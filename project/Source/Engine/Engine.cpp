@@ -1,5 +1,5 @@
 #include "Engine.h"
-#include "Func/CrushHandler/CrushHandler.h"
+#include "Func/CrashHandler/CrashHandler.h"
 
 #pragma comment(lib,"winmm.lib")
 #pragma comment(lib,"Dbghelp.lib")
@@ -90,7 +90,7 @@ void Engine::PostDraw()
 void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 {
 	// 例外が発生したときに起動する
-	SetUnhandledExceptionFilter(Detail::ExportDump);
+	Detail::InitializeCrashHandler();
 
 	// COM初期化
 	CoInitializeEx(0, COINIT_MULTITHREADED);

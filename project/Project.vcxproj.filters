@@ -50,7 +50,7 @@
     <Filter Include="Source\Engine\Logger">
       <UniqueIdentifier>{57125a32-a15f-4814-80f3-2a658f909ab7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\Func\CrushHandler">
+    <Filter Include="Source\Engine\Func\CrashHandler">
       <UniqueIdentifier>{4efaad5f-64d7-472d-a96d-c1663f83cbf0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -91,6 +91,9 @@
     <ClCompile Include="Source\Engine\Logger\Logger.cpp">
       <Filter>Source\Engine\Logger</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Func\CrashHandler\CrashHandler.cpp">
+      <Filter>Source\Engine\Func\CrashHandler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -126,8 +129,8 @@
     <ClInclude Include="Source\Engine\Logger\Logger.h">
       <Filter>Source\Engine\Logger</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\Func\CrushHandler\CrushHandler.h">
-      <Filter>Source\Engine\Func\CrushHandler</Filter>
+    <ClInclude Include="Source\Engine\Func\CrashHandler\CrashHandler.h">
+      <Filter>Source\Engine\Func\CrashHandler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
