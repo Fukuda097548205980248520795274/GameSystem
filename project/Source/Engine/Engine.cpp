@@ -1,4 +1,19 @@
 #include "Engine.h"
+#include "Func/CrushHandler/CrushHandler.h"
+
+#pragma comment(lib,"winmm.lib")
+#pragma comment(lib,"Dbghelp.lib")
+#pragma comment(lib,"d3d12.lib")
+#pragma comment(lib,"dxgi.lib")
+#pragma comment(lib,"dxguid.lib")
+#pragma comment(lib,"dxcompiler.lib")
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "xinput.lib")
+#pragma comment(lib, "Mf.lib")
+#pragma comment(lib, "mfplat.lib")
+#pragma comment(lib, "Mfreadwrite.lib")
+#pragma comment(lib, "mfuuid.lib")
+#pragma comment(lib, "xaudio2.lib")
 
 // インスタンス
 std::unique_ptr<Engine> Engine::instance_ = nullptr;
@@ -9,6 +24,13 @@ Engine::~Engine()
 	// ウィンドウアプリケーションを破棄
 	winApp_.reset();
 	winApp_ = nullptr;
+
+	// ロガーを破棄
+	logger_.reset();
+	logger_ = nullptr;
+
+	// COM終了
+	CoUninitialize();
 }
 
 /// @brief インスタンスを取得する
@@ -67,6 +89,15 @@ void Engine::PostDraw()
 /// @param title 
 void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 {
+	// 例外が発生したときに起動する
+	SetUnhandledExceptionFilter(Detail::ExportDump);
+
+	// COM初期化
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+
+	// ロガーを作成
+	logger_ = std::make_unique<Detail::Logger>();
+
 	// ウィンドウアプリケーションを作成
 	winApp_ = std::make_unique<Detail::WinApp>();
 	winApp_->Initialize(screenWidth, screenHeight, title);

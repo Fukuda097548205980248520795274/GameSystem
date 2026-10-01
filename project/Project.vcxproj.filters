@@ -50,6 +50,9 @@
     <Filter Include="Source\Engine\Logger">
       <UniqueIdentifier>{57125a32-a15f-4814-80f3-2a658f909ab7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Func\CrushHandler">
+      <UniqueIdentifier>{4efaad5f-64d7-472d-a96d-c1663f83cbf0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -122,6 +125,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Logger\Logger.h">
       <Filter>Source\Engine\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\CrushHandler\CrushHandler.h">
+      <Filter>Source\Engine\Func\CrushHandler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

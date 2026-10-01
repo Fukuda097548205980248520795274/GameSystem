@@ -1,8 +1,8 @@
 #pragma once
-#include "WinApp/WinApp.h"
 #include <memory>
 
-#pragma comment(lib,"winmm.lib")
+#include "Logger/Logger.h"
+#include "WinApp/WinApp.h"
 
 class Engine
 {
@@ -58,6 +58,9 @@ private:
 	/// @param screenHeight 
 	/// @param title 
 	void Initialize(int32_t screenWidth, int32_t screenHeight, const std::string& title);
+
+	/// @brief ロガー
+	std::unique_ptr<Detail::Logger> logger_;
 
 	/// @brief ウィンドウアプリケーション
 	std::unique_ptr<Detail::WinApp> winApp_;

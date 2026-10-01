@@ -183,6 +183,7 @@
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h" />
     <ClInclude Include="Source\Engine\Func\ConvertString\ConvertString.h" />
+    <ClInclude Include="Source\Engine\Func\CrushHandler\CrushHandler.h" />
     <ClInclude Include="Source\Engine\Logger\Logger.h" />
     <ClInclude Include="Source\Engine\WinApp\WinApp.h" />
     <ClInclude Include="Source\Game\Game.h" />
