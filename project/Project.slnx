@@ -1,9 +1,14 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Development" />
+    <BuildType Name="Release" />
     <Platform Name="x64" />
   </Configurations>
   <Folder Name="/ソリューション項目/">
     <File Path=".editorconfig" />
   </Folder>
+  <Project Path="Externals/DirectXTex/DirectXTex_Desktop_2022_Win10.vcxproj" Id="371b9fa9-4c90-4ac6-a123-aced756d6c77" />
+  <Project Path="Externals/imgui/imgui.vcxproj" Id="30b4b48b-cc71-4756-bd4c-bf778fcf2357" />
   <Project Path="Project.vcxproj" Id="90284ac1-138e-4ac8-9a53-8e7f95bfc1f4" />
 </Solution>
