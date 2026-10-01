@@ -47,11 +47,11 @@
     <Filter Include="Source\Math\Vector\Vector4">
       <UniqueIdentifier>{845236ab-d7f3-4673-bb1a-e4915fcca19c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Logger">
+      <UniqueIdentifier>{57125a32-a15f-4814-80f3-2a658f909ab7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Engine\Engine.cpp">
       <Filter>Source\Engine</Filter>
     </ClCompile>
@@ -81,6 +81,12 @@
     </ClCompile>
     <ClCompile Include="Source\Math\Vector\Vector4\Vector4.cpp">
       <Filter>Source\Math\Vector\Vector4</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Logger\Logger.cpp">
+      <Filter>Source\Engine\Logger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +119,9 @@
     </ClInclude>
     <ClInclude Include="Source\Math\Vector\Vector4\Vector4.h">
       <Filter>Source\Math\Vector\Vector4</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Logger\Logger.h">
+      <Filter>Source\Engine\Logger</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

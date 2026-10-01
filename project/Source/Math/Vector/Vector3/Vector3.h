@@ -147,20 +147,6 @@ namespace
 	}
 
 	/// @brief スカラー除算
-	/// @param scalar 
-	/// @param vector 
-	/// @return 
-	template<typename T>
-	TVector3<T> operator/(T scalar, const TVector3<T>& vector)
-	{
-		TVector3<T> division = TVector3<T>(T(0), T(0), T(0));
-		division.x = scalar / vector.x;
-		division.y = scalar / vector.y;
-		division.z = scalar / vector.z;
-		return division;
-	}
-
-	/// @brief スカラー除算
 	/// @param vector 
 	/// @param scalar 
 	/// @return 
