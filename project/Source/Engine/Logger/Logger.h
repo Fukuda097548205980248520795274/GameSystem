@@ -2,6 +2,14 @@
 #include <string>
 #include <fstream>
 
+// @brief ログレベル
+enum class LogLevel
+{
+	Info,
+	Warning,
+	Error
+};
+
 namespace Detail
 {
 	class Logger
@@ -11,9 +19,10 @@ namespace Detail
 		/// @brief コンストラクタ
 		Logger();
 
-		/// @brief ロギング
+		/// @brief ログを出力する
+		/// @param level
 		/// @param log 
-		void Logging(const std::string& log);
+		void Logging(LogLevel level, const std::string& log);
 
 
 	private:

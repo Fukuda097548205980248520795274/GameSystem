@@ -132,6 +132,9 @@ void Detail::WinApp::Initialize(int32_t clientWidth, int32_t clientHeight, const
 		nullptr
 	);
 
+	// DPIに応じてウィンドウサイズを調整する
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
 	// ウィンドウを表示する
 	ShowWindow(hwnd_, SW_SHOW);
 }

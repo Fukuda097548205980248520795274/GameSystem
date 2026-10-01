@@ -2,17 +2,17 @@
 #include <Windows.h>
 #include <chrono>
 #include <cassert>
+#include <filesystem>
 
 /// @brief コンストラクタ
 Detail::Logger::Logger()
 {
-	// ディレクトリを掘る
-	if (!CreateDirectory(L"./logs", nullptr))
+	// logsディレクトリがなければ作る
+	std::error_code ec;
+	if (!std::filesystem::create_directories("./logs", ec) && ec)
 	{
-		if (GetLastError() != ERROR_ALREADY_EXISTS)
-		{
-			assert(false);
-		}
+		// ディレクトリ作成に失敗した場合のエラーハンドリング
+		assert(false);
 	}
 
 	// 現在時刻（UTC時刻）を取得
@@ -39,15 +39,34 @@ Detail::Logger::Logger()
 		assert(false);
 	}
 
-	Logging("Create Log File \n");
+	// ログファイル作成のログを出力
+	Logging(LogLevel::Info, "Create Log File");
 }
 
-/// @brief ロギング
-/// @param log 
-void Detail::Logger::Logging(const std::string& log)
+/// @brief ログを出力する
+/// @param level ログレベル
+/// @param log ログメッセージ
+void Detail::Logger::Logging(LogLevel level, const std::string& log)
 {
-	os << log << '\n';
-	os.flush();
+	// 現在時刻を取得
+	auto now = std::chrono::system_clock::now();
+	auto localTime = std::chrono::zoned_time{ std::chrono::current_zone(), std::chrono::floor<std::chrono::seconds>(now) };
 
-	OutputDebugStringA(log.c_str());
+	// ログレベルに応じた文字列を決定
+	const char* levelStr = (level == LogLevel::Error) ? "[ERROR]" :
+		(level == LogLevel::Warning) ? "[WARN ]" : "[INFO ]";
+
+	// フォーマットされたログメッセージを作成
+	std::string formattedLog = std::format("[{:%Y-%m-%d %H:%M:%S}] {} {}\n", localTime, levelStr, log);
+
+	// 標準出力に出力
+	os << formattedLog;
+	if (level == LogLevel::Error || level == LogLevel::Warning)
+	{
+		// エラーや警告の場合は即座にフラッシュしてログを出力
+		os.flush();
+	}
+
+	// デバッグ出力にも出力
+	OutputDebugStringA(formattedLog.c_str());
 }

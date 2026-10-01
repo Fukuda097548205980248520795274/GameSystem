@@ -38,6 +38,11 @@ public:
 	/// @brief 描画後処理
 	void PostDraw();
 
+	/// @brief ログ出力
+	/// @brief level
+	/// @param log 
+	void Log(LogLevel level, const std::string& log) { logger_->Logging(level, log); }
+
 
 
 private:
