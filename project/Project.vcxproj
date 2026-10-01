@@ -161,7 +161,15 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\Engine\Engine.cpp" />
+    <ClCompile Include="Source\Engine\Func\ConvertString\ConvertString.cpp" />
+    <ClCompile Include="Source\Engine\WinApp\WinApp.cpp" />
     <ClCompile Include="Source\Game\Game.cpp" />
+    <ClCompile Include="Source\Math\Matrix\Matrix3x3\Matrix3x3.cpp" />
+    <ClCompile Include="Source\Math\Matrix\Matrix4x4\Matrix4x4.cpp" />
+    <ClCompile Include="Source\Math\Quaternion\Quaternion.cpp" />
+    <ClCompile Include="Source\Math\Vector\Vector2\Vector2.cpp" />
+    <ClCompile Include="Source\Math\Vector\Vector3\Vector3.cpp" />
+    <ClCompile Include="Source\Math\Vector\Vector4\Vector4.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -173,7 +181,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h" />
+    <ClInclude Include="Source\Engine\Func\ConvertString\ConvertString.h" />
+    <ClInclude Include="Source\Engine\WinApp\WinApp.h" />
     <ClInclude Include="Source\Game\Game.h" />
+    <ClInclude Include="Source\Math\Matrix\Matrix3x3\Matrix3x3.h" />
+    <ClInclude Include="Source\Math\Matrix\Matrix4x4\Matrix4x4.h" />
+    <ClInclude Include="Source\Math\Quaternion\Quaternion.h" />
+    <ClInclude Include="Source\Math\Vector\Vector2\Vector2.h" />
+    <ClInclude Include="Source\Math\Vector\Vector3\Vector3.h" />
+    <ClInclude Include="Source\Math\Vector\Vector4\Vector4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

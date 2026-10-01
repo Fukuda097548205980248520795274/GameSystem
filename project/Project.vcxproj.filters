@@ -11,6 +11,42 @@
     <Filter Include="Source\Game">
       <UniqueIdentifier>{465c62b8-ba41-4921-bffd-b990489be71e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\WinApp">
+      <UniqueIdentifier>{01e37e2c-4abe-462d-a78f-5b60c43e6b66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Func">
+      <UniqueIdentifier>{e0c3f47b-141f-43e3-b983-023c345686b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Func\ConvertString">
+      <UniqueIdentifier>{badfd8f0-2cc9-4676-8157-45f7585708a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math">
+      <UniqueIdentifier>{34d019a1-8697-4a15-a512-dded0008e1aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Matrix">
+      <UniqueIdentifier>{31c9a3ef-0ed1-430b-846c-250e31c7790a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Vector">
+      <UniqueIdentifier>{dfa0b0b3-788b-41ce-ae2d-3aec625afe05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Quaternion">
+      <UniqueIdentifier>{f701e057-b977-43a2-a392-7618bf2b0029}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Matrix\Matrix4x4">
+      <UniqueIdentifier>{3dec66e0-3f81-4194-b880-4704225cd4a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Matrix\Matrix3x3">
+      <UniqueIdentifier>{7ce12766-21cd-4294-bee7-ff3f8b115534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Vector\Vector2">
+      <UniqueIdentifier>{217b05d3-0c19-4dbe-9ac7-fca77a5a852d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Vector\Vector3">
+      <UniqueIdentifier>{257ff5c3-3f25-4d99-8eac-5dbe54297374}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Vector\Vector4">
+      <UniqueIdentifier>{845236ab-d7f3-4673-bb1a-e4915fcca19c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -22,6 +58,30 @@
     <ClCompile Include="Source\Game\Game.cpp">
       <Filter>Source\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\WinApp\WinApp.cpp">
+      <Filter>Source\Engine\WinApp</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Func\ConvertString\ConvertString.cpp">
+      <Filter>Source\Engine\Func\ConvertString</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Matrix\Matrix4x4\Matrix4x4.cpp">
+      <Filter>Source\Math\Matrix\Matrix4x4</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Matrix\Matrix3x3\Matrix3x3.cpp">
+      <Filter>Source\Math\Matrix\Matrix3x3</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Quaternion\Quaternion.cpp">
+      <Filter>Source\Math\Quaternion</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Vector\Vector2\Vector2.cpp">
+      <Filter>Source\Math\Vector\Vector2</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Vector\Vector3\Vector3.cpp">
+      <Filter>Source\Math\Vector\Vector3</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Vector\Vector4\Vector4.cpp">
+      <Filter>Source\Math\Vector\Vector4</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -29,6 +89,30 @@
     </ClInclude>
     <ClInclude Include="Source\Game\Game.h">
       <Filter>Source\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\WinApp\WinApp.h">
+      <Filter>Source\Engine\WinApp</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\ConvertString\ConvertString.h">
+      <Filter>Source\Engine\Func\ConvertString</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Matrix\Matrix4x4\Matrix4x4.h">
+      <Filter>Source\Math\Matrix\Matrix4x4</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Matrix\Matrix3x3\Matrix3x3.h">
+      <Filter>Source\Math\Matrix\Matrix3x3</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Quaternion\Quaternion.h">
+      <Filter>Source\Math\Quaternion</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Vector\Vector2\Vector2.h">
+      <Filter>Source\Math\Vector\Vector2</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Vector\Vector3\Vector3.h">
+      <Filter>Source\Math\Vector\Vector3</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Vector\Vector4\Vector4.h">
+      <Filter>Source\Math\Vector\Vector4</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
