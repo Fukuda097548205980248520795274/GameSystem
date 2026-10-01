@@ -53,6 +53,9 @@
     <Filter Include="Source\Engine\Func\CrashHandler">
       <UniqueIdentifier>{4efaad5f-64d7-472d-a96d-c1663f83cbf0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\ShaderCompiler">
+      <UniqueIdentifier>{c6dc3cf3-3fb1-4b17-89d7-e6a9da5960d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -94,6 +97,9 @@
     <ClCompile Include="Source\Engine\Func\CrashHandler\CrashHandler.cpp">
       <Filter>Source\Engine\Func\CrashHandler</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\ShaderCompiler\ShaderCompiler.cpp">
+      <Filter>Source\Engine\ShaderCompiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -131,6 +137,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Func\CrashHandler\CrashHandler.h">
       <Filter>Source\Engine\Func\CrashHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.h">
+      <Filter>Source\Engine\ShaderCompiler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
