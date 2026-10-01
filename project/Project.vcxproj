@@ -80,6 +80,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,6 +110,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,6 +141,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,6 +160,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Source\Engine\Engine.cpp" />
+    <ClCompile Include="Source\Game\Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -165,6 +170,10 @@
     <ProjectReference Include="Externals\imgui\imgui.vcxproj">
       <Project>{30b4b48b-cc71-4756-bd4c-bf778fcf2357}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Engine\Engine.h" />
+    <ClInclude Include="Source\Game\Game.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
