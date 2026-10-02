@@ -35,12 +35,12 @@ Detail::Logger::Logger()
 	os.open(logFilePath);
 	if (!os.is_open())
 	{
-		OutputDebugStringA("Failed to open log file\n");
+		OutputDebugStringA("ログファイルを生成できませんでした \n");
 		assert(false);
 	}
 
 	// ログファイル作成のログを出力
-	Logging(LogLevel::Info, "Create Log File");
+	Logging(LogLevel::Info, "ログファイル生成");
 }
 
 /// @brief ログを出力する

@@ -56,6 +56,18 @@
     <Filter Include="Source\Engine\ShaderCompiler">
       <UniqueIdentifier>{c6dc3cf3-3fb1-4b17-89d7-e6a9da5960d3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext">
+      <UniqueIdentifier>{73c90f85-23c0-4a4d-bc05-b0136a019bc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\DXCore">
+      <UniqueIdentifier>{d08dbafc-e64f-4e2b-94ba-41f02160d595}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\DXCommand">
+      <UniqueIdentifier>{0529099d-8a87-4c04-a539-1afeb9fbe247}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\DXDebug">
+      <UniqueIdentifier>{3324bf0c-a359-474d-9693-678f9b2f16cc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -100,6 +112,18 @@
     <ClCompile Include="Source\Engine\ShaderCompiler\ShaderCompiler.cpp">
       <Filter>Source\Engine\ShaderCompiler</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\RenderContext.cpp">
+      <Filter>Source\Engine\RenderContext</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\DXCore\DXCore.cpp">
+      <Filter>Source\Engine\RenderContext\DXCore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\DXCommand\DXCommand.cpp">
+      <Filter>Source\Engine\RenderContext\DXCommand</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\DXDebug\DXDebug.cpp">
+      <Filter>Source\Engine\DXDebug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -140,6 +164,18 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.h">
       <Filter>Source\Engine\ShaderCompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\RenderContext.h">
+      <Filter>Source\Engine\RenderContext</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\DXCore\DXCore.h">
+      <Filter>Source\Engine\RenderContext\DXCore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\DXCommand\DXCommand.h">
+      <Filter>Source\Engine\RenderContext\DXCommand</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\DXDebug\DXDebug.h">
+      <Filter>Source\Engine\DXDebug</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

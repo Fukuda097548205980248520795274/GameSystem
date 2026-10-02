@@ -21,6 +21,16 @@ std::unique_ptr<Engine> Engine::instance_ = nullptr;
 /// @brief デストラクタ
 Engine::~Engine()
 {
+	// レンダーコンテキストを破棄
+	renderContext_.reset();
+	renderContext_ = nullptr;
+
+#ifdef _DEBUG
+	// DirectXデバッグを破棄
+	dxDebug_.reset();
+	dxDebug_ = nullptr;
+#endif
+
 	// ウィンドウアプリケーションを破棄
 	winApp_.reset();
 	winApp_ = nullptr;
@@ -101,4 +111,12 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 	// ウィンドウアプリケーションを作成
 	winApp_ = std::make_unique<Detail::WinApp>();
 	winApp_->Initialize(screenWidth, screenHeight, title);
+
+#ifdef _DEBUG
+	// DirectXデバッグを作成
+	dxDebug_ = std::make_unique<Detail::DXDebug>();
+#endif
+
+	// レンダーコンテキストを作成
+	renderContext_ = std::make_unique<Detail::RenderContext>();
 }

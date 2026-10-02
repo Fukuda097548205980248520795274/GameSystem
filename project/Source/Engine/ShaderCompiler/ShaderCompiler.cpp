@@ -3,25 +3,33 @@
 #include <cassert>
 #include <format>
 
+#include "Engine.h"
+
 /// @brief 初期化
 /// @param log 
 void Detail::ShaderCompiler::Initialize()
 {
+	// エンジンのインスタンスを取得する
+	auto engine = Engine::GetInstance();
+
 	/*-----------------
 		DXCの初期化
 	-----------------*/
 
+	// DXCの初期化
 	HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
 	assert(SUCCEEDED(hr));
-	if (log_)log_->Logging("DxcCreateInstance IDxcUtils \n");
+	if (engine)engine->Log(LogLevel::Info, "DXCの初期化");
 
+	// DXCコンパイラの初期化
 	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
 	assert(SUCCEEDED(hr));
-	if (log_)log_->Logging("DxcCreateInstance IDxcCompiler3 \n");
+	if (engine)engine->Log(LogLevel::Info, "DXCコンパイラの初期化");
 
+	// DXCインクルードハンドラの初期化
 	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 	assert(SUCCEEDED(hr));
-	if (log_)log_->Logging("CreateDefaultIncludeHandler \n");
+	if (engine)engine->Log(LogLevel::Info, "DXCインクルードハンドラの初期化");
 }
 
 /// @brief コンパイルする
@@ -30,29 +38,32 @@ void Detail::ShaderCompiler::Initialize()
 /// @return 
 Microsoft::WRL::ComPtr<IDxcBlob> Detail::ShaderCompiler::Compile(const std::wstring& filePath, const wchar_t* profile)
 {
-	/*----------------------
+	// エンジンのインスタンスを取得する
+	auto engine = Engine::GetInstance();
+
+	/*----------------------s
 		HLSLファイルを読む
 	----------------------*/
 
 	// コンパイルをするシェーダの情報をログに出力する
-	if (log_)log_->Logging(ConvertString(std::format(L"Begin CompileShader , path : {} , profile : {}", filePath, profile)));
+	if (engine)engine->Log(LogLevel::Info, ConvertString(std::format(L"コンパイル開始 , パス : {} , プロファイル : {}", filePath, profile)));
 
 	// HLSLファイルを読む
 	IDxcBlobEncoding* shaderSource = nullptr;
 	HRESULT hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	assert(SUCCEEDED(hr));
-	if (log_)log_->Logging("Succeeded Load");
+	if (engine)engine->Log(LogLevel::Info, "読み込み完了");
 
 	// 読み込んだファイルの内容を設定する
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
 	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
-	if (log_)
+	if (engine)
 	{
-		log_->Logging(std::format("ShaderSource Ptr : {}", shaderSourceBuffer.Ptr));
-		log_->Logging(std::format("ShaderSource Size : {} bytes", shaderSourceBuffer.Size));
-		log_->Logging("ShaderSource Encoding : DXC_CP_UTF8");
+		engine->Log(LogLevel::Info, std::format("シェーダソース ポインタ : {}", shaderSourceBuffer.Ptr));
+		engine->Log(LogLevel::Info, std::format("シェーダソース サイズ : {} bytes", shaderSourceBuffer.Size));
+		engine->Log(LogLevel::Info, "シェーダソース エンコーディング : DXC_CP_UTF8");
 	}
 
 
@@ -112,7 +123,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> Detail::ShaderCompiler::Compile(const std::wstr
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0)
 	{
 		// エラーをログに出力する
-		if (log_)log_->Logging(shaderError->GetStringPointer());
+		if (engine)engine->Log(LogLevel::Error, shaderError->GetStringPointer());
 		assert(false);
 	}
 
@@ -127,7 +138,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> Detail::ShaderCompiler::Compile(const std::wstr
 	assert(SUCCEEDED(hr));
 
 	// コンパイル成功ログ
-	if (log_)log_->Logging("Succeeded Compiler \n");
+	if (engine)engine->Log(LogLevel::Info, "コンパイル成功");
 
 	// リソースを解放
 	shaderSource->Release();

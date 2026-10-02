@@ -3,6 +3,8 @@
 
 #include "Logger/Logger.h"
 #include "WinApp/WinApp.h"
+#include "DXDebug/DXDebug.h"
+#include "RenderContext/RenderContext.h"
 
 class Engine
 {
@@ -70,5 +72,10 @@ private:
 	/// @brief ウィンドウアプリケーション
 	std::unique_ptr<Detail::WinApp> winApp_;
 
+	/// @brief DirectXデバッグ
+	std::unique_ptr<Detail::DXDebug> dxDebug_;
+
+	/// @brief レンダーコンテキスト
+	std::unique_ptr<Detail::RenderContext> renderContext_;
 };
 
