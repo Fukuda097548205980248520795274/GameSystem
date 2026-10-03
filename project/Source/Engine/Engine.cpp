@@ -31,6 +31,10 @@ Engine::~Engine()
 	dxDebug_ = nullptr;
 #endif
 
+	// ECSレジストリを破棄
+	registry_.reset();
+	registry_ = nullptr;
+
 	// ウィンドウアプリケーションを破棄
 	winApp_.reset();
 	winApp_ = nullptr;
@@ -114,6 +118,9 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 	// ウィンドウアプリケーションを作成
 	winApp_ = std::make_unique<Detail::WinApp>();
 	winApp_->Initialize(screenWidth, screenHeight, title);
+
+	// ECSレジストリを作成
+	registry_ = std::make_unique<Detail::RegistryECS>();
 
 #ifdef _DEBUG
 	// DirectXデバッグを作成

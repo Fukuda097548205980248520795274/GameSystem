@@ -1,0 +1,65 @@
+#pragma once
+#include "Vector/Vector3/Vector3.h"
+
+/// @brief トランスフォームコンポーネント
+struct TransformComponent
+{
+	/// @brief コンストラクタ
+	TransformComponent() : position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), scale(1.0f, 1.0f, 1.0f) {}
+
+	/// @brief 位置
+	Vector3 position;
+
+	/// @brief 回転
+	Vector3 rotation;
+
+	/// @brief スケール
+	Vector3 scale;
+};
+
+/// @brief ブレンドモードの列挙型
+enum class BlendMode
+{
+	None,
+	Normal,
+	Add,
+	Subtract,
+	Multiply,
+	Screen,
+};
+
+/// @brief パスの基本的な制御と実行順序
+struct RenderPassComponent
+{
+	RenderPassComponent() : isEnabled(true), priority(0) {}
+
+	/// @brief パスの有効/無効フラグ
+	bool isEnabled;
+
+	/// @brief 描画順序（数値が小さいほど先に描画）
+	int priority;
+};
+
+/// @brief 合成（ブレンド）のパラメータ
+struct BlendComponent
+{
+	BlendComponent() : opacity(1.0f), blendMode(0) {}
+
+	/// @brief 不透明度（0.0f ～ 1.0f）
+	float opacity;
+
+	/// @brief ブレンドモード
+	BlendMode blendMode;
+};
+
+/// @brief 入力テクスチャと出力先レンダーターゲット
+struct RenderTargetComponent
+{
+	RenderTargetComponent() : inputTextureHandle(0), outputTargetHandle(0) {}
+
+	/// @brief 読み込むテクスチャのハンドル（またはID/ポインタ）
+	uint32_t inputTextureHandle;
+
+	/// @brief 書き込むレンダーターゲットのハンドル（またはID/ポインタ）
+	uint32_t outputTargetHandle;
+};

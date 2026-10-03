@@ -80,6 +80,39 @@
     <Filter Include="Source\Engine\Func\Barrier">
       <UniqueIdentifier>{6929b12b-9e00-48fa-a677-67377c3774eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\ECS">
+      <UniqueIdentifier>{a7942847-ec76-4196-a72f-736eba0c5f62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\ECS\ComponentECS">
+      <UniqueIdentifier>{a3f01daa-65e4-477b-9c91-7c7cae9c9c5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\ECS\RegistryECS">
+      <UniqueIdentifier>{51b2b84c-4d40-43f6-8dcd-5b3a9117dc5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\ECS\EntityECS">
+      <UniqueIdentifier>{f8fbbdc3-ae90-458d-98db-f9d6ff15b1e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\MultiPass">
+      <UniqueIdentifier>{9b5f33d0-7bfb-4001-a9d0-7adf1b7a6c8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource">
+      <UniqueIdentifier>{7d225e92-3cb2-4f4f-a6c0-d15436c9de65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\ConstantBufferResource">
+      <UniqueIdentifier>{4b3edc40-a816-4a32-b980-3c4c48061954}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\OffscreenResource">
+      <UniqueIdentifier>{6023b159-93c0-4185-ba50-8d59752aa51f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\StructuredBufferResource">
+      <UniqueIdentifier>{de499d68-b3da-4dd5-9335-ae8271c63055}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Func\ResourceFunc">
+      <UniqueIdentifier>{53d56efd-f37c-4650-a159-9953122ef7bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\DepthResource">
+      <UniqueIdentifier>{678d2d2f-a991-4481-8228-f6abdd4aa12c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -148,6 +181,21 @@
     <ClCompile Include="Source\Engine\Func\Barrier\Barrier.cpp">
       <Filter>Source\Engine\Func\Barrier</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\ECS\RegistryECS\RegistryECS.cpp">
+      <Filter>Source\Engine\ECS\RegistryECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\MultiPass\MultiPass.cpp">
+      <Filter>Source\Engine\RenderContext\MultiPass</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Func\ResourceFunc\ResourceFunc.cpp">
+      <Filter>Source\Engine\Func\ResourceFunc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.cpp">
+      <Filter>Source\Engine\Resource\OffscreenResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\DepthResource\DepthResource.cpp">
+      <Filter>Source\Engine\Resource\DepthResource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -212,6 +260,33 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Func\Barrier\Barrier.h">
       <Filter>Source\Engine\Func\Barrier</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\ECS\ComponentECS\ComponentECS.h">
+      <Filter>Source\Engine\ECS\ComponentECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\ECS\RegistryECS\RegistryECS.h">
+      <Filter>Source\Engine\ECS\RegistryECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\ECS\EntityECS\EntityECS.h">
+      <Filter>Source\Engine\ECS\EntityECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\MultiPass\MultiPass.h">
+      <Filter>Source\Engine\RenderContext\MultiPass</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\ConstantBufferResource.h">
+      <Filter>Source\Engine\Resource\ConstantBufferResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\ResourceFunc\ResourceFunc.h">
+      <Filter>Source\Engine\Func\ResourceFunc</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\StructuredBufferResource.h">
+      <Filter>Source\Engine\Resource\StructuredBufferResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.h">
+      <Filter>Source\Engine\Resource\OffscreenResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.h">
+      <Filter>Source\Engine\Resource\DepthResource</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

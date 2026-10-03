@@ -4,6 +4,7 @@
 #include "Logger/Logger.h"
 #include "WinApp/WinApp.h"
 #include "DXDebug/DXDebug.h"
+#include "ECS/RegistryECS/RegistryECS.h"
 #include "RenderContext/RenderContext.h"
 
 class Engine
@@ -79,6 +80,9 @@ private:
 
 	/// @brief ウィンドウアプリケーション
 	std::unique_ptr<Detail::WinApp> winApp_;
+
+	/// @brief ECSレジストリ
+	std::unique_ptr<Detail::RegistryECS> registry_;
 
 	/// @brief DirectXデバッグ
 	std::unique_ptr<Detail::DXDebug> dxDebug_;
