@@ -61,9 +61,8 @@ Microsoft::WRL::ComPtr<IDxcBlob> Detail::ShaderCompiler::Compile(const std::wstr
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
 	if (engine)
 	{
-		engine->Log(LogLevel::Info, std::format("シェーダソース ポインタ : {}", shaderSourceBuffer.Ptr));
-		engine->Log(LogLevel::Info, std::format("シェーダソース サイズ : {} bytes", shaderSourceBuffer.Size));
-		engine->Log(LogLevel::Info, "シェーダソース エンコーディング : DXC_CP_UTF8");
+		engine->Log(LogLevel::Info, std::format("シェーダソース ポインタ : {}, シェーダソース サイズ : {} bytes, シェーダソース エンコーディング : DXC_CP_UTF8", shaderSourceBuffer.Ptr, shaderSourceBuffer.Size, shaderSourceBuffer.Encoding));
+
 	}
 
 
@@ -138,7 +137,7 @@ Microsoft::WRL::ComPtr<IDxcBlob> Detail::ShaderCompiler::Compile(const std::wstr
 	assert(SUCCEEDED(hr));
 
 	// コンパイル成功ログ
-	if (engine)engine->Log(LogLevel::Info, "コンパイル成功");
+	if (engine)engine->Log(LogLevel::Info, ConvertString(std::format(L"コンパイル成功 , パス : {} , プロファイル : {}", filePath, profile)));
 
 	// リソースを解放
 	shaderSource->Release();

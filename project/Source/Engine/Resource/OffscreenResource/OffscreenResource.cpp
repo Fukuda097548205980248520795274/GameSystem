@@ -50,6 +50,7 @@ void Detail::OffscreenResource::Initialize(ID3D12Device* device, DXHeap* heap, i
 		rtvHandle_[i] = heap->GetRtvDescriptorHandle();
 
 		device->CreateRenderTargetView(resource_[i].Get(), &rtvDesc, rtvHandle_[i]);
+		if(engine) engine->Log(LogLevel::Info, "RTV生成");
 
 
 
@@ -69,6 +70,7 @@ void Detail::OffscreenResource::Initialize(ID3D12Device* device, DXHeap* heap, i
 		srvHandle_[i] = heap->GetSrvDescriptorHandle();
 
 		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
+		if (engine) engine->Log(LogLevel::Info, "SRV生成");
 	}
 }
 

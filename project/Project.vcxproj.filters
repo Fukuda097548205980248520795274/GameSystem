@@ -113,6 +113,21 @@
     <Filter Include="Source\Engine\Resource\DepthResource">
       <UniqueIdentifier>{678d2d2f-a991-4481-8228-f6abdd4aa12c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool">
+      <UniqueIdentifier>{27512a54-4a1e-4bac-be69-2f095bc1fbf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{8c17e7aa-a72a-40a2-805d-1732c09507f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Fullscreen">
+      <UniqueIdentifier>{bc083508-dc07-4d40-a4ea-87d98a33f116}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\SwapChainCopy">
+      <UniqueIdentifier>{2b85c17a-5237-4e54-9d56-c21e29ceb3fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO">
+      <UniqueIdentifier>{55c3e983-2e1a-4e98-8c7f-e5a4755948ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -195,6 +210,12 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\DepthResource\DepthResource.cpp">
       <Filter>Source\Engine\Resource\DepthResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.cpp">
+      <Filter>Source\Engine\RenderContext\MultiPass\RenderTargetPool</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.cpp">
+      <Filter>Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -288,5 +309,24 @@
     <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.h">
       <Filter>Source\Engine\Resource\DepthResource</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.h">
+      <Filter>Source\Engine\RenderContext\MultiPass\RenderTargetPool</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.h">
+      <Filter>Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Assets\Shader\Fullscreen\Fullscreen.VS.hlsl">
+      <Filter>Shader\Fullscreen</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\SwapChainCopy\SwapChainCopy.PS.hlsl">
+      <Filter>Shader\SwapChainCopy</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Shader\Fullscreen\Fullscreen.hlsli">
+      <Filter>Shader\Fullscreen</Filter>
+    </None>
   </ItemGroup>
 </Project>

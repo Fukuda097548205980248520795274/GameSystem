@@ -4,6 +4,8 @@
 #include "DXFence/DXFence.h"
 #include "DXHeap/DXHeap.h"
 #include "DXSwapChain/DXSwapChain.h"
+#include "ShaderCompiler/ShaderCompiler.h"
+#include "MultiPass/MultiPass.h"
 #include <memory>
 
 namespace Detail
@@ -15,10 +17,14 @@ namespace Detail
 	public:
 
 		/// @brief コンストラクタ
-		RenderContext(WinApp* winApp);
+		RenderContext() = default;
 
 		/// @brief デストラクタ
 		~RenderContext();
+
+		/// @brief 初期化
+		/// @param winApp 
+		void Initialize(WinApp* winApp);
 
 		/// @brief 最大バッファ数を取得する
 		/// @return 
@@ -54,6 +60,12 @@ namespace Detail
 
 		/// @brief DXSwapChain
 		std::unique_ptr<DXSwapChain> swapChain_ = nullptr;
+
+		/// @brief シェーダコンパイラ
+		std::unique_ptr<ShaderCompiler> shaderCompiler_ = nullptr;
+
+		/// @brief マルチパス
+		std::unique_ptr<MultiPass> multiPass_ = nullptr;
 
 
 	private:

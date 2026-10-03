@@ -47,11 +47,13 @@ void Detail::DepthResource::Initialize(ID3D12Device* device, int32_t width, int3
 
 		// DSV生成
 		device->CreateDepthStencilView(resource_[i].Get(), &dsvDesc, dsvHandle_[i]);
+		if (engine)engine->Log(LogLevel::Info, "DSV生成");
 
 		// 読み取り専用のDSVを生成する
 		dsvDesc.Flags = D3D12_DSV_FLAG_READ_ONLY_DEPTH; // 深度書き込みを禁止するフラグ
 		dsvReadOnlyHandle_[i] = heap->GetDsvDescriptorHandle();
 		device->CreateDepthStencilView(resource_[i].Get(), &dsvDesc, dsvReadOnlyHandle_[i]);
+		if (engine) engine->Log(LogLevel::Info, "DSV(読み取り専用)生成");
 
 
 		/*---------------
@@ -70,6 +72,7 @@ void Detail::DepthResource::Initialize(ID3D12Device* device, int32_t width, int3
 
 		// SRV生成
 		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
+		if (engine) engine->Log(LogLevel::Info, "SRV生成");
 	}
 }
 

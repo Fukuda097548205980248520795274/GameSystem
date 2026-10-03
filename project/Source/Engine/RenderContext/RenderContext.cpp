@@ -4,8 +4,9 @@
 #include "WinApp/WinApp.h"
 #include "Func/Barrier/Barrier.h"
 
-/// @brief コンストラクタ
-Detail::RenderContext::RenderContext(WinApp* winApp)
+/// @brief 初期化
+/// @param winApp 
+void Detail::RenderContext::Initialize(WinApp* winApp)
 {
 	// DXCoreを作成
 	core_ = std::make_unique<DXCore>();
@@ -24,6 +25,13 @@ Detail::RenderContext::RenderContext(WinApp* winApp)
 
 	// DXSwapChainを作成
 	swapChain_ = std::make_unique<DXSwapChain>(heap_.get(), winApp, core_.get(), command_.get());
+
+	// シェーダコンパイラを作成
+	shaderCompiler_ = std::make_unique<ShaderCompiler>();
+	shaderCompiler_->Initialize();
+
+	// マルチパスを作成
+	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
 
 
 	// ビューポートの設定

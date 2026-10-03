@@ -195,6 +195,8 @@
     <ClCompile Include="Source\Engine\RenderContext\DXHeap\DXHeap.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\MultiPass\MultiPass.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\RenderContext.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -260,6 +262,8 @@
     <ClInclude Include="Source\Engine\RenderContext\DXHeap\DXHeap.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.h" />
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\MultiPass.h" />
+    <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.h" />
+    <ClInclude Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.h" />
     <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\ConstantBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.h" />
@@ -274,6 +278,31 @@
     <ClInclude Include="Source\Math\Vector\Vector2\Vector2.h" />
     <ClInclude Include="Source\Math\Vector\Vector3\Vector3.h" />
     <ClInclude Include="Source\Math\Vector\Vector4\Vector4.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Assets\Shader\Fullscreen\Fullscreen.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\SwapChainCopy\SwapChainCopy.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Shader\Fullscreen\Fullscreen.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
