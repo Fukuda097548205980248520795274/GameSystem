@@ -78,19 +78,22 @@ void Engine::PerScene()
 /// @brief 新フレーム処理
 void Engine::NewFrame()
 {
-
+	// 新フレーム処理
+	renderContext_->NewFrame();
 }
 
 /// @brief 描画前処理
 void Engine::PreDraw()
 {
-
+	// 描画前処理
+	renderContext_->PreDraw();
 }
 
 /// @brief 描画後処理
 void Engine::PostDraw()
 {
-
+	// 描画後処理
+	renderContext_->PostDraw();
 }
 
 /// @brief 初期化

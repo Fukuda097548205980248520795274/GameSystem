@@ -1,5 +1,8 @@
 #pragma once
 #include "DXCore/DXCore.h"
+#include "DXCommand/DXCommand.h"
+#include "DXFence/DXFence.h"
+#include "DXHeap/DXHeap.h"
 #include <memory>
 
 namespace Detail
@@ -14,11 +17,45 @@ namespace Detail
 		/// @brief デストラクタ
 		~RenderContext() = default;
 
+		/// @brief 最大バッファ数を取得する
+		/// @return 
+		uint32_t GetMaxBufferCount() const { return kBufferCount; }
+
+		/// @brief フレームインデックスを取得する
+		/// @return 
+		uint32_t GetFrameIndex() const { return frameIndex_; }
+
+		/// @brief シーン前処理
+		void NewFrame();
+
+		/// @brief 描画前処理
+		void PreDraw();
+
+		/// @brief 描画後処理
+		void PostDraw();
+
 
 	private:
 
 		/// @brief DXCore
 		std::unique_ptr<DXCore> core_ = nullptr;
 
+		/// @brief DXCommand
+		std::unique_ptr<DXCommand> command_ = nullptr;
+
+		/// @brief DXFence
+		std::unique_ptr<DXFence> fence_ = nullptr;
+
+		/// @brief DXHeap
+		std::unique_ptr<DXHeap> heap_ = nullptr;
+
+
+	private:
+
+		/// @brief バッファ数
+		static constexpr uint32_t kBufferCount = 2;
+
+		/// @brief 現在のフレームインデックス
+		uint32_t frameIndex_ = 0;
 	};
 }

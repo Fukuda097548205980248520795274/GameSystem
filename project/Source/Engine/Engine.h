@@ -28,6 +28,14 @@ public:
 	/// @return 
 	bool GameLoop() { return winApp_->ProcessMessage(); }
 
+	/// @brief 最大バッファ数を取得する
+	/// @return 
+	uint32_t GetMaxBufferCount() const { return renderContext_->GetMaxBufferCount(); }
+
+	/// @brief フレームインデックスを取得する
+	/// @return 
+	uint32_t GetFrameIndex() const { return renderContext_->GetFrameIndex(); }
+
 	/// @brief シーン前処理
 	void PerScene();
 

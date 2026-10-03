@@ -68,6 +68,12 @@
     <Filter Include="Source\Engine\DXDebug">
       <UniqueIdentifier>{3324bf0c-a359-474d-9693-678f9b2f16cc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\DXFence">
+      <UniqueIdentifier>{a8d01a38-6c07-4fea-a7c5-6ecbd9a6b0af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\DXHeap">
+      <UniqueIdentifier>{b3430498-9cf6-4db4-848a-973844b24b67}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -124,6 +130,12 @@
     <ClCompile Include="Source\Engine\DXDebug\DXDebug.cpp">
       <Filter>Source\Engine\DXDebug</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\DXFence\DXFence.cpp">
+      <Filter>Source\Engine\RenderContext\DXFence</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\DXHeap\DXHeap.cpp">
+      <Filter>Source\Engine\RenderContext\DXHeap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -176,6 +188,12 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\DXDebug\DXDebug.h">
       <Filter>Source\Engine\DXDebug</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\DXFence\DXFence.h">
+      <Filter>Source\Engine\RenderContext\DXFence</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\DXHeap\DXHeap.h">
+      <Filter>Source\Engine\RenderContext\DXHeap</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
