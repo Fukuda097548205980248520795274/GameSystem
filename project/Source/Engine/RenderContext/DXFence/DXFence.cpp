@@ -63,15 +63,15 @@ void Detail::DXFence::Initialize(ID3D12Device* device)
 
 /// @brief GPUにシグナルを送る
 /// @param commandQueue 
-void Detail::DXFence::SendSignal(ID3D12CommandQueue* commandQueue)
+/// @param frameIndex
+void Detail::DXFence::SendSignal(ID3D12CommandQueue* commandQueue, uint32_t frameIndex)
 {
 	assert(commandQueue);
 
 	// フェンスの値をインクリメントする
 	currentFenceValue_++;
 
-	// フレームインデックスを取得して、フェンスの値を保持する配列に格納する
-	uint32_t frameIndex = Engine::GetInstance()->GetFrameIndex();
+	// 引数で受け取った現在のフレームインデックスの配列に格納する
 	fenceValues_[frameIndex] = currentFenceValue_;
 
 	// GPUにシグナルを送る
@@ -79,11 +79,8 @@ void Detail::DXFence::SendSignal(ID3D12CommandQueue* commandQueue)
 }
 
 /// @brief GPUの処理が完了するまで待機する
-void Detail::DXFence::WaitGPU()
+void Detail::DXFence::WaitGPU(uint32_t frameIndex)
 {
-	// フレームインデックスを取得する
-	uint32_t frameIndex = Engine::GetInstance()->GetFrameIndex();
-
 	// フェンスの値を取得する
 	uint64_t waitValue = fenceValues_[frameIndex];
 

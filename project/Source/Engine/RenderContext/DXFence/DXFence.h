@@ -20,10 +20,11 @@ namespace Detail
 
 		/// @brief GPUにシグナルを送る
 		/// @param commandQueue 
-		void SendSignal(ID3D12CommandQueue* commandQueue);
+		/// @param frameIndex
+		void SendSignal(ID3D12CommandQueue* commandQueue, uint32_t frameIndex);
 
 		/// @brief GPUの処理が完了するまで待機する
-		void WaitGPU();
+		void WaitGPU(uint32_t frameIndex);
 
 		// Microsoft::WRL 省略
 		template<class T> using ComPtr = Microsoft::WRL::ComPtr<T>;

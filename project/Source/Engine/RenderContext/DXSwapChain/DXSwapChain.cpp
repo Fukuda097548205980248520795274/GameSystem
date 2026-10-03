@@ -21,7 +21,6 @@ void Detail::DXSwapChain::Initialize(DXHeap* heap, WinApp* winApp, DXCore* dxCor
 	assert(dxCore);
 	assert(dxCommand);
 
-
 	// dxgiFactoryとコマンドキューを取得する
 	auto dxgiFactory = dxCore->GetDXGIFactory();
 	auto commandQueue = dxCommand->GetCommandQueue();

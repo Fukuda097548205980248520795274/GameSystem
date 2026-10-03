@@ -77,6 +77,9 @@
     <Filter Include="Source\Engine\RenderContext\DXSwapChain">
       <UniqueIdentifier>{144b6966-4a84-4710-9b77-8b9fc4d5c5e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Func\Barrier">
+      <UniqueIdentifier>{6929b12b-9e00-48fa-a677-67377c3774eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -142,6 +145,9 @@
     <ClCompile Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.cpp">
       <Filter>Source\Engine\RenderContext\DXSwapChain</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Func\Barrier\Barrier.cpp">
+      <Filter>Source\Engine\Func\Barrier</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -203,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.h">
       <Filter>Source\Engine\RenderContext\DXSwapChain</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\Barrier\Barrier.h">
+      <Filter>Source\Engine\Func\Barrier</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

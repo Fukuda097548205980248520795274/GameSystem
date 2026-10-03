@@ -11,6 +11,7 @@ namespace Detail
 	class WinApp;
 	class DXCore;
 	class DXCommand;
+	class DXFence;
 
 	class DXSwapChain
 	{
@@ -25,6 +26,11 @@ namespace Detail
 
 		/// @brief デストラクタ
 		~DXSwapChain() = default;
+
+		/// @brief スワップチェーンの表示
+		/// @param syncInterval 
+		/// @param flags 
+		void Present(int syncInterval = 0, UINT flags = 0) { swapChain_->Present(syncInterval, flags); }
 
 		/// @brief サイズを作り直す
 		/// @param device 

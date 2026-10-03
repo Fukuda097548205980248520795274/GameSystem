@@ -1,5 +1,8 @@
 #include "RenderContext.h"
+#include <cassert>
+
 #include "WinApp/WinApp.h"
+#include "Func/Barrier/Barrier.h"
 
 /// @brief コンストラクタ
 Detail::RenderContext::RenderContext(WinApp* winApp)
@@ -21,22 +24,106 @@ Detail::RenderContext::RenderContext(WinApp* winApp)
 
 	// DXSwapChainを作成
 	swapChain_ = std::make_unique<DXSwapChain>(heap_.get(), winApp, core_.get(), command_.get());
+
+
+	// ビューポートの設定
+	viewport_.Width = static_cast<float>(winApp->GetClientWidth());
+	viewport_.Height = static_cast<float>(winApp->GetClientHeight());
+	viewport_.TopLeftX = 0;
+	viewport_.TopLeftY = 0;
+	viewport_.MinDepth = 0.0f;
+	viewport_.MaxDepth = 1.0f;
+
+	// シザー矩形の設定
+	scissorRect_.left = 0;
+	scissorRect_.right = winApp->GetClientWidth();
+	scissorRect_.top = 0;
+	scissorRect_.bottom = winApp->GetClientHeight();
+}
+
+/// @brief デストラクタ
+Detail::RenderContext::~RenderContext()
+{
+	// GPUの処理が完了するまで待機する
+	if (command_ && fence_)
+	{
+		fence_->SendSignal(command_->GetCommandQueue(), frameIndex_);
+		fence_->WaitGPU(frameIndex_);
+	}
 }
 
 /// @brief シーン前処理
 void Detail::RenderContext::NewFrame()
 {
+	// コマンドリストを取得
+	auto commandList = command_->GetCommandList();
 
+	// GPUの処理が完了するまで待機する
+	fence_->WaitGPU(frameIndex_);
+
+	// コマンドアロケータを取得
+	auto commandAllocator = command_->GetCommandAllocator();
+
+	// 次のフレーム用のコマンドリストを準備
+	HRESULT hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr));
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
 }
 
 /// @brief 描画前処理
 void Detail::RenderContext::PreDraw()
 {
+	// コマンドリストを取得
+	auto commandList = command_->GetCommandList();
 
+	// ビューポート、シザー矩形の設定
+	commandList->RSSetViewports(1, &viewport_);
+	commandList->RSSetScissorRects(1, &scissorRect_);
+
+	// 描画用のディスクリプタヒープを設定
+	ID3D12DescriptorHeap* descriptorHeaps[] = { heap_->GetSrvDescriptorHeap() };
+	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
 /// @brief 描画後処理
 void Detail::RenderContext::PostDraw()
 {
+	// コマンドリストを取得
+	auto commandList = command_->GetCommandList();
 
+	// バックバッファのインデックスを取得
+	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();
+	ID3D12Resource* backBufferResource = swapChain_->GetSwapChainResource(backBufferIndex);
+	D3D12_CPU_DESCRIPTOR_HANDLE backBufferCPUHandle = swapChain_->GetSwapChainRtvHandle(backBufferIndex);
+
+	// バックバッファリソース Present -> RenderTarget
+	TransitionBarrier(backBufferResource, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET, commandList);
+
+	// 描画先のRTVを設定する
+	commandList->OMSetRenderTargets(1, &backBufferCPUHandle, false, nullptr);
+
+	// 指定した色で画面全体をクリアする
+	float clearColor[] = { 0.1f , 0.1f , 0.1f , 1.0f };
+	commandList->ClearRenderTargetView(backBufferCPUHandle, clearColor, 0, nullptr);
+
+	// バックバッファリソース RenderTarget -> Present
+	TransitionBarrier(backBufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, commandList);
+
+	// コマンドの内容を確定させる（閉じる）
+	HRESULT hr = commandList->Close();
+	assert(SUCCEEDED(hr));
+
+	// GPUにコマンドリストの実行を行わせる
+	ID3D12CommandList* commandLists[] = { commandList };
+	command_->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+
+	// GPUにシグナルを送る
+	fence_->SendSignal(command_->GetCommandQueue(), frameIndex_);
+
+	// GPUとOSに画面の交換を行うよう通知する
+	swapChain_->Present(0, 0);
+
+	// 次のフレーム用のコマンドリストを準備する
+	frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
 }

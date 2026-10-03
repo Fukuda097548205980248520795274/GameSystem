@@ -18,7 +18,7 @@ namespace Detail
 		RenderContext(WinApp* winApp);
 
 		/// @brief デストラクタ
-		~RenderContext() = default;
+		~RenderContext();
 
 		/// @brief 最大バッファ数を取得する
 		/// @return 
@@ -54,6 +54,15 @@ namespace Detail
 
 		/// @brief DXSwapChain
 		std::unique_ptr<DXSwapChain> swapChain_ = nullptr;
+
+
+	private:
+
+		/// @brief ビューポート
+		D3D12_VIEWPORT viewport_{};
+
+		/// @brief シザー矩形
+		D3D12_RECT scissorRect_{};
 
 
 	private:
