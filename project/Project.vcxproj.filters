@@ -74,6 +74,9 @@
     <Filter Include="Source\Engine\RenderContext\DXHeap">
       <UniqueIdentifier>{b3430498-9cf6-4db4-848a-973844b24b67}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\DXSwapChain">
+      <UniqueIdentifier>{144b6966-4a84-4710-9b77-8b9fc4d5c5e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -136,6 +139,9 @@
     <ClCompile Include="Source\Engine\RenderContext\DXHeap\DXHeap.cpp">
       <Filter>Source\Engine\RenderContext\DXHeap</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.cpp">
+      <Filter>Source\Engine\RenderContext\DXSwapChain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -194,6 +200,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\DXHeap\DXHeap.h">
       <Filter>Source\Engine\RenderContext\DXHeap</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.h">
+      <Filter>Source\Engine\RenderContext\DXSwapChain</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

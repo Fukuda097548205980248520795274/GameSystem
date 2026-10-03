@@ -3,16 +3,19 @@
 #include "DXCommand/DXCommand.h"
 #include "DXFence/DXFence.h"
 #include "DXHeap/DXHeap.h"
+#include "DXSwapChain/DXSwapChain.h"
 #include <memory>
 
 namespace Detail
 {
+	class WinApp;
+
 	class RenderContext
 	{
 	public:
 
 		/// @brief コンストラクタ
-		RenderContext();
+		RenderContext(WinApp* winApp);
 
 		/// @brief デストラクタ
 		~RenderContext() = default;
@@ -48,6 +51,9 @@ namespace Detail
 
 		/// @brief DXHeap
 		std::unique_ptr<DXHeap> heap_ = nullptr;
+
+		/// @brief DXSwapChain
+		std::unique_ptr<DXSwapChain> swapChain_ = nullptr;
 
 
 	private:

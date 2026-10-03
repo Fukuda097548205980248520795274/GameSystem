@@ -121,5 +121,5 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 #endif
 
 	// レンダーコンテキストを作成
-	renderContext_ = std::make_unique<Detail::RenderContext>();
+	renderContext_ = std::make_unique<Detail::RenderContext>(winApp_.get());
 }

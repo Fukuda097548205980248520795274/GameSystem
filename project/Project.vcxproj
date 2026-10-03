@@ -190,6 +190,7 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\DXFence\DXFence.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\DXHeap\DXHeap.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\RenderContext.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -246,6 +247,7 @@
     <ClInclude Include="Source\Engine\RenderContext\DXCore\DXCore.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXFence\DXFence.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXHeap\DXHeap.h" />
+    <ClInclude Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.h" />
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.h" />
     <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.h" />
     <ClInclude Include="Source\Engine\WinApp\WinApp.h" />
