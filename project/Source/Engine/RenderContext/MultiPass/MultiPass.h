@@ -1,6 +1,8 @@
 #pragma once
 #include "RenderTargetPool/RenderTargetPool.h"
 #include "SwapChainCopyPSO/SwapChainCopyPSO.h"
+#include "RenderPassSystem/RenderPassSystem.h"
+#include "Resource/DepthResource/DepthResource.h"
 
 namespace Detail
 {
@@ -24,6 +26,34 @@ namespace Detail
 		/// @brief デストラクタ
 		~MultiPass() = default;
 
+		/// @brief レンダーパスを作成する
+		/// @param priority 
+		/// @param blendMode 
+		/// @param drawFunc 
+		/// @return 
+		Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return renderPassSystem_->CreatePass(priority, blendMode, drawFunc); }
+
+		/// @brief クリア
+		/// @param commandList 
+		void Clear(ID3D12GraphicsCommandList* commandList, int frameIndex);
+
+		/// @brief フレーム終了時の処理
+		/// @param commandList 
+		void EndFrame(ID3D12GraphicsCommandList* commandList, int frameIndex);
+
+		/// @brief スワップチェインのRTVリソースにオフクリーンリソースを書き込む
+		/// @param commandList 
+		/// @param frameIndex
+		void RenderSwapChain(ID3D12GraphicsCommandList* commandList, int frameIndex);
+
+		/// @brief レンダーパスを実行する
+		/// @param commandList 
+		void Execute(ID3D12GraphicsCommandList* commandList, int frameIndex);
+
+		/// @brief 現在のレンダーパスのリソースを設定する
+		/// @param resource 
+		void SetCurrentResource(OffscreenResource* resource) { currentResource_ = resource; }
+
 
 	private:
 
@@ -38,11 +68,29 @@ namespace Detail
 
 	private:
 
+		// 読み込みのリソース
+		OffscreenResource* sourceResource_ = nullptr;
+
+		// 書き込み対象のレンダーターゲット
+		OffscreenResource* destinationResource_ = nullptr;
+
+		// 最新のパスの結果
+		OffscreenResource* currentResource_ = nullptr;
+
+
+	private:
+
+		/// @brief 深度リソース
+		std::unique_ptr<DepthResource> depthResource_;
+
 		/// @brief レンダーターゲットプール
 		std::unique_ptr<RenderTargetPool> renderTargetPool_;
 
 		/// @brief スワップチェーンコピーPSO
 		std::unique_ptr<SwapChainCopyPSO> swapChainCopyPSO_;
+
+		/// @brief レンダーパスシステム
+		std::unique_ptr< RenderPassSystem> renderPassSystem_;
 
 
 	private:

@@ -13,7 +13,8 @@ Game::Game(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 /// @brief 初期化
 void Game::Initialize()
 {
-
+	// レンダーパスを作成
+	renderPassEntity = Engine::GetInstance()->CreatePass(0, BlendMode::None, [this]() {});
 }
 
 /// @brief 更新処理

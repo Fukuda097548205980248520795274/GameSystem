@@ -128,6 +128,9 @@
     <Filter Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO">
       <UniqueIdentifier>{55c3e983-2e1a-4e98-8c7f-e5a4755948ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem">
+      <UniqueIdentifier>{3fa2dc91-299b-41ec-9fd1-dbb93572ca45}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -216,6 +219,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.cpp">
       <Filter>Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem\RenderPassSystem.cpp">
+      <Filter>Source\Engine\RenderContext\MultiPass\RenderPassSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -314,6 +320,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.h">
       <Filter>Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem\RenderPassSystem.h">
+      <Filter>Source\Engine\RenderContext\MultiPass\RenderPassSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

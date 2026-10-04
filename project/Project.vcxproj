@@ -195,6 +195,7 @@
     <ClCompile Include="Source\Engine\RenderContext\DXHeap\DXHeap.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\MultiPass\MultiPass.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem\RenderPassSystem.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\RenderContext.cpp">
@@ -262,6 +263,7 @@
     <ClInclude Include="Source\Engine\RenderContext\DXHeap\DXHeap.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.h" />
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\MultiPass.h" />
+    <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem\RenderPassSystem.h" />
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.h" />
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.h" />

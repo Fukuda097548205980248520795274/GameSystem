@@ -54,6 +54,17 @@ public:
 	/// @param log 
 	void Log(LogLevel level, const std::string& log) { logger_->Logging(level, log); }
 
+	/// @brief ECSレジストリを取得する
+	/// @return 
+	Detail::RegistryECS* GetRegistryECS() { return registry_.get(); }
+
+	/// @brief レンダーパスを作成する
+	/// @param priority 
+	/// @param blendMode 
+	/// @param drawFunc 
+	/// @return 
+	Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return renderContext_->CreatePass(priority, blendMode, drawFunc); }
+
 
 
 private:

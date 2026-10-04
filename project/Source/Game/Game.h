@@ -30,5 +30,10 @@ protected:
 	/// @brief 描画処理
 	void Draw();
 
+
+private:
+
+	/// @brief レンダーパスのエンティティ
+	Entity renderPassEntity;
 };
 

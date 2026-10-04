@@ -77,13 +77,7 @@ void Detail::RenderContext::NewFrame()
 	assert(SUCCEEDED(hr));
 	hr = commandList->Reset(commandAllocator, nullptr);
 	assert(SUCCEEDED(hr));
-}
 
-/// @brief 描画前処理
-void Detail::RenderContext::PreDraw()
-{
-	// コマンドリストを取得
-	auto commandList = command_->GetCommandList();
 
 	// ビューポート、シザー矩形の設定
 	commandList->RSSetViewports(1, &viewport_);
@@ -92,6 +86,16 @@ void Detail::RenderContext::PreDraw()
 	// 描画用のディスクリプタヒープを設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { heap_->GetSrvDescriptorHeap() };
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
+}
+
+/// @brief 描画前処理
+void Detail::RenderContext::PreDraw()
+{
+	// コマンドリストを取得
+	auto commandList = command_->GetCommandList();
+
+	// デプスステンシルのクリア
+	multiPass_->Clear(commandList, frameIndex_);
 }
 
 /// @brief 描画後処理
@@ -115,8 +119,17 @@ void Detail::RenderContext::PostDraw()
 	float clearColor[] = { 0.1f , 0.1f , 0.1f , 1.0f };
 	commandList->ClearRenderTargetView(backBufferCPUHandle, clearColor, 0, nullptr);
 
+	// レンダーパスを実行する
+	multiPass_->Execute(commandList, frameIndex_);
+
+	// スワップチェインにオフスクリーンリソースを書き込む
+	multiPass_->RenderSwapChain(commandList, frameIndex_);
+
 	// バックバッファリソース RenderTarget -> Present
 	TransitionBarrier(backBufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, commandList);
+
+	// フレーム終了時の処理
+	multiPass_->EndFrame(commandList, frameIndex_);
 
 	// コマンドの内容を確定させる（閉じる）
 	HRESULT hr = commandList->Close();

@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 #include "Vector/Vector3/Vector3.h"
 
 /// @brief トランスフォームコンポーネント
@@ -43,7 +44,7 @@ struct RenderPassComponent
 /// @brief 合成（ブレンド）のパラメータ
 struct BlendComponent
 {
-	BlendComponent() : opacity(1.0f), blendMode(0) {}
+	BlendComponent() : opacity(1.0f), blendMode(BlendMode::Normal) {}
 
 	/// @brief 不透明度（0.0f ～ 1.0f）
 	float opacity;
@@ -62,4 +63,13 @@ struct RenderTargetComponent
 
 	/// @brief 書き込むレンダーターゲットのハンドル（またはID/ポインタ）
 	uint32_t outputTargetHandle;
+};
+
+/// @brief 描画コールバック関数を保持するコンポーネント
+struct RenderCallbackComponent
+{
+	RenderCallbackComponent() : drawFunc(nullptr) {}
+
+	/// @brief 描画コールバック関数
+	std::function<void()> drawFunc;
 };

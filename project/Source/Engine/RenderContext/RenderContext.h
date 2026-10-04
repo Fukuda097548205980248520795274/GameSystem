@@ -43,6 +43,13 @@ namespace Detail
 		/// @brief 描画後処理
 		void PostDraw();
 
+		/// @brief レンダーパスを作成する
+		/// @param priority 
+		/// @param blendMode 
+		/// @param drawFunc 
+		/// @return 
+		Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return multiPass_->CreatePass(priority, blendMode, drawFunc); }
+
 
 	private:
 
