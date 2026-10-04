@@ -4,12 +4,19 @@
 #include "WinApp/WinApp.h"
 #include "Func/Barrier/Barrier.h"
 
+#include "DXDebug/DXDebug.h"
+
 /// @brief 初期化
 /// @param winApp 
-void Detail::RenderContext::Initialize(WinApp* winApp)
+/// @param dxDebug 
+void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 {
+	assert(winApp);
+	assert(dxDebug);
+
 	// DXCoreを作成
 	core_ = std::make_unique<DXCore>();
+	dxDebug->Stop(core_->GetDevice());
 
 	// DXCommandを作成
 	command_ = std::make_unique<DXCommand>();
@@ -47,6 +54,27 @@ void Detail::RenderContext::Initialize(WinApp* winApp)
 	scissorRect_.right = winApp->GetClientWidth();
 	scissorRect_.top = 0;
 	scissorRect_.bottom = winApp->GetClientHeight();
+
+
+#ifdef DEVELOPMENT
+	
+	// ImGuiRenderを作成
+	imguiRender_ = std::make_unique<ImGuiRender>();
+	imguiRender_->Initialize(core_->GetDevice(), winApp, heap_.get(), swapChain_.get());
+
+#endif
+
+
+	// 初期化時のコマンドリストを閉じる
+	auto commandList = command_->GetCommandList();
+	commandList->Close();
+
+	// GPUにコマンドリストの実行を行わせる
+	ID3D12CommandList* commandLists[] = { commandList };
+	command_->GetCommandQueue()->ExecuteCommandLists(1, commandLists);
+
+	// GPUにシグナルを送る
+	fence_->SendSignal(command_->GetCommandQueue(), frameIndex_);
 }
 
 /// @brief デストラクタ
@@ -79,6 +107,13 @@ void Detail::RenderContext::NewFrame()
 	assert(SUCCEEDED(hr));
 
 
+#ifdef DEVELOPMENT
+
+	// フレームの開始をImGuiに伝える
+	imguiRender_->FrameStart();
+
+#endif
+
 	// ビューポート、シザー矩形の設定
 	commandList->RSSetViewports(1, &viewport_);
 	commandList->RSSetScissorRects(1, &scissorRect_);
@@ -86,11 +121,29 @@ void Detail::RenderContext::NewFrame()
 	// 描画用のディスクリプタヒープを設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { heap_->GetSrvDescriptorHeap() };
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
+
+#ifdef DEVELOPMENT
+
+	// Dockスペースを作成する
+	imguiRender_->CreateDockSpace();
+
+#endif 
 }
 
 /// @brief 描画前処理
 void Detail::RenderContext::PreDraw()
 {
+	// ビューウィンドウがホバーしているかどうか
+	bool isHoverViewWindow = false;
+
+#ifdef DEVELOPMENT
+
+	// ImGuiDockingのビューウィンドウがホバーしているかどうかを取得する
+	isHoverViewWindow = imguiRender_->IsViewWindowHover();
+
+#endif
+
+
 	// コマンドリストを取得
 	auto commandList = command_->GetCommandList();
 
@@ -103,6 +156,9 @@ void Detail::RenderContext::PostDraw()
 {
 	// コマンドリストを取得
 	auto commandList = command_->GetCommandList();
+
+	// レンダーパスを実行する
+	multiPass_->Execute(commandList, frameIndex_);
 
 	// バックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();
@@ -119,11 +175,15 @@ void Detail::RenderContext::PostDraw()
 	float clearColor[] = { 0.1f , 0.1f , 0.1f , 1.0f };
 	commandList->ClearRenderTargetView(backBufferCPUHandle, clearColor, 0, nullptr);
 
-	// レンダーパスを実行する
-	multiPass_->Execute(commandList, frameIndex_);
-
 	// スワップチェインにオフスクリーンリソースを書き込む
 	multiPass_->RenderSwapChain(commandList, frameIndex_);
+
+#ifdef DEVELOPMENT
+
+	// ImGuiDockingに最終的なオフスクリーンを描画する
+	imguiRender_->DrawImGuiScreen(multiPass_->GetCurrentResource(), commandList, frameIndex_);
+
+#endif
 
 	// バックバッファリソース RenderTarget -> Present
 	TransitionBarrier(backBufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, commandList);

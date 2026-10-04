@@ -6,11 +6,13 @@
 #include "DXSwapChain/DXSwapChain.h"
 #include "ShaderCompiler/ShaderCompiler.h"
 #include "MultiPass/MultiPass.h"
+#include "ImGuiRender/ImGuiRender.h"
 #include <memory>
 
 namespace Detail
 {
 	class WinApp;
+	class DXDebug;
 
 	class RenderContext
 	{
@@ -24,7 +26,7 @@ namespace Detail
 
 		/// @brief 初期化
 		/// @param winApp 
-		void Initialize(WinApp* winApp);
+		void Initialize(WinApp* winApp, DXDebug* dxDebug);
 
 		/// @brief 最大バッファ数を取得する
 		/// @return 
@@ -73,6 +75,11 @@ namespace Detail
 
 		/// @brief マルチパス
 		std::unique_ptr<MultiPass> multiPass_ = nullptr;
+
+#ifdef DEVELOPMENT
+		/// @brief ImGui描画
+		std::unique_ptr<ImGuiRender> imguiRender_ = nullptr;
+#endif
 
 
 	private:

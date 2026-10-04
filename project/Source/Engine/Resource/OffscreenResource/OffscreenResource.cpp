@@ -130,6 +130,18 @@ void Detail::OffscreenResource::Barrier(ID3D12GraphicsCommandList* commandList, 
 	TransitionBarrier(resource_[frameIndex].Get(), before, after, commandList);
 }
 
+/// @brief 全てのバリアを張る
+/// @param commandList 
+/// @param before 
+/// @param after 
+void Detail::OffscreenResource::AllBarrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after)
+{
+	for (auto& res : resource_)
+	{
+		TransitionBarrier(res.Get(), before, after, commandList);
+	}
+}
+
 /// @brief レンダーターゲットの設定とクリア
 /// @param commandList 
 /// @param dsvHandle 

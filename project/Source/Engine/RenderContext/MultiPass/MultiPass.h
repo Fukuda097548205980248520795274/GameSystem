@@ -54,6 +54,10 @@ namespace Detail
 		/// @param resource 
 		void SetCurrentResource(OffscreenResource* resource) { currentResource_ = resource; }
 
+		/// @brief 現在のレンダーターゲットのリソースを取得する
+		/// @return 
+		OffscreenResource* GetCurrentResource() const { return currentResource_; }
+
 
 	private:
 

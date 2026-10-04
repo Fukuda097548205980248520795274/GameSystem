@@ -131,6 +131,9 @@
     <Filter Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem">
       <UniqueIdentifier>{3fa2dc91-299b-41ec-9fd1-dbb93572ca45}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\ImGuiRender">
+      <UniqueIdentifier>{0bdc9465-b915-4510-97ef-34a3df26a554}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -222,6 +225,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem\RenderPassSystem.cpp">
       <Filter>Source\Engine\RenderContext\MultiPass\RenderPassSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\ImGuiRender\ImGuiRender.cpp">
+      <Filter>Source\Engine\ImGuiRender</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -323,6 +329,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem\RenderPassSystem.h">
       <Filter>Source\Engine\RenderContext\MultiPass\RenderPassSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\ImGuiRender\ImGuiRender.h">
+      <Filter>Source\Engine\ImGuiRender</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

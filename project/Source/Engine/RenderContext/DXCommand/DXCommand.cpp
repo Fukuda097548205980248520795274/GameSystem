@@ -66,9 +66,6 @@ void Detail::DXCommand::Initialize(ID3D12Device* device)
 		throw std::runtime_error("コマンドリストの生成に失敗しました");
 	}
 
-	// コマンドリストは生成直後は記録状態なので、Closeしておく
-	commandList_->Close();
-
 	// コマンドリスト生成成功のログ
 	if (engine)engine->Log(LogLevel::Info, "コマンドリスト生成");
 }

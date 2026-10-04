@@ -82,7 +82,7 @@ void Detail::RenderTargetPool::Resize(int width, int height, ID3D12GraphicsComma
 		resource->Resize(device_, width, height);
 
 		// バリアを張る
-		resource->Barrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, frameIndex);
+		resource->AllBarrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 	}
 }
 
@@ -98,7 +98,7 @@ void Detail::RenderTargetPool::CreateRenderTarget(int width, int height, ID3D12G
 	auto renderTarget = std::make_unique<OffscreenResource>(device_, heap_, width, height);
 	std::string name = "RenderTarget_" + std::to_string(resources_.size());
 	renderTarget->SetName(name);
-	renderTarget->Barrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, frameIndex);
+	renderTarget->AllBarrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// プールに追加
 	freeQueue_.push(renderTarget.get());

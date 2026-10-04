@@ -55,7 +55,6 @@ void Detail::DXDebug::Stop(ID3D12Device* device)
 		// 警告で停止させる
 		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
 
-
 		// 抑制するメッセージのID
 		D3D12_MESSAGE_ID denyIDs[] = { D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE };
 

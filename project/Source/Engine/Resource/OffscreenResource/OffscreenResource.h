@@ -35,6 +35,12 @@ namespace Detail
 		/// @param frameIndex
 		void Barrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after, uint32_t frameIndex);
 
+		/// @brief 全てのバリアを張る
+		/// @param commandList 
+		/// @param before 
+		/// @param after 
+		void AllBarrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
+
 		/// @brief レンダーターゲットの設定とクリア
 		/// @param commandList 
 		/// @param dsvHandle 
