@@ -39,6 +39,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// マルチパスを作成
 	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
 
+	// テクスチャストアを作成
+	textureStore_ = std::make_unique<TextureStore>();
+
 
 	// ビューポートの設定
 	viewport_.Width = static_cast<float>(winApp->GetClientWidth());
@@ -74,6 +77,21 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 
 	// GPUにシグナルを送る
 	fence_->SendSignal(command_->GetCommandQueue(), frameIndex_);
+
+	// GPUの処理が完了するまで待機する
+	fence_->WaitGPU(frameIndex_);
+
+	// コマンドアロケータを取得
+	auto commandAllocator = command_->GetCommandAllocator();
+
+	// 次のフレーム用のコマンドリストを準備
+	HRESULT hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr));
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
+
+	// 中間リソースを解放する
+	textureStore_->ReleaseIntermediateResources();
 }
 
 /// @brief デストラクタ
@@ -96,14 +114,21 @@ void Detail::RenderContext::NewFrame()
 	// GPUの処理が完了するまで待機する
 	fence_->WaitGPU(frameIndex_);
 
-	// コマンドアロケータを取得
-	auto commandAllocator = command_->GetCommandAllocator();
+	// 初回フレームでなければコマンドリストをリセットする
+	if (!isFirstFrame_)
+	{
+		// コマンドアロケータを取得
+		auto commandAllocator = command_->GetCommandAllocator();
 
-	// 次のフレーム用のコマンドリストを準備
-	HRESULT hr = commandAllocator->Reset();
-	assert(SUCCEEDED(hr));
-	hr = commandList->Reset(commandAllocator, nullptr);
-	assert(SUCCEEDED(hr));
+		// 次のフレーム用のコマンドリストを準備
+		HRESULT hr = commandAllocator->Reset();
+		assert(SUCCEEDED(hr));
+		hr = commandList->Reset(commandAllocator, nullptr);
+		assert(SUCCEEDED(hr));
+
+		// 中間リソースを解放する
+		textureStore_->ReleaseIntermediateResources();
+	}
 
 
 #ifdef DEVELOPMENT
@@ -206,4 +231,8 @@ void Detail::RenderContext::PostDraw()
 
 	// 次のフレーム用のコマンドリストを準備する
 	frameIndex_ = swapChain_->GetCurrentBackBufferIndex();
+
+
+	// 初回フレームのフラグを下ろす
+	isFirstFrame_ = false;
 }

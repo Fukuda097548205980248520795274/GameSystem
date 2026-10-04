@@ -65,6 +65,11 @@ public:
 	/// @return 
 	Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return renderContext_->CreatePass(priority, blendMode, drawFunc); }
 
+	/// @brief テクスチャを読み込む
+	/// @param filePath 
+	/// @return 
+	uint32_t LoadTexture(const std::string& filePath) { return renderContext_->LoadTexture(filePath); }
+
 
 
 private:

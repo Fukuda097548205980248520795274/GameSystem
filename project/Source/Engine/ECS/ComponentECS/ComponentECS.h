@@ -73,3 +73,12 @@ struct RenderCallbackComponent
 	/// @brief 描画コールバック関数
 	std::function<void()> drawFunc;
 };
+
+/// @brief テクスチャコンポーネント
+struct TextureComponent
+{
+	TextureComponent() : handle(0) {}
+
+	/// @brief テクスチャのハンドル（またはID/ポインタ）
+	uint32_t handle;
+};

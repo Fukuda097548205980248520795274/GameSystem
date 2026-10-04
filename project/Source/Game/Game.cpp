@@ -15,6 +15,9 @@ void Game::Initialize()
 {
 	// レンダーパスを作成
 	renderPassEntity = Engine::GetInstance()->CreatePass(0, BlendMode::None, [this]() {});
+
+	// テクスチャを読み込む
+	textureHandle = Engine::GetInstance()->LoadTexture("./Assets/Texture/uvChecker.png");
 }
 
 /// @brief 更新処理

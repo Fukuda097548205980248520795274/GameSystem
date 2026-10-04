@@ -134,6 +134,15 @@
     <Filter Include="Source\Engine\ImGuiRender">
       <UniqueIdentifier>{0bdc9465-b915-4510-97ef-34a3df26a554}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Store">
+      <UniqueIdentifier>{bd4a019b-8fd7-42b8-b850-c93fd94071ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\TextureStore">
+      <UniqueIdentifier>{f5b04a9c-a1dd-4af3-91ee-9a25bbe8bc6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Func\TextureFunc">
+      <UniqueIdentifier>{0b0b20f6-2563-4250-84e3-1154594669cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -228,6 +237,12 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\ImGuiRender\ImGuiRender.cpp">
       <Filter>Source\Engine\ImGuiRender</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\TextureStore\TextureStore.cpp">
+      <Filter>Source\Engine\Store\TextureStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Func\TextureFunc\TextureFunc.cpp">
+      <Filter>Source\Engine\Func\TextureFunc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -332,6 +347,12 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\ImGuiRender\ImGuiRender.h">
       <Filter>Source\Engine\ImGuiRender</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\TextureStore\TextureStore.h">
+      <Filter>Source\Engine\Store\TextureStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\TextureFunc\TextureFunc.h">
+      <Filter>Source\Engine\Func\TextureFunc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

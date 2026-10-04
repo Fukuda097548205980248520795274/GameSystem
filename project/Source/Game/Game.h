@@ -35,5 +35,8 @@ private:
 
 	/// @brief レンダーパスのエンティティ
 	Entity renderPassEntity;
+
+	/// @brief 読み込んだテクスチャのハンドル
+	uint32_t textureHandle = 0;
 };
 

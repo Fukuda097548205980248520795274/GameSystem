@@ -6,6 +6,7 @@
 #include "DXSwapChain/DXSwapChain.h"
 #include "ShaderCompiler/ShaderCompiler.h"
 #include "MultiPass/MultiPass.h"
+#include "Store/TextureStore/TextureStore.h"
 #include "ImGuiRender/ImGuiRender.h"
 #include <memory>
 
@@ -52,6 +53,11 @@ namespace Detail
 		/// @return 
 		Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return multiPass_->CreatePass(priority, blendMode, drawFunc); }
 
+		/// @brief テクスチャを読み込む
+		/// @param filePath 
+		/// @return 
+		uint32_t LoadTexture(const std::string& filePath) { return textureStore_->Load(filePath, heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
+
 
 	private:
 
@@ -76,6 +82,9 @@ namespace Detail
 		/// @brief マルチパス
 		std::unique_ptr<MultiPass> multiPass_ = nullptr;
 
+		/// @brief テクスチャストア
+		std::unique_ptr<TextureStore> textureStore_ = nullptr;
+
 #ifdef DEVELOPMENT
 		/// @brief ImGui描画
 		std::unique_ptr<ImGuiRender> imguiRender_ = nullptr;
@@ -98,5 +107,8 @@ namespace Detail
 
 		/// @brief 現在のフレームインデックス
 		uint32_t frameIndex_ = 0;
+
+		/// @brief 初回フレームかどうか
+		bool isFirstFrame_ = true;
 	};
 }
