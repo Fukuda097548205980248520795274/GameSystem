@@ -95,8 +95,12 @@ private:
 	/// @brief ECSレジストリ
 	std::unique_ptr<Detail::RegistryECS> registry_;
 
+#ifdef _DEBUG
+
 	/// @brief DirectXデバッグ
 	std::unique_ptr<Detail::DXDebug> dxDebug_;
+
+#endif
 
 	/// @brief レンダーコンテキスト
 	std::unique_ptr<Detail::RenderContext> renderContext_;

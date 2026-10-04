@@ -122,12 +122,16 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 	// ECSレジストリを作成
 	registry_ = std::make_unique<Detail::RegistryECS>();
 
+	// DirectXデバッグのポインタ
+	Detail::DXDebug* dxDebug = nullptr;
+
 #ifdef _DEBUG
 	// DirectXデバッグを作成
 	dxDebug_ = std::make_unique<Detail::DXDebug>();
+	dxDebug = dxDebug_.get();
 #endif
 
 	// レンダーコンテキストを作成
 	renderContext_ = std::make_unique<Detail::RenderContext>();
-	renderContext_->Initialize(winApp_.get(), dxDebug_.get());
+	renderContext_->Initialize(winApp_.get(), dxDebug);
 }

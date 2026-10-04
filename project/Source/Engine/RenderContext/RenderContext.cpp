@@ -12,11 +12,10 @@
 void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 {
 	assert(winApp);
-	assert(dxDebug);
 
 	// DXCoreを作成
 	core_ = std::make_unique<DXCore>();
-	dxDebug->Stop(core_->GetDevice());
+	if(dxDebug)dxDebug->Stop(core_->GetDevice());
 
 	// DXCommandを作成
 	command_ = std::make_unique<DXCommand>();
