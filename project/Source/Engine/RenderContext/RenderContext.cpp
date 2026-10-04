@@ -89,9 +89,6 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	assert(SUCCEEDED(hr));
 	hr = commandList->Reset(commandAllocator, nullptr);
 	assert(SUCCEEDED(hr));
-
-	// 中間リソースを解放する
-	textureStore_->ReleaseIntermediateResources();
 }
 
 /// @brief デストラクタ
@@ -107,6 +104,20 @@ Detail::RenderContext::~RenderContext()
 
 /// @brief シーン前処理
 void Detail::RenderContext::NewFrame()
+{
+#ifdef DEVELOPMENT
+
+	// フレームの開始をImGuiに伝える
+	imguiRender_->FrameStart();
+
+	// Dockスペースを作成する
+	imguiRender_->CreateDockSpace();
+
+#endif
+}
+
+/// @brief 描画前処理
+void Detail::RenderContext::PreDraw()
 {
 	// コマンドリストを取得
 	auto commandList = command_->GetCommandList();
@@ -130,14 +141,6 @@ void Detail::RenderContext::NewFrame()
 		textureStore_->ReleaseIntermediateResources();
 	}
 
-
-#ifdef DEVELOPMENT
-
-	// フレームの開始をImGuiに伝える
-	imguiRender_->FrameStart();
-
-#endif
-
 	// ビューポート、シザー矩形の設定
 	commandList->RSSetViewports(1, &viewport_);
 	commandList->RSSetScissorRects(1, &scissorRect_);
@@ -146,17 +149,7 @@ void Detail::RenderContext::NewFrame()
 	ID3D12DescriptorHeap* descriptorHeaps[] = { heap_->GetSrvDescriptorHeap() };
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
-#ifdef DEVELOPMENT
 
-	// Dockスペースを作成する
-	imguiRender_->CreateDockSpace();
-
-#endif 
-}
-
-/// @brief 描画前処理
-void Detail::RenderContext::PreDraw()
-{
 	// ビューウィンドウがホバーしているかどうか
 	bool isHoverViewWindow = false;
 
@@ -166,10 +159,6 @@ void Detail::RenderContext::PreDraw()
 	isHoverViewWindow = imguiRender_->IsViewWindowHover();
 
 #endif
-
-
-	// コマンドリストを取得
-	auto commandList = command_->GetCommandList();
 
 	// デプスステンシルのクリア
 	multiPass_->Clear(commandList, frameIndex_);
