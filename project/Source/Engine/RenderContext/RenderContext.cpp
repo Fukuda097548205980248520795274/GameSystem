@@ -120,8 +120,8 @@ void Detail::RenderContext::NewFrame()
 #endif
 }
 
-/// @brief 描画前処理
-void Detail::RenderContext::PreDraw()
+/// @brief 描画後処理
+void Detail::RenderContext::PostDraw()
 {
 	// コマンドリストを取得
 	auto commandList = command_->GetCommandList();
@@ -144,7 +144,7 @@ void Detail::RenderContext::PreDraw()
 		// 中間リソースを解放する
 		textureStore_->ReleaseIntermediateResources();
 	}
-	
+
 	// リサイズ処理
 	if (winApp_->IsResized())
 		Resize(winApp_->GetClientWidth(), winApp_->GetClientHeight());
@@ -157,26 +157,8 @@ void Detail::RenderContext::PreDraw()
 	ID3D12DescriptorHeap* descriptorHeaps[] = { heap_->GetSrvDescriptorHeap() };
 	commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
-
-	// ビューウィンドウがホバーしているかどうか
-	bool isHoverViewWindow = false;
-
-#ifdef DEVELOPMENT
-
-	// ImGuiDockingのビューウィンドウがホバーしているかどうかを取得する
-	isHoverViewWindow = imguiRender_->IsViewWindowHover();
-
-#endif
-
 	// デプスステンシルのクリア
 	multiPass_->Clear(commandList, frameIndex_);
-}
-
-/// @brief 描画後処理
-void Detail::RenderContext::PostDraw()
-{
-	// コマンドリストを取得
-	auto commandList = command_->GetCommandList();
 
 	// レンダーパスを実行する
 	multiPass_->Execute(commandList, frameIndex_);

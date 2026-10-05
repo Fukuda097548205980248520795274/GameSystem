@@ -27,9 +27,6 @@ protected:
 	/// @brief 更新処理
 	void Update();
 
-	/// @brief 描画処理
-	void Draw();
-
 
 private:
 

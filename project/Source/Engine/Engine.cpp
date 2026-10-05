@@ -89,13 +89,6 @@ void Engine::NewFrame()
 	winApp_->Update();
 }
 
-/// @brief 描画前処理
-void Engine::PreDraw()
-{
-	// 描画前処理
-	renderContext_->PreDraw();
-}
-
 /// @brief 描画後処理
 void Engine::PostDraw()
 {

@@ -73,7 +73,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;DEVELOPMENT;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;DEVELOPMENT;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -103,7 +103,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -132,7 +132,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>DEVELOPMENT;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEVELOPMENT;_WINDOWS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -249,6 +249,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Store\AudioStore\AudioStore.cpp" />
     <ClCompile Include="Source\Engine\Store\TextureStore\TextureStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -300,6 +301,7 @@
     <ClInclude Include="Source\Engine\Func\Barrier\Barrier.h" />
     <ClInclude Include="Source\Engine\Func\ConvertString\ConvertString.h" />
     <ClInclude Include="Source\Engine\Func\CrashHandler\CrashHandler.h" />
+    <ClInclude Include="Source\Engine\Func\RandomFunc\RandomFunc.h" />
     <ClInclude Include="Source\Engine\Func\ResourceFunc\ResourceFunc.h" />
     <ClInclude Include="Source\Engine\Func\TextureFunc\TextureFunc.h" />
     <ClInclude Include="Source\Engine\Logger\Logger.h" />
@@ -319,6 +321,7 @@
     <ClInclude Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.h" />
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\StructuredBufferResource.h" />
     <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.h" />
+    <ClInclude Include="Source\Engine\Store\AudioStore\AudioStore.h" />
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureStore.h" />
     <ClInclude Include="Source\Engine\WinApp\WinApp.h" />
     <ClInclude Include="Source\Game\Game.h" />

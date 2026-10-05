@@ -43,9 +43,6 @@ public:
 	/// @brief 新フレーム処理
 	void NewFrame();
 
-	/// @brief 描画前処理
-	void PreDraw();
-
 	/// @brief 描画後処理
 	void PostDraw();
 

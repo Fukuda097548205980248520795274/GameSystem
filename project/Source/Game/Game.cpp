@@ -26,12 +26,6 @@ void Game::Update()
 
 }
 
-/// @brief 描画処理
-void Game::Draw()
-{
-
-}
-
 /// @brief 実行
 /// @return 
 int32_t Game::Run()
@@ -50,12 +44,6 @@ int32_t Game::Run()
 
 		// 更新処理
 		Update();
-
-		// 描画前処理
-		engine->PreDraw();
-
-		// 描画処理
-		Draw();
 
 		// 描画後処理
 		engine->PostDraw();
