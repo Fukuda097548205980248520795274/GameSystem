@@ -90,3 +90,17 @@ void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, int fram
 	// レンダーパスを実行する
 	renderPassSystem_->ExecuteAll(commandList, this, depthResource_->GetDsvHandle(frameIndex));
 }
+
+/// @brief サイズを作り直す
+/// @param device 
+/// @param commandList 
+/// @param width 
+/// @param height 
+void Detail::MultiPass::Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int width, int height)
+{
+	// レンダーターゲットプールのリサイズ
+	renderTargetPool_->Resize(width, height, commandList);
+
+	// 深度リソースのリサイズ
+	depthResource_->Resize(device, width, height);
+}

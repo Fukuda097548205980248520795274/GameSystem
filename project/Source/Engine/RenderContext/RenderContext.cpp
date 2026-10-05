@@ -11,7 +11,11 @@
 /// @param dxDebug 
 void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 {
+	// nullptrチェック
 	assert(winApp);
+
+	// 引数を受け取る
+	winApp_ = winApp;
 
 	// DXCoreを作成
 	core_ = std::make_unique<DXCore>();
@@ -140,6 +144,10 @@ void Detail::RenderContext::PreDraw()
 		// 中間リソースを解放する
 		textureStore_->ReleaseIntermediateResources();
 	}
+	
+	// リサイズ処理
+	if (winApp_->IsResized())
+		Resize(winApp_->GetClientWidth(), winApp_->GetClientHeight());
 
 	// ビューポート、シザー矩形の設定
 	commandList->RSSetViewports(1, &viewport_);
@@ -224,4 +232,44 @@ void Detail::RenderContext::PostDraw()
 
 	// 初回フレームのフラグを下ろす
 	isFirstFrame_ = false;
+}
+
+/// @brief サイズを作り直す
+/// @param width 
+/// @param height 
+void Detail::RenderContext::Resize(int32_t width, int32_t height)
+{
+	if (width == 0 || height == 0) return;
+
+	// GPUの処理が完了するまで待機する
+	fence_->SendSignal(command_->GetCommandQueue(), frameIndex_);
+	fence_->WaitGPU(frameIndex_);
+
+	// コマンドリストを取得
+	auto commandList = command_->GetCommandList();
+
+	// スワップチェーンのリサイズ
+	swapChain_->Resize(core_->GetDevice(), width, height);
+
+	// オフスクリーン再生成
+	multiPass_->Resize(core_->GetDevice(), commandList, width, height);
+
+#ifdef DEVELOPMENT
+	// IMGUIのリサイズ
+	imguiRender_->Resize(width, height);
+#endif
+
+	// ビューポートの設定
+	viewport_.Width = static_cast<float>(width);
+	viewport_.Height = static_cast<float>(height);
+	viewport_.TopLeftX = 0;
+	viewport_.TopLeftY = 0;
+	viewport_.MinDepth = 0.0f;
+	viewport_.MaxDepth = 1.0f;
+
+	// シザー矩形の設定
+	scissorRect_.left = 0;
+	scissorRect_.right = width;
+	scissorRect_.top = 0;
+	scissorRect_.bottom = height;
 }

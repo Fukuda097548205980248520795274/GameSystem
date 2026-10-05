@@ -75,7 +75,6 @@ void Detail::RenderTargetPool::CheckMemoryLeaks()
 void Detail::RenderTargetPool::Resize(int width, int height, ID3D12GraphicsCommandList* commandList)
 {
 	auto engine = Engine::GetInstance();
-	int frameIndex = engine->GetFrameIndex();
 
 	for (auto& resource : resources_)
 	{
@@ -92,7 +91,6 @@ void Detail::RenderTargetPool::Resize(int width, int height, ID3D12GraphicsComma
 void Detail::RenderTargetPool::CreateRenderTarget(int width, int height, ID3D12GraphicsCommandList* commandList)
 {
 	auto engine = Engine::GetInstance();
-	int frameIndex = engine->GetFrameIndex();
 
 	// レンダーターゲットを作成
 	auto renderTarget = std::make_unique<OffscreenResource>(device_, heap_, width, height);

@@ -58,6 +58,13 @@ namespace Detail
 		/// @return 
 		OffscreenResource* GetCurrentResource() const { return currentResource_; }
 
+		/// @brief サイズを作り直す
+		/// @param device 
+		/// @param commandList 
+		/// @param width 
+		/// @param height 
+		void Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int width, int height);
+
 
 	private:
 

@@ -61,6 +61,14 @@ namespace Detail
 
 	private:
 
+		/// @brief サイズを作り直す
+		/// @param width 
+		/// @param height 
+		void Resize(int32_t width, int32_t height);
+
+
+	private:
+
 		/// @brief DXCore
 		std::unique_ptr<DXCore> core_ = nullptr;
 
@@ -110,5 +118,12 @@ namespace Detail
 
 		/// @brief 初回フレームかどうか
 		bool isFirstFrame_ = true;
+
+
+	private:
+
+		/// @brief ウィンドウアプリケーション
+		WinApp* winApp_ = nullptr;
+
 	};
 }

@@ -84,6 +84,9 @@ void Engine::NewFrame()
 {
 	// 新フレーム処理
 	renderContext_->NewFrame();
+
+	// ウィンドウアプリケーションの更新
+	winApp_->Update();
 }
 
 /// @brief 描画前処理
