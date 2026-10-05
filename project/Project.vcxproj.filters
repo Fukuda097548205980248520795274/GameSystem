@@ -143,11 +143,41 @@
     <Filter Include="Source\Engine\Func\TextureFunc">
       <UniqueIdentifier>{0b0b20f6-2563-4250-84e3-1154594669cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\Store\AudioStore">
-      <UniqueIdentifier>{4b685ee3-7b77-4e55-96e8-0c8e7528ef48}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\Func\RandomFunc">
       <UniqueIdentifier>{acd4d1ac-d122-4333-b7a7-f6431382c7ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Audio">
+      <UniqueIdentifier>{cb1ee9fd-86c3-4a20-888d-cb2e4e955ed8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Audio\AudioStore">
+      <UniqueIdentifier>{4b685ee3-7b77-4e55-96e8-0c8e7528ef48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Render">
+      <UniqueIdentifier>{ebec58ce-ae80-4ea1-a373-b769c7755e69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Render\Render3DSystem">
+      <UniqueIdentifier>{558f52e3-1dc7-4489-ad55-9e8dbcec9afb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool">
+      <UniqueIdentifier>{2ec14736-53e7-42d8-9413-de6f449827af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\PSO">
+      <UniqueIdentifier>{65b3b28c-d6c1-4584-93be-acfd1c4bc1dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\PSO\PSODescription">
+      <UniqueIdentifier>{75b41520-9bd1-4858-8427-e12681b576c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\PSO\DynamicPSOBuilder">
+      <UniqueIdentifier>{f58adbe1-ce38-4752-b0e4-e1712bc456f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\PSO\PSOEditor">
+      <UniqueIdentifier>{3f802197-5fc7-477c-9976-03ed12bd090f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Shader">
+      <UniqueIdentifier>{df470403-a9ec-4a9b-944d-fa30b137c14b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Shader\ShaderEditor">
+      <UniqueIdentifier>{51ad5843-9868-4121-ba86-ef11dd6ba58c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -250,8 +280,20 @@
     <ClCompile Include="Source\Engine\Func\TextureFunc\TextureFunc.cpp">
       <Filter>Source\Engine\Func\TextureFunc</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Store\AudioStore\AudioStore.cpp">
-      <Filter>Source\Engine\Store\AudioStore</Filter>
+    <ClCompile Include="Source\Engine\Audio\AudioStore\AudioStore.cpp">
+      <Filter>Source\Engine\Audio\AudioStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.cpp">
+      <Filter>Source\Engine\Render\Render3DSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp">
+      <Filter>Source\Tool\PSO\DynamicPSOBuilder</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\PSO\PSOEditor\PSOEditor.cpp">
+      <Filter>Source\Tool\PSO\PSOEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.cpp">
+      <Filter>Source\Tool\Shader\ShaderEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -363,11 +405,26 @@
     <ClInclude Include="Source\Engine\Func\TextureFunc\TextureFunc.h">
       <Filter>Source\Engine\Func\TextureFunc</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\Store\AudioStore\AudioStore.h">
-      <Filter>Source\Engine\Store\AudioStore</Filter>
+    <ClInclude Include="Source\Engine\Audio\AudioStore\AudioStore.h">
+      <Filter>Source\Engine\Audio\AudioStore</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\Func\RandomFunc\RandomFunc.h">
       <Filter>Source\Engine\Func\RandomFunc</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.h">
+      <Filter>Source\Engine\Render\Render3DSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\PSO\PSODescription\PSODescription.h">
+      <Filter>Source\Tool\PSO\PSODescription</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.h">
+      <Filter>Source\Tool\PSO\DynamicPSOBuilder</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\PSO\PSOEditor\PSOEditor.h">
+      <Filter>Source\Tool\PSO\PSOEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.h">
+      <Filter>Source\Tool\Shader\ShaderEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

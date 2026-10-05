@@ -1,6 +1,8 @@
 #pragma once
 #include <functional>
 #include "Vector/Vector3/Vector3.h"
+#include "Vector/Vector2/Vector2.h"
+#include "Vector/Vector4/Vector4.h"
 
 /// @brief トランスフォームコンポーネント
 struct TransformComponent
@@ -81,4 +83,19 @@ struct TextureComponent
 
 	/// @brief テクスチャのハンドル（またはID/ポインタ）
 	uint32_t handle;
+};
+
+/// @brief UVトランスフォームコンポーネント
+struct UVTransformComponent
+{
+	UVTransformComponent() : offset(0.0f, 0.0f), scale(1.0f, 1.0f), radian(0.0f) {}
+
+	/// @brief UVオフセット
+	Vector2 offset;
+
+	/// @brief UVスケール
+	Vector2 scale;
+
+	/// @brief 回転角度（ラジアン）
+	float radian;
 };

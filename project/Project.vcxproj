@@ -80,7 +80,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,7 +110,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,7 +141,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -193,6 +193,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\DXCommand\DXCommand.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -237,6 +238,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.cpp" />
     <ClCompile Include="Source\Engine\Resource\DepthResource\DepthResource.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -249,7 +251,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Store\AudioStore\AudioStore.cpp" />
+    <ClCompile Include="Source\Engine\Audio\AudioStore\AudioStore.cpp" />
     <ClCompile Include="Source\Engine\Store\TextureStore\TextureStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -283,6 +285,8 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Tool\PSO\PSOEditor\PSOEditor.cpp" />
+    <ClCompile Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -305,6 +309,8 @@
     <ClInclude Include="Source\Engine\Func\ResourceFunc\ResourceFunc.h" />
     <ClInclude Include="Source\Engine\Func\TextureFunc\TextureFunc.h" />
     <ClInclude Include="Source\Engine\Logger\Logger.h" />
+    <ClInclude Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.h" />
+    <ClInclude Include="Source\Tool\PSO\PSODescription\PSODescription.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXCommand\DXCommand.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXCore\DXCore.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXFence\DXFence.h" />
@@ -316,12 +322,13 @@
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.h" />
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.h" />
     <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\ConstantBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.h" />
     <ClInclude Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.h" />
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\StructuredBufferResource.h" />
     <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.h" />
-    <ClInclude Include="Source\Engine\Store\AudioStore\AudioStore.h" />
+    <ClInclude Include="Source\Engine\Audio\AudioStore\AudioStore.h" />
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureStore.h" />
     <ClInclude Include="Source\Engine\WinApp\WinApp.h" />
     <ClInclude Include="Source\Game\Game.h" />
@@ -331,6 +338,8 @@
     <ClInclude Include="Source\Math\Vector\Vector2\Vector2.h" />
     <ClInclude Include="Source\Math\Vector\Vector3\Vector3.h" />
     <ClInclude Include="Source\Math\Vector\Vector4\Vector4.h" />
+    <ClInclude Include="Source\Tool\PSO\PSOEditor\PSOEditor.h" />
+    <ClInclude Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\Fullscreen\Fullscreen.VS.hlsl">

@@ -8,6 +8,9 @@
 #include "MultiPass/MultiPass.h"
 #include "Store/TextureStore/TextureStore.h"
 #include "ImGuiRender/ImGuiRender.h"
+
+#include "PSO/PSOEditor/PSOEditor.h"
+
 #include <memory>
 
 namespace Detail
@@ -122,5 +125,11 @@ namespace Detail
 		/// @brief ウィンドウアプリケーション
 		WinApp* winApp_ = nullptr;
 
+
+
+	private:
+
+		/// @brief PSOエディタ
+		std::unique_ptr<Detail::PSOEditor> psoEditor_;
 	};
 }
