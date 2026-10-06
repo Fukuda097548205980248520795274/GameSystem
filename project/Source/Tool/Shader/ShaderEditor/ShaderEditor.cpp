@@ -81,16 +81,16 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 	ImGui::Begin("シェーダエディタ");
 
-	// --- ファイル選択プルダウン (Combo) ---
+	// ファイル選択プルダウン
 	ImGui::Text("File:");
 	ImGui::SameLine();
 	ImGui::SetNextItemWidth(-140.0f); // ボタン用のエリアを考慮して幅調整
 
 	std::string previewName = (selectedFileIndex_ >= 0 && selectedFileIndex_ < static_cast<int>(fileListUtf8_.size()))
 		? fileListUtf8_[selectedFileIndex_]
-		: "Select Shader File...";
+		: "選択しているファイル";
 
-	if (ImGui::BeginCombo("##ShaderPathCombo", previewName.c_str()))
+	if (ImGui::BeginCombo("##シェーダ", previewName.c_str()))
 	{
 		for (int n = 0; n < static_cast<int>(fileListUtf8_.size()); n++)
 		{
@@ -111,8 +111,8 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 	ImGui::SameLine();
 
-	// リスト再読み込みボタン（エクスプローラー等で新しくファイルを追加した場合用）
-	if (ImGui::Button("Refresh"))
+	// リスト再読み込みボタン
+	if (ImGui::Button("シェーダ再読み込み"))
 	{
 		RefreshFileList();
 	}
@@ -121,17 +121,17 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 	if (isDirty_)
 	{
-		ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "[ Unsaved Changes ]");
+		ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "[ 未保存の変更 ]");
 		ImGui::SameLine();
 	}
 
 	// 保存ボタンとショートカット(Ctrl+S)
-	if (ImGui::Button("Save & Test Compile") || (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)))
+	if (ImGui::Button("保存 & コンパイル") || (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)))
 	{
 		if (SaveFile())
 		{
 			auto engine = Engine::GetInstance();
-			if (engine) engine->Log(LogLevel::Info, "Shader Saved: " + currentFilePathUtf8_);
+			if (engine) engine->Log(LogLevel::Info, "シェーダファイルを保存しました : " + currentFilePathUtf8_);
 
 			// ファイル名に ".VS." が含まれていれば頂点シェーダー、そうでなければピクセルシェーダーとしてコンパイル
 			std::wstring profile = (currentFilePath_.find(L".VS.") != std::wstring::npos) ? L"vs_6_0" : L"ps_6_0";
@@ -142,18 +142,18 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 			// コンパイル結果のログを表示
 			if (result.success)
 			{
-				compileLog_ = "File Saved and Compiled Successfully.";
+				compileLog_ = "コンパイル成功";
 				isCompileError_ = false;
 			}
 			else
 			{
-				compileLog_ = "Compile Error:\n" + result.errorMessage;
+				compileLog_ = "コンパイルエラー : \n" + result.errorMessage;
 				isCompileError_ = true;
 			}
 		}
 		else
 		{
-			compileLog_ = "Error: Failed to save file.";
+			compileLog_ = "エラー : ファイルの保存に失敗しました";
 			isCompileError_ = true;
 		}
 	}
@@ -174,14 +174,14 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 	}
 
 	// テキストの描画
-	if (ImGui::InputTextMultiline("##ShaderCode", textBuffer_.data(), textBuffer_.size(), editorSize, flags))
+	if (ImGui::InputTextMultiline("##シェーダコード", textBuffer_.data(), textBuffer_.size(), editorSize, flags))
 	{
 		isDirty_ = true;
 	}
 
 	// 下部：コンパイル出力 / エラー表示ログ
 	ImGui::Separator();
-	ImGui::Text("Compile Output:");
+	ImGui::Text("コンパイル結果 :");
 
 	// コンパイル結果のログを色分けして表示
 	if (isCompileError_)

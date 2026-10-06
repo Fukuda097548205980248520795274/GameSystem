@@ -48,28 +48,48 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 	ImGui::Begin("PSO動的エディタ");
 	auto engine = Engine::GetInstance();
 
-	// PSOデータファイルのリスト更新ボタン
-	if (ImGui::Button("PSOファイルリスト更新"))
-	{
-		RefreshPsoFileList();
-	}
-	ImGui::SameLine();
-
 	// PSOデータファイルのプルダウン描画
 	std::string psoFilePreview = (selectedPsoFileIndex_ >= 0 && selectedPsoFileIndex_ < static_cast<int>(psoFileList_.size()))
 		? psoFileList_[selectedPsoFileIndex_]
 		: "ファイルを選択してください...";
 
 	ImGui::SetNextItemWidth(250.0f);
-	if (ImGui::BeginCombo("PSOデータファイル", psoFilePreview.c_str()))
+	bool isComboOpen = ImGui::BeginCombo("PSOデータファイル", psoFilePreview.c_str());
+
+	if (isComboOpen)
 	{
+		// 開いた最初の1フレーム（瞬間）のみファイルリストをリフレッシュ
+		if (!wasComboOpen_)
+		{
+			RefreshPsoFileList();
+
+			// 現在選択・編集中のファイル名とリスト内のインデックスを再同期
+			selectedPsoFileIndex_ = -1;
+			for (int i = 0; i < static_cast<int>(psoFileList_.size()); ++i)
+			{
+				if (std::filesystem::path(psoFileList_[i]).stem().string() == saveFileNameBuffer_)
+				{
+					selectedPsoFileIndex_ = i;
+					break;
+				}
+			}
+		}
+
 		for (int i = 0; i < static_cast<int>(psoFileList_.size()); ++i)
 		{
 			bool isSelected = (selectedPsoFileIndex_ == i);
+
 			if (ImGui::Selectable(psoFileList_[i].c_str(), isSelected))
 			{
 				selectedPsoFileIndex_ = i;
+
+				// 選択されたファイル名を保存用バッファにコピー
+				saveFileNameBuffer_ = std::filesystem::path(psoFileList_[i]).stem().string();
+
+				// プルダウンで選択されたら自動でファイルを読み込む
+				LoadFromFile(saveFileNameBuffer_.c_str());
 			}
+
 			if (isSelected)
 			{
 				ImGui::SetItemDefaultFocus();
@@ -78,34 +98,43 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		ImGui::EndCombo();
 	}
 
+	// 現在の開閉状態を保持（次のフレームで判定に使用）
+	wasComboOpen_ = isComboOpen;
+
 	ImGui::SameLine();
 
-	// ファイルが選択されているかチェック
-	bool isFileSelected = (selectedPsoFileIndex_ >= 0 && selectedPsoFileIndex_ < static_cast<int>(psoFileList_.size()));
 
-	// 選択中のみ保存ボタンを有効化
-	if (!isFileSelected) ImGui::BeginDisabled();
+
+	// 保存ファイル名の入力欄を追加
+	char fileBuf[256];
+	strcpy_s(fileBuf, saveFileNameBuffer_.c_str());
+	ImGui::SetNextItemWidth(150.0f);
+	if (ImGui::InputText("保存ファイル名", fileBuf, sizeof(fileBuf)))
+	{
+		saveFileNameBuffer_ = fileBuf;
+	}
+	ImGui::SameLine();
+
+	// 保存ボタンの有効化条件をチェック
+	bool canSave = (saveFileNameBuffer_.size() > 0);
+	if (!canSave) ImGui::BeginDisabled();
 	if (ImGui::Button("保存"))
 	{
-		if (isFileSelected)
+		// 入力されたファイル名で保存し、リストを更新する
+		SaveToFile(saveFileNameBuffer_.c_str());
+		RefreshPsoFileList();
+
+		// 保存したファイルをリストから検索し、選択状態（プルダウン）を更新
+		for (int i = 0; i < static_cast<int>(psoFileList_.size()); ++i)
 		{
-			SaveToFile(psoFileList_[selectedPsoFileIndex_]);
+			if (std::filesystem::path(psoFileList_[i]).stem().string() == saveFileNameBuffer_)
+			{
+				selectedPsoFileIndex_ = i;
+				break;
+			}
 		}
 	}
-	if (!isFileSelected) ImGui::EndDisabled();
-
-	ImGui::SameLine();
-
-	// 選択中のみ読み込みボタンを有効化
-	if (!isFileSelected) ImGui::BeginDisabled();
-	if (ImGui::Button("読み込み"))
-	{
-		if (isFileSelected)
-		{
-			LoadFromFile(psoFileList_[selectedPsoFileIndex_]);
-		}
-	}
-	if (!isFileSelected) ImGui::EndDisabled();
+	if (!canSave) ImGui::EndDisabled();
 
 	ImGui::SameLine();
 
@@ -115,6 +144,13 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 	{
 		PSOItem newItem;
 		newItem.name = "PSO_" + std::to_string(psoItems_.size());
+
+		// 保存ファイル名が空（ファイル未選択状態）の場合のみ、デフォルトの保存名としてセット
+		if (saveFileNameBuffer_.empty())
+		{
+			saveFileNameBuffer_ = newItem.name;
+		}
+
 		newItem.isDirty = false; // 新規作成時は自動構築しない
 		psoItems_.push_back(newItem);
 		selectedIndex_ = static_cast<int>(psoItems_.size()) - 1;
@@ -163,7 +199,8 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		// 識別名の編集
 		char nameBuf[256];
 		strcpy_s(nameBuf, currentItem.name.c_str());
-		if (ImGui::InputText("PSO 名", nameBuf, sizeof(nameBuf))) {
+		if (ImGui::InputText("PSO 名", nameBuf, sizeof(nameBuf)))
+		{
 			currentItem.name = nameBuf;
 		}
 
@@ -186,35 +223,44 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		bool psExists = !currentDesc.psPath.empty() && std::filesystem::exists(currentDesc.psPath);
 		bool csExists = !currentDesc.csPath.empty() && std::filesystem::exists(currentDesc.csPath);
 
-		// リスト手動更新ボタン
-		if (ImGui::Button("シェーダーリスト更新")) {
-			RefreshShaderFileList();
-		}
-
-		// コンボボックスを描画するヘルパーラムダ
-		auto DrawShaderCombo = [&](const char* label, std::wstring& currentPathW) {
-			std::string currentPathUtf8 = ConvertString(currentPathW);
-			std::string previewName = currentPathUtf8.empty() ? "選択してください..." : currentPathUtf8;
-			bool changed = false;
-
-			if (ImGui::BeginCombo(label, previewName.c_str()))
+		// シェーダファイルのコンボボックス描画用ラムダ関数
+		auto DrawShaderCombo = [&](const char* label, std::wstring& currentPathW, bool& wasOpenFlag)
 			{
-				for (size_t n = 0; n < shaderFileListUtf8_.size(); n++)
+				std::string currentPathUtf8 = ConvertString(currentPathW);
+				std::string previewName = currentPathUtf8.empty() ? "選択してください..." : currentPathUtf8;
+				bool changed = false;
+
+				bool isComboOpen = ImGui::BeginCombo(label, previewName.c_str());
+				if (isComboOpen)
 				{
-					bool isSelected = (currentPathW == shaderFileList_[n]);
-					if (ImGui::Selectable(shaderFileListUtf8_[n].c_str(), isSelected))
+					// 開いた最初の1フレーム（瞬間）のみファイルリストをリフレッシュ
+					if (!wasOpenFlag)
 					{
-						currentPathW = shaderFileList_[n];
-						changed = true;
+						RefreshShaderFileList();
 					}
-					if (isSelected)
+
+					for (size_t n = 0; n < shaderFileListUtf8_.size(); n++)
 					{
-						ImGui::SetItemDefaultFocus();
+						bool isSelected = (currentPathW == shaderFileList_[n]);
+
+						if (ImGui::Selectable(shaderFileListUtf8_[n].c_str(), isSelected))
+						{
+							currentPathW = shaderFileList_[n];
+							changed = true;
+						}
+
+						if (isSelected)
+						{
+							ImGui::SetItemDefaultFocus();
+						}
 					}
+					ImGui::EndCombo();
 				}
-				ImGui::EndCombo();
-			}
-			return changed;
+
+				// 現在の開閉状態を保持（次のフレームで判定に使用）
+				wasOpenFlag = isComboOpen;
+
+				return changed;
 			};
 
 
@@ -224,7 +270,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			if (ImGui::CollapsingHeader("グラフィックス シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				// 頂点シェーダ
-				if (DrawShaderCombo("頂点シェーダ パス", currentDesc.vsPath))
+				if (DrawShaderCombo("頂点シェーダ パス", currentDesc.vsPath, wasVsComboOpen_))
 				{
 					currentItem.isDirty = true;
 				}
@@ -236,7 +282,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				}
 
 				// ピクセルシェーダ
-				if (DrawShaderCombo("ピクセルシェーダ パス", currentDesc.psPath))
+				if (DrawShaderCombo("ピクセルシェーダ パス", currentDesc.psPath, wasPsComboOpen_))
 				{
 					currentItem.isDirty = true;
 				}
@@ -253,7 +299,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			// Compute 専用のUI
 			if (ImGui::CollapsingHeader("コンピュート シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				if (DrawShaderCombo("コンピュートシェーダ パス", currentDesc.csPath))
+				if (DrawShaderCombo("コンピュートシェーダ パス", currentDesc.csPath, wasCsComboOpen_))
 				{
 					currentItem.isDirty = true;
 				}
@@ -371,7 +417,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		}
 
 		// サンプラーの設定 (Graphics / Compute 共通)
-		if (ImGui::CollapsingHeader("Static Samplers", ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader("サンプラー", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			// サンプラーの追加ボタン
 			if (ImGui::Button("サンプラー 追加"))
@@ -605,16 +651,15 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					currentItem.isDirty = true;
 				}
 
-				ImGui::Separator();
 
-				// 詳細設定
-				auto& cb = currentDesc.customBlend;
-				bool changed = false;
-
-				if (ImGui::Checkbox("ブレンド有効", &cb.blendEnable)) changed = true;
-
-				if (cb.blendEnable)
+				if (currentDesc.blendMode == EditorBlendMode::Custom)
 				{
+					// 詳細設定
+					auto& cb = currentDesc.customBlend;
+
+					// ブレンド有効のチェックボックス
+					ImGui::Checkbox("ブレンド 有効", &cb.blendEnable);
+
 					// D3D12_BLEND の定義リスト
 					const char* blendOptionNames[] = {
 						"ZERO", "ONE", "SRC_COLOR", "INV_SRC_COLOR", "SRC_ALPHA",
@@ -666,27 +711,20 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					// RGB 設定
 					if (ImGui::TreeNode("カラー (RGB) ブレンド"))
 					{
-						changed |= DrawBlendCombo("ソースブレンド RGB", cb.srcBlend);
-						changed |= DrawBlendCombo("デストブレンド RGB", cb.destBlend);
-						changed |= DrawOpCombo("ブレンド演算 RGB", cb.blendOp);
+						DrawBlendCombo("ソースブレンド RGB", cb.srcBlend);
+						DrawBlendCombo("デストブレンド RGB", cb.destBlend);
+						DrawOpCombo("ブレンド演算 RGB", cb.blendOp);
 						ImGui::TreePop();
 					}
 
 					// Alpha 設定
 					if (ImGui::TreeNode("Alpha ブレンド"))
 					{
-						changed |= DrawBlendCombo("ソースブレンド Alpha", cb.srcBlendAlpha);
-						changed |= DrawBlendCombo("デストブレンド Alpha", cb.destBlendAlpha);
-						changed |= DrawOpCombo("ブレンド演算 Alpha", cb.blendOpAlpha);
+						DrawBlendCombo("ソースブレンド Alpha", cb.srcBlendAlpha);
+						DrawBlendCombo("デストブレンド Alpha", cb.destBlendAlpha);
+						DrawOpCombo("ブレンド演算 Alpha", cb.blendOpAlpha);
 						ImGui::TreePop();
 					}
-				}
-
-				// 変更があった場合は Custom モードに切り替え
-				if (changed)
-				{
-					currentDesc.blendMode = EditorBlendMode::Custom;
-					currentItem.isDirty = true;
 				}
 			}
 		}
@@ -786,8 +824,10 @@ ID3D12RootSignature* Detail::PSOEditor::GetRootSignature(const std::string& name
 
 /// @brief PSO設定をJSONファイルに保存する
 /// @param filepath 
-void Detail::PSOEditor::SaveToFile(const std::string& filepath)
+void Detail::PSOEditor::SaveToFile(const std::string& filename)
 {
+	const std::string filePath = kDir + filename + ".json";
+
 	json jArray = json::array();
 	for (const auto& item : psoItems_)
 	{
@@ -802,7 +842,7 @@ void Detail::PSOEditor::SaveToFile(const std::string& filepath)
 		jArray.push_back(jItem);
 	}
 
-	std::ofstream file(filepath);
+	std::ofstream file(filePath);
 	if (file.is_open())
 	{
 		// インデント幅4で整形して出力
@@ -814,10 +854,12 @@ void Detail::PSOEditor::SaveToFile(const std::string& filepath)
 }
 
 /// @brief JSONファイルからPSO設定を読み込む
-/// @param filepath 
-void Detail::PSOEditor::LoadFromFile(const std::string& filepath)
+/// @param filename 
+void Detail::PSOEditor::LoadFromFile(const std::string& filename)
 {
-	std::ifstream file(filepath);
+	const std::string filePath = kDir + filename + ".json";
+
+	std::ifstream file(filePath);
 	if (file.is_open())
 	{
 		json jArray;
@@ -856,6 +898,29 @@ void Detail::PSOEditor::LoadFromFile(const std::string& filepath)
 		// ファイルを閉じる
 		file.close();
 	}
+}
+
+/// @brief 選択されているPSOファイルの名前を取得する
+/// @return 
+std::string Detail::PSOEditor::GetSelectedPsoFileName() const
+{
+	if (selectedPsoFileIndex_ >= 0 && selectedPsoFileIndex_ < static_cast<int>(psoFileList_.size()))
+	{
+		return std::filesystem::path(psoFileList_[selectedPsoFileIndex_]).filename().string();
+	}
+
+	return "";
+}
+
+/// @brief 選択されているPSOファイルのパスを取得する
+/// @return 
+std::string Detail::PSOEditor::GetSelectedPsoFilePath() const
+{
+	if (selectedPsoFileIndex_ >= 0 && selectedPsoFileIndex_ < static_cast<int>(psoFileList_.size()))
+	{
+		return psoFileList_[selectedPsoFileIndex_];
+	}
+	return "";
 }
 
 /// @brief PSOファイルリストを更新する

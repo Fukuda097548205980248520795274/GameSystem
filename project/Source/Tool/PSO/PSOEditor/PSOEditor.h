@@ -76,14 +76,22 @@ namespace Detail
 
 		/// @brief PSO設定をJSONファイルに保存する
 		/// @param filepath 
-		void SaveToFile(const std::string& filepath);
+		void SaveToFile(const std::string& filename);
 
 		/// @brief JSONファイルからPSO設定を読み込む
 		/// @param filepath 
-		void LoadFromFile(const std::string& filepath);
+		void LoadFromFile(const std::string& filename);
 
 
 	private:
+
+		/// @brief 選択されているPSOファイルの名前を取得する
+		/// @return 
+		std::string GetSelectedPsoFileName() const;
+
+		/// @brief 選択されているPSOファイルのパスを取得する
+		/// @return 
+		std::string GetSelectedPsoFilePath() const;
 
 		/// @brief PSOファイルリストを更新する
 		void RefreshPsoFileList();
@@ -116,6 +124,12 @@ namespace Detail
 		std::vector<std::string> psoFileList_;
 		int selectedPsoFileIndex_ = -1;
 
+		// 保存するファイル名のバッファ
+		std::string saveFileNameBuffer_ = "";
+
+		// コンボボックスの開閉状態を追跡するフラグ
+		bool wasComboOpen_ = false;
+
 
 	private:
 
@@ -125,5 +139,10 @@ namespace Detail
 		// シェーダーファイルリスト
 		std::vector<std::wstring> shaderFileList_;
 		std::vector<std::string> shaderFileListUtf8_;
+
+		// シェーダープルダウン前フレーム開閉フラグ
+		bool wasVsComboOpen_ = false;
+		bool wasPsComboOpen_ = false;
+		bool wasCsComboOpen_ = false;
 	};
 }
