@@ -48,6 +48,16 @@ namespace Detail
 		UINT8 renderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	};
 
+	/// @brief DescriptorTableの設定データ
+	struct CustomDescriptorRange
+	{
+		D3D12_DESCRIPTOR_RANGE_TYPE rangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+		uint32_t numDescriptors = 1;
+		uint32_t baseShaderRegister = 0;
+		uint32_t registerSpace = 0;
+		uint32_t offsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	};
+
 	// ルートパラメータの設定データ
 	struct CustomRootParameter
 	{
@@ -55,9 +65,8 @@ namespace Detail
 		uint32_t shaderRegister = 0; // b0, t0, u0 などの 0 の部分
 		D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL;
 
-		// DescriptorTableの場合の設定（簡略化のためレンジは1つとする）
-		D3D12_DESCRIPTOR_RANGE_TYPE rangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-		uint32_t numDescriptors = 1;
+		// DescriptorTableの場合の設定
+		std::vector<CustomDescriptorRange> descriptorRanges;
 	};
 
 	// 静的サンプラーの設定データ
@@ -89,15 +98,17 @@ namespace Detail
 		// PSOの種別
 		PSOType type = PSOType::Graphics;
 
-		// シェーダファイル情報
+		// 頂点シェーダ
 		std::wstring vsPath = L"./Assets/Shader/Render3D.VS.hlsl";
 		std::string  vsEntryPoint = "main";
 		std::wstring  vsTarget = L"vs_6_0";
 
+		// ピクセルシェーダ
 		std::wstring psPath = L"./Assets/Shader/Render3D.PS.hlsl";
 		std::string  psEntryPoint = "main";
 		std::wstring  psTarget = L"ps_6_0";
 
+		// コンピュートシェーダ
 		std::wstring csPath = L"./Assets/Shader/Compute.CS.hlsl";
 		std::string  csEntryPoint = "main";
 		std::wstring csTarget = L"cs_6_0";
@@ -129,6 +140,19 @@ namespace Detail
 		std::vector<CustomInputElement> inputLayouts;
 	};
 
+
+	/// @brief CustomDescriptorRangeをJSONに変換する
+	/// @param j 
+	/// @param range 
+	inline void ToJson(json& j, const CustomDescriptorRange& range)
+	{
+		j["rangeType"] = static_cast<int>(range.rangeType);
+		j["numDescriptors"] = range.numDescriptors;
+		j["baseShaderRegister"] = range.baseShaderRegister;
+		j["registerSpace"] = range.registerSpace;
+		j["offsetInDescriptorsFromTableStart"] = range.offsetInDescriptorsFromTableStart;
+	}
+
 	/// @brief CustomRootParameterをJSONに変換する
 	/// @param j 
 	/// @param param 
@@ -137,8 +161,14 @@ namespace Detail
 		j["type"] = static_cast<int>(param.type);
 		j["shaderRegister"] = param.shaderRegister;
 		j["visibility"] = static_cast<int>(param.visibility);
-		j["rangeType"] = static_cast<int>(param.rangeType);
-		j["numDescriptors"] = param.numDescriptors;
+		
+		j["descriptorRanges"] = json::array();
+		for (const auto& range : param.descriptorRanges)
+		{
+			json rangeJson;
+			ToJson(rangeJson, range);
+			j["descriptorRanges"].push_back(rangeJson);
+		}
 	}
 
 	/// @brief CustomStaticSamplerをJSONに変換する
@@ -243,6 +273,18 @@ namespace Detail
 		}
 	}
 
+	/// @brief JSONからCustomDescriptorRangeに変換する
+	/// @param j 
+	/// @param range 
+	inline void FromJson(const json& j, CustomDescriptorRange& range)
+	{
+		range.rangeType = static_cast<D3D12_DESCRIPTOR_RANGE_TYPE>(j.value("rangeType", static_cast<int>(range.rangeType)));
+		range.numDescriptors = j.value("numDescriptors", range.numDescriptors);
+		range.baseShaderRegister = j.value("baseShaderRegister", range.baseShaderRegister);
+		range.registerSpace = j.value("registerSpace", range.registerSpace);
+		range.offsetInDescriptorsFromTableStart = j.value("offsetInDescriptorsFromTableStart", range.offsetInDescriptorsFromTableStart);
+	}
+
 	/// @brief JSONからCustomRootParameterに変換する
 	/// @param j 
 	/// @param param 
@@ -251,8 +293,18 @@ namespace Detail
 		param.type = static_cast<CustomRootParamType>(j.value("type", static_cast<int>(param.type)));
 		param.shaderRegister = j.value("shaderRegister", param.shaderRegister);
 		param.visibility = static_cast<D3D12_SHADER_VISIBILITY>(j.value("visibility", static_cast<int>(param.visibility)));
-		param.rangeType = static_cast<D3D12_DESCRIPTOR_RANGE_TYPE>(j.value("rangeType", static_cast<int>(param.rangeType)));
-		param.numDescriptors = j.value("numDescriptors", param.numDescriptors);
+		
+		// DescriptorRangesの読み込み
+		if (j.contains("descriptorRanges") && j["descriptorRanges"].is_array())
+		{
+			param.descriptorRanges.clear();
+			for (const auto& item : j["descriptorRanges"])
+			{
+				CustomDescriptorRange range;
+				FromJson(item, range);
+				param.descriptorRanges.push_back(range);
+			}
+		}
 	}
 
 	/// @brief JSONからCustomStaticSamplerに変換する

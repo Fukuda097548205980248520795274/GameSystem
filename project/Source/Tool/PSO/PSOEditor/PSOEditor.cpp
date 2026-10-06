@@ -134,11 +134,14 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		// ルートパラメータの設定 (Graphics / Compute 共通)
 		if (ImGui::CollapsingHeader("Root Parameters", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			// (既存の Root Parameters のループ処理をそのまま配置)
-			if (ImGui::Button("Add Parameter")) {
+			// ルートパラメータの追加ボタン
+			if (ImGui::Button("Add Parameter")) 
+			{
 				currentDesc.rootParameters.push_back(CustomRootParameter{});
 				currentItem.isDirty = true;
 			}
+
+			// ルートパラメータのリストを表示
 			for (size_t i = 0; i < currentDesc.rootParameters.size(); ++i)
 			{
 				ImGui::PushID(static_cast<int>(i));
@@ -151,10 +154,75 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					currentItem.isDirty = true;
 				}
 
-				int reg = static_cast<int>(p.shaderRegister);
-				if (ImGui::InputInt("Register", &reg)) {
-					p.shaderRegister = static_cast<uint32_t>(std::max(0, reg));
+				// Descriptor Table 以外は単一のレジスタとして扱う
+				if (p.type != Detail::CustomRootParamType::DescriptorTable)
+				{
+					int reg = static_cast<int>(p.shaderRegister);
+					if (ImGui::InputInt("Register", &reg)) {
+						p.shaderRegister = static_cast<uint32_t>(std::max(0, reg));
+						currentItem.isDirty = true;
+					}
+				}
+				else
+				{
+					// DescriptorTableの場合、複数のレンジを追加できるUI
+					if (ImGui::Button("Add Descriptor Range"))
+					{
+						p.descriptorRanges.push_back(CustomDescriptorRange{});
+						currentItem.isDirty = true;
+					}
+
+					// Descriptor Range のリストを表示
+					for (size_t j = 0; j < p.descriptorRanges.size(); ++j)
+					{
+						ImGui::PushID(static_cast<int>(j) + 10000); // 階層のID衝突を回避
+						auto& range = p.descriptorRanges[j];
+
+						ImGui::Indent();
+
+						const char* rangeTypeItems[] = { "SRV", "UAV", "CBV", "SAMPLER" };
+						int currentRangeType = static_cast<int>(range.rangeType);
+						if (ImGui::Combo("Range Type", &currentRangeType, rangeTypeItems, _countof(rangeTypeItems))) 
+						{
+							range.rangeType = static_cast<D3D12_DESCRIPTOR_RANGE_TYPE>(currentRangeType);
+							currentItem.isDirty = true;
+						}
+
+						int numDesc = static_cast<int>(range.numDescriptors);
+						if (ImGui::InputInt("Num Descriptors", &numDesc)) 
+						{
+							range.numDescriptors = static_cast<uint32_t>(std::max(1, numDesc));
+							currentItem.isDirty = true;
+						}
+
+						int baseReg = static_cast<int>(range.baseShaderRegister);
+						if (ImGui::InputInt("Base Register", &baseReg))
+						{
+							range.baseShaderRegister = static_cast<uint32_t>(std::max(0, baseReg));
+							currentItem.isDirty = true;
+						}
+
+						if (ImGui::Button("Remove Range"))
+						{
+							p.descriptorRanges.erase(p.descriptorRanges.begin() + j);
+							currentItem.isDirty = true;
+							ImGui::Unindent();
+							ImGui::PopID();
+							break;
+						}
+
+						ImGui::Unindent();
+						ImGui::PopID();
+					}
+				}
+
+				// パラメータの削除ボタン
+				if (ImGui::Button("Remove Parameter")) 
+				{
+					currentDesc.rootParameters.erase(currentDesc.rootParameters.begin() + i);
 					currentItem.isDirty = true;
+					ImGui::PopID();
+					break;
 				}
 
 				ImGui::Separator();

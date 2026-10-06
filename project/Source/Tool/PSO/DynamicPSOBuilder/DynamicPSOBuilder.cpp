@@ -14,28 +14,35 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 	auto engine = Engine::GetInstance();
 
 
-	/* ====================================================
-	   1. ルートシグネチャの動的生成
-	==================================================== */
+	// ルートパラメータの構築
 	std::vector<D3D12_ROOT_PARAMETER> rootParams(desc.rootParameters.size());
-	std::vector<D3D12_DESCRIPTOR_RANGE> descriptorRanges(desc.rootParameters.size()); // メモリを確保しておく
+	
+	// DescriptorTableの範囲を保持するためのベクターを作成
+	std::vector<std::vector<D3D12_DESCRIPTOR_RANGE>> allDescriptorRanges(desc.rootParameters.size());
 
 	for (size_t i = 0; i < desc.rootParameters.size(); ++i)
 	{
 		const auto& p = desc.rootParameters[i];
 		rootParams[i].ShaderVisibility = p.visibility;
 
+		// DescriptorTableの場合の設定
 		if (p.type == CustomRootParamType::DescriptorTable)
 		{
-			descriptorRanges[i].RangeType = p.rangeType;
-			descriptorRanges[i].NumDescriptors = p.numDescriptors;
-			descriptorRanges[i].BaseShaderRegister = p.shaderRegister;
-			descriptorRanges[i].RegisterSpace = 0;
-			descriptorRanges[i].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+			auto& ranges = allDescriptorRanges[i];
+			ranges.resize(p.descriptorRanges.size());
+
+			for (size_t j = 0; j < p.descriptorRanges.size(); ++j)
+			{
+				ranges[j].RangeType = p.descriptorRanges[j].rangeType;
+				ranges[j].NumDescriptors = p.descriptorRanges[j].numDescriptors;
+				ranges[j].BaseShaderRegister = p.descriptorRanges[j].baseShaderRegister;
+				ranges[j].RegisterSpace = p.descriptorRanges[j].registerSpace;
+				ranges[j].OffsetInDescriptorsFromTableStart = p.descriptorRanges[j].offsetInDescriptorsFromTableStart;
+			}
 
 			rootParams[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-			rootParams[i].DescriptorTable.NumDescriptorRanges = 1;
-			rootParams[i].DescriptorTable.pDescriptorRanges = &descriptorRanges[i];
+			rootParams[i].DescriptorTable.NumDescriptorRanges = static_cast<UINT>(ranges.size());
+			rootParams[i].DescriptorTable.pDescriptorRanges = ranges.empty() ? nullptr : ranges.data();
 		}
 		else
 		{
