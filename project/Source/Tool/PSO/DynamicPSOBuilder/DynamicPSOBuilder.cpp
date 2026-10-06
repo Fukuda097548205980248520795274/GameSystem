@@ -77,6 +77,7 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 		samplers[i].ShaderVisibility = s.visibility;
 	}
 
+	// ルートシグネチャの構築
 	D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
 	rootSigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 	rootSigDesc.NumParameters = static_cast<UINT>(rootParams.size());
@@ -84,6 +85,7 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 	rootSigDesc.NumStaticSamplers = static_cast<UINT>(samplers.size());
 	rootSigDesc.pStaticSamplers = samplers.data();
 
+	// ルートシグネチャのシリアライズと生成
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob, errorBlob;
 	HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
 	if (FAILED(hr)) {
@@ -91,13 +93,14 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 		return false;
 	}
 
+	// ルートシグネチャの生成
 	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(outRootSignature));
 	if (FAILED(hr)) return false;
 
-
+	// PSOの生成
 	if (desc.type == PSOType::Compute)
 	{
-		// --- コンピュートシェーダのコンパイル ---
+		// コンピュートシェーダのコンパイル
 		auto csResult = compiler->CompileFile(desc.csPath, desc.csTarget.c_str(), ConvertString(desc.csEntryPoint).c_str());
 		if (!csResult.success)
 		{
@@ -105,18 +108,19 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 			return false;
 		}
 
-		// --- Compute PSO Desc の構築 ---
+		// コンピュートPSO記述子の構築
 		D3D12_COMPUTE_PIPELINE_STATE_DESC computePsoDesc{};
 		computePsoDesc.pRootSignature = *outRootSignature;
 		computePsoDesc.CS = { csResult.blob->GetBufferPointer(), csResult.blob->GetBufferSize() };
 		computePsoDesc.NodeMask = 0;
 
+		// PSOの生成
 		HRESULT hr = device->CreateComputePipelineState(&computePsoDesc, IID_PPV_ARGS(outPipelineState));
 		return SUCCEEDED(hr);
 	}
 	else
 	{
-		// 1. シェーダのコンパイル
+		// シェーダのコンパイル
 		auto vsResult = compiler->CompileFile(desc.vsPath, desc.vsTarget.c_str(), ConvertString(desc.vsEntryPoint).c_str());
 		auto psResult = compiler->CompileFile(desc.psPath, desc.psTarget.c_str(), ConvertString(desc.psEntryPoint).c_str());
 
@@ -134,13 +138,12 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 			return false;
 		}
 
-		// 2. インプットレイアウトの定義（エディタからの設定を反映）
+		// インプットレイアウトの定義（エディタからの設定を反映）
 		std::vector<D3D12_INPUT_ELEMENT_DESC> inputElements(desc.inputLayouts.size());
 		for (size_t i = 0; i < desc.inputLayouts.size(); ++i)
 		{
 			const auto& elem = desc.inputLayouts[i];
 
-			// elem.semanticName は builder 関数が終わるまで有効なので .c_str() で渡して問題ありません
 			inputElements[i].SemanticName = elem.semanticName.c_str();
 			inputElements[i].SemanticIndex = elem.semanticIndex;
 			inputElements[i].Format = elem.format;
@@ -150,7 +153,7 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 			inputElements[i].InstanceDataStepRate = elem.instanceDataStepRate;
 		}
 
-		// 3. パイプラインステート記述子の構築
+		// パイプラインステート記述子の構築
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
 		psoDesc.pRootSignature = *outRootSignature;
 		psoDesc.VS = { vsResult.blob->GetBufferPointer(), vsResult.blob->GetBufferSize() };
@@ -196,31 +199,42 @@ Detail::CustomBlendDesc Detail::DynamicPSOBuilder::GetPresetBlendDesc(EditorBlen
 	CustomBlendDesc cb{};
 	switch (blendMode)
 	{
+		// ノーマル合成
 	case EditorBlendMode::Normal:
 		cb.blendEnable = true;
 		cb.srcBlend = D3D12_BLEND_SRC_ALPHA; cb.destBlend = D3D12_BLEND_INV_SRC_ALPHA; cb.blendOp = D3D12_BLEND_OP_ADD;
 		cb.srcBlendAlpha = D3D12_BLEND_ONE; cb.destBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA; cb.blendOpAlpha = D3D12_BLEND_OP_ADD;
 		break;
+
+		// 加算合成
 	case EditorBlendMode::Add:
 		cb.blendEnable = true;
 		cb.srcBlend = D3D12_BLEND_SRC_ALPHA; cb.destBlend = D3D12_BLEND_ONE; cb.blendOp = D3D12_BLEND_OP_ADD;
 		cb.srcBlendAlpha = D3D12_BLEND_ONE; cb.destBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA; cb.blendOpAlpha = D3D12_BLEND_OP_ADD;
 		break;
+
+		// 減算合成
 	case EditorBlendMode::Subtract:
 		cb.blendEnable = true;
 		cb.srcBlend = D3D12_BLEND_SRC_ALPHA; cb.destBlend = D3D12_BLEND_ONE; cb.blendOp = D3D12_BLEND_OP_REV_SUBTRACT;
 		cb.srcBlendAlpha = D3D12_BLEND_ONE; cb.destBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA; cb.blendOpAlpha = D3D12_BLEND_OP_ADD;
 		break;
+
+		// 乗算合成
 	case EditorBlendMode::Multiply:
 		cb.blendEnable = true;
 		cb.srcBlend = D3D12_BLEND_ZERO; cb.destBlend = D3D12_BLEND_SRC_COLOR; cb.blendOp = D3D12_BLEND_OP_ADD;
 		cb.srcBlendAlpha = D3D12_BLEND_ONE; cb.destBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA; cb.blendOpAlpha = D3D12_BLEND_OP_ADD;
 		break;
+
+		// スクリーン合成
 	case EditorBlendMode::Screen:
 		cb.blendEnable = true;
 		cb.srcBlend = D3D12_BLEND_INV_DEST_COLOR; cb.destBlend = D3D12_BLEND_ONE; cb.blendOp = D3D12_BLEND_OP_ADD;
 		cb.srcBlendAlpha = D3D12_BLEND_ONE; cb.destBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA; cb.blendOpAlpha = D3D12_BLEND_OP_ADD;
 		break;
+
+		// 合成なし
 	case EditorBlendMode::None:
 	default:
 		cb.blendEnable = false;

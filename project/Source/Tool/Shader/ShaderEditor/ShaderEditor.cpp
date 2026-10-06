@@ -61,21 +61,25 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 	ImGui::Begin("Shader Source Editor");
 
-	// 1. ファイル選択・読み込みヘッダー
+	// ファイル選択・読み込みヘッダー
 	char pathBuf[512];
 	strcpy_s(pathBuf, currentFilePathUtf8_.c_str());
 
 	ImGui::Text("File:");
 	ImGui::SameLine();
 	ImGui::SetNextItemWidth(-120.0f);
-	if (ImGui::InputText("##ShaderPath", pathBuf, sizeof(pathBuf))) {
+	if (ImGui::InputText("##ShaderPath", pathBuf, sizeof(pathBuf))) 
+	{
 		currentFilePathUtf8_ = pathBuf;
 		currentFilePath_ = ConvertString(currentFilePathUtf8_);
 	}
 	ImGui::SameLine();
 
-	if (ImGui::Button("Open")) {
-		if (!OpenFile(currentFilePath_)) {
+	// ファイルを開くボタン
+	if (ImGui::Button("Open")) 
+	{
+		if (!OpenFile(currentFilePath_))
+		{
 			compileLog_ = "Error: Failed to open file.";
 			isCompileError_ = true;
 		}
@@ -83,12 +87,13 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 	ImGui::Separator();
 
-	// 2. コントロールボタン（Save & Compile）
-	if (isDirty_) {
+	if (isDirty_) 
+	{
 		ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "[ Unsaved Changes ]");
 		ImGui::SameLine();
 	}
 
+	// 保存ボタンとショートカット(Ctrl+S)
 	if (ImGui::Button("Save & Test Compile") || (ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S)))
 	{
 		if (SaveFile())
@@ -102,6 +107,7 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 			ShaderCompileResult result = compiler->CompileSource(source, currentFilePath_, profile.c_str());
 
+			// コンパイル結果のログを表示
 			if (result.success)
 			{
 				compileLog_ = "File Saved and Compiled Successfully.";
@@ -120,7 +126,7 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 		}
 	}
 
-	// 3. テキストエディタ領域
+	// テキストエディタ領域
 	ImGui::Separator();
 
 	// エディタ領域の高さをコンパイルログ領域用に少し下を開けて計算
@@ -129,22 +135,29 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 	ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
 
-	if (textBuffer_.empty()) {
-		textBuffer_.assign(1024 * 1024, 0); // 初期バッファ確保
+	// テキストバッファが空の場合、初期サイズを確保
+	if (textBuffer_.empty()) 
+	{
+		textBuffer_.assign(1024 * 1024, 0); 
 	}
 
+	// テキストの描画
 	if (ImGui::InputTextMultiline("##ShaderCode", textBuffer_.data(), textBuffer_.size(), editorSize, flags))
 	{
 		isDirty_ = true;
 	}
 
-	// 4. 下部：コンパイル出力 / エラー表示ログ
+	// 下部：コンパイル出力 / エラー表示ログ
 	ImGui::Separator();
 	ImGui::Text("Compile Output:");
 
-	if (isCompileError_) {
+	// コンパイル結果のログを色分けして表示
+	if (isCompileError_)
+	{
 		ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "%s", compileLog_.c_str());
-	} else {
+	} 
+	else 
+	{
 		ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "%s", compileLog_.c_str());
 	}
 

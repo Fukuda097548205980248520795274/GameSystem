@@ -12,7 +12,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 	ImGui::Begin("PSO Dynamic Editor");
 	auto engine = Engine::GetInstance();
 
-	// 1. PSOの追加ボタンとAuto Rebuildトグル
+	// PSOの追加ボタンとAuto Rebuildトグル
 	if (ImGui::Button("Create New PSO"))
 	{
 		PSOItem newItem;
@@ -31,27 +31,32 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 	ImGui::Columns(2, "PSOEditorColumns", true);
 	ImGui::SetColumnWidth(0, 160.0f);
 
-	// --- 左カラム：PSOリスト ---
+	// 左カラム：PSOリスト
 	for (int i = 0; i < static_cast<int>(psoItems_.size()); ++i)
 	{
 		bool isSelected = (selectedIndex_ == i);
 		std::string label = psoItems_[i].name;
 
 		// 状態をラベルに付与
-		if (psoItems_[i].pso == nullptr) {
+		if (psoItems_[i].pso == nullptr)
+		{
 			label += " [Unbuilt]";
 		}
-		else if (psoItems_[i].isBuildFailed) {
+		else if (psoItems_[i].isBuildFailed)
+		{
 			label += " [Error]";
 		}
 
-		if (ImGui::Selectable(label.c_str(), isSelected)) {
+		// 選択可能なリストアイテムとして表示
+		if (ImGui::Selectable(label.c_str(), isSelected))
+		{
 			selectedIndex_ = i;
 		}
 	}
 
 	ImGui::NextColumn();
 
+	// 右カラム：選択されたPSOのプロパティ
 	if (selectedIndex_ >= 0 && selectedIndex_ < static_cast<int>(psoItems_.size()))
 	{
 		auto& currentItem = psoItems_[selectedIndex_];
@@ -83,7 +88,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		bool psExists = !currentDesc.psPath.empty() && std::filesystem::exists(currentDesc.psPath);
 		bool csExists = !currentDesc.csPath.empty() && std::filesystem::exists(currentDesc.csPath); // 追加
 
-		// --- Graphics 専用のUI ---
+		// Graphics 専用のUI
 		if (currentDesc.type == Detail::PSOType::Graphics)
 		{
 			if (ImGui::CollapsingHeader("Shader Files", ImGuiTreeNodeFlags_DefaultOpen))
@@ -92,11 +97,15 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				std::string vsPathStr = ConvertString(currentDesc.vsPath);
 				char vsPathBuf[256];
 				strcpy_s(vsPathBuf, vsPathStr.c_str());
-				if (ImGui::InputText("VS Path", vsPathBuf, sizeof(vsPathBuf))) {
+				if (ImGui::InputText("VS Path", vsPathBuf, sizeof(vsPathBuf))) 
+				{
 					currentDesc.vsPath = ConvertString(vsPathBuf);
 					currentItem.isDirty = true;
 				}
-				if (!vsExists) {
+
+				// ファイルが存在しない場合の警告表示
+				if (!vsExists)
+				{
 					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ Warning: Vertex shader file not found!");
 				}
 
@@ -104,28 +113,36 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				std::string psPathStr = ConvertString(currentDesc.psPath);
 				char psPathBuf[256];
 				strcpy_s(psPathBuf, psPathStr.c_str());
-				if (ImGui::InputText("PS Path", psPathBuf, sizeof(psPathBuf))) {
+				if (ImGui::InputText("PS Path", psPathBuf, sizeof(psPathBuf))) 
+				{
 					currentDesc.psPath = ConvertString(psPathBuf);
 					currentItem.isDirty = true;
 				}
-				if (!psExists) {
+
+				// ファイルが存在しない場合の警告表示
+				if (!psExists)
+				{
 					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ Warning: Pixel shader file not found!");
 				}
 			}
 		}
-		// --- Compute 専用のUI ---
 		else if (currentDesc.type == Detail::PSOType::Compute)
 		{
+			// Compute 専用のUI
 			if (ImGui::CollapsingHeader("Compute Shader File", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				std::string csPathStr = ConvertString(currentDesc.csPath);
 				char csPathBuf[256];
 				strcpy_s(csPathBuf, csPathStr.c_str());
-				if (ImGui::InputText("CS Path", csPathBuf, sizeof(csPathBuf))) {
+				if (ImGui::InputText("CS Path", csPathBuf, sizeof(csPathBuf)))
+				{
 					currentDesc.csPath = ConvertString(csPathBuf);
 					currentItem.isDirty = true;
 				}
-				if (!csExists) {
+
+				// ファイルが存在しない場合の警告表示
+				if (!csExists)
+				{
 					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ Warning: Compute shader file not found!");
 				}
 			}
@@ -147,6 +164,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				ImGui::PushID(static_cast<int>(i));
 				auto& p = currentDesc.rootParameters[i];
 
+				// パラメータの種類を選択するコンボボックス
 				const char* typeItems[] = { "CBV", "SRV", "UAV", "DescriptorTable" };
 				int currentType = static_cast<int>(p.type);
 				if (ImGui::Combo("Type", &currentType, typeItems, _countof(typeItems))) {
@@ -180,6 +198,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 
 						ImGui::Indent();
 
+						// レンジの種類を選択するコンボボックス
 						const char* rangeTypeItems[] = { "SRV", "UAV", "CBV", "SAMPLER" };
 						int currentRangeType = static_cast<int>(range.rangeType);
 						if (ImGui::Combo("Range Type", &currentRangeType, rangeTypeItems, _countof(rangeTypeItems))) 
@@ -188,6 +207,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 							currentItem.isDirty = true;
 						}
 
+						// ディスクリプタ数の編集
 						int numDesc = static_cast<int>(range.numDescriptors);
 						if (ImGui::InputInt("Num Descriptors", &numDesc)) 
 						{
@@ -195,6 +215,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 							currentItem.isDirty = true;
 						}
 
+						// レジスタ番号の編集
 						int baseReg = static_cast<int>(range.baseShaderRegister);
 						if (ImGui::InputInt("Base Register", &baseReg))
 						{
@@ -202,6 +223,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 							currentItem.isDirty = true;
 						}
 
+						// レジスタスペースの編集
 						if (ImGui::Button("Remove Range"))
 						{
 							p.descriptorRanges.erase(p.descriptorRanges.begin() + j);
@@ -322,13 +344,15 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 		}
 
-		// --- 以下のステートは Graphics の場合のみ表示 ---
+		// Graphics 専用のUI
 		if (currentDesc.type == Detail::PSOType::Graphics)
 		{
 			// インプットレイアウトの設定
 			if (ImGui::CollapsingHeader("Input Layout", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				if (ImGui::Button("Add Input Element")) {
+				// インプットレイアウトの追加ボタン
+				if (ImGui::Button("Add Input Element"))
+				{
 					currentDesc.inputLayouts.push_back(CustomInputElement{});
 					currentItem.isDirty = true;
 				}
@@ -352,7 +376,8 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					// Semantic Index の編集
 					int semIndex = static_cast<int>(elem.semanticIndex);
 					ImGui::SetNextItemWidth(80.0f);
-					if (ImGui::InputInt("Index", &semIndex)) {
+					if (ImGui::InputInt("Index", &semIndex)) 
+					{
 						elem.semanticIndex = static_cast<uint32_t>(std::max(0, semIndex));
 						currentItem.isDirty = true;
 					}
@@ -367,18 +392,21 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UINT
 					};
 					int currentFormatIdx = 0;
-					for (int f = 0; f < _countof(formatValues); ++f) {
+					for (int f = 0; f < _countof(formatValues); ++f)
+					{
 						if (elem.format == formatValues[f]) { currentFormatIdx = f; break; }
 					}
 					ImGui::SetNextItemWidth(180.0f);
-					if (ImGui::Combo("Format", &currentFormatIdx, formatNames, _countof(formatNames))) {
+					if (ImGui::Combo("Format", &currentFormatIdx, formatNames, _countof(formatNames)))
+					{
 						elem.format = formatValues[currentFormatIdx];
 						currentItem.isDirty = true;
 					}
 
 					// 削除ボタン
 					ImGui::SameLine();
-					if (ImGui::Button("Remove")) {
+					if (ImGui::Button("Remove"))
+					{
 						currentDesc.inputLayouts.erase(currentDesc.inputLayouts.begin() + i);
 						currentItem.isDirty = true;
 						ImGui::PopID();
@@ -395,14 +423,16 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			{
 				const char* cullItems[] = { "None", "Front", "Back" };
 				int currentCull = static_cast<int>(currentDesc.cullMode) - 1;
-				if (ImGui::Combo("Cull Mode", &currentCull, cullItems, _countof(cullItems))) {
+				if (ImGui::Combo("Cull Mode", &currentCull, cullItems, _countof(cullItems)))
+				{
 					currentDesc.cullMode = static_cast<D3D12_CULL_MODE>(currentCull + 1);
 					currentItem.isDirty = true;
 				}
 
 				const char* fillItems[] = { "Wireframe", "Solid" };
 				int currentFill = static_cast<int>(currentDesc.fillMode) - 2;
-				if (ImGui::Combo("Fill Mode", &currentFill, fillItems, _countof(fillItems))) {
+				if (ImGui::Combo("Fill Mode", &currentFill, fillItems, _countof(fillItems)))
+				{
 					currentDesc.fillMode = static_cast<D3D12_FILL_MODE>(currentFill + 2);
 					currentItem.isDirty = true;
 				}
@@ -443,8 +473,9 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				const char* blendItems[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen", "Custom" };
 				int currentBlend = static_cast<int>(currentDesc.blendMode);
 
-				// 1. プリセット選択
-				if (ImGui::Combo("Preset", &currentBlend, blendItems, _countof(blendItems))) {
+				// プリセット選択
+				if (ImGui::Combo("Preset", &currentBlend, blendItems, _countof(blendItems))) 
+				{
 					currentDesc.blendMode = static_cast<EditorBlendMode>(currentBlend);
 
 					// Custom 以外が選ばれた場合は、プリセットのデフォルト値を customBlend に同期
@@ -452,12 +483,13 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					{
 						currentDesc.customBlend = DynamicPSOBuilder::GetPresetBlendDesc(currentDesc.blendMode);
 					}
+
 					currentItem.isDirty = true;
 				}
 
 				ImGui::Separator();
 
-				// 2. 詳細設定 (Custom Settings)
+				// 詳細設定
 				auto& cb = currentDesc.customBlend;
 				bool changed = false;
 
@@ -481,28 +513,36 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						D3D12_BLEND_OP_ADD, D3D12_BLEND_OP_SUBTRACT, D3D12_BLEND_OP_REV_SUBTRACT, D3D12_BLEND_OP_MIN, D3D12_BLEND_OP_MAX
 					};
 
-					auto DrawBlendCombo = [&](const char* label, D3D12_BLEND& blendVal) {
-						int currentIdx = 0;
-						for (int i = 0; i < _countof(blendOptionValues); ++i) {
-							if (blendVal == blendOptionValues[i]) { currentIdx = i; break; }
-						}
-						if (ImGui::Combo(label, &currentIdx, blendOptionNames, _countof(blendOptionNames))) {
-							blendVal = blendOptionValues[currentIdx];
-							return true;
-						}
-						return false;
+					// D3D12_BLEND のコンボボックス描画
+					auto DrawBlendCombo = [&](const char* label, D3D12_BLEND& blendVal) 
+						{
+							int currentIdx = 0;
+							for (int i = 0; i < _countof(blendOptionValues); ++i) 
+							{
+								if (blendVal == blendOptionValues[i]) { currentIdx = i; break; }
+							}
+							if (ImGui::Combo(label, &currentIdx, blendOptionNames, _countof(blendOptionNames)))
+							{
+								blendVal = blendOptionValues[currentIdx];
+								return true;
+							}
+							return false;
 						};
 
-					auto DrawOpCombo = [&](const char* label, D3D12_BLEND_OP& opVal) {
-						int currentIdx = 0;
-						for (int i = 0; i < _countof(opValues); ++i) {
-							if (opVal == opValues[i]) { currentIdx = i; break; }
-						}
-						if (ImGui::Combo(label, &currentIdx, opNames, _countof(opNames))) {
-							opVal = opValues[currentIdx];
-							return true;
-						}
-						return false;
+					// D3D12_BLEND_OP のコンボボックス描画
+					auto DrawOpCombo = [&](const char* label, D3D12_BLEND_OP& opVal)
+						{
+							int currentIdx = 0;
+							for (int i = 0; i < _countof(opValues); ++i)
+							{
+								if (opVal == opValues[i]) { currentIdx = i; break; }
+							}
+							if (ImGui::Combo(label, &currentIdx, opNames, _countof(opNames))) 
+							{
+								opVal = opValues[currentIdx];
+								return true;
+							}
+							return false;
 						};
 
 					// RGB 設定
@@ -533,7 +573,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 		}
 
-		// --- 再構築処理 ---
+		// 再構築処理
 		bool manualBuildPressed = ImGui::Button("Build / Rebuild PSO");
 		bool shouldBuild = manualBuildPressed || (isAutoRebuild_ && currentItem.isDirty);
 
@@ -541,32 +581,43 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		{
 			// タイプに応じたファイル存在チェック
 			bool canBuild = false;
-			if (currentDesc.type == Detail::PSOType::Graphics) {
+
+			// Graphics PSO の場合は VS と PS が必要、Compute PSO の場合は CS が必要
+			if (currentDesc.type == Detail::PSOType::Graphics)
+			{
 				canBuild = vsExists && psExists;
-			} else {
+			} 
+			else 
+			{
 				canBuild = csExists;
 			}
 
+			// ビルド可能かどうかのチェック
 			if (!canBuild)
 			{
 				currentItem.isBuildFailed = true;
 				currentItem.statusMessage = "Build Failed: Missing shader file(s)";
 				if (engine) engine->Log(LogLevel::Error, "Cannot build PSO. Invalid shader path: " + currentItem.name);
-			} else
+			} 
+			else
 			{
 				DynamicPSOBuilder builder;
 				Microsoft::WRL::ComPtr<ID3D12PipelineState> newPSO;
 				Microsoft::WRL::ComPtr<ID3D12RootSignature> newRootSig;
 
+				// PSOのビルドを試みる
 				if (builder.Build(device, compiler, currentDesc, &newRootSig, &newPSO))
 				{
+					// ビルドに成功した場合の処理
 					currentItem.pso = newPSO;
 					currentItem.rootSig = newRootSig;
 					currentItem.isBuildFailed = false;
 					currentItem.statusMessage = "Successfully Built";
 					if (engine) engine->Log(LogLevel::Info, "PSO Rebuilt Successfully: " + currentItem.name);
-				} else
+				}
+				else
 				{
+					// ビルドに失敗した場合の処理
 					currentItem.isBuildFailed = true;
 					currentItem.statusMessage = "Compile Error";
 					if (engine) engine->Log(LogLevel::Error, "Failed to Rebuild PSO: " + currentItem.name);
