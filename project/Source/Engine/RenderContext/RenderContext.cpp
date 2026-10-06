@@ -70,8 +70,11 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 
 #endif
 
+	// ShaderEditorを作成
+	shaderEditor_ = std::make_unique<ShaderEditor>();
+
 	// PSOEditorを作成
-	psoEditor_ = std::make_unique<Detail::PSOEditor>();
+	psoEditor_ = std::make_unique<PSOEditor>();
 
 
 	// 初期化時のコマンドリストを閉じる
@@ -137,6 +140,9 @@ void Detail::RenderContext::NewFrame()
 
 	// Dockスペースを作成する
 	imguiRender_->CreateDockSpace();
+
+	// ShaderエディタのUIを描画する
+	shaderEditor_->DrawUI(shaderCompiler_.get());
 
 	// PSOエディタのUIを描画する
 	psoEditor_->DrawUI(core_->GetDevice(), shaderCompiler_.get());

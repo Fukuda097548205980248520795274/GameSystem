@@ -22,13 +22,18 @@ namespace Detail
 		/// @return 
 		bool Build(ID3D12Device* device, ShaderCompiler* compiler, const PSODescription& desc, ID3D12RootSignature** outRootSignature, ID3D12PipelineState** outPipelineState);
 
+		/// @brief ブレンドモードのプリセットを取得する
+		/// @param blendMode 
+		/// @return 
+		static CustomBlendDesc GetPresetBlendDesc(EditorBlendMode blendMode);
+
 
 	private:
 
 		/// @brief ブレンドモードを作成する
 		/// @param blendMode 
 		/// @return 
-		D3D12_BLEND_DESC CreateBlendMode(BlendMode blendMode);
+		D3D12_BLEND_DESC CreateBlendMode(EditorBlendMode blendMode);
 
 
 		/// @brief ブレンドモード作成 : 合成なし
@@ -54,5 +59,10 @@ namespace Detail
 		/// @brief ブレンドモード作成 : スクリーン合成
 		/// @return 
 		D3D12_BLEND_DESC CreateBlendScreen();
+
+		/// @brief ブレンドモード作成 : カスタム合成
+		/// @param desc 
+		/// @return 
+		D3D12_BLEND_DESC CreateBlendMode(const PSODescription& desc);
 	};
 }

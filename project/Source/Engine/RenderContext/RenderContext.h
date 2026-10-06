@@ -9,6 +9,7 @@
 #include "Store/TextureStore/TextureStore.h"
 #include "ImGuiRender/ImGuiRender.h"
 
+#include "Shader/ShaderEditor/ShaderEditor.h"
 #include "PSO/PSOEditor/PSOEditor.h"
 
 #include <memory>
@@ -131,5 +132,8 @@ namespace Detail
 
 		/// @brief PSOエディタ
 		std::unique_ptr<Detail::PSOEditor> psoEditor_;
+
+		/// @brief シェーダエディタ
+		std::unique_ptr<Detail::ShaderEditor> shaderEditor_;
 	};
 }
