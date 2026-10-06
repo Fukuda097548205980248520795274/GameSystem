@@ -112,6 +112,24 @@ Detail::RenderContext::~RenderContext()
 /// @brief シーン前処理
 void Detail::RenderContext::NewFrame()
 {
+	// GPUの処理が完了するまで待機する
+	fence_->WaitGPU(frameIndex_);
+
+	// 初回フレームでなければコマンドリストをリセットする
+	if (!isFirstFrame_)
+	{
+		auto commandAllocator = command_->GetCommandAllocator();
+		HRESULT hr = commandAllocator->Reset();
+		assert(SUCCEEDED(hr));
+
+		auto commandList = command_->GetCommandList();
+		hr = commandList->Reset(commandAllocator, nullptr);
+		assert(SUCCEEDED(hr));
+
+		// 中間リソースを解放する
+		textureStore_->ReleaseIntermediateResources();
+	}
+
 #ifdef DEVELOPMENT
 
 	// フレームの開始をImGuiに伝える
@@ -131,25 +149,6 @@ void Detail::RenderContext::PostDraw()
 {
 	// コマンドリストを取得
 	auto commandList = command_->GetCommandList();
-
-	// GPUの処理が完了するまで待機する
-	fence_->WaitGPU(frameIndex_);
-
-	// 初回フレームでなければコマンドリストをリセットする
-	if (!isFirstFrame_)
-	{
-		// コマンドアロケータを取得
-		auto commandAllocator = command_->GetCommandAllocator();
-
-		// 次のフレーム用のコマンドリストを準備
-		HRESULT hr = commandAllocator->Reset();
-		assert(SUCCEEDED(hr));
-		hr = commandList->Reset(commandAllocator, nullptr);
-		assert(SUCCEEDED(hr));
-
-		// 中間リソースを解放する
-		textureStore_->ReleaseIntermediateResources();
-	}
 
 	// リサイズ処理
 	if (winApp_->IsResized())
