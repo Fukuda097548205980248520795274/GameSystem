@@ -46,6 +46,9 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 		}
 		else
 		{
+			// DescriptorTable以外の設定
+
+			// ルートパラメータのタイプを設定
 			if (p.type == CustomRootParamType::CBV) rootParams[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 			if (p.type == CustomRootParamType::SRV) rootParams[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 			if (p.type == CustomRootParamType::UAV) rootParams[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
@@ -66,7 +69,7 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 		samplers[i].AddressW = s.addressW;
 		samplers[i].MipLODBias = 0.0f;
 		samplers[i].MaxAnisotropy = 1;
-		samplers[i].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		samplers[i].ComparisonFunc = s.comparisonFunc;
 		samplers[i].MinLOD = 0.0f;
 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
 		samplers[i].ShaderRegister = s.shaderRegister;

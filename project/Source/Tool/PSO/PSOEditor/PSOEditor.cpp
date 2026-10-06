@@ -230,6 +230,98 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 		}
 
+		// 静的サンプラーの設定 (Graphics / Compute 共通)
+		if (ImGui::CollapsingHeader("Static Samplers", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			// サンプラーの追加ボタン
+			if (ImGui::Button("Add Sampler"))
+			{
+				currentDesc.staticSamplers.push_back(CustomStaticSampler{});
+				currentItem.isDirty = true;
+			}
+
+			// サンプラーのリストを表示
+			for (size_t i = 0; i < currentDesc.staticSamplers.size(); ++i)
+			{
+				ImGui::PushID(static_cast<int>(i) + 20000); // 階層のID衝突を回避
+				auto& sampler = currentDesc.staticSamplers[i];
+
+				// レジスタ番号の編集
+				int reg = static_cast<int>(sampler.shaderRegister);
+				if (ImGui::InputInt("Register (s#)", &reg)) {
+					sampler.shaderRegister = static_cast<uint32_t>(std::max(0, reg));
+					currentItem.isDirty = true;
+				}
+
+				// フィルターの編集
+				const char* filterItems[] = { "MIN_MAG_MIP_POINT", "MIN_MAG_MIP_LINEAR", "ANISOTROPIC",
+					"COMPARISON_MIN_MAG_MIP_POINT", "COMPARISON_MIN_MAG_MIP_LINEAR", "COMPARISON_ANISOTROPIC" };
+				D3D12_FILTER filterValues[] = { D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_FILTER_ANISOTROPIC, 
+					D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT, D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR, D3D12_FILTER_COMPARISON_ANISOTROPIC };
+				int currentFilterIdx = 0;
+				for (int f = 0; f < _countof(filterValues); ++f) {
+					if (sampler.filter == filterValues[f]) { currentFilterIdx = f; break; }
+				}
+				if (ImGui::Combo("Filter", &currentFilterIdx, filterItems, _countof(filterItems))) {
+					sampler.filter = filterValues[currentFilterIdx];
+					currentItem.isDirty = true;
+				}
+
+				// 比較関数の編集
+				const char* cmpFuncItems[] = {
+					"NEVER", "LESS", "EQUAL", "LESS_EQUAL",
+					"GREATER", "NOT_EQUAL", "GREATER_EQUAL", "ALWAYS"
+				};
+				D3D12_COMPARISON_FUNC cmpFuncValues[] = {
+					D3D12_COMPARISON_FUNC_NEVER, D3D12_COMPARISON_FUNC_LESS, D3D12_COMPARISON_FUNC_EQUAL, D3D12_COMPARISON_FUNC_LESS_EQUAL,
+					D3D12_COMPARISON_FUNC_GREATER, D3D12_COMPARISON_FUNC_NOT_EQUAL, D3D12_COMPARISON_FUNC_GREATER_EQUAL, D3D12_COMPARISON_FUNC_ALWAYS
+				};
+				int currentCmpIdx = 0;
+				for (int c = 0; c < _countof(cmpFuncValues); ++c) {
+					if (sampler.comparisonFunc == cmpFuncValues[c]) { currentCmpIdx = c; break; }
+				}
+				if (ImGui::Combo("Comparison Func", &currentCmpIdx, cmpFuncItems, _countof(cmpFuncItems))) {
+					sampler.comparisonFunc = cmpFuncValues[currentCmpIdx];
+					currentItem.isDirty = true;
+				}
+
+				// アドレスモードの編集
+				const char* addressModeItems[] = { "WRAP", "MIRROR", "CLAMP", "BORDER", "MIRROR_ONCE" };
+				D3D12_TEXTURE_ADDRESS_MODE addressModeValues[] = {
+					D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_MIRROR,
+					D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+					D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE
+				};
+
+				auto DrawAddressCombo = [&](const char* label, D3D12_TEXTURE_ADDRESS_MODE& mode) {
+					int currentIdx = 0;
+					for (int m = 0; m < _countof(addressModeValues); ++m) {
+						if (mode == addressModeValues[m]) { currentIdx = m; break; }
+					}
+					if (ImGui::Combo(label, &currentIdx, addressModeItems, _countof(addressModeItems))) {
+						mode = addressModeValues[currentIdx];
+						currentItem.isDirty = true;
+					}
+					};
+
+				DrawAddressCombo("Address U", sampler.addressU);
+				DrawAddressCombo("Address V", sampler.addressV);
+				DrawAddressCombo("Address W", sampler.addressW);
+
+				// サンプラーの削除ボタン
+				if (ImGui::Button("Remove Sampler"))
+				{
+					currentDesc.staticSamplers.erase(currentDesc.staticSamplers.begin() + i);
+					currentItem.isDirty = true;
+					ImGui::PopID();
+					break;
+				}
+
+				ImGui::Separator();
+				ImGui::PopID();
+			}
+		}
+
 		// --- 以下のステートは Graphics の場合のみ表示 ---
 		if (currentDesc.type == Detail::PSOType::Graphics)
 		{
@@ -324,6 +416,23 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				bool depthWrite = (currentDesc.depthWriteMask == D3D12_DEPTH_WRITE_MASK_ALL);
 				if (ImGui::Checkbox("Depth Write", &depthWrite)) {
 					currentDesc.depthWriteMask = depthWrite ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+					currentItem.isDirty = true;
+				}
+
+				// Depth Func の編集
+				const char* depthFuncItems[] = { "LESS", "LESS_EQUAL", "EQUAL", "GREATER", "GREATER_EQUAL", "ALWAYS" };
+				D3D12_COMPARISON_FUNC depthFuncValues[] = {
+					D3D12_COMPARISON_FUNC_LESS, D3D12_COMPARISON_FUNC_LESS_EQUAL, D3D12_COMPARISON_FUNC_EQUAL,
+					D3D12_COMPARISON_FUNC_GREATER, D3D12_COMPARISON_FUNC_GREATER_EQUAL, D3D12_COMPARISON_FUNC_ALWAYS
+				};
+				int currentDepthFuncIdx = 0;
+				for (int d = 0; d < _countof(depthFuncValues); ++d) 
+				{
+					if (currentDesc.depthFunc == depthFuncValues[d]) { currentDepthFuncIdx = d; break; }
+				}
+				if (ImGui::Combo("Depth Func", &currentDepthFuncIdx, depthFuncItems, _countof(depthFuncItems)))
+				{
+					currentDesc.depthFunc = depthFuncValues[currentDepthFuncIdx];
 					currentItem.isDirty = true;
 				}
 			}

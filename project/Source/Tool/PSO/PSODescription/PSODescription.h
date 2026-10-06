@@ -77,6 +77,7 @@ namespace Detail
 		D3D12_TEXTURE_ADDRESS_MODE addressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		D3D12_TEXTURE_ADDRESS_MODE addressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		D3D12_TEXTURE_ADDRESS_MODE addressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		D3D12_COMPARISON_FUNC comparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
 		D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL;
 	};
 
@@ -181,6 +182,7 @@ namespace Detail
 		j["addressU"] = static_cast<int>(sampler.addressU);
 		j["addressV"] = static_cast<int>(sampler.addressV);
 		j["addressW"] = static_cast<int>(sampler.addressW);
+		j["comparisonFunc"] = static_cast<int>(sampler.comparisonFunc);
 		j["visibility"] = static_cast<int>(sampler.visibility);
 	}
 
@@ -317,6 +319,7 @@ namespace Detail
 		sampler.addressU = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(j.value("addressU", static_cast<int>(sampler.addressU)));
 		sampler.addressV = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(j.value("addressV", static_cast<int>(sampler.addressV)));
 		sampler.addressW = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(j.value("addressW", static_cast<int>(sampler.addressW)));
+		sampler.comparisonFunc = static_cast<D3D12_COMPARISON_FUNC>(j.value("comparisonFunc", static_cast<int>(sampler.comparisonFunc)));
 		sampler.visibility = static_cast<D3D12_SHADER_VISIBILITY>(j.value("visibility", static_cast<int>(sampler.visibility)));
 	}
 
