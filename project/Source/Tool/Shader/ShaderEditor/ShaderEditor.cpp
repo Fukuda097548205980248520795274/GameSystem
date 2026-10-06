@@ -2,15 +2,35 @@
 #include "Engine.h"
 #include "Func/ConvertString/ConvertString.h"
 
+/// @brief コンストラクタ
+Detail::ShaderEditor::ShaderEditor()
+{
+	// 初期化時にフォルダ内のファイルリストを更新
+	RefreshFileList();
+}
+
 /// @brief 指定されたファイルを開く
 /// @param filePath 
 /// @return 
 bool Detail::ShaderEditor::OpenFile(const std::wstring& filePath)
 {
-	if (!std::filesystem::exists(filePath)) return false;
+	if (!std::filesystem::exists(filePath))
+		return false;
 
 	currentFilePath_ = filePath;
 	currentFilePathUtf8_ = ConvertString(filePath);
+
+	// ファイルリストの中から現在のインデックスを同期
+	selectedFileIndex_ = -1;
+	for (size_t i = 0; i < fileList_.size(); ++i)
+	{
+		if (fileList_[i] == currentFilePath_)
+		{
+			selectedFileIndex_ = static_cast<int>(i);
+			break;
+		}
+	}
+
 	return LoadFileContent();
 }
 
@@ -59,35 +79,47 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 {
 #ifdef DEVELOPMENT
 
-	ImGui::Begin("Shader Source Editor");
+	ImGui::Begin("シェーダエディタ");
 
-	// ファイル選択・読み込みヘッダー
-	char pathBuf[512];
-	strcpy_s(pathBuf, currentFilePathUtf8_.c_str());
-
+	// --- ファイル選択プルダウン (Combo) ---
 	ImGui::Text("File:");
 	ImGui::SameLine();
-	ImGui::SetNextItemWidth(-120.0f);
-	if (ImGui::InputText("##ShaderPath", pathBuf, sizeof(pathBuf))) 
+	ImGui::SetNextItemWidth(-140.0f); // ボタン用のエリアを考慮して幅調整
+
+	std::string previewName = (selectedFileIndex_ >= 0 && selectedFileIndex_ < static_cast<int>(fileListUtf8_.size()))
+		? fileListUtf8_[selectedFileIndex_]
+		: "Select Shader File...";
+
+	if (ImGui::BeginCombo("##ShaderPathCombo", previewName.c_str()))
 	{
-		currentFilePathUtf8_ = pathBuf;
-		currentFilePath_ = ConvertString(currentFilePathUtf8_);
+		for (int n = 0; n < static_cast<int>(fileListUtf8_.size()); n++)
+		{
+			const bool isSelected = (selectedFileIndex_ == n);
+			if (ImGui::Selectable(fileListUtf8_[n].c_str(), isSelected))
+			{
+				selectedFileIndex_ = n;
+				OpenFile(fileList_[n]); // プルダウン選択時にそのままファイルを開く
+			}
+
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
 	}
+
 	ImGui::SameLine();
 
-	// ファイルを開くボタン
-	if (ImGui::Button("Open")) 
+	// リスト再読み込みボタン（エクスプローラー等で新しくファイルを追加した場合用）
+	if (ImGui::Button("Refresh"))
 	{
-		if (!OpenFile(currentFilePath_))
-		{
-			compileLog_ = "Error: Failed to open file.";
-			isCompileError_ = true;
-		}
+		RefreshFileList();
 	}
 
 	ImGui::Separator();
 
-	if (isDirty_) 
+	if (isDirty_)
 	{
 		ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "[ Unsaved Changes ]");
 		ImGui::SameLine();
@@ -112,13 +144,13 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 			{
 				compileLog_ = "File Saved and Compiled Successfully.";
 				isCompileError_ = false;
-			} 
+			}
 			else
 			{
 				compileLog_ = "Compile Error:\n" + result.errorMessage;
 				isCompileError_ = true;
 			}
-		} 
+		}
 		else
 		{
 			compileLog_ = "Error: Failed to save file.";
@@ -136,9 +168,9 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 	ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
 
 	// テキストバッファが空の場合、初期サイズを確保
-	if (textBuffer_.empty()) 
+	if (textBuffer_.empty())
 	{
-		textBuffer_.assign(1024 * 1024, 0); 
+		textBuffer_.assign(1024 * 1024, 0);
 	}
 
 	// テキストの描画
@@ -155,8 +187,8 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 	if (isCompileError_)
 	{
 		ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "%s", compileLog_.c_str());
-	} 
-	else 
+	}
+	else
 	{
 		ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "%s", compileLog_.c_str());
 	}
@@ -164,4 +196,34 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 	ImGui::End();
 
 #endif
+}
+
+/// @brief フォルダ内のファイルリストを更新する
+void Detail::ShaderEditor::RefreshFileList()
+{
+	fileList_.clear();
+	fileListUtf8_.clear();
+	selectedFileIndex_ = -1;
+
+	std::filesystem::path dirPath(kDir);
+	if (!std::filesystem::exists(dirPath)) return;
+
+	// 再帰的にディレクトリを探索してファイルパスを取得
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(dirPath))
+	{
+		if (entry.is_regular_file())
+		{
+			std::wstring pathW = entry.path().wstring();
+			std::string pathUtf8 = ConvertString(pathW);
+
+			fileList_.push_back(pathW);
+			fileListUtf8_.push_back(pathUtf8);
+
+			// 現在選択中のファイルと一致する場合はインデックスを保存
+			if (pathW == currentFilePath_)
+			{
+				selectedFileIndex_ = static_cast<int>(fileList_.size() - 1);
+			}
+		}
+	}
 }

@@ -141,6 +141,9 @@ void Detail::RenderContext::NewFrame()
 	// Dockスペースを作成する
 	imguiRender_->CreateDockSpace();
 
+	// psoEditorを更新する
+	psoEditor_->Update();
+
 	// ShaderエディタのUIを描画する
 	shaderEditor_->DrawUI(shaderCompiler_.get());
 

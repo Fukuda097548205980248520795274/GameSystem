@@ -8,7 +8,7 @@ namespace Detail
 	struct PSOItem
 	{
 		// 名前
-		std::string name = "New PSO";
+		std::string name = "新規 PSO";
 
 		// PSOの設定
 		PSODescription desc;
@@ -24,12 +24,26 @@ namespace Detail
 		bool isBuildFailed = false;
 
 		// ビルドステータスメッセージ
-		std::string statusMessage = "Not Built";
+		std::string statusMessage = "未 ビルド";
+	};
+
+	// 古いPSOやルートシグネチャを破棄するための構造体
+	struct GarbageResource
+	{
+		Microsoft::WRL::ComPtr<ID3D12PipelineState> pso;
+		Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSig;
+		uint32_t frameAge = 0;
 	};
 
 	class PSOEditor
 	{
 	public:
+
+		/// @brief コンストラクタ
+		PSOEditor();
+
+		/// @brief 更新処理
+		void Update();
 
 		/// @brief UIを描画する
 		/// @param device 
@@ -60,6 +74,23 @@ namespace Detail
 		/// @return 
 		ID3D12RootSignature* GetRootSignature(size_t index) const { return psoItems_[index].rootSig.Get(); }
 
+		/// @brief PSO設定をJSONファイルに保存する
+		/// @param filepath 
+		void SaveToFile(const std::string& filepath);
+
+		/// @brief JSONファイルからPSO設定を読み込む
+		/// @param filepath 
+		void LoadFromFile(const std::string& filepath);
+
+
+	private:
+
+		/// @brief PSOファイルリストを更新する
+		void RefreshPsoFileList();
+
+		/// @brief シェーダファイルリストを更新する
+		void RefreshShaderFileList();
+
 
 	private:
 
@@ -71,5 +102,28 @@ namespace Detail
 
 		// 編集時の自動再構築を行うかどうかのフラグ
 		bool isAutoRebuild_ = false;
+
+		/// @brief 古いPSOやルートシグネチャを破棄するためのキュー
+		std::vector<GarbageResource> garbageQueue_;
+
+
+	private:
+
+		/// @brief PSO設定の保存先ディレクトリ
+		const std::string kDir = "./Assets/EngineData/PSO/";
+
+		// PSOデータファイルリスト
+		std::vector<std::string> psoFileList_;
+		int selectedPsoFileIndex_ = -1;
+
+
+	private:
+
+		/// @brief シェーダファイルの走査対象ディレクトリ
+		const std::string kShaderDir = "./Assets/Shader/";
+
+		// シェーダーファイルリスト
+		std::vector<std::wstring> shaderFileList_;
+		std::vector<std::string> shaderFileListUtf8_;
 	};
 }

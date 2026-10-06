@@ -90,6 +90,51 @@ void Detail::ImGuiRender::Initialize(ID3D12Device* device, WinApp* winApp, DXHea
 	}
 
 	ImGui::StyleColorsDark();
+
+	// スタイルのカスタマイズ
+	ImGuiStyle& style = ImGui::GetStyle();
+
+	// サイズと余白の調整
+	style.ItemSpacing = ImVec2(8.0f, 8.0f);       // ボタンやアイテム同士の余白を広げる
+	style.ItemInnerSpacing = ImVec2(6.0f, 6.0f);  // アイテム内部の余白
+	style.FramePadding = ImVec2(6.0f, 4.0f);      // ボタンやフレームの内側パディング
+	style.ScrollbarSize = 18.0f;                  // スクロールバーを太くする
+	style.GrabMinSize = 14.0f;                    // スライダーなどのつまみを大きくする
+	style.WindowRounding = 4.0f;                  // ウィンドウの角の丸み
+	style.FrameRounding = 2.0f;                   // ボタンなどの角の丸み
+	style.ScrollbarRounding = 2.0f;               // スクロールバーの角の丸み
+	style.GrabRounding = 2.0f;                    // つまみの角の丸み
+
+	// 色調の調整
+	ImVec4* colors = style.Colors;
+	colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
+	colors[ImGuiCol_WindowBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f); // 背景を真っ黒に近い色に
+	colors[ImGuiCol_ChildBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+	colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
+	colors[ImGuiCol_Border] = ImVec4(0.20f, 0.20f, 0.20f, 0.50f);
+	colors[ImGuiCol_FrameBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f); // ボタンや入力欄の背景
+	colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_FrameBgActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+	colors[ImGuiCol_TitleBg] = ImVec4(0.04f, 0.04f, 0.04f, 1.00f);
+	colors[ImGuiCol_TitleBgActive] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.53f);
+	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+	colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+	colors[ImGuiCol_SliderGrab] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+	colors[ImGuiCol_Button] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+	colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_ButtonActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+	colors[ImGuiCol_Header] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+	colors[ImGuiCol_HeaderHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_HeaderActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+	colors[ImGuiCol_Tab] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+	colors[ImGuiCol_TabHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+	colors[ImGuiCol_TabActive] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+
+
 	ImGui_ImplWin32_Init(winApp_->GetHwnd());
 	ImGui_ImplDX12_Init(device, swapChain->GetSwapChainDesc().BufferCount,
 		swapChain->GetRtvDesc().Format, heap->GetSrvDescriptorHeap(), srvHandle_.cpuHandle, srvHandle_.gpuHandle);

@@ -2,6 +2,42 @@
 #include "Engine.h"
 #include "Func/ConvertString/ConvertString.h"
 
+/// @brief コンストラクタ
+Detail::PSOEditor::PSOEditor()
+{
+	RefreshPsoFileList();
+	RefreshShaderFileList();
+}
+
+/// @brief 更新処理
+void Detail::PSOEditor::Update()
+{
+#ifdef DEVELOPMENT
+
+	auto engine = Engine::GetInstance();
+
+	// 安全に破棄できるフレーム数を取得
+	uint32_t safeFrameAge = 2;
+	if (engine) safeFrameAge = engine->GetMaxBufferCount();
+
+	// 古いPSOやルートシグネチャを破棄するためのキューを更新
+	for (auto it = garbageQueue_.begin(); it != garbageQueue_.end(); )
+	{
+		it->frameAge++;
+		if (it->frameAge >= safeFrameAge)
+		{
+			// イテレータ削除時の ComPtr デストラクタ呼び出しにより、ここで安全に Release される
+			it = garbageQueue_.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+
+#endif
+}
+
 /// @brief UIを描画する
 /// @param device 
 /// @param compiler 
@@ -9,11 +45,73 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 {
 #ifdef DEVELOPMENT
 
-	ImGui::Begin("PSO Dynamic Editor");
+	ImGui::Begin("PSO動的エディタ");
 	auto engine = Engine::GetInstance();
 
+	// PSOデータファイルのリスト更新ボタン
+	if (ImGui::Button("PSOファイルリスト更新"))
+	{
+		RefreshPsoFileList();
+	}
+	ImGui::SameLine();
+
+	// PSOデータファイルのプルダウン描画
+	std::string psoFilePreview = (selectedPsoFileIndex_ >= 0 && selectedPsoFileIndex_ < static_cast<int>(psoFileList_.size()))
+		? psoFileList_[selectedPsoFileIndex_]
+		: "ファイルを選択してください...";
+
+	ImGui::SetNextItemWidth(250.0f);
+	if (ImGui::BeginCombo("PSOデータファイル", psoFilePreview.c_str()))
+	{
+		for (int i = 0; i < static_cast<int>(psoFileList_.size()); ++i)
+		{
+			bool isSelected = (selectedPsoFileIndex_ == i);
+			if (ImGui::Selectable(psoFileList_[i].c_str(), isSelected))
+			{
+				selectedPsoFileIndex_ = i;
+			}
+			if (isSelected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+
+	ImGui::SameLine();
+
+	// ファイルが選択されているかチェック
+	bool isFileSelected = (selectedPsoFileIndex_ >= 0 && selectedPsoFileIndex_ < static_cast<int>(psoFileList_.size()));
+
+	// 選択中のみ保存ボタンを有効化
+	if (!isFileSelected) ImGui::BeginDisabled();
+	if (ImGui::Button("保存"))
+	{
+		if (isFileSelected)
+		{
+			SaveToFile(psoFileList_[selectedPsoFileIndex_]);
+		}
+	}
+	if (!isFileSelected) ImGui::EndDisabled();
+
+	ImGui::SameLine();
+
+	// 選択中のみ読み込みボタンを有効化
+	if (!isFileSelected) ImGui::BeginDisabled();
+	if (ImGui::Button("読み込み"))
+	{
+		if (isFileSelected)
+		{
+			LoadFromFile(psoFileList_[selectedPsoFileIndex_]);
+		}
+	}
+	if (!isFileSelected) ImGui::EndDisabled();
+
+	ImGui::SameLine();
+
+
 	// PSOの追加ボタンとAuto Rebuildトグル
-	if (ImGui::Button("Create New PSO"))
+	if (ImGui::Button("新規作成 PSO"))
 	{
 		PSOItem newItem;
 		newItem.name = "PSO_" + std::to_string(psoItems_.size());
@@ -23,7 +121,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 	}
 
 	ImGui::SameLine();
-	ImGui::Checkbox("Auto Rebuild on Change", &isAutoRebuild_);
+	ImGui::Checkbox("変更時に自動再構築", &isAutoRebuild_);
 
 	ImGui::Separator();
 
@@ -40,11 +138,11 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		// 状態をラベルに付与
 		if (psoItems_[i].pso == nullptr)
 		{
-			label += " [Unbuilt]";
+			label += " [未 ビルド]";
 		}
 		else if (psoItems_[i].isBuildFailed)
 		{
-			label += " [Error]";
+			label += " [エラー]";
 		}
 
 		// 選択可能なリストアイテムとして表示
@@ -65,94 +163,114 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		// 識別名の編集
 		char nameBuf[256];
 		strcpy_s(nameBuf, currentItem.name.c_str());
-		if (ImGui::InputText("PSO Name", nameBuf, sizeof(nameBuf))) {
+		if (ImGui::InputText("PSO 名", nameBuf, sizeof(nameBuf))) {
 			currentItem.name = nameBuf;
 		}
 
 		// PSO Type の選択を追加
-		const char* psoTypeNames[] = { "Graphics", "Compute" };
+		const char* psoTypeNames[] = { "グラフィックス", "コンピュート" };
 		int currentTypeIdx = static_cast<int>(currentDesc.type);
-		if (ImGui::Combo("PSO Type", &currentTypeIdx, psoTypeNames, _countof(psoTypeNames)))
+		if (ImGui::Combo("PSO タイプ", &currentTypeIdx, psoTypeNames, _countof(psoTypeNames)))
 		{
 			currentDesc.type = static_cast<Detail::PSOType>(currentTypeIdx);
 			currentItem.isDirty = true;
 		}
 
 		// ステータス表示
-		ImGui::Text("Status: %s", currentItem.statusMessage.c_str());
+		ImGui::Text("ステータス: %s", currentItem.statusMessage.c_str());
 		ImGui::Separator();
 
 
 		// シェーダファイルのパス設定 & ファイル実在チェック
 		bool vsExists = !currentDesc.vsPath.empty() && std::filesystem::exists(currentDesc.vsPath);
 		bool psExists = !currentDesc.psPath.empty() && std::filesystem::exists(currentDesc.psPath);
-		bool csExists = !currentDesc.csPath.empty() && std::filesystem::exists(currentDesc.csPath); // 追加
+		bool csExists = !currentDesc.csPath.empty() && std::filesystem::exists(currentDesc.csPath);
+
+		// リスト手動更新ボタン
+		if (ImGui::Button("シェーダーリスト更新")) {
+			RefreshShaderFileList();
+		}
+
+		// コンボボックスを描画するヘルパーラムダ
+		auto DrawShaderCombo = [&](const char* label, std::wstring& currentPathW) {
+			std::string currentPathUtf8 = ConvertString(currentPathW);
+			std::string previewName = currentPathUtf8.empty() ? "選択してください..." : currentPathUtf8;
+			bool changed = false;
+
+			if (ImGui::BeginCombo(label, previewName.c_str()))
+			{
+				for (size_t n = 0; n < shaderFileListUtf8_.size(); n++)
+				{
+					bool isSelected = (currentPathW == shaderFileList_[n]);
+					if (ImGui::Selectable(shaderFileListUtf8_[n].c_str(), isSelected))
+					{
+						currentPathW = shaderFileList_[n];
+						changed = true;
+					}
+					if (isSelected)
+					{
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			return changed;
+			};
+
 
 		// Graphics 専用のUI
 		if (currentDesc.type == Detail::PSOType::Graphics)
 		{
-			if (ImGui::CollapsingHeader("Shader Files", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("グラフィックス シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				// 頂点シェーダ
-				std::string vsPathStr = ConvertString(currentDesc.vsPath);
-				char vsPathBuf[256];
-				strcpy_s(vsPathBuf, vsPathStr.c_str());
-				if (ImGui::InputText("VS Path", vsPathBuf, sizeof(vsPathBuf))) 
+				if (DrawShaderCombo("頂点シェーダ パス", currentDesc.vsPath))
 				{
-					currentDesc.vsPath = ConvertString(vsPathBuf);
 					currentItem.isDirty = true;
 				}
 
 				// ファイルが存在しない場合の警告表示
 				if (!vsExists)
 				{
-					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ Warning: Vertex shader file not found!");
+					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ 警告 : 頂点シェーダーファイルが見つかりません！");
 				}
 
 				// ピクセルシェーダ
-				std::string psPathStr = ConvertString(currentDesc.psPath);
-				char psPathBuf[256];
-				strcpy_s(psPathBuf, psPathStr.c_str());
-				if (ImGui::InputText("PS Path", psPathBuf, sizeof(psPathBuf))) 
+				if (DrawShaderCombo("ピクセルシェーダ パス", currentDesc.psPath))
 				{
-					currentDesc.psPath = ConvertString(psPathBuf);
 					currentItem.isDirty = true;
 				}
 
 				// ファイルが存在しない場合の警告表示
 				if (!psExists)
 				{
-					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ Warning: Pixel shader file not found!");
+					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : ピクセルシェーダーファイルが見つかりません！");
 				}
 			}
 		}
 		else if (currentDesc.type == Detail::PSOType::Compute)
 		{
 			// Compute 専用のUI
-			if (ImGui::CollapsingHeader("Compute Shader File", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("コンピュート シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				std::string csPathStr = ConvertString(currentDesc.csPath);
-				char csPathBuf[256];
-				strcpy_s(csPathBuf, csPathStr.c_str());
-				if (ImGui::InputText("CS Path", csPathBuf, sizeof(csPathBuf)))
+				if (DrawShaderCombo("コンピュートシェーダ パス", currentDesc.csPath))
 				{
-					currentDesc.csPath = ConvertString(csPathBuf);
 					currentItem.isDirty = true;
 				}
 
 				// ファイルが存在しない場合の警告表示
 				if (!csExists)
 				{
-					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ Warning: Compute shader file not found!");
+					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : コンピュートシェーダーファイルが見つかりません！");
 				}
 			}
 		}
 
 		// ルートパラメータの設定 (Graphics / Compute 共通)
-		if (ImGui::CollapsingHeader("Root Parameters", ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader("ルートパラメータ", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			// ルートパラメータの追加ボタン
-			if (ImGui::Button("Add Parameter")) 
+			if (ImGui::Button("パラメータ 追加")) 
 			{
 				currentDesc.rootParameters.push_back(CustomRootParameter{});
 				currentItem.isDirty = true;
@@ -167,7 +285,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				// パラメータの種類を選択するコンボボックス
 				const char* typeItems[] = { "CBV", "SRV", "UAV", "DescriptorTable" };
 				int currentType = static_cast<int>(p.type);
-				if (ImGui::Combo("Type", &currentType, typeItems, _countof(typeItems))) {
+				if (ImGui::Combo("タイプ", &currentType, typeItems, _countof(typeItems))) {
 					p.type = static_cast<Detail::CustomRootParamType>(currentType);
 					currentItem.isDirty = true;
 				}
@@ -176,7 +294,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				if (p.type != Detail::CustomRootParamType::DescriptorTable)
 				{
 					int reg = static_cast<int>(p.shaderRegister);
-					if (ImGui::InputInt("Register", &reg)) {
+					if (ImGui::InputInt("レジスタ", &reg)) {
 						p.shaderRegister = static_cast<uint32_t>(std::max(0, reg));
 						currentItem.isDirty = true;
 					}
@@ -184,7 +302,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				else
 				{
 					// DescriptorTableの場合、複数のレンジを追加できるUI
-					if (ImGui::Button("Add Descriptor Range"))
+					if (ImGui::Button("ディスクリプタレンジ 追加"))
 					{
 						p.descriptorRanges.push_back(CustomDescriptorRange{});
 						currentItem.isDirty = true;
@@ -201,7 +319,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						// レンジの種類を選択するコンボボックス
 						const char* rangeTypeItems[] = { "SRV", "UAV", "CBV", "SAMPLER" };
 						int currentRangeType = static_cast<int>(range.rangeType);
-						if (ImGui::Combo("Range Type", &currentRangeType, rangeTypeItems, _countof(rangeTypeItems))) 
+						if (ImGui::Combo("レンジタイプ", &currentRangeType, rangeTypeItems, _countof(rangeTypeItems))) 
 						{
 							range.rangeType = static_cast<D3D12_DESCRIPTOR_RANGE_TYPE>(currentRangeType);
 							currentItem.isDirty = true;
@@ -209,7 +327,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 
 						// ディスクリプタ数の編集
 						int numDesc = static_cast<int>(range.numDescriptors);
-						if (ImGui::InputInt("Num Descriptors", &numDesc)) 
+						if (ImGui::InputInt("ディスクリプタ数", &numDesc)) 
 						{
 							range.numDescriptors = static_cast<uint32_t>(std::max(1, numDesc));
 							currentItem.isDirty = true;
@@ -217,14 +335,14 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 
 						// レジスタ番号の編集
 						int baseReg = static_cast<int>(range.baseShaderRegister);
-						if (ImGui::InputInt("Base Register", &baseReg))
+						if (ImGui::InputInt("レジスタ番号", &baseReg))
 						{
 							range.baseShaderRegister = static_cast<uint32_t>(std::max(0, baseReg));
 							currentItem.isDirty = true;
 						}
 
 						// レジスタスペースの編集
-						if (ImGui::Button("Remove Range"))
+						if (ImGui::Button("レンジ 削除"))
 						{
 							p.descriptorRanges.erase(p.descriptorRanges.begin() + j);
 							currentItem.isDirty = true;
@@ -239,7 +357,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				}
 
 				// パラメータの削除ボタン
-				if (ImGui::Button("Remove Parameter")) 
+				if (ImGui::Button("パラメータ 削除")) 
 				{
 					currentDesc.rootParameters.erase(currentDesc.rootParameters.begin() + i);
 					currentItem.isDirty = true;
@@ -252,11 +370,11 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 		}
 
-		// 静的サンプラーの設定 (Graphics / Compute 共通)
+		// サンプラーの設定 (Graphics / Compute 共通)
 		if (ImGui::CollapsingHeader("Static Samplers", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			// サンプラーの追加ボタン
-			if (ImGui::Button("Add Sampler"))
+			if (ImGui::Button("サンプラー 追加"))
 			{
 				currentDesc.staticSamplers.push_back(CustomStaticSampler{});
 				currentItem.isDirty = true;
@@ -270,7 +388,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 
 				// レジスタ番号の編集
 				int reg = static_cast<int>(sampler.shaderRegister);
-				if (ImGui::InputInt("Register (s#)", &reg)) {
+				if (ImGui::InputInt("レジスタ番号 (s#)", &reg)) {
 					sampler.shaderRegister = static_cast<uint32_t>(std::max(0, reg));
 					currentItem.isDirty = true;
 				}
@@ -284,7 +402,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				for (int f = 0; f < _countof(filterValues); ++f) {
 					if (sampler.filter == filterValues[f]) { currentFilterIdx = f; break; }
 				}
-				if (ImGui::Combo("Filter", &currentFilterIdx, filterItems, _countof(filterItems))) {
+				if (ImGui::Combo("フィルター", &currentFilterIdx, filterItems, _countof(filterItems))) {
 					sampler.filter = filterValues[currentFilterIdx];
 					currentItem.isDirty = true;
 				}
@@ -302,7 +420,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				for (int c = 0; c < _countof(cmpFuncValues); ++c) {
 					if (sampler.comparisonFunc == cmpFuncValues[c]) { currentCmpIdx = c; break; }
 				}
-				if (ImGui::Combo("Comparison Func", &currentCmpIdx, cmpFuncItems, _countof(cmpFuncItems))) {
+				if (ImGui::Combo("比較関数", &currentCmpIdx, cmpFuncItems, _countof(cmpFuncItems))) {
 					sampler.comparisonFunc = cmpFuncValues[currentCmpIdx];
 					currentItem.isDirty = true;
 				}
@@ -326,12 +444,12 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					}
 					};
 
-				DrawAddressCombo("Address U", sampler.addressU);
-				DrawAddressCombo("Address V", sampler.addressV);
-				DrawAddressCombo("Address W", sampler.addressW);
+				DrawAddressCombo("アドレス U", sampler.addressU);
+				DrawAddressCombo("アドレス V", sampler.addressV);
+				DrawAddressCombo("アドレス W", sampler.addressW);
 
 				// サンプラーの削除ボタン
-				if (ImGui::Button("Remove Sampler"))
+				if (ImGui::Button("サンプラー 削除"))
 				{
 					currentDesc.staticSamplers.erase(currentDesc.staticSamplers.begin() + i);
 					currentItem.isDirty = true;
@@ -348,10 +466,10 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		if (currentDesc.type == Detail::PSOType::Graphics)
 		{
 			// インプットレイアウトの設定
-			if (ImGui::CollapsingHeader("Input Layout", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("入力レイアウト", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				// インプットレイアウトの追加ボタン
-				if (ImGui::Button("Add Input Element"))
+				if (ImGui::Button("入力レイアウト 追加"))
 				{
 					currentDesc.inputLayouts.push_back(CustomInputElement{});
 					currentItem.isDirty = true;
@@ -366,7 +484,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					char nameBuf[64];
 					strcpy_s(nameBuf, elem.semanticName.c_str());
 					ImGui::SetNextItemWidth(120.0f);
-					if (ImGui::InputText("Semantic", nameBuf, sizeof(nameBuf))) {
+					if (ImGui::InputText("セマンティック", nameBuf, sizeof(nameBuf))) {
 						elem.semanticName = nameBuf;
 						currentItem.isDirty = true;
 					}
@@ -376,7 +494,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					// Semantic Index の編集
 					int semIndex = static_cast<int>(elem.semanticIndex);
 					ImGui::SetNextItemWidth(80.0f);
-					if (ImGui::InputInt("Index", &semIndex)) 
+					if (ImGui::InputInt("インデックス", &semIndex)) 
 					{
 						elem.semanticIndex = static_cast<uint32_t>(std::max(0, semIndex));
 						currentItem.isDirty = true;
@@ -397,7 +515,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						if (elem.format == formatValues[f]) { currentFormatIdx = f; break; }
 					}
 					ImGui::SetNextItemWidth(180.0f);
-					if (ImGui::Combo("Format", &currentFormatIdx, formatNames, _countof(formatNames)))
+					if (ImGui::Combo("フォーマット", &currentFormatIdx, formatNames, _countof(formatNames)))
 					{
 						elem.format = formatValues[currentFormatIdx];
 						currentItem.isDirty = true;
@@ -405,7 +523,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 
 					// 削除ボタン
 					ImGui::SameLine();
-					if (ImGui::Button("Remove"))
+					if (ImGui::Button("入力レイアウト 削除"))
 					{
 						currentDesc.inputLayouts.erase(currentDesc.inputLayouts.begin() + i);
 						currentItem.isDirty = true;
@@ -419,19 +537,19 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 
 			// ラスタライザステート設定
-			if (ImGui::CollapsingHeader("Rasterizer State", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("ラスタライザ設定", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				const char* cullItems[] = { "None", "Front", "Back" };
+				const char* cullItems[] = { "なし", "前面", "背面" };
 				int currentCull = static_cast<int>(currentDesc.cullMode) - 1;
-				if (ImGui::Combo("Cull Mode", &currentCull, cullItems, _countof(cullItems)))
+				if (ImGui::Combo("カリングモード", &currentCull, cullItems, _countof(cullItems)))
 				{
 					currentDesc.cullMode = static_cast<D3D12_CULL_MODE>(currentCull + 1);
 					currentItem.isDirty = true;
 				}
 
-				const char* fillItems[] = { "Wireframe", "Solid" };
+				const char* fillItems[] = { "ワイヤーフレーム", "ソリッド" };
 				int currentFill = static_cast<int>(currentDesc.fillMode) - 2;
-				if (ImGui::Combo("Fill Mode", &currentFill, fillItems, _countof(fillItems)))
+				if (ImGui::Combo("フィルモード", &currentFill, fillItems, _countof(fillItems)))
 				{
 					currentDesc.fillMode = static_cast<D3D12_FILL_MODE>(currentFill + 2);
 					currentItem.isDirty = true;
@@ -439,12 +557,12 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 
 			// デプスステンシル設定
-			if (ImGui::CollapsingHeader("Depth Stencil State", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("デプスステンシル設定", ImGuiTreeNodeFlags_DefaultOpen))
 			{
-				if (ImGui::Checkbox("Depth Enable", &currentDesc.depthEnable)) currentItem.isDirty = true;
+				if (ImGui::Checkbox("深度 有効", &currentDesc.depthEnable)) currentItem.isDirty = true;
 
 				bool depthWrite = (currentDesc.depthWriteMask == D3D12_DEPTH_WRITE_MASK_ALL);
-				if (ImGui::Checkbox("Depth Write", &depthWrite)) {
+				if (ImGui::Checkbox("深度 書き込み", &depthWrite)) {
 					currentDesc.depthWriteMask = depthWrite ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
 					currentItem.isDirty = true;
 				}
@@ -460,7 +578,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				{
 					if (currentDesc.depthFunc == depthFuncValues[d]) { currentDepthFuncIdx = d; break; }
 				}
-				if (ImGui::Combo("Depth Func", &currentDepthFuncIdx, depthFuncItems, _countof(depthFuncItems)))
+				if (ImGui::Combo("深度テスト関数", &currentDepthFuncIdx, depthFuncItems, _countof(depthFuncItems)))
 				{
 					currentDesc.depthFunc = depthFuncValues[currentDepthFuncIdx];
 					currentItem.isDirty = true;
@@ -468,13 +586,13 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 
 			// ブレンドステート設定
-			if (ImGui::CollapsingHeader("Blend State", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("ブレンド設定", ImGuiTreeNodeFlags_DefaultOpen))
 			{
 				const char* blendItems[] = { "None", "Normal", "Add", "Subtract", "Multiply", "Screen", "Custom" };
 				int currentBlend = static_cast<int>(currentDesc.blendMode);
 
 				// プリセット選択
-				if (ImGui::Combo("Preset", &currentBlend, blendItems, _countof(blendItems))) 
+				if (ImGui::Combo("プリセット", &currentBlend, blendItems, _countof(blendItems))) 
 				{
 					currentDesc.blendMode = static_cast<EditorBlendMode>(currentBlend);
 
@@ -493,7 +611,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				auto& cb = currentDesc.customBlend;
 				bool changed = false;
 
-				if (ImGui::Checkbox("Blend Enable", &cb.blendEnable)) changed = true;
+				if (ImGui::Checkbox("ブレンド有効", &cb.blendEnable)) changed = true;
 
 				if (cb.blendEnable)
 				{
@@ -546,25 +664,25 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						};
 
 					// RGB 設定
-					if (ImGui::TreeNode("Color (RGB) Blend"))
+					if (ImGui::TreeNode("カラー (RGB) ブレンド"))
 					{
-						changed |= DrawBlendCombo("Src Blend RGB", cb.srcBlend);
-						changed |= DrawBlendCombo("Dest Blend RGB", cb.destBlend);
-						changed |= DrawOpCombo("Blend Op RGB", cb.blendOp);
+						changed |= DrawBlendCombo("ソースブレンド RGB", cb.srcBlend);
+						changed |= DrawBlendCombo("デストブレンド RGB", cb.destBlend);
+						changed |= DrawOpCombo("ブレンド演算 RGB", cb.blendOp);
 						ImGui::TreePop();
 					}
 
 					// Alpha 設定
-					if (ImGui::TreeNode("Alpha Blend"))
+					if (ImGui::TreeNode("Alpha ブレンド"))
 					{
-						changed |= DrawBlendCombo("Src Blend Alpha", cb.srcBlendAlpha);
-						changed |= DrawBlendCombo("Dest Blend Alpha", cb.destBlendAlpha);
-						changed |= DrawOpCombo("Blend Op Alpha", cb.blendOpAlpha);
+						changed |= DrawBlendCombo("ソースブレンド Alpha", cb.srcBlendAlpha);
+						changed |= DrawBlendCombo("デストブレンド Alpha", cb.destBlendAlpha);
+						changed |= DrawOpCombo("ブレンド演算 Alpha", cb.blendOpAlpha);
 						ImGui::TreePop();
 					}
 				}
 
-				// 詳細項目を変更した場合は自動的に Mode を Custom に切り替えて Rebuild フラグを立てる
+				// 変更があった場合は Custom モードに切り替え
 				if (changed)
 				{
 					currentDesc.blendMode = EditorBlendMode::Custom;
@@ -574,7 +692,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		}
 
 		// 再構築処理
-		bool manualBuildPressed = ImGui::Button("Build / Rebuild PSO");
+		bool manualBuildPressed = ImGui::Button("PSOビルド / 再構築");
 		bool shouldBuild = manualBuildPressed || (isAutoRebuild_ && currentItem.isDirty);
 
 		if (shouldBuild)
@@ -596,8 +714,8 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			if (!canBuild)
 			{
 				currentItem.isBuildFailed = true;
-				currentItem.statusMessage = "Build Failed: Missing shader file(s)";
-				if (engine) engine->Log(LogLevel::Error, "Cannot build PSO. Invalid shader path: " + currentItem.name);
+				currentItem.statusMessage = "ビルド失敗 : シェーダファイルが見つかりません";
+				if (engine) engine->Log(LogLevel::Error, "PSOビルド失敗. 無効なシェーダパス : " + currentItem.name);
 			} 
 			else
 			{
@@ -608,19 +726,25 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				// PSOのビルドを試みる
 				if (builder.Build(device, compiler, currentDesc, &newRootSig, &newPSO))
 				{
+					// 古いPSOやルートシグネチャを破棄するためにガベージキューに追加
+					if (currentItem.pso || currentItem.rootSig)
+					{
+						garbageQueue_.push_back({ currentItem.pso, currentItem.rootSig, 0 });
+					}
+
 					// ビルドに成功した場合の処理
 					currentItem.pso = newPSO;
 					currentItem.rootSig = newRootSig;
 					currentItem.isBuildFailed = false;
-					currentItem.statusMessage = "Successfully Built";
-					if (engine) engine->Log(LogLevel::Info, "PSO Rebuilt Successfully: " + currentItem.name);
+					currentItem.statusMessage = "ビルド成功";
+					if (engine) engine->Log(LogLevel::Info, "PSO ビルド成功 : " + currentItem.name);
 				}
 				else
 				{
 					// ビルドに失敗した場合の処理
 					currentItem.isBuildFailed = true;
-					currentItem.statusMessage = "Compile Error";
-					if (engine) engine->Log(LogLevel::Error, "Failed to Rebuild PSO: " + currentItem.name);
+					currentItem.statusMessage = "コンパイルエラー";
+					if (engine) engine->Log(LogLevel::Error, "PSO ビルド失敗 : " + currentItem.name);
 				}
 			}
 
@@ -658,4 +782,123 @@ ID3D12RootSignature* Detail::PSOEditor::GetRootSignature(const std::string& name
 	}
 
 	return nullptr;
+}
+
+/// @brief PSO設定をJSONファイルに保存する
+/// @param filepath 
+void Detail::PSOEditor::SaveToFile(const std::string& filepath)
+{
+	json jArray = json::array();
+	for (const auto& item : psoItems_)
+	{
+		json jItem;
+		jItem["name"] = item.name;
+
+		// 既存の ToJson 関数を呼び出して desc を変換
+		json jDesc;
+		ToJson(jDesc, item.desc);
+		jItem["desc"] = jDesc;
+
+		jArray.push_back(jItem);
+	}
+
+	std::ofstream file(filepath);
+	if (file.is_open())
+	{
+		// インデント幅4で整形して出力
+		file << jArray.dump(4);
+
+		// ファイルを閉じる
+		file.close();
+	}
+}
+
+/// @brief JSONファイルからPSO設定を読み込む
+/// @param filepath 
+void Detail::PSOEditor::LoadFromFile(const std::string& filepath)
+{
+	std::ifstream file(filepath);
+	if (file.is_open())
+	{
+		json jArray;
+		file >> jArray;
+
+		psoItems_.clear();
+		for (const auto& jItem : jArray)
+		{
+			PSOItem newItem;
+			newItem.name = jItem.value("name", "Loaded PSO");
+
+			if (jItem.contains("desc"))
+			{
+				// 既存の FromJson 関数を呼び出して desc を復元
+				FromJson(jItem["desc"], newItem.desc);
+			}
+
+			// 読み込み直後は再ビルドが必要なのでフラグを立てる
+			newItem.isDirty = true;
+			newItem.isBuildFailed = false;
+			newItem.statusMessage = "Not Built";
+
+			psoItems_.push_back(newItem);
+		}
+
+		// psoItems_が空でない場合は最初のアイテムを選択、空の場合は選択なしにする
+		if (!psoItems_.empty())
+		{
+			selectedIndex_ = 0;
+		}
+		else
+		{
+			selectedIndex_ = -1;
+		}
+
+		// ファイルを閉じる
+		file.close();
+	}
+}
+
+/// @brief PSOファイルリストを更新する
+void Detail::PSOEditor::RefreshPsoFileList()
+{
+	psoFileList_.clear();
+
+	std::filesystem::path dirPath(kDir);
+	if (!std::filesystem::exists(dirPath))
+	{
+		std::filesystem::create_directories(dirPath);
+		return;
+	}
+
+	// PSO保存用ディレクトリ配下の.jsonファイルを再帰走査
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(dirPath))
+	{
+		if (entry.is_regular_file() && entry.path().extension() == ".json")
+		{
+			psoFileList_.push_back(entry.path().string());
+		}
+	}
+}
+
+/// @brief シェーダファイルリストを更新する
+void Detail::PSOEditor::RefreshShaderFileList()
+{
+	shaderFileList_.clear();
+	shaderFileListUtf8_.clear();
+
+	std::filesystem::path dirPath(kShaderDir);
+	if (!std::filesystem::exists(dirPath)) return;
+
+	// サブフォルダ含めてシェーダーファイルを再帰的に検索
+	for (const auto& entry : std::filesystem::recursive_directory_iterator(dirPath))
+	{
+		if (entry.is_regular_file())
+		{
+			std::wstring pathW = entry.path().wstring();
+			std::string pathUtf8 = ConvertString(pathW);
+
+			shaderFileList_.push_back(pathW);
+			shaderFileListUtf8_.push_back(pathUtf8);
+		}
+	}
 }

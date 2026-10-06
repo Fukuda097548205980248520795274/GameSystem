@@ -131,9 +131,6 @@
     <Filter Include="Source\Engine\RenderContext\MultiPass\RenderPassSystem">
       <UniqueIdentifier>{3fa2dc91-299b-41ec-9fd1-dbb93572ca45}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\ImGuiRender">
-      <UniqueIdentifier>{0bdc9465-b915-4510-97ef-34a3df26a554}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\Store">
       <UniqueIdentifier>{bd4a019b-8fd7-42b8-b850-c93fd94071ef}</UniqueIdentifier>
     </Filter>
@@ -178,6 +175,9 @@
     </Filter>
     <Filter Include="Source\Tool\Shader\ShaderEditor">
       <UniqueIdentifier>{51ad5843-9868-4121-ba86-ef11dd6ba58c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\ImGuiRender">
+      <UniqueIdentifier>{0bdc9465-b915-4510-97ef-34a3df26a554}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -272,7 +272,7 @@
       <Filter>Source\Engine\RenderContext\MultiPass\RenderPassSystem</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\ImGuiRender\ImGuiRender.cpp">
-      <Filter>Source\Engine\ImGuiRender</Filter>
+      <Filter>Source\Engine\RenderContext\ImGuiRender</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\TextureStore\TextureStore.cpp">
       <Filter>Source\Engine\Store\TextureStore</Filter>
@@ -397,7 +397,7 @@
       <Filter>Source\Engine\RenderContext\MultiPass\RenderPassSystem</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\ImGuiRender\ImGuiRender.h">
-      <Filter>Source\Engine\ImGuiRender</Filter>
+      <Filter>Source\Engine\RenderContext\ImGuiRender</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureStore.h">
       <Filter>Source\Engine\Store\TextureStore</Filter>
