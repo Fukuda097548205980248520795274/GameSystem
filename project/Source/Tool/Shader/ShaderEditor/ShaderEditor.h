@@ -49,7 +49,7 @@ namespace Detail
 		std::vector<std::string> fileListUtf8_;
 		int selectedFileIndex_ = -1;
 
-		// テキストバッファ (ImGuiInputTextMultiline用)
+		// テキストバッファ
 		std::vector<char> textBuffer_;
 
 

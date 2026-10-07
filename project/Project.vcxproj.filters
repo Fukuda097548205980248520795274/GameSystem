@@ -53,9 +53,6 @@
     <Filter Include="Source\Engine\Func\CrashHandler">
       <UniqueIdentifier>{4efaad5f-64d7-472d-a96d-c1663f83cbf0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\ShaderCompiler">
-      <UniqueIdentifier>{c6dc3cf3-3fb1-4b17-89d7-e6a9da5960d3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\RenderContext">
       <UniqueIdentifier>{73c90f85-23c0-4a4d-bc05-b0136a019bc9}</UniqueIdentifier>
     </Filter>
@@ -179,6 +176,15 @@
     <Filter Include="Source\Engine\RenderContext\ImGuiRender">
       <UniqueIdentifier>{0bdc9465-b915-4510-97ef-34a3df26a554}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\Shader\ShaderCompiler">
+      <UniqueIdentifier>{c6dc3cf3-3fb1-4b17-89d7-e6a9da5960d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\IndexBufferResource">
+      <UniqueIdentifier>{d485c078-bb00-45cb-9594-205061548509}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\VertexBufferResource">
+      <UniqueIdentifier>{f71f5110-8ca9-4aff-b508-237b54b0084c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -220,8 +226,8 @@
     <ClCompile Include="Source\Engine\Func\CrashHandler\CrashHandler.cpp">
       <Filter>Source\Engine\Func\CrashHandler</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\ShaderCompiler\ShaderCompiler.cpp">
-      <Filter>Source\Engine\ShaderCompiler</Filter>
+    <ClCompile Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.cpp">
+      <Filter>Source\Tool\Shader\ShaderCompiler</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\RenderContext.cpp">
       <Filter>Source\Engine\RenderContext</Filter>
@@ -295,6 +301,9 @@
     <ClCompile Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.cpp">
       <Filter>Source\Tool\Shader\ShaderEditor</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp">
+      <Filter>Source\Engine\Resource\IndexBufferResource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -333,8 +342,8 @@
     <ClInclude Include="Source\Engine\Func\CrashHandler\CrashHandler.h">
       <Filter>Source\Engine\Func\CrashHandler</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.h">
-      <Filter>Source\Engine\ShaderCompiler</Filter>
+    <ClInclude Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.h">
+      <Filter>Source\Tool\Shader\ShaderCompiler</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.h">
       <Filter>Source\Engine\RenderContext</Filter>
@@ -425,6 +434,12 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.h">
       <Filter>Source\Tool\Shader\ShaderEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.h">
+      <Filter>Source\Engine\Resource\IndexBufferResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.h">
+      <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

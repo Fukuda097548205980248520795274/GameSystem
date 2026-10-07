@@ -4,7 +4,7 @@
 #include "DXFence/DXFence.h"
 #include "DXHeap/DXHeap.h"
 #include "DXSwapChain/DXSwapChain.h"
-#include "ShaderCompiler/ShaderCompiler.h"
+#include "Shader/ShaderCompiler/ShaderCompiler.h"
 #include "MultiPass/MultiPass.h"
 #include "Store/TextureStore/TextureStore.h"
 #include "ImGuiRender/ImGuiRender.h"

@@ -826,6 +826,10 @@ ID3D12RootSignature* Detail::PSOEditor::GetRootSignature(const std::string& name
 /// @param filepath 
 void Detail::PSOEditor::SaveToFile(const std::string& filename)
 {
+	// ディレクトリが存在しない場合は作成
+	if (!std::filesystem::exists(kDir))
+		std::filesystem::create_directories(kDir);
+
 	const std::string filePath = kDir + filename + ".json";
 
 	json jArray = json::array();
@@ -858,41 +862,50 @@ void Detail::PSOEditor::SaveToFile(const std::string& filename)
 void Detail::PSOEditor::LoadFromFile(const std::string& filename)
 {
 	const std::string filePath = kDir + filename + ".json";
-
 	std::ifstream file(filePath);
+
 	if (file.is_open())
 	{
-		json jArray;
-		file >> jArray;
-
-		psoItems_.clear();
-		for (const auto& jItem : jArray)
+		try
 		{
-			PSOItem newItem;
-			newItem.name = jItem.value("name", "Loaded PSO");
+			json jArray;
+			file >> jArray;
 
-			if (jItem.contains("desc"))
+			psoItems_.clear();
+			for (const auto& jItem : jArray)
 			{
-				// 既存の FromJson 関数を呼び出して desc を復元
-				FromJson(jItem["desc"], newItem.desc);
+				PSOItem newItem;
+				newItem.name = jItem.value("name", "Loaded PSO");
+
+				if (jItem.contains("desc"))
+				{
+					// 既存の FromJson 関数を呼び出して desc を復元
+					FromJson(jItem["desc"], newItem.desc);
+				}
+
+				// 読み込み直後は再ビルドが必要なのでフラグを立てる
+				newItem.isDirty = true;
+				newItem.isBuildFailed = false;
+				newItem.statusMessage = "Not Built";
+
+				psoItems_.push_back(newItem);
 			}
 
-			// 読み込み直後は再ビルドが必要なのでフラグを立てる
-			newItem.isDirty = true;
-			newItem.isBuildFailed = false;
-			newItem.statusMessage = "Not Built";
-
-			psoItems_.push_back(newItem);
+			// psoItems_が空でない場合は最初のアイテムを選択、空の場合は選択なしにする
+			if (!psoItems_.empty())
+			{
+				selectedIndex_ = 0;
+			}
+			else
+			{
+				selectedIndex_ = -1;
+			}
 		}
-
-		// psoItems_が空でない場合は最初のアイテムを選択、空の場合は選択なしにする
-		if (!psoItems_.empty())
+		catch (const std::exception& e)
 		{
-			selectedIndex_ = 0;
-		}
-		else
-		{
-			selectedIndex_ = -1;
+			// JSONのパースに失敗した場合のエラーログ
+			auto engine = Engine::GetInstance();
+			if (engine) engine->Log(LogLevel::Error, "PSO設定の読み込みに失敗 : " + std::string(e.what()));
 		}
 
 		// ファイルを閉じる

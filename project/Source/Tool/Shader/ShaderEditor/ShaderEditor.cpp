@@ -88,7 +88,7 @@ void Detail::ShaderEditor::DrawUI(ShaderCompiler* compiler)
 
 	std::string previewName = (selectedFileIndex_ >= 0 && selectedFileIndex_ < static_cast<int>(fileListUtf8_.size()))
 		? fileListUtf8_[selectedFileIndex_]
-		: "選択しているファイル";
+		: "ファイルを選択してください...";
 
 	if (ImGui::BeginCombo("##シェーダ", previewName.c_str()))
 	{

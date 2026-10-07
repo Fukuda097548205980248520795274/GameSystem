@@ -3,11 +3,11 @@
 #include <string>
 #include <json.hpp>
 
-// JSONライブラリの名前空間を簡略化
-using json = nlohmann::json;
-
 namespace Detail
 {
+	// JSONライブラリの名前空間を簡略化
+	using json = nlohmann::json;
+
 	// ルートパラメータの種類
 	enum class CustomRootParamType
 	{

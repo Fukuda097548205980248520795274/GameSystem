@@ -193,7 +193,11 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp" />
+    <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp" />
+    <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\DXCommand\DXCommand.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -247,7 +251,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\ShaderCompiler\ShaderCompiler.cpp">
+    <ClCompile Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
@@ -285,8 +289,14 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Tool\PSO\PSOEditor\PSOEditor.cpp" />
-    <ClCompile Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.cpp" />
+    <ClCompile Include="Source\Tool\PSO\PSOEditor\PSOEditor.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -309,6 +319,8 @@
     <ClInclude Include="Source\Engine\Func\ResourceFunc\ResourceFunc.h" />
     <ClInclude Include="Source\Engine\Func\TextureFunc\TextureFunc.h" />
     <ClInclude Include="Source\Engine\Logger\Logger.h" />
+    <ClInclude Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.h" />
+    <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.h" />
     <ClInclude Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.h" />
     <ClInclude Include="Source\Tool\PSO\PSODescription\PSODescription.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXCommand\DXCommand.h" />
@@ -327,7 +339,7 @@
     <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.h" />
     <ClInclude Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.h" />
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\StructuredBufferResource.h" />
-    <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.h" />
+    <ClInclude Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.h" />
     <ClInclude Include="Source\Engine\Audio\AudioStore\AudioStore.h" />
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureStore.h" />
     <ClInclude Include="Source\Engine\WinApp\WinApp.h" />
