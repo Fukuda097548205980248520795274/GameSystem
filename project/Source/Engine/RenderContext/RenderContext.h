@@ -9,6 +9,8 @@
 #include "Store/TextureStore/TextureStore.h"
 #include "ImGuiRender/ImGuiRender.h"
 
+#include "RenderSystem/RenderSystem.h"
+
 #include "Shader/ShaderEditor/ShaderEditor.h"
 #include "PSO/PSOEditor/PSOEditor.h"
 
@@ -59,6 +61,14 @@ namespace Detail
 		/// @return 
 		uint32_t LoadTexture(const std::string& filePath) { return textureStore_->Load(filePath, heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
 
+		/// @brief PSOエディタを取得する
+		/// @return 
+		PSOEditor* GetPSOEditor() { return psoEditor_.get(); }
+
+		/// @brief シェーダエディタを取得する
+		/// @return 
+		ShaderEditor* GetShaderEditor() { return shaderEditor_.get(); }
+
 
 	private:
 
@@ -107,6 +117,12 @@ namespace Detail
 
 		/// @brief シザー矩形
 		D3D12_RECT scissorRect_{};
+
+
+	private:
+
+		/// @brief レンダーシステム
+		std::unique_ptr<RenderSystem> renderSystem_ = nullptr;
 
 
 	private:

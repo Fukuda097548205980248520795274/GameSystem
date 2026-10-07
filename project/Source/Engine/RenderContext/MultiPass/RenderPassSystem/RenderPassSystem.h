@@ -11,6 +11,7 @@ namespace Detail
 	class RenderTargetPool;
 	class MultiPass;
 	class OffscreenResource;
+	class RenderSystem;
 
 	class RenderPassSystem
 	{
@@ -33,9 +34,10 @@ namespace Detail
 
 		/// @brief すべてのレンダーパスを実行する
 		/// @param commandList 
-		/// @param multiPass 
 		/// @param dsvHandle 
-		void ExecuteAll(ID3D12GraphicsCommandList* commandList, MultiPass* multiPass, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle);
+		/// @param multiPass 
+		/// @param renderSystem 
+		void ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem);
 
 		/// @brief レンダーパスを返却する
 		void Return();

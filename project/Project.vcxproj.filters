@@ -146,12 +146,6 @@
     <Filter Include="Source\Engine\Audio\AudioStore">
       <UniqueIdentifier>{4b685ee3-7b77-4e55-96e8-0c8e7528ef48}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\Render">
-      <UniqueIdentifier>{ebec58ce-ae80-4ea1-a373-b769c7755e69}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Engine\Render\Render3DSystem">
-      <UniqueIdentifier>{558f52e3-1dc7-4489-ad55-9e8dbcec9afb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Tool">
       <UniqueIdentifier>{2ec14736-53e7-42d8-9413-de6f449827af}</UniqueIdentifier>
     </Filter>
@@ -184,6 +178,18 @@
     </Filter>
     <Filter Include="Source\Engine\Resource\VertexBufferResource">
       <UniqueIdentifier>{f71f5110-8ca9-4aff-b508-237b54b0084c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Skybox">
+      <UniqueIdentifier>{6dd10d13-d065-4d03-8629-d42046904b52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Background">
+      <UniqueIdentifier>{5fb22016-e1ac-41c1-91a6-6911246f5592}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Background\SkyboxPSO">
+      <UniqueIdentifier>{2a451371-00b8-433a-ba22-de8e229e0725}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\RenderSystem">
+      <UniqueIdentifier>{558f52e3-1dc7-4489-ad55-9e8dbcec9afb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -289,8 +295,8 @@
     <ClCompile Include="Source\Engine\Audio\AudioStore\AudioStore.cpp">
       <Filter>Source\Engine\Audio\AudioStore</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.cpp">
-      <Filter>Source\Engine\Render\Render3DSystem</Filter>
+    <ClCompile Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.cpp">
+      <Filter>Source\Engine\RenderContext\RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp">
       <Filter>Source\Tool\PSO\DynamicPSOBuilder</Filter>
@@ -303,6 +309,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp">
       <Filter>Source\Engine\Resource\IndexBufferResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Background\SkyboxPSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -420,8 +429,8 @@
     <ClInclude Include="Source\Engine\Func\RandomFunc\RandomFunc.h">
       <Filter>Source\Engine\Func\RandomFunc</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.h">
-      <Filter>Source\Engine\Render\Render3DSystem</Filter>
+    <ClInclude Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.h">
+      <Filter>Source\Engine\RenderContext\RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="Source\Tool\PSO\PSODescription\PSODescription.h">
       <Filter>Source\Tool\PSO\PSODescription</Filter>
@@ -441,6 +450,9 @@
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.h">
       <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.h">
+      <Filter>Source\Engine\RenderContext\Background\SkyboxPSO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\Fullscreen\Fullscreen.VS.hlsl">
@@ -449,10 +461,19 @@
     <FxCompile Include="Assets\Shader\SwapChainCopy\SwapChainCopy.PS.hlsl">
       <Filter>Shader\SwapChainCopy</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\Shader\Skybox\Skybox.PS.hlsl">
+      <Filter>Shader\Skybox</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\Skybox\Skybox.VS.hlsl">
+      <Filter>Shader\Skybox</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shader\Fullscreen\Fullscreen.hlsli">
       <Filter>Shader\Fullscreen</Filter>
+    </None>
+    <None Include="Assets\Shader\Skybox\Skybox.hlsli">
+      <Filter>Shader\Skybox</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
 namespace Detail
 {
 	class ShaderCompiler;
+	class RenderSystem;
 
 	class MultiPass
 	{
@@ -48,7 +49,7 @@ namespace Detail
 
 		/// @brief レンダーパスを実行する
 		/// @param commandList 
-		void Execute(ID3D12GraphicsCommandList* commandList, int frameIndex);
+		void Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, int frameIndex);
 
 		/// @brief 現在のレンダーパスのリソースを設定する
 		/// @param resource 

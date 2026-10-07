@@ -46,6 +46,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// テクスチャストアを作成
 	textureStore_ = std::make_unique<TextureStore>();
 
+	// レンダーシステムを作成
+	renderSystem_ = std::make_unique<RenderSystem>();
+
 
 	// ビューポートの設定
 	viewport_.Width = static_cast<float>(winApp->GetClientWidth());
@@ -175,7 +178,7 @@ void Detail::RenderContext::PostDraw()
 	multiPass_->Clear(commandList, frameIndex_);
 
 	// レンダーパスを実行する
-	multiPass_->Execute(commandList, frameIndex_);
+	multiPass_->Execute(commandList, renderSystem_.get(), frameIndex_);
 
 	// バックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();

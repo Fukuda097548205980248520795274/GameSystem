@@ -53,6 +53,17 @@ namespace Detail
 			return static_cast<ComponentArray<T>*>(componentArrays_[typeIndex].get());
 		}
 
+		/// @brief エンティティがコンポーネントを持っているか確認する
+		/// @tparam T 
+		/// @param entity 
+		/// @return 
+		template<typename T>
+		bool HasComponent(Entity entity)
+		{
+			auto componentArray = GetComponentArray<T>();
+			return componentArray->Has(entity);
+		}
+
 
 	private:
 

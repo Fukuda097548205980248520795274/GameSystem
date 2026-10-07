@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "Engine.h"
+#include "RenderContext/RenderSystem/RenderSystem.h"
 
 /// @brief 初期化
 /// @param renderTargetPool 
@@ -40,11 +41,6 @@ Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode, s
 	blendComp.blendMode = blendMode;
 	registry_->AddComponent(entity, blendComp);
 
-	// RenderCallbackComponentを追加する
-	RenderCallbackComponent callbackComp;
-	callbackComp.drawFunc = drawFunc;
-	registry_->AddComponent(entity, callbackComp);
-
 	return entity;
 }
 
@@ -52,16 +48,18 @@ Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode, s
 /// @param commandList 
 /// @param multiPass 
 /// @param dsvHandle 
-void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, MultiPass* multiPass, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle)
+/// @param renderSystem 
+void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem)
 {
     auto* passArray = registry_->GetComponentArray<RenderPassComponent>();
     const auto& entities = passArray->GetEntities();
 	int32_t frameIndex = Engine::GetInstance()->GetFrameIndex();
 
-    // エンティティと優先度をペアにして収集
+	// priority に基づいてソートするためのペアのベクターを作成
     std::vector<std::pair<Entity, int>> sortedPasses;
     for (Entity entity : entities)
     {
+		// RenderPassComponent を取得して、isEnabled が true の場合のみ追加
         auto& passComp = registry_->GetComponent<RenderPassComponent>(entity);
         if (passComp.isEnabled)
         {
@@ -76,33 +74,29 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
     for (const auto& pair : sortedPasses)
     {
         Entity entity = pair.first;
-        auto& callbackComp = registry_->GetComponent<RenderCallbackComponent>(entity);
         auto& blendComp = registry_->GetComponent<BlendComponent>(entity);
 
-        if (callbackComp.drawFunc)
-        {
-            // オフスクリーンリソースの貸出
-            OffscreenResource* destinationResource = renderTargetPool_->Rent(commandList);
-            if (!destinationResource) continue;
+        // オフスクリーンリソースの貸出
+        OffscreenResource* destinationResource = renderTargetPool_->Rent(commandList);
+        if (!destinationResource) continue;
 
-            // 返却処理のためにアクティブリソースリストに追加しておく
-            activeResources_.push_back(destinationResource);
+        // 返却処理のためにアクティブリソースリストに追加しておく
+        activeResources_.push_back(destinationResource);
 
-            // リソースバリアの設定（シェーダーリソース状態からレンダーターゲット状態へ遷移）
-            destinationResource->Barrier(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET, frameIndex);
+        // リソースバリアの設定（シェーダーリソース状態からレンダーターゲット状態へ遷移）
+        destinationResource->Barrier(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET, frameIndex);
 
-            // レンダーターゲットのクリアと設定
-            destinationResource->ClearRenderTarget(commandList, dsvHandle, frameIndex);
+        // レンダーターゲットのクリアと設定
+        destinationResource->ClearRenderTarget(commandList, dsvHandle, frameIndex);
 
-            // 描画コールバック関数の呼び出し
-            callbackComp.drawFunc();
+		// 描画処理の実行
+		renderSystem->ExecuteAll(commandList, pair.second);
 
-            // リソースバリアの設定（レンダーターゲット状態からシェーダーリソース状態へ遷移）
-            destinationResource->Barrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, frameIndex);
+        // リソースバリアの設定（レンダーターゲット状態からシェーダーリソース状態へ遷移）
+        destinationResource->Barrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, frameIndex);
 
-            // MultiPass クラスへ今回の描画結果リソースを渡す
-            multiPass->SetCurrentResource(destinationResource);
-        }
+        // MultiPass クラスへ今回の描画結果リソースを渡す
+        multiPass->SetCurrentResource(destinationResource);
     }
 }
 

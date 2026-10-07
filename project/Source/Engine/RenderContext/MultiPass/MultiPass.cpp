@@ -82,13 +82,15 @@ void Detail::MultiPass::RenderSwapChain(ID3D12GraphicsCommandList* commandList, 
 
 /// @brief レンダーパスを実行する
 /// @param commandList 
-void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, int frameIndex)
+void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, int frameIndex)
 {
 	// nullptrチェック
 	assert(commandList);
+	assert(renderSystem);
+	assert(frameIndex >= 0);
 
 	// レンダーパスを実行する
-	renderPassSystem_->ExecuteAll(commandList, this, depthResource_->GetDsvHandle(frameIndex));
+	renderPassSystem_->ExecuteAll(commandList, depthResource_->GetDsvHandle(frameIndex), this, renderSystem);
 }
 
 /// @brief サイズを作り直す

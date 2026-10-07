@@ -43,6 +43,18 @@ struct RenderPassComponent
 	int priority;
 };
 
+/// @brief 描画コンポーネント
+struct RenderComponent
+{
+	RenderComponent() : isEnabled(true), priority(0) {}
+
+	/// @brief 3D描画の有効/無効フラグ
+	bool isEnabled;
+
+	// 描画順序（数値が小さいほど先に描画）
+	int priority;
+};
+
 /// @brief 合成（ブレンド）のパラメータ
 struct BlendComponent
 {
@@ -65,15 +77,6 @@ struct RenderTargetComponent
 
 	/// @brief 書き込むレンダーターゲットのハンドル（またはID/ポインタ）
 	uint32_t outputTargetHandle;
-};
-
-/// @brief 描画コールバック関数を保持するコンポーネント
-struct RenderCallbackComponent
-{
-	RenderCallbackComponent() : drawFunc(nullptr) {}
-
-	/// @brief 描画コールバック関数
-	std::function<void()> drawFunc;
 };
 
 /// @brief テクスチャコンポーネント

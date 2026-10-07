@@ -67,6 +67,14 @@ public:
 	/// @return 
 	uint32_t LoadTexture(const std::string& filePath) { return renderContext_->LoadTexture(filePath); }
 
+	/// @brief PSOエディタを取得する
+	/// @return 
+	Detail::PSOEditor* GetPSOEditor() { return renderContext_->GetPSOEditor(); }
+
+	/// @brief シェーダエディタを取得する
+	/// @return 
+	Detail::ShaderEditor* GetShaderEditor() { return renderContext_->GetShaderEditor(); }
+
 
 
 private:

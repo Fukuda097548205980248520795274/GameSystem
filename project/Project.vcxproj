@@ -193,6 +193,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.cpp" />
     <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp" />
     <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
@@ -242,7 +243,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.cpp" />
     <ClCompile Include="Source\Engine\Resource\DepthResource\DepthResource.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -319,6 +320,7 @@
     <ClInclude Include="Source\Engine\Func\ResourceFunc\ResourceFunc.h" />
     <ClInclude Include="Source\Engine\Func\TextureFunc\TextureFunc.h" />
     <ClInclude Include="Source\Engine\Logger\Logger.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.h" />
     <ClInclude Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.h" />
     <ClInclude Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.h" />
@@ -334,7 +336,7 @@
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.h" />
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.h" />
-    <ClInclude Include="Source\Engine\RenderContext\Render\Render3DSystem\Render3DSystem.h" />
+    <ClInclude Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.h" />
     <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\ConstantBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.h" />
     <ClInclude Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.h" />
@@ -362,6 +364,22 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Assets\Shader\Skybox\Skybox.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Shader\Skybox\Skybox.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Assets\Shader\SwapChainCopy\SwapChainCopy.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -373,6 +391,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shader\Fullscreen\Fullscreen.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Assets\Shader\Skybox\Skybox.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
