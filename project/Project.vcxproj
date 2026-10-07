@@ -184,6 +184,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Func\ModelFunc\ModelFunc.cpp" />
     <ClCompile Include="Source\Engine\Func\ResourceFunc\ResourceFunc.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -193,7 +194,8 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO\SkyboxPSO.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.cpp" />
     <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp" />
     <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
@@ -243,7 +245,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\RenderSystem.cpp" />
     <ClCompile Include="Source\Engine\Resource\DepthResource\DepthResource.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -316,11 +318,13 @@
     <ClInclude Include="Source\Engine\Func\Barrier\Barrier.h" />
     <ClInclude Include="Source\Engine\Func\ConvertString\ConvertString.h" />
     <ClInclude Include="Source\Engine\Func\CrashHandler\CrashHandler.h" />
+    <ClInclude Include="Source\Engine\Func\ModelFunc\ModelFunc.h" />
     <ClInclude Include="Source\Engine\Func\RandomFunc\RandomFunc.h" />
     <ClInclude Include="Source\Engine\Func\ResourceFunc\ResourceFunc.h" />
     <ClInclude Include="Source\Engine\Func\TextureFunc\TextureFunc.h" />
     <ClInclude Include="Source\Engine\Logger\Logger.h" />
-    <ClInclude Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO\SkyboxPSO.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.h" />
     <ClInclude Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.h" />
     <ClInclude Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.h" />
@@ -336,7 +340,7 @@
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\RenderTargetPool\RenderTargetPool.h" />
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\SwapChainCopyPSO\SwapChainCopyPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.h" />
-    <ClInclude Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderSystem.h" />
     <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\ConstantBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.h" />
     <ClInclude Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.h" />

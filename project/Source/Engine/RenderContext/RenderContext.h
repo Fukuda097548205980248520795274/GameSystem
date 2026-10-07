@@ -9,7 +9,7 @@
 #include "Store/TextureStore/TextureStore.h"
 #include "ImGuiRender/ImGuiRender.h"
 
-#include "RenderSystem/RenderSystem.h"
+#include "Render/RenderSystem/RenderSystem.h"
 
 #include "Shader/ShaderEditor/ShaderEditor.h"
 #include "PSO/PSOEditor/PSOEditor.h"

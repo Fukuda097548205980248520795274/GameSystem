@@ -182,13 +182,19 @@
     <Filter Include="Shader\Skybox">
       <UniqueIdentifier>{6dd10d13-d065-4d03-8629-d42046904b52}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\RenderContext\Background">
+    <Filter Include="Source\Engine\Func\ModelFunc">
+      <UniqueIdentifier>{45d5d421-b1e6-424b-9ca3-bdf7294d6faf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render">
+      <UniqueIdentifier>{f850ea66-9c97-4ae6-9084-2fd845ba0dc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\SkyboxSystem">
       <UniqueIdentifier>{5fb22016-e1ac-41c1-91a6-6911246f5592}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\RenderContext\Background\SkyboxPSO">
+    <Filter Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO">
       <UniqueIdentifier>{2a451371-00b8-433a-ba22-de8e229e0725}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\RenderContext\RenderSystem">
+    <Filter Include="Source\Engine\RenderContext\Render\RenderSystem">
       <UniqueIdentifier>{558f52e3-1dc7-4489-ad55-9e8dbcec9afb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -295,8 +301,8 @@
     <ClCompile Include="Source\Engine\Audio\AudioStore\AudioStore.cpp">
       <Filter>Source\Engine\Audio\AudioStore</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.cpp">
-      <Filter>Source\Engine\RenderContext\RenderSystem</Filter>
+    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\RenderSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem</Filter>
     </ClCompile>
     <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp">
       <Filter>Source\Tool\PSO\DynamicPSOBuilder</Filter>
@@ -310,8 +316,14 @@
     <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp">
       <Filter>Source\Engine\Resource\IndexBufferResource</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.cpp">
-      <Filter>Source\Engine\RenderContext\Background\SkyboxPSO</Filter>
+    <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO\SkyboxPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Func\ModelFunc\ModelFunc.cpp">
+      <Filter>Source\Engine\Func\ModelFunc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\SkyboxSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -429,8 +441,8 @@
     <ClInclude Include="Source\Engine\Func\RandomFunc\RandomFunc.h">
       <Filter>Source\Engine\Func\RandomFunc</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\RenderContext\RenderSystem\RenderSystem.h">
-      <Filter>Source\Engine\RenderContext\RenderSystem</Filter>
+    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderSystem.h">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem</Filter>
     </ClInclude>
     <ClInclude Include="Source\Tool\PSO\PSODescription\PSODescription.h">
       <Filter>Source\Tool\PSO\PSODescription</Filter>
@@ -450,8 +462,14 @@
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.h">
       <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\RenderContext\Background\SkyboxPSO\SkyboxPSO.h">
-      <Filter>Source\Engine\RenderContext\Background\SkyboxPSO</Filter>
+    <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO\SkyboxPSO.h">
+      <Filter>Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\ModelFunc\ModelFunc.h">
+      <Filter>Source\Engine\Func\ModelFunc</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.h">
+      <Filter>Source\Engine\RenderContext\Render\SkyboxSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
