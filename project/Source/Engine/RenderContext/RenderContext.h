@@ -73,6 +73,10 @@ namespace Detail
 		/// @return 
 		ShaderEditor* GetShaderEditor() { return shaderEditor_.get(); }
 
+		/// @brief デバイスを取得する
+		/// @return 
+		ID3D12Device* GetDevice() const { return core_->GetDevice(); }
+
 		/// @brief テクスチャファイルがドロップされたときの処理
 		/// @param filePath 
 		void OnTextureDropped(const std::string& filePath);

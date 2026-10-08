@@ -11,41 +11,41 @@ namespace Detail
 
 	class TextureEditor
 	{
-    public:
+	public:
 
 		/// @brief コンストラクタ
-        TextureEditor() = default;
+		TextureEditor() = default;
 
 		/// @brief デストラクタ
-        ~TextureEditor() = default;
+		~TextureEditor() = default;
 
-        /// @brief UIを描画する
-        /// @param renderContext 
-        /// @param textureStore 
-        void DrawUI(RenderContext* renderContext, TextureStore* textureStore);
+		/// @brief UIを描画する
+		/// @param renderContext 
+		/// @param textureStore 
+		void DrawUI(RenderContext* renderContext, TextureStore* textureStore);
 
 		/// @brief ドロップされたファイルを処理する
-        /// @param filePath 
-        void OnFileDropped(const std::string& filePath);
+		/// @param filePath 
+		void OnFileDropped(const std::string& filePath);
 
-    private:
+	private:
 
 		/// @brief ドロップされたファイルのキュー
-        std::vector<std::string> droppedFilesQueue_;
+		std::vector<std::string> droppedFilesQueue_;
 
 		/// @brief ドロップされたファイルを処理する
-        std::mutex dropMutex_;
+		std::mutex dropMutex_;
 
-        // 入力用のバッファ
-        char inputFilePath_[256] = "";
+		// 入力用のバッファ
+		char inputFilePath_[256] = "";
 
-        // 選択中のテクスチャハンドル
-        uint32_t selectedHandle_ = UINT32_MAX;
+		// 選択中のテクスチャハンドル
+		uint32_t selectedHandle_ = UINT32_MAX;
 
 
-    private:
+	private:
 
-        // デフォルトのテクスチャディレクトリ
+		// デフォルトのテクスチャディレクトリ
 		const std::string kDir = "./Assets/Texture/";
 	};
 }

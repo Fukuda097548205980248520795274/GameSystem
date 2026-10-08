@@ -93,7 +93,7 @@ namespace Detail
 
 		/// @brief テクスチャを削除する
 		/// @param handle 
-		void Remove(uint32_t handle);
+		void Remove(uint32_t handle, ID3D12Device* device);
 
 		/// @brief 中間リソースを解放する
 		void ReleaseIntermediateResources();

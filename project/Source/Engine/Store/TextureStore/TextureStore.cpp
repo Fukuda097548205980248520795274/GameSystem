@@ -191,7 +191,7 @@ Detail::TextureType Detail::TextureStore::GetType(uint32_t handle) const
 
 /// @brief テクスチャを削除する
 /// @param handle 
-void Detail::TextureStore::Remove(uint32_t handle)
+void Detail::TextureStore::Remove(uint32_t handle, ID3D12Device* device)
 {
 	// 範囲外アクセスや、すでに削除済みの場合は何もしない
 	if (handle >= dataTable_.size() || !dataTable_[handle])
@@ -200,6 +200,45 @@ void Detail::TextureStore::Remove(uint32_t handle)
 	// GPUの処理が完了するまで待機する
 	if (auto engine = Engine::GetInstance())
 		engine->WaitForGPU();
+
+	// SRVをNullに置き換える
+	if (device)
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+		// 0番のデフォルトテクスチャが存在する場合はそのリソースで上書き
+		if (handle != 0 && !dataTable_.empty() && dataTable_[0] && dataTable_[0]->resource)
+		{
+			const auto& meta = dataTable_[0]->metadata;
+			srvDesc.Format = meta.format;
+
+			// SRVの種類を設定（Cubemapか2Dテクスチャか）
+			if (meta.IsCubemap())
+			{
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+				srvDesc.TextureCube.MostDetailedMip = 0;
+				srvDesc.TextureCube.MipLevels = UINT_MAX;
+				srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+			}
+			else
+			{
+				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				srvDesc.Texture2D.MipLevels = static_cast<UINT>(meta.mipLevels);
+			}
+
+			device->CreateShaderResourceView(dataTable_[0]->resource.Get(), &srvDesc, dataTable_[handle]->srvHandle.cpuHandle);
+		}
+		else
+		{
+			// デフォルトが存在しない場合は Null SRV で上書き
+			srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.Texture2D.MipLevels = 1;
+
+			device->CreateShaderResourceView(nullptr, &srvDesc, dataTable_[handle]->srvHandle.cpuHandle);
+		}
+	}
 
 	// ファイルパスマップから削除
 	std::string normPath = NormalizePath(dataTable_[handle]->name);
