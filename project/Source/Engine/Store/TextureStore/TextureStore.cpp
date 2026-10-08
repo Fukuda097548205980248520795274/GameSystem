@@ -146,7 +146,19 @@ uint32_t Detail::TextureStore::GetHandle(const std::string& filePath) const
 /// @return 
 Detail::SRVDescriptorHandle Detail::TextureStore::GetSrvHandle(uint32_t handle) const
 {
-	assert(handle < dataTable_.size());
+	// 範囲外アクセスや、すでに削除済みの場合は0番のハンドルを返す
+	if (handle >= dataTable_.size() || !dataTable_[handle])
+	{
+		if (!dataTable_.empty() && dataTable_[0])
+		{
+			return dataTable_[0]->srvHandle;
+		}
+
+		// 0番も存在しない場合のフォールバック
+		static SRVDescriptorHandle nullHandle{};
+		return nullHandle;
+	}
+
 	return dataTable_[handle]->srvHandle;
 }
 
@@ -155,7 +167,7 @@ Detail::SRVDescriptorHandle Detail::TextureStore::GetSrvHandle(uint32_t handle) 
 /// @return 
 size_t Detail::TextureStore::GetTextureWidth(uint32_t handle) const
 {
-	assert(handle < dataTable_.size());
+	if (handle >= dataTable_.size() || !dataTable_[handle]) return 0;
 	return dataTable_[handle]->metadata.width;
 }
 
@@ -164,7 +176,7 @@ size_t Detail::TextureStore::GetTextureWidth(uint32_t handle) const
 /// @return 
 size_t Detail::TextureStore::GetTextureHeight(uint32_t handle) const
 {
-	assert(handle < dataTable_.size());
+	if (handle >= dataTable_.size() || !dataTable_[handle]) return 0;
 	return dataTable_[handle]->metadata.height;
 }
 
@@ -173,8 +185,28 @@ size_t Detail::TextureStore::GetTextureHeight(uint32_t handle) const
 /// @return 
 Detail::TextureType Detail::TextureStore::GetType(uint32_t handle) const
 {
-	assert(handle < dataTable_.size());
+	if (handle >= dataTable_.size() || !dataTable_[handle]) return TextureType::Texture2D;
 	return dataTable_[handle]->type_;
+}
+
+/// @brief テクスチャを削除する
+/// @param handle 
+void Detail::TextureStore::Remove(uint32_t handle)
+{
+	// 範囲外アクセスや、すでに削除済みの場合は何もしない
+	if (handle >= dataTable_.size() || !dataTable_[handle])
+		return;
+
+	// GPUの処理が完了するまで待機する
+	if (auto engine = Engine::GetInstance())
+		engine->WaitForGPU();
+
+	// ファイルパスマップから削除
+	std::string normPath = NormalizePath(dataTable_[handle]->name);
+	pathToHandleMap_.erase(normPath);
+
+	// テーブルから削除
+	dataTable_[handle].reset();
 }
 
 /// @brief 中間リソースを解放する

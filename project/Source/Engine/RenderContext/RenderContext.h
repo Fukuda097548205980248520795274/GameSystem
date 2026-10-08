@@ -50,6 +50,9 @@ namespace Detail
 		/// @brief 描画後処理
 		void PostDraw();
 
+		/// @brief GPUの処理が完了するまで待機する
+		void WaitForGPU() { fence_->WaitGPU(frameIndex_); }
+
 		/// @brief レンダーパスを作成する
 		/// @param priority 
 		/// @param blendMode 

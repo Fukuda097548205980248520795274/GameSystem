@@ -91,6 +91,10 @@ namespace Detail
 		/// @return 
 		size_t GetTextureCount() const { return dataTable_.size(); }
 
+		/// @brief テクスチャを削除する
+		/// @param handle 
+		void Remove(uint32_t handle);
+
 		/// @brief 中間リソースを解放する
 		void ReleaseIntermediateResources();
 

@@ -46,6 +46,9 @@ public:
 	/// @brief 描画後処理
 	void PostDraw();
 
+	/// @brief GPUの処理が完了するまで待機する
+	void WaitForGPU() { renderContext_->WaitForGPU(); }
+
 	/// @brief ログ出力
 	/// @brief level
 	/// @param log 

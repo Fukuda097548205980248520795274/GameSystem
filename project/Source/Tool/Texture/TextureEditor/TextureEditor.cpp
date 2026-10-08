@@ -77,7 +77,7 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
     ImGui::SameLine();
 
     // 選択中テクスチャの詳細とプレビュー
-    ImGui::BeginChild("TextureDetails", ImVec2(0, 0), true);
+    ImGui::BeginChild("詳細", ImVec2(0, 0), true);
     if (selectedHandle_ != UINT32_MAX && selectedHandle_ < texCount)
     {
         std::string path = textureStore->GetFilePath(selectedHandle_);
@@ -100,6 +100,30 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
         float previewHeight = previewWidth * (static_cast<float>(height) / static_cast<float>(width));
 
         ImGui::Image(static_cast<ImTextureID>(srvHandle.gpuHandle.ptr), ImVec2(previewWidth, previewHeight));
+
+
+        ImGui::Separator();
+
+        // 削除ボタン
+        if (ImGui::Button("テクスチャを削除"))
+        {
+            try
+            {
+                // ファイルシステム（フォルダ内）から画像を削除
+                if (std::filesystem::exists(path))
+                    std::filesystem::remove(path);
+
+                // TextureStore側のメモリ・登録データから削除
+                textureStore->Remove(selectedHandle_);
+
+                // 選択状態を解除
+                selectedHandle_ = UINT32_MAX;
+            }
+            catch (const std::filesystem::filesystem_error& e)
+            {
+                if (engine) engine->Log(LogLevel::Error, "テクスチャファイルの削除に失敗しました : " + std::string(e.what()));
+            }
+        }
     } 
     else
     {
