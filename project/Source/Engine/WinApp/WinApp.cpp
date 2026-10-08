@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
+#include <shellapi.h>
 
 #include "Func/ConvertString/ConvertString.h"
 
@@ -30,6 +31,46 @@ LRESULT CALLBACK Detail::WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, 
 		// OSに対してアプリの終了を伝える
 		PostQuitMessage(0);
 		return 0;
+
+
+	case WM_DROPFILES:
+	{
+		// GWLP_USERDATA から WinApp のインスタンスポインタを取得する
+		WinApp* app = reinterpret_cast<WinApp*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+		if (app && app->dropCallback_)
+		{
+			HDROP hDrop = reinterpret_cast<HDROP>(wparam);
+			
+			// ドロップされたファイル数を取得
+			UINT fileCount = DragQueryFileW(hDrop, 0xFFFFFFFF, nullptr, 0);
+
+			for (UINT i = 0; i < fileCount; ++i)
+			{
+				// パスの長さを取得
+				UINT length = DragQueryFileW(hDrop, i, nullptr, 0);
+				std::wstring filePathW(length + 1, L'\0');
+				
+				// パスを取得
+				DragQueryFileW(hDrop, i, filePathW.data(), length + 1);
+				filePathW.resize(length); // 末尾のnull文字を除外
+
+				// std::wstring から std::string へ変換 (Shift-JIS または UTF-8)
+				// ※プロジェクト内に独自の wstring -> string 変換関数があればそちらを使用してください
+				int bufferSize = WideCharToMultiByte(CP_ACP, 0, filePathW.c_str(), -1, nullptr, 0, nullptr, nullptr);
+				std::string filePath(bufferSize, 0);
+				WideCharToMultiByte(CP_ACP, 0, filePathW.c_str(), -1, &filePath[0], bufferSize, nullptr, nullptr);
+				
+				if (!filePath.empty() && filePath.back() == '\0') {
+					filePath.pop_back();
+				}
+
+				// 登録されたコールバックを呼び出す
+				app->dropCallback_(filePath);
+			}
+			DragFinish(hDrop);
+		}
+		return 0;
+	}
 	}
 
 	// 標準のメッセージ処理を行う
@@ -137,6 +178,12 @@ void Detail::WinApp::Initialize(int32_t clientWidth, int32_t clientHeight, const
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd_, SW_SHOW);
+
+	// ウィンドウハンドルをthisに紐づける
+	SetWindowLongPtr(hwnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+
+	// ドラッグ＆ドロップを許可する
+	DragAcceptFiles(hwnd_, TRUE);
 }
 
 /// @brief 更新処理

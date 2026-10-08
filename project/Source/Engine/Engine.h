@@ -75,6 +75,10 @@ public:
 	/// @return 
 	Detail::ShaderEditor* GetShaderEditor() { return renderContext_->GetShaderEditor(); }
 
+	/// @brief テクスチャファイルがドロップされたときの処理
+	/// @param filePath 
+	void OnTextureDropped(const std::string& filePath) { renderContext_->OnTextureDropped(filePath); }
+
 
 
 private:

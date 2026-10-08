@@ -197,6 +197,12 @@
     <Filter Include="Source\Engine\RenderContext\Render\RenderSystem">
       <UniqueIdentifier>{558f52e3-1dc7-4489-ad55-9e8dbcec9afb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\Texture">
+      <UniqueIdentifier>{8e4a737c-4394-454b-8002-5db16867b3e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Texture\TextureEditor">
+      <UniqueIdentifier>{cafa9372-fcf7-453c-b50c-bbbae9cc23d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -324,6 +330,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.cpp">
       <Filter>Source\Engine\RenderContext\Render\SkyboxSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Texture\TextureEditor\TextureEditor.cpp">
+      <Filter>Source\Tool\Texture\TextureEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -470,6 +479,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.h">
       <Filter>Source\Engine\RenderContext\Render\SkyboxSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Texture\TextureEditor\TextureEditor.h">
+      <Filter>Source\Tool\Texture\TextureEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

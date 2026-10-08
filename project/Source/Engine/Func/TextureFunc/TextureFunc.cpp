@@ -35,12 +35,17 @@ DirectX::ScratchImage Detail::LoadTextureGetMipImages(const std::string& filePat
 	if (DirectX::IsCompressed(image.GetMetadata().format))
 	{
 		mipImages = std::move(image);
-	}
+	} 
 	else
 	{
 		// 圧縮フォーマットではないとき
 		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-		assert(SUCCEEDED(hr));
+
+		// 失敗した場合は空のScratchImageを返す
+		if (FAILED(hr))
+		{
+			return DirectX::ScratchImage();
+		}
 	}
 
 	// ミップマップ付きデータを返す
@@ -86,24 +91,19 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Detail::CreateTextureResource(ID3D12Devic
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 
 	HRESULT hr = device->CreateCommittedResource(
-		// ヒープの設定
 		&heapProperties,
-
-		// ヒープの特殊な設定
 		D3D12_HEAP_FLAG_NONE,
-
-		// リソースの設定
 		&resourceDesc,
-
-		// データ転送できる設定
 		D3D12_RESOURCE_STATE_COPY_DEST,
-
-		// クリア最適値
 		nullptr,
-
 		IID_PPV_ARGS(&resource)
 	);
-	assert(SUCCEEDED(hr));
+
+	// 失敗した場合はnullptrを返す
+	if (FAILED(hr))
+	{
+		return nullptr;
+	}
 
 	return resource;
 }

@@ -115,6 +115,14 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 	winApp_ = std::make_unique<Detail::WinApp>();
 	winApp_->Initialize(screenWidth, screenHeight, title);
 
+	// ドロップされたファイルを処理するコールバック関数を設定
+	winApp_->SetDropCallback([this](const std::string& filePath) 
+		{
+			renderContext_->OnTextureDropped(filePath); 
+		}
+	);
+
+
 	// ECSレジストリを作成
 	registry_ = std::make_unique<Detail::RegistryECS>();
 

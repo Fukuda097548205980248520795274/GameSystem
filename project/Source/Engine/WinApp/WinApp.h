@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <string>
 #include <cstdint>
+#include <functional>
 
 namespace Detail
 {
@@ -62,6 +63,10 @@ namespace Detail
 		/// @brief 閉じる
 		void Close() { PostQuitMessage(0); }
 
+		/// @brief ドロップされたファイルを処理するコールバック関数を設定する
+		/// @param callback 
+		void SetDropCallback(std::function<void(const std::string&)> callback) { dropCallback_ = callback; }
+
 
 	private:
 
@@ -104,5 +109,11 @@ namespace Detail
 
 		/// @brief ウィンドウスタイル
 		DWORD windowStyle_ = 0;
+
+
+	private:
+
+		/// @brief ドロップされたファイルを処理するコールバック関数
+		std::function<void(const std::string&)> dropCallback_;
 	};
 }

@@ -300,6 +300,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Tool\Texture\TextureEditor\TextureEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
@@ -358,6 +359,7 @@
     <ClInclude Include="Source\Math\Vector\Vector4\Vector4.h" />
     <ClInclude Include="Source\Tool\PSO\PSOEditor\PSOEditor.h" />
     <ClInclude Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.h" />
+    <ClInclude Include="Source\Tool\Texture\TextureEditor\TextureEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\Fullscreen\Fullscreen.VS.hlsl">

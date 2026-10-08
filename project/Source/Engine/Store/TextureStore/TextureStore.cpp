@@ -3,6 +3,7 @@
 #include <cctype>
 #include <filesystem>
 #include <cassert>
+#include "Engine.h"
 
 #include "Func/TextureFunc/TextureFunc.h"
 
@@ -31,6 +32,10 @@ uint32_t Detail::TextureStore::Load(const std::string& filePath, DXHeap* heap, I
 	assert(device);
 	assert(commandList);
 
+
+	// Engineのインスタンスを取得する
+	auto engine = Engine::GetInstance();
+
 	// すでに読み込み済みかファイルパスマップから高速検索
 	std::string normPath = NormalizePath(filePath);
 	auto it = pathToHandleMap_.find(normPath);
@@ -43,8 +48,9 @@ uint32_t Detail::TextureStore::Load(const std::string& filePath, DXHeap* heap, I
 	DirectX::ScratchImage image = LoadTextureGetMipImages(filePath);
 	if (image.GetImageCount() == 0)
 	{
-		// エラーログを出力
-		throw std::runtime_error("テクスチャを読み込めません : " + filePath);
+		// 読み込みに失敗した場合は無効なハンドルを返す
+		if (engine)engine->Log(LogLevel::Error, "テクスチャンの読み込みに失敗 : " + filePath);
+		return kInvalidTextureHandle;
 	}
 
 	// テクスチャデータを作成
@@ -60,8 +66,9 @@ uint32_t Detail::TextureStore::Load(const std::string& filePath, DXHeap* heap, I
 	textureData->resource = CreateTextureResource(device, metadata);
 	if (!textureData->resource)
 	{
-		// エラーログを出力
-		throw std::runtime_error("テクスチャのリソースを作成できません : " + filePath);
+		// 失敗した場合は無効なハンドルを返す
+		if (engine)engine->Log(LogLevel::Error, "テクスチャリソースの生成に失敗 : " + filePath);
+		return kInvalidTextureHandle;
 	}
 
 	// 中間リソースを生成して転送コマンドを発行
@@ -69,7 +76,10 @@ uint32_t Detail::TextureStore::Load(const std::string& filePath, DXHeap* heap, I
 
 	// 中間リソースは専用のリストに退避させる
 	if (subResource)
-		pendingUploadResources_.push_back(std::move(subResource));
+	{
+		int maxBufferCount = engine ? static_cast<int>(engine->GetMaxBufferCount()) + 1 : 3;
+		pendingUploadResources_.push_back({ std::move(subResource), maxBufferCount });
+	}
 
 	// SRV設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -170,5 +180,13 @@ Detail::TextureType Detail::TextureStore::GetType(uint32_t handle) const
 /// @brief 中間リソースを解放する
 void Detail::TextureStore::ReleaseIntermediateResources()
 {
-	pendingUploadResources_.clear();
+	// 残りフレーム数を減らし、0になったものだけをリストから削除する
+	pendingUploadResources_.erase(
+		std::remove_if(pendingUploadResources_.begin(), pendingUploadResources_.end(),
+			[](auto& item) {
+				item.second--;
+				return item.second == 0;
+			}),
+		pendingUploadResources_.end()
+	);
 }

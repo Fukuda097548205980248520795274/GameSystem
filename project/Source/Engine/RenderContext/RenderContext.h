@@ -13,6 +13,7 @@
 
 #include "Shader/ShaderEditor/ShaderEditor.h"
 #include "PSO/PSOEditor/PSOEditor.h"
+#include "Texture/TextureEditor/TextureEditor.h"
 
 #include <memory>
 
@@ -68,6 +69,10 @@ namespace Detail
 		/// @brief シェーダエディタを取得する
 		/// @return 
 		ShaderEditor* GetShaderEditor() { return shaderEditor_.get(); }
+
+		/// @brief テクスチャファイルがドロップされたときの処理
+		/// @param filePath 
+		void OnTextureDropped(const std::string& filePath);
 
 
 	private:
@@ -151,5 +156,8 @@ namespace Detail
 
 		/// @brief シェーダエディタ
 		std::unique_ptr<Detail::ShaderEditor> shaderEditor_;
+
+		/// @brief テクスチャエディタ
+		std::unique_ptr<Detail::TextureEditor> textureEditor_ = nullptr;
 	};
 }

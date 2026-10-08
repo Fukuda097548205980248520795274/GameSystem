@@ -87,6 +87,10 @@ namespace Detail
 		/// @return 
 		TextureType GetType(uint32_t handle) const;
 
+		/// @brief テクスチャの数を取得する
+		/// @return 
+		size_t GetTextureCount() const { return dataTable_.size(); }
+
 		/// @brief 中間リソースを解放する
 		void ReleaseIntermediateResources();
 
@@ -106,7 +110,7 @@ namespace Detail
 		/// @brief ファイルパスとハンドルのマップ
 		std::unordered_map<std::string, uint32_t> pathToHandleMap_;
 
-		/// @brief 中間リソースの解放待ちリスト
-		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> pendingUploadResources_;
+		/// @brief 保留中のアップロードリソース
+		std::vector<std::pair<Microsoft::WRL::ComPtr<ID3D12Resource>, uint32_t>> pendingUploadResources_;
 	};
 }

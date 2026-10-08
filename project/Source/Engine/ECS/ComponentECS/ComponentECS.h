@@ -55,6 +55,12 @@ struct RenderComponent
 	int priority;
 };
 
+/// @brief スカイボックスコンポーネント
+struct SkyboxComponent
+{
+	SkyboxComponent(){}
+};
+
 /// @brief 合成（ブレンド）のパラメータ
 struct BlendComponent
 {
@@ -85,6 +91,15 @@ struct TextureComponent
 	TextureComponent() : handle(0) {}
 
 	/// @brief テクスチャのハンドル（またはID/ポインタ）
+	uint32_t handle;
+};
+
+/// @brief キューブマップコンポーネント
+struct CubemapComponent
+{
+	CubemapComponent() : handle(0) {}
+
+	/// @brief キューブマップのハンドル（またはID/ポインタ）
 	uint32_t handle;
 };
 

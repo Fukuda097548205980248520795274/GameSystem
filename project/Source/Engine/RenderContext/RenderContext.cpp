@@ -79,6 +79,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// PSOEditorを作成
 	psoEditor_ = std::make_unique<PSOEditor>();
 
+	// TextureEditorを作成
+	textureEditor_ = std::make_unique<TextureEditor>();
+
 
 	// 初期化時のコマンドリストを閉じる
 	auto commandList = command_->GetCommandList();
@@ -152,6 +155,9 @@ void Detail::RenderContext::NewFrame()
 
 	// PSOエディタのUIを描画する
 	psoEditor_->DrawUI(core_->GetDevice(), shaderCompiler_.get());
+
+	// テクスチャエディタのUIを描画する
+	textureEditor_->DrawUI(this, textureStore_.get());
 
 #endif
 }
@@ -271,4 +277,18 @@ void Detail::RenderContext::Resize(int32_t width, int32_t height)
 	scissorRect_.right = width;
 	scissorRect_.top = 0;
 	scissorRect_.bottom = height;
+}
+
+/// @brief テクスチャファイルがドロップされたときの処理
+/// @param filePath 
+void Detail::RenderContext::OnTextureDropped(const std::string& filePath)
+{
+#ifdef DEVELOPMENT
+	
+	if(textureEditor_)
+	{
+		textureEditor_->OnFileDropped(filePath);
+	}
+	
+#endif
 }
