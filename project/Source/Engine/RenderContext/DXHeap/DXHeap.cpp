@@ -41,24 +41,31 @@ void Detail::DXHeap::Initialize(ID3D12Device* device)
 /// @return 
 D3D12_CPU_DESCRIPTOR_HANDLE Detail::DXHeap::GetRtvDescriptorHandle()
 {
-	// RTVディスクリプタの最大数を超過していないか確認
-	assert(useRtvDescriptor_ < static_cast<int>(rtvDescriptorNum_) && "RTVディスクリプタの最大数を超過しています");
-
-	// エンジンのインスタンスを取得
 	auto engine = Engine::GetInstance();
+	uint32_t index = 0;
+
+	// フリーリストに空きがあれば優先的に再利用
+	if (!freeRtvIndices_.empty())
+	{
+		index = freeRtvIndices_.back();
+		freeRtvIndices_.pop_back();
+	}
+	else
+	{
+		// 空きがなければ新規インデックスを発行
+		assert(useRtvDescriptor_ < static_cast<int>(rtvDescriptorNum_) && "RTVディスクリプタの最大数を超過しています");
+		index = static_cast<uint32_t>(useRtvDescriptor_++);
+	}
 
 	// CPUハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-	cpuHandle.ptr += rtvDescriptorSize_ * useRtvDescriptor_;
+	cpuHandle.ptr += rtvDescriptorSize_ * index;
 
 	// ログを出力する
 	if (engine)
 	{
-		engine->Log(LogLevel::Info, std::format("ビュー : RTV, ハンドル : CPU, 値 : {}, ポインタ : {}", useRtvDescriptor_, cpuHandle.ptr));
+		engine->Log(LogLevel::Info, std::format("ビュー : RTV, ハンドル : CPU, 値 : {}, ポインタ : {}", index, cpuHandle.ptr));
 	}
-
-	// 数をカウントする
-	useRtvDescriptor_++;
 
 	return cpuHandle;
 }
@@ -67,29 +74,35 @@ D3D12_CPU_DESCRIPTOR_HANDLE Detail::DXHeap::GetRtvDescriptorHandle()
 /// @return 
 Detail::SRVDescriptorHandle Detail::DXHeap::GetSrvDescriptorHandle()
 {
-	// SRVディスクリプタの最大数を超過していないか確認
-	assert(useSrvDescriptor_ < static_cast<int>(srvDescriptorNum_) && "SRVディスクリプタの最大数を超過しています");
-
-	// エンジンのインスタンスを取得
 	auto engine = Engine::GetInstance();
+	uint32_t index = 0;
 
-	// CPUハンドルを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-	cpuHandle.ptr += srvDescriptorSize_ * useSrvDescriptor_;
-
-	// GPUハンドルの取得
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = srvDescriptorHeap_->GetGPUDescriptorHandleForHeapStart();
-	gpuHandle.ptr += srvDescriptorSize_ * useSrvDescriptor_;
-
-	// ログを出力する
-	if (engine)
+	// フリーリストに空きがあれば優先的に再利用
+	if (!freeSrvIndices_.empty())
 	{
-		engine->Log(LogLevel::Info, std::format("ビュー : SRV, ハンドル : CPU, 値 : {}, ポインタ : {}", useSrvDescriptor_, cpuHandle.ptr));
-		engine->Log(LogLevel::Info, std::format("ビュー : SRV, ハンドル : GPU, 値 : {}, ポインタ : {}", useSrvDescriptor_, gpuHandle.ptr));
+		index = freeSrvIndices_.back();
+		freeSrvIndices_.pop_back();
+	}
+	else
+	{
+		// 空きがなければ新規インデックスを発行
+		assert(useSrvDescriptor_ < static_cast<int>(srvDescriptorNum_) && "SRVディスクリプタの最大数を超過しています");
+		index = static_cast<uint32_t>(useSrvDescriptor_++);
 	}
 
-	// 数をカウントする
-	useSrvDescriptor_++;
+	// CPUハンドルを計算
+	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	cpuHandle.ptr += srvDescriptorSize_ * index;
+
+	// GPUハンドルを計算
+	D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = srvDescriptorHeap_->GetGPUDescriptorHandleForHeapStart();
+	gpuHandle.ptr += srvDescriptorSize_ * index;
+
+	if (engine)
+	{
+		engine->Log(LogLevel::Info, std::format("ビュー : SRV, ハンドル : CPU, インデックス : {}, ポインタ : {}", index, cpuHandle.ptr));
+		engine->Log(LogLevel::Info, std::format("ビュー : SRV, ハンドル : GPU, インデックス : {}, ポインタ : {}", index, gpuHandle.ptr));
+	}
 
 	return { cpuHandle, gpuHandle };
 }
@@ -99,26 +112,102 @@ Detail::SRVDescriptorHandle Detail::DXHeap::GetSrvDescriptorHandle()
 /// @return 
 D3D12_CPU_DESCRIPTOR_HANDLE Detail::DXHeap::GetDsvDescriptorHandle()
 {
-	// DSVディスクリプタの最大数を超過していないか確認
-	assert(useDsvDescriptor_ < static_cast<int>(dsvDescriptorNum_) && "DSVディスクリプタの最大数を超過しています");
-
-	// エンジンのインスタンスを取得
 	auto engine = Engine::GetInstance();
+	uint32_t index = 0;
+
+	// フリーリストに空きがあれば優先的に再利用
+	if (!freeDsvIndices_.empty())
+	{
+		index = freeDsvIndices_.back();
+		freeDsvIndices_.pop_back();
+	}
+	else
+	{
+		// 空きがなければ新規インデックスを発行
+		assert(useDsvDescriptor_ < static_cast<int>(dsvDescriptorNum_) && "DSVディスクリプタの最大数を超過しています");
+		index = static_cast<uint32_t>(useDsvDescriptor_++);
+	}
 
 	// CPUハンドルを取得
 	D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
-	cpuHandle.ptr += dsvDescriptorSize_ * useDsvDescriptor_;
+	cpuHandle.ptr += dsvDescriptorSize_ * index;
 
 	// ログを出力する
 	if (engine)
 	{
-		engine->Log( LogLevel::Info, std::format("ビュー : DSV, ハンドル : CPU, 値 : {}, ポインタ : {}", useDsvDescriptor_, cpuHandle.ptr));
+		engine->Log( LogLevel::Info, std::format("ビュー : DSV, ハンドル : CPU, 値 : {}, ポインタ : {}", index, cpuHandle.ptr));
 	}
 
-	// 数をカウントする
-	useDsvDescriptor_++;
-
 	return cpuHandle;
+}
+
+/// @brief RTV用ディスクリプタハンドルを解放する
+/// @param handle 
+void Detail::DXHeap::FreeRtvDescriptorHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+{
+	if (handle.ptr == 0) return;
+
+	// ヒープの開始ハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE startHandle = rtvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	if (handle.ptr < startHandle.ptr)
+	{
+		throw std::runtime_error("解放しようとしたRTVハンドルがヒープの範囲外です");
+	}
+
+	// ポインタの差分からインデックスを計算してフリーリストに追加
+	uint32_t index = static_cast<uint32_t>((handle.ptr - startHandle.ptr) / rtvDescriptorSize_);
+	if (index >= rtvDescriptorNum_)
+	{
+		throw std::runtime_error("範囲外のRTVハンドルです");
+	}
+
+	freeRtvIndices_.push_back(index);
+}
+
+/// @brief SRV用ディスクリプタハンドルを解放する
+/// @param index 
+void Detail::DXHeap::FreeSrvDescriptorHandle(const SRVDescriptorHandle& handle)
+{
+	if (handle.cpuHandle.ptr == 0) return;
+
+	// ヒープの開始ハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE startHandle = srvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	if (handle.cpuHandle.ptr < startHandle.ptr)
+	{
+		throw std::runtime_error("解放しようとしたSRVハンドルがヒープの範囲外です");
+	}
+
+	// ポインタの差分からインデックスを計算してフリーリストに追加
+	uint32_t index = static_cast<uint32_t>((handle.cpuHandle.ptr - startHandle.ptr) / srvDescriptorSize_);
+	if(index >= srvDescriptorNum_)
+	{
+		throw std::runtime_error("範囲外のSRVハンドルです");
+	}
+
+	freeSrvIndices_.push_back(index);
+}
+
+/// @brief DSV用ディスクリプタハンドルを解放する
+/// @param handle 
+void Detail::DXHeap::FreeDsvDescriptorHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle)
+{
+	if (handle.ptr == 0) return;
+
+	// ヒープの開始ハンドルを取得
+	D3D12_CPU_DESCRIPTOR_HANDLE startHandle = dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	if (handle.ptr < startHandle.ptr)
+	{
+		throw std::runtime_error("解放しようとしたDSVハンドルがヒープの範囲外です");
+	}
+
+	// ポインタの差分からインデックスを計算してフリーリストに追加
+	uint32_t index = static_cast<uint32_t>((handle.ptr - startHandle.ptr) / dsvDescriptorSize_);
+	if (index >= dsvDescriptorNum_)
+	{
+		throw std::runtime_error("範囲外のDSVハンドルです");
+	}
+
+	freeDsvIndices_.push_back(index);
 }
 
 

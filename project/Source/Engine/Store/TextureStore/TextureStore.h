@@ -44,6 +44,9 @@ namespace Detail
 
 			/// @brief 種類
 			TextureType type_;
+
+			/// @brief ハッシュ値
+			uint64_t hash = 0;
 		};
 
 
@@ -93,7 +96,7 @@ namespace Detail
 
 		/// @brief テクスチャを削除する
 		/// @param handle 
-		void Remove(uint32_t handle, ID3D12Device* device);
+		void Remove(uint32_t handle, ID3D12Device* device, DXHeap* heap);
 
 		/// @brief 中間リソースを解放する
 		void ReleaseIntermediateResources();
@@ -106,6 +109,11 @@ namespace Detail
 		/// @return 
 		std::string NormalizePath(const std::string& path) const;
 
+		/// @brief テクスチャのハッシュ値を計算する
+		/// @param image 
+		/// @return 
+		uint64_t ComputeImageHash(const DirectX::ScratchImage& image) const;
+
 	private:
 
 		/// @brief テクスチャデータのテーブル
@@ -113,6 +121,9 @@ namespace Detail
 
 		/// @brief ファイルパスとハンドルのマップ
 		std::unordered_map<std::string, uint32_t> pathToHandleMap_;
+
+		/// @brief ハッシュ値とハンドルのマップ
+		std::unordered_map<uint64_t, uint32_t> hashToHandleMap_;
 
 		/// @brief 保留中のアップロードリソース
 		std::vector<std::pair<Microsoft::WRL::ComPtr<ID3D12Resource>, uint32_t>> pendingUploadResources_;

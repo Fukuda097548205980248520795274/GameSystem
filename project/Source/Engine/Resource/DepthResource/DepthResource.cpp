@@ -4,6 +4,25 @@
 #include "Func/Barrier/Barrier.h"
 #include "Func/ResourceFunc/ResourceFunc.h"
 
+/// @brief デストラクタ
+Detail::DepthResource::~DepthResource()
+{
+	if (heap_)
+	{
+		for (int i = 0; i < resource_.size(); ++i)
+		{
+			// DSVハンドルを解放する
+			heap_->FreeDsvDescriptorHandle(dsvHandle_[i]);
+
+			// 読み取り専用のDSVハンドルを解放する
+			heap_->FreeDsvDescriptorHandle(dsvReadOnlyHandle_[i]);
+
+			// SRVハンドルを解放する
+			heap_->FreeSrvDescriptorHandle(srvHandle_[i]);
+		}
+	}
+}
+
 /// @brief 初期化
 /// @param device 
 /// @param width 
@@ -18,6 +37,7 @@ void Detail::DepthResource::Initialize(ID3D12Device* device, int32_t width, int3
 
 	// エンジンのインスタンスを取得する
 	auto engine = Engine::GetInstance();
+	heap_ = heap;
 
 	// 最大バッファ数を取得する
 	uint32_t maxBufferCount = 1;

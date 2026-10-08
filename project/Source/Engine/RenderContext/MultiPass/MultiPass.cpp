@@ -23,8 +23,8 @@ void Detail::MultiPass::Initialize(ID3D12Device* device, DXHeap* heap, DXSwapCha
 	int width = static_cast<int32_t>(swapChain->GetSwapChainDesc().Width);
 	int height = static_cast<int32_t>(swapChain->GetSwapChainDesc().Height);
 
-	depthResource_ = std::make_unique<DepthResource>();
-	depthResource_->Initialize(device, width, height, heap);
+	// デプスリソースを作成
+	depthResource_ = std::make_unique<DepthResource>(device, width, height, heap);
 
 	// スワップチェーンコピーPSOを作成
 	swapChainCopyPSO_ = std::make_unique<SwapChainCopyPSO>(device, shaderCompiler);

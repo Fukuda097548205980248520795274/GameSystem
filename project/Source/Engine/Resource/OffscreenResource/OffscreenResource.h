@@ -20,7 +20,7 @@ namespace Detail
 		OffscreenResource(ID3D12Device* device, DXHeap* heap, int32_t width, int32_t height) { Initialize(device, heap, width, height); }
 
 		/// @brief デストラクタ
-		~OffscreenResource() = default;
+		~OffscreenResource();
 
 		/// @brief サイズを作り直す
 		/// @param device 
@@ -98,6 +98,9 @@ namespace Detail
 		/// @param width
 		/// @param height
 		void Initialize(ID3D12Device* device, DXHeap* heap, int32_t width, int32_t height);
+
+		/// @brief ヒープ
+		DXHeap* heap_ = nullptr;
 
 		// リソース
 		std::vector<ComPtr<ID3D12Resource>> resource_;

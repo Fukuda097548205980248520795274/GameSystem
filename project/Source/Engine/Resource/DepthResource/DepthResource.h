@@ -17,7 +17,10 @@ namespace Detail
 		/// @param width 
 		/// @param height 
 		/// @param heap 
-		void Initialize(ID3D12Device* device, int32_t width, int32_t height, DXHeap* heap);
+		DepthResource(ID3D12Device* device, int32_t width, int32_t height, DXHeap* heap) { Initialize(device, width, height, heap); }
+
+		/// @brief デストラクタ
+		~DepthResource();
 
 		/// @brief サイズを作り直す
 		/// @param device 
@@ -66,6 +69,16 @@ namespace Detail
 
 
 	private:
+
+		/// @brief 初期化
+		/// @param device 
+		/// @param width 
+		/// @param height 
+		/// @param heap 
+		void Initialize(ID3D12Device* device, int32_t width, int32_t height, DXHeap* heap);
+
+		/// @brief ヒープ
+		DXHeap* heap_ = nullptr;
 
 		// リソース
 		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;

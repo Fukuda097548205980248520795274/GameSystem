@@ -21,7 +21,7 @@ namespace Detail
 		StructuredBufferResource(ID3D12Device* device, DXHeap* heap, UINT num) { Initialize(device, heap, num); }
 
 		/// @brief デストラクタ
-		~StructuredBufferResource() = default;
+		~StructuredBufferResource();
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
@@ -49,6 +49,9 @@ namespace Detail
 		/// @param num 
 		void Initialize(ID3D12Device* device, DXHeap* heap, UINT num);
 
+		/// @brief ヒープ
+		DXHeap* heap_ = nullptr;
+
 		/// @brief リソース
 		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
 
@@ -58,6 +61,20 @@ namespace Detail
 		/// @brief SRVハンドル
 		std::vector<SRVDescriptorHandle> handle_;
 	};
+}
+
+/// @brief デストラクタ
+template <typename T>
+Detail::StructuredBufferResource<T>::~StructuredBufferResource()
+{
+	if (heap_)
+	{
+		for (int i = 0; i < resource_.size(); ++i)
+		{
+			// SRVハンドルを解放する
+			heap_->FreeSrvDescriptorHandle(handle_[i]);
+		}
+	}
 }
 
 /// @brief 初期化
@@ -75,6 +92,7 @@ void Detail::StructuredBufferResource<T>::Initialize(ID3D12Device* device, DXHea
 
 	// エンジンのインスタンスを取得する
 	auto engine = Engine::GetInstance();
+	heap_ = heap;
 
 	// 最大バッファ数を取得する
 	int maxBufferCount = 1;

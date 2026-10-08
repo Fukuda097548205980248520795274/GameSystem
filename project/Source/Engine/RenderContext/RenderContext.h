@@ -75,7 +75,11 @@ namespace Detail
 
 		/// @brief デバイスを取得する
 		/// @return 
-		ID3D12Device* GetDevice() const { return core_->GetDevice(); }
+		DXCore* GetCore() const { return core_.get(); }
+
+		/// @brief コマンドを取得する
+		/// @return 
+		DXHeap* GetHeap() const { return heap_.get(); }
 
 		/// @brief テクスチャファイルがドロップされたときの処理
 		/// @param filePath 

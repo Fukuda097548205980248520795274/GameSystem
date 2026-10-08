@@ -20,6 +20,34 @@ std::string Detail::TextureStore::NormalizePath(const std::string& path) const
 	return normalized;
 }
 
+/// @brief テクスチャのハッシュ値を計算する
+/// @param image 
+/// @return 
+uint64_t Detail::TextureStore::ComputeImageHash(const DirectX::ScratchImage& image) const
+{
+	// FNV-1aハッシュアルゴリズムの初期値
+	uint64_t hash = 14695981039346656037ULL;
+
+	// DirectX::ScratchImageからピクセルデータを取得してハッシュ値を計算する
+	const DirectX::Image* images = image.GetImages();
+	size_t imageCount = image.GetImageCount();
+
+	// すべてのスライス（ミップマップを含む）に対してハッシュ値を計算
+	for (size_t i = 0; i < imageCount; ++i)
+	{
+		// スライスのピクセルデータとサイズを取得
+		const uint8_t* pixels = images[i].pixels;
+		size_t size = images[i].slicePitch;
+
+		for (size_t j = 0; j < size; ++j)
+		{
+			hash ^= pixels[j];
+			hash *= 1099511628211ULL;
+		}
+	}
+	return hash;
+}
+
 /// @brief テクスチャを読み込む
 /// @param filePath 
 /// @param heap 
@@ -49,14 +77,28 @@ uint32_t Detail::TextureStore::Load(const std::string& filePath, DXHeap* heap, I
 	if (image.GetImageCount() == 0)
 	{
 		// 読み込みに失敗した場合は無効なハンドルを返す
-		if (engine)engine->Log(LogLevel::Error, "テクスチャンの読み込みに失敗 : " + filePath);
+		if (engine)engine->Log(LogLevel::Error, "テクスチャの読み込みに失敗 : " + filePath);
 		return kInvalidTextureHandle;
+	}
+	if (engine)engine->Log(LogLevel::Info, "テクスチャを読み込みました : " + filePath);
+
+	// ハッシュ値を計算して、すでに同じハッシュ値のテクスチャが存在するか確認
+	uint64_t hash = ComputeImageHash(image);
+	auto hashIt = hashToHandleMap_.find(hash);
+	if (hashIt != hashToHandleMap_.end())
+	{
+		uint32_t existingHandle = hashIt->second;
+		
+		// すでに同じハッシュ値のテクスチャが存在する場合は、既存のハンドルを返す
+		pathToHandleMap_[normPath] = existingHandle;
+		return existingHandle;
 	}
 
 	// テクスチャデータを作成
 	auto textureData = std::make_unique<TextureData>();
 	textureData->name = filePath;
 	textureData->metadata = image.GetMetadata();
+	textureData->hash = hash;
 
 	// メタデータからテクスチャの種類を判定
 	const DirectX::TexMetadata& metadata = image.GetMetadata();
@@ -70,6 +112,7 @@ uint32_t Detail::TextureStore::Load(const std::string& filePath, DXHeap* heap, I
 		if (engine)engine->Log(LogLevel::Error, "テクスチャリソースの生成に失敗 : " + filePath);
 		return kInvalidTextureHandle;
 	}
+	if (engine)engine->Log(LogLevel::Info, "テクスチャリソースを生成しました : " + filePath);
 
 	// 中間リソースを生成して転送コマンドを発行
 	Microsoft::WRL::ComPtr<ID3D12Resource> subResource = UploadTextureData(textureData->resource.Get(), image, device, commandList);
@@ -110,6 +153,7 @@ uint32_t Detail::TextureStore::Load(const std::string& filePath, DXHeap* heap, I
 
 	dataTable_.push_back(std::move(textureData));
 	pathToHandleMap_[normPath] = handle;
+	hashToHandleMap_[hash] = handle;
 
 	return handle;
 }
@@ -191,7 +235,9 @@ Detail::TextureType Detail::TextureStore::GetType(uint32_t handle) const
 
 /// @brief テクスチャを削除する
 /// @param handle 
-void Detail::TextureStore::Remove(uint32_t handle, ID3D12Device* device)
+/// @param device
+/// @param heap
+void Detail::TextureStore::Remove(uint32_t handle, ID3D12Device* device, DXHeap* heap)
 {
 	// 範囲外アクセスや、すでに削除済みの場合は何もしない
 	if (handle >= dataTable_.size() || !dataTable_[handle])
@@ -243,6 +289,10 @@ void Detail::TextureStore::Remove(uint32_t handle, ID3D12Device* device)
 	// ファイルパスマップから削除
 	std::string normPath = NormalizePath(dataTable_[handle]->name);
 	pathToHandleMap_.erase(normPath);
+	hashToHandleMap_.erase(dataTable_[handle]->hash);
+
+	// DXHeapからSRVディスクリプタを解放
+	if (heap)heap->FreeSrvDescriptorHandle(dataTable_[handle]->srvHandle);
 
 	// テーブルから削除
 	dataTable_[handle].reset();

@@ -6,6 +6,22 @@
 
 #include "Engine.h"
 
+/// @brief デストラクタ
+Detail::OffscreenResource::~OffscreenResource()
+{
+	if (heap_)
+	{
+		for (int i = 0; i < resource_.size(); ++i)
+		{
+			// RTVハンドルを解放する
+			heap_->FreeRtvDescriptorHandle(rtvHandle_[i]);
+
+			// SRVハンドルを解放する
+			heap_->FreeSrvDescriptorHandle(srvHandle_[i]);
+		}
+	}
+}
+
 /// @brief 初期化
 /// @param device 
 /// @param heap 
@@ -20,6 +36,7 @@ void Detail::OffscreenResource::Initialize(ID3D12Device* device, DXHeap* heap, i
 
 	// エンジンのインスタンスを取得する
 	auto engine = Engine::GetInstance();
+	heap_ = heap;
 	
 	// 最大バッファ数を取得する
 	uint32_t maxBufferCount = 1;
