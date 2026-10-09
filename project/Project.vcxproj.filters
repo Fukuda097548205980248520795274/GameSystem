@@ -77,18 +77,6 @@
     <Filter Include="Source\Engine\Func\Barrier">
       <UniqueIdentifier>{6929b12b-9e00-48fa-a677-67377c3774eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\ECS">
-      <UniqueIdentifier>{a7942847-ec76-4196-a72f-736eba0c5f62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Engine\ECS\ComponentECS">
-      <UniqueIdentifier>{a3f01daa-65e4-477b-9c91-7c7cae9c9c5c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Engine\ECS\RegistryECS">
-      <UniqueIdentifier>{51b2b84c-4d40-43f6-8dcd-5b3a9117dc5a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Engine\ECS\EntityECS">
-      <UniqueIdentifier>{f8fbbdc3-ae90-458d-98db-f9d6ff15b1e8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\RenderContext\MultiPass">
       <UniqueIdentifier>{9b5f33d0-7bfb-4001-a9d0-7adf1b7a6c8b}</UniqueIdentifier>
     </Filter>
@@ -203,6 +191,18 @@
     <Filter Include="Source\Tool\Texture\TextureEditor">
       <UniqueIdentifier>{cafa9372-fcf7-453c-b50c-bbbae9cc23d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\ECS">
+      <UniqueIdentifier>{a7942847-ec76-4196-a72f-736eba0c5f62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\ECS\ComponentECS">
+      <UniqueIdentifier>{a3f01daa-65e4-477b-9c91-7c7cae9c9c5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\ECS\RegistryECS">
+      <UniqueIdentifier>{51b2b84c-4d40-43f6-8dcd-5b3a9117dc5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\ECS\EntityECS">
+      <UniqueIdentifier>{f8fbbdc3-ae90-458d-98db-f9d6ff15b1e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -271,8 +271,8 @@
     <ClCompile Include="Source\Engine\Func\Barrier\Barrier.cpp">
       <Filter>Source\Engine\Func\Barrier</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\ECS\RegistryECS\RegistryECS.cpp">
-      <Filter>Source\Engine\ECS\RegistryECS</Filter>
+    <ClCompile Include="Source\Tool\ECS\RegistryECS\RegistryECS.cpp">
+      <Filter>Source\Tool\ECS\RegistryECS</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\MultiPass\MultiPass.cpp">
       <Filter>Source\Engine\RenderContext\MultiPass</Filter>
@@ -399,14 +399,14 @@
     <ClInclude Include="Source\Engine\Func\Barrier\Barrier.h">
       <Filter>Source\Engine\Func\Barrier</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\ECS\ComponentECS\ComponentECS.h">
-      <Filter>Source\Engine\ECS\ComponentECS</Filter>
+    <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.h">
+      <Filter>Source\Tool\ECS\ComponentECS</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\ECS\RegistryECS\RegistryECS.h">
-      <Filter>Source\Engine\ECS\RegistryECS</Filter>
+    <ClInclude Include="Source\Tool\ECS\RegistryECS\RegistryECS.h">
+      <Filter>Source\Tool\ECS\RegistryECS</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\ECS\EntityECS\EntityECS.h">
-      <Filter>Source\Engine\ECS\EntityECS</Filter>
+    <ClInclude Include="Source\Tool\ECS\EntityECS\EntityECS.h">
+      <Filter>Source\Tool\ECS\EntityECS</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\MultiPass\MultiPass.h">
       <Filter>Source\Engine\RenderContext\MultiPass</Filter>
