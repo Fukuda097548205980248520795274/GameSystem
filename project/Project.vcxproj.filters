@@ -203,6 +203,15 @@
     <Filter Include="Source\Tool\ECS\EntityECS">
       <UniqueIdentifier>{f8fbbdc3-ae90-458d-98db-f9d6ff15b1e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\ECS\ECSEditor">
+      <UniqueIdentifier>{34d103fd-0c81-4d51-b520-93273e3c0165}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\ECS\ECSEditor\HierarchyUI">
+      <UniqueIdentifier>{2c6d3d4e-03bb-432c-92e7-7c3d9456356a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\ECS\ECSEditor\InspectorUI">
+      <UniqueIdentifier>{265712d5-07f3-4fc7-aa42-806225b5d3de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -333,6 +342,18 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\Texture\TextureEditor\TextureEditor.cpp">
       <Filter>Source\Tool\Texture\TextureEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
+      <Filter>Source\Tool\ECS\ECSEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ECSEditor\新しいフォルダー\HierarchyUI.cpp">
+      <Filter>Source\Tool\ECS\ECSEditor\HierarchyUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ECSEditor\InspectorUI\InspectorUI.cpp">
+      <Filter>Source\Tool\ECS\ECSEditor\InspectorUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ECSEditor\HierarchyUI\HierarchyUI.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -482,6 +503,9 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\Texture\TextureEditor\TextureEditor.h">
       <Filter>Source\Tool\Texture\TextureEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\ECS\ECSEditor\ECSEditor.h">
+      <Filter>Source\Tool\ECS\ECSEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
