@@ -200,7 +200,8 @@ void Detail::ImGuiRender::CreateDockSpace()
 void Detail::ImGuiRender::DrawImGuiScreen(OffscreenResource* currentOffscreen, ID3D12GraphicsCommandList* commandList, int32_t frameIndex)
 {
 	// nullptrチェック
-	if (currentOffscreen == nullptr)return;
+	if (currentOffscreen == nullptr)
+		return;
 
 	ImGui::Begin("View");
 

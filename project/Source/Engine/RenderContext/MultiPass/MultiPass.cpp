@@ -26,6 +26,10 @@ void Detail::MultiPass::Initialize(ID3D12Device* device, DXHeap* heap, DXSwapCha
 	// デプスリソースを作成
 	depthResource_ = std::make_unique<DepthResource>(device, width, height, heap);
 
+	// ダミーリソースを作成
+	dummyResource_ = std::make_unique<OffscreenResource>(device, heap, 1, 1);
+	dummyResource_->AllBarrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 	// スワップチェーンコピーPSOを作成
 	swapChainCopyPSO_ = std::make_unique<SwapChainCopyPSO>(device, shaderCompiler);
 
@@ -42,6 +46,9 @@ void Detail::MultiPass::Initialize(ID3D12Device* device, DXHeap* heap, DXSwapCha
 void Detail::MultiPass::Clear(ID3D12GraphicsCommandList* commandList, int frameIndex)
 {
 	assert(commandList);
+
+	// 初期に戻ったので、現在のリソースをクリア
+	currentResource_ = nullptr;
 
 	// デプスステンシルのクリア
 	depthResource_->ClearDepthStencil(commandList, frameIndex);
@@ -91,6 +98,12 @@ void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSy
 
 	// レンダーパスを実行する
 	renderPassSystem_->ExecuteAll(commandList, depthResource_->GetDsvHandle(frameIndex), this, renderSystem);
+
+	// レンダーパスの結果が存在しない場合は、ダミーリソースを設定する
+	if (!currentResource_)
+	{
+		currentResource_ = dummyResource_.get();
+	}
 }
 
 /// @brief サイズを作り直す

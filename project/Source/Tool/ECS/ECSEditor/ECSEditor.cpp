@@ -19,7 +19,11 @@ void Detail::ECSEditor::Initialize()
 /// @brief 更新
 void Detail::ECSEditor::Update()
 {
+#ifdef DEVELOPMENT
+
 	// UIウィンドウの描画
 	DrawHierarchy();
 	DrawInspector();
+
+#endif
 }

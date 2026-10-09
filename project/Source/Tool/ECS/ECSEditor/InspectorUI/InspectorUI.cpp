@@ -3,6 +3,8 @@
 
 void Detail::ECSEditor::DrawInspector()
 {
+#ifdef DEVELOPMENT
+
 	ImGui::Begin("Inspector");
 
 	if (selectedEntity_ == kNullEntity)
@@ -26,11 +28,6 @@ void Detail::ECSEditor::DrawInspector()
 			ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
 		}
 	}
-	else
-	{
-		if (ImGui::Button("Add Transform"))
-			registry_->AddComponent<TransformComponent>(selectedEntity_, TransformComponent());
-	}
 
 	// BlendComponent
 	if (registry_->HasComponent<BlendComponent>(selectedEntity_))
@@ -48,10 +45,16 @@ void Detail::ECSEditor::DrawInspector()
 			}
 		}
 	}
-	else
+
+	// RenderPassComponent
+	if (registry_->HasComponent<RenderPassComponent>(selectedEntity_))
 	{
-		if (ImGui::Button("Add Blend"))
-			registry_->AddComponent<BlendComponent>(selectedEntity_, BlendComponent());
+		if (ImGui::CollapsingHeader("Render Pass", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& renderPass = registry_->GetComponent<RenderPassComponent>(selectedEntity_);
+			ImGui::Checkbox("Is Enabled", &renderPass.isEnabled);
+			ImGui::DragInt("Priority", &renderPass.priority, 1);
+		}
 	}
 
 	// RenderComponent
@@ -64,11 +67,8 @@ void Detail::ECSEditor::DrawInspector()
 			ImGui::DragInt("Priority", &render.priority, 1);
 		}
 	}
-	else
-	{
-		if (ImGui::Button("Add Render"))
-			registry_->AddComponent<RenderComponent>(selectedEntity_, RenderComponent());
-	}
 
 	ImGui::End();
+
+#endif
 }

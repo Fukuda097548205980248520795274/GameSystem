@@ -95,6 +95,9 @@ namespace Detail
 		/// @brief 深度リソース
 		std::unique_ptr<DepthResource> depthResource_;
 
+		/// @brief ダミーリソース
+		std::unique_ptr<OffscreenResource> dummyResource_;
+
 		/// @brief レンダーターゲットプール
 		std::unique_ptr<RenderTargetPool> renderTargetPool_;
 

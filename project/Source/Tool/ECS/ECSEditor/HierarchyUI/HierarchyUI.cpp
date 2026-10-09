@@ -3,6 +3,8 @@
 
 void Detail::ECSEditor::DrawHierarchy()
 {
+#ifdef DEVELOPMENT
+
 	ImGui::Begin("Hierarchy");
 
 	// エンティティ作成ボタン
@@ -30,7 +32,7 @@ void Detail::ECSEditor::DrawHierarchy()
 			selectedEntity_ = entity;
 		}
 
-		// 右クリック等でエンティティ削除メニューを出す処理もここで追加可能
+		// 右クリックでコンテキストメニューを表示
 		if (ImGui::BeginPopupContextItem())
 		{
 			if (ImGui::MenuItem("Destroy Entity"))
@@ -46,4 +48,6 @@ void Detail::ECSEditor::DrawHierarchy()
 	}
 
 	ImGui::End();
+
+#endif
 }
