@@ -346,14 +346,11 @@
     <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
       <Filter>Source\Tool\ECS\ECSEditor</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tool\ECS\ECSEditor\新しいフォルダー\HierarchyUI.cpp">
-      <Filter>Source\Tool\ECS\ECSEditor\HierarchyUI</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Tool\ECS\ECSEditor\InspectorUI\InspectorUI.cpp">
       <Filter>Source\Tool\ECS\ECSEditor\InspectorUI</Filter>
     </ClCompile>
     <ClCompile Include="Source\Tool\ECS\ECSEditor\HierarchyUI\HierarchyUI.cpp">
-      <Filter>Source</Filter>
+      <Filter>Source\Tool\ECS\ECSEditor\HierarchyUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

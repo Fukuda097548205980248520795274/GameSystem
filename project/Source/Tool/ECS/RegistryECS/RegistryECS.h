@@ -64,6 +64,10 @@ namespace Detail
 			return componentArray->Has(entity);
 		}
 
+		/// @brief 有効なエンティティの一覧を取得する
+		/// @return 
+		const std::vector<Entity>& GetActiveEntities() const { return activeEntities_; }
+
 
 	private:
 
@@ -72,5 +76,8 @@ namespace Detail
 
 		/// @brief コンポーネント配列のマップ
 		std::unordered_map<std::type_index, std::unique_ptr<IComponentArray>> componentArrays_;
+
+		/// @brief 有効なエンティティの一覧
+		std::vector<Entity> activeEntities_;
 	};
 }

@@ -11,6 +11,7 @@
 
 #include "Render/RenderSystem/RenderSystem.h"
 
+#include "ECS/ECSEditor/ECSEditor.h"
 #include "Shader/ShaderEditor/ShaderEditor.h"
 #include "PSO/PSOEditor/PSOEditor.h"
 #include "Texture/TextureEditor/TextureEditor.h"
@@ -161,6 +162,9 @@ namespace Detail
 
 
 	private:
+
+		/// @brief ECSエディタ
+		std::unique_ptr<ECSEditor> ecsEditor_ = nullptr;
 
 		/// @brief PSOエディタ
 		std::unique_ptr<Detail::PSOEditor> psoEditor_;

@@ -73,6 +73,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 
 #endif
 
+	// ECSEditorを作成
+	ecsEditor_ = std::make_unique<ECSEditor>();
+
 	// ShaderEditorを作成
 	shaderEditor_ = std::make_unique<ShaderEditor>();
 
@@ -146,6 +149,9 @@ void Detail::RenderContext::NewFrame()
 
 	// Dockスペースを作成する
 	imguiRender_->CreateDockSpace();
+
+	// ECSEditorを更新する
+	ecsEditor_->Update();
 
 	// psoEditorを更新する
 	psoEditor_->Update();
