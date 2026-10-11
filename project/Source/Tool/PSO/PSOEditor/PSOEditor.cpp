@@ -310,6 +310,13 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				{
 					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : ピクセルシェーダーファイルが見つかりません！");
 				}
+
+				// 自動設定ボタン
+				if (ImGui::Button("シェーダから自動設定"))
+				{
+					AutoSetupRootParameters(currentDesc);
+					currentItem.isDirty = true;
+				}
 			}
 		}
 		else if (currentDesc.type == Detail::PSOType::Compute)
@@ -328,13 +335,6 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : コンピュートシェーダーファイルが見つかりません！");
 				}
 			}
-		}
-
-		// 自動設定ボタン
-		if (ImGui::Button("シェーダから自動設定"))
-		{
-			AutoSetupRootParameters(currentDesc);
-			currentItem.isDirty = true;
 		}
 
 		// ルートパラメータの設定 (Graphics / Compute 共通)
@@ -583,7 +583,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						currentItem.isDirty = true;
 					}
 
-					// Format の編集 (代表的なものを列挙)
+					// Format の編集
 					const char* formatNames[] = {
 						"R32G32B32A32_FLOAT", "R32G32B32_FLOAT", "R32G32_FLOAT", "R32_FLOAT",
 						"R8G8B8A8_UNORM", "R8G8B8A8_UINT"
