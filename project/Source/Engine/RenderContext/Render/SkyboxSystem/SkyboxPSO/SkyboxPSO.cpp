@@ -17,7 +17,7 @@ void Detail::SkyboxPSO::Initialize(ID3D12Device* device, ShaderCompiler* compile
 	auto engine = Engine::GetInstance();
 
 	// ピクセルシェーダのバイナリデータを取得する
-	vertexShaderBlob_ = compiler->Compile(L"./Assets/Shader/Skybox/Skybox.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob_ = compiler->Compile(L"./Assets/InternalShader/Skybox/Skybox.VS.hlsl", L"vs_6_0");
 	if (!vertexShaderBlob_)
 	{
 		if (engine)engine->Log(LogLevel::Error, "Skybox.VS.hlslのコンパイルに失敗しました");
@@ -25,7 +25,7 @@ void Detail::SkyboxPSO::Initialize(ID3D12Device* device, ShaderCompiler* compile
 	}
 
 	// ピクセルシェーダのバイナリデータを取得する
-	pixelShaderBlob_ = compiler->Compile(L"./Assets/Shader/Skybox/Skybox.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob_ = compiler->Compile(L"./Assets/InternalShader/Skybox/Skybox.PS.hlsl", L"ps_6_0");
 	if (!pixelShaderBlob_)
 	{
 		if (engine)engine->Log(LogLevel::Error, "Skybox.PS.hlslのコンパイルに失敗しました");

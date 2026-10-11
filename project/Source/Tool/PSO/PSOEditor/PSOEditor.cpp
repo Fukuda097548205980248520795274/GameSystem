@@ -312,6 +312,13 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			}
 		}
 
+		// 自動設定ボタン
+		if (ImGui::Button("シェーダから自動設定"))
+		{
+			AutoSetupRootParameters(currentDesc);
+			currentItem.isDirty = true;
+		}
+
 		// ルートパラメータの設定 (Graphics / Compute 共通)
 		if (ImGui::CollapsingHeader("ルートパラメータ", ImGuiTreeNodeFlags_DefaultOpen))
 		{
@@ -910,6 +917,75 @@ void Detail::PSOEditor::LoadFromFile(const std::string& filename)
 
 		// ファイルを閉じる
 		file.close();
+	}
+}
+
+/// @brief ルートパラメータを自動設定する
+/// @param desc 
+void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
+{
+	std::set<std::pair<char, uint32_t>> registers;
+
+	// ファイルを読み込んでレジスタを抽出するラムダ関数
+	auto ExtractRegisters = [&](const std::wstring& path)
+		{
+			if (path.empty() || !std::filesystem::exists(path)) return;
+			std::ifstream file(path);
+			if (!file.is_open()) return;
+
+			std::ostringstream ss;
+			ss << file.rdbuf();
+			std::string content = ss.str();
+
+			// HLSLのregister指定を正規表現で抽出
+			std::regex reg("register\\s*\\(\\s*([btus])(\\d+)\\s*(?:,\\s*space\\d+)?\\s*\\)");
+			auto words_begin = std::sregex_iterator(content.begin(), content.end(), reg);
+			auto words_end = std::sregex_iterator();
+
+			for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+			{
+				std::smatch match = *i;
+				char type = match[1].str()[0];
+				uint32_t regNum = static_cast<uint32_t>(std::stoul(match[2].str()));
+				registers.insert({ type, regNum });
+			}
+		};
+
+	// PSOのタイプに応じて解析するシェーダを切り替え
+	if (desc.type == PSOType::Graphics)
+	{
+		ExtractRegisters(desc.vsPath);
+		ExtractRegisters(desc.psPath);
+	}
+	else if (desc.type == PSOType::Compute)
+	{
+		ExtractRegisters(desc.csPath);
+	}
+
+	// 既存の設定をクリア
+	desc.rootParameters.clear();
+	desc.staticSamplers.clear();
+
+	// 抽出したレジスタ情報からパラメータを構築
+	for (const auto& r : registers)
+	{
+		if (r.first == 's')
+		{
+			CustomStaticSampler sampler{};
+			sampler.shaderRegister = r.second;
+			desc.staticSamplers.push_back(sampler);
+		}
+		else
+		{
+			CustomRootParameter param{};
+			param.shaderRegister = r.second;
+
+			if (r.first == 'b') param.type = CustomRootParamType::CBV;
+			else if (r.first == 't') param.type = CustomRootParamType::SRV;
+			else if (r.first == 'u') param.type = CustomRootParamType::UAV;
+
+			desc.rootParameters.push_back(param);
+		}
 	}
 }
 

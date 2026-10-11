@@ -1,5 +1,7 @@
 #pragma once
 #include "PSO/DynamicPSOBuilder/DynamicPSOBuilder.h"
+#include <regex>
+#include <set>
 
 namespace Detail
 {
@@ -82,6 +84,10 @@ namespace Detail
 		/// @param filepath 
 		void LoadFromFile(const std::string& filename);
 
+		/// @brief ルートパラメータを自動設定する
+		/// @param desc 
+		void AutoSetupRootParameters(PSODescription& desc);
+
 
 	private:
 
@@ -118,7 +124,7 @@ namespace Detail
 	private:
 
 		/// @brief PSO設定の保存先ディレクトリ
-		const std::string kDir = "./Assets/EngineData/PSO/";
+		const std::string kDir = "./Assets/Data/PSO/";
 
 		// PSOデータファイルリスト
 		std::vector<std::string> psoFileList_;
