@@ -23,7 +23,21 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 	for (size_t i = 0; i < desc.rootParameters.size(); ++i)
 	{
 		const auto& p = desc.rootParameters[i];
-		rootParams[i].ShaderVisibility = p.visibility;
+
+		// シェーダの可視性を設定
+		if(desc.type == PSOType::Compute)
+		{
+			rootParams[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+		}
+		else
+		{
+			if (p.visibility == ShaderVisibility::All) rootParams[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			if (p.visibility == ShaderVisibility::Vertex) rootParams[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+			if (p.visibility == ShaderVisibility::Hull) rootParams[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_HULL;
+			if (p.visibility == ShaderVisibility::Domain) rootParams[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
+			if (p.visibility == ShaderVisibility::Geometry) rootParams[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_GEOMETRY;
+			if (p.visibility == ShaderVisibility::Pixel) rootParams[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+		}
 
 		// DescriptorTableの場合の設定
 		if (p.type == CustomRootParamType::DescriptorTable)
@@ -74,7 +88,21 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 		samplers[i].MaxLOD = D3D12_FLOAT32_MAX;
 		samplers[i].ShaderRegister = s.shaderRegister;
 		samplers[i].RegisterSpace = 0;
-		samplers[i].ShaderVisibility = s.visibility;
+
+		// シェーダの可視性を設定
+		if (desc.type == PSOType::Compute)
+		{
+			samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+		}
+		else
+		{
+			if (s.visibility == ShaderVisibility::All) samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+			if (s.visibility == ShaderVisibility::Vertex) samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+			if (s.visibility == ShaderVisibility::Hull) samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_HULL;
+			if (s.visibility == ShaderVisibility::Domain) samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_DOMAIN;
+			if (s.visibility == ShaderVisibility::Geometry) samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_GEOMETRY;
+			if (s.visibility == ShaderVisibility::Pixel) samplers[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+		}
 	}
 
 	// ルートシグネチャの構築

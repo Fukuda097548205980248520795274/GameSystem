@@ -17,6 +17,17 @@ namespace Detail
 		DescriptorTable
 	};
 
+	// シェーダの可視性
+	enum class ShaderVisibility
+	{
+		All,
+		Vertex,
+		Hull,
+		Domain,
+		Geometry,
+		Pixel
+	};
+
 	enum class PSOType
 	{ 
 		Graphics, 
@@ -63,7 +74,7 @@ namespace Detail
 	{
 		CustomRootParamType type = CustomRootParamType::CBV;
 		uint32_t shaderRegister = 0; // b0, t0, u0 などの 0 の部分
-		D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL;
+		ShaderVisibility visibility = ShaderVisibility::All;
 
 		// DescriptorTableの場合の設定
 		std::vector<CustomDescriptorRange> descriptorRanges;
@@ -78,7 +89,7 @@ namespace Detail
 		D3D12_TEXTURE_ADDRESS_MODE addressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		D3D12_TEXTURE_ADDRESS_MODE addressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		D3D12_COMPARISON_FUNC comparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		D3D12_SHADER_VISIBILITY visibility = D3D12_SHADER_VISIBILITY_ALL;
+		ShaderVisibility visibility = ShaderVisibility::All;
 	};
 
 	// 入力レイアウトの設定データ
@@ -294,7 +305,7 @@ namespace Detail
 	{
 		param.type = static_cast<CustomRootParamType>(j.value("type", static_cast<int>(param.type)));
 		param.shaderRegister = j.value("shaderRegister", param.shaderRegister);
-		param.visibility = static_cast<D3D12_SHADER_VISIBILITY>(j.value("visibility", static_cast<int>(param.visibility)));
+		param.visibility = static_cast<ShaderVisibility>(j.value("visibility", static_cast<int>(param.visibility)));
 		
 		// DescriptorRangesの読み込み
 		if (j.contains("descriptorRanges") && j["descriptorRanges"].is_array())
@@ -320,7 +331,7 @@ namespace Detail
 		sampler.addressV = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(j.value("addressV", static_cast<int>(sampler.addressV)));
 		sampler.addressW = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(j.value("addressW", static_cast<int>(sampler.addressW)));
 		sampler.comparisonFunc = static_cast<D3D12_COMPARISON_FUNC>(j.value("comparisonFunc", static_cast<int>(sampler.comparisonFunc)));
-		sampler.visibility = static_cast<D3D12_SHADER_VISIBILITY>(j.value("visibility", static_cast<int>(sampler.visibility)));
+		sampler.visibility = static_cast<ShaderVisibility>(j.value("visibility", static_cast<int>(sampler.visibility)));
 	}
 
 	/// @brief JSONからCustomInputElementに変換する

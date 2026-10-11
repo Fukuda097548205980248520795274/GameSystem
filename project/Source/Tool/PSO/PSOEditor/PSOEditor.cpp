@@ -7,6 +7,24 @@ Detail::PSOEditor::PSOEditor()
 {
 	RefreshPsoFileList();
 	RefreshShaderFileList();
+
+	
+	// エディタ生成時に初期用のシェーダを読み込んだデフォルトPSOを追加する
+	PSOItem defaultRender3DItem;
+	defaultRender3DItem.name = "Default_Render3D";
+
+	// デフォルトのシェーダパスを設定する
+	defaultRender3DItem.desc.vsPath = L"./Assets/InternalShader/Render/Render3D/Render3D.VS.hlsl";
+	defaultRender3DItem.desc.psPath = L"./Assets/InternalShader/Render/Render3D/Render3D.PS.hlsl";
+	AutoSetupRootParameters(defaultRender3DItem.desc);
+
+	// 自動再構築のフラグを立てておき、最初にDrawUIが呼ばれたタイミングでビルドを走らせる
+	defaultRender3DItem.isDirty = true;
+	isAutoRebuild_ = true;
+
+	// リストに追加して選択状態にする
+	psoItems_.push_back(defaultRender3DItem);
+	selectedIndex_ = 0;
 }
 
 /// @brief 更新処理
@@ -341,6 +359,18 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				if (ImGui::Combo("タイプ", &currentType, typeItems, _countof(typeItems))) {
 					p.type = static_cast<Detail::CustomRootParamType>(currentType);
 					currentItem.isDirty = true;
+				}
+
+				// Graphics PSO の場合のみ、シェーダの可視性を選択するUIを表示
+				if (currentDesc.type == Detail::PSOType::Graphics)
+				{
+					// シェーダの可視性を選択するコンボボックス
+					const char* visibilityItems[] = { "All", "Vertex", "Hull", "Domain", "Geometry", "Pixel" };
+					int currentVisibility = static_cast<int>(p.visibility);
+					if (ImGui::Combo("可視性", &currentVisibility, visibilityItems, _countof(visibilityItems))) {
+						p.visibility = static_cast<Detail::ShaderVisibility>(currentVisibility);
+						currentItem.isDirty = true;
+					}
 				}
 
 				// Descriptor Table 以外は単一のレジスタとして扱う
@@ -924,10 +954,16 @@ void Detail::PSOEditor::LoadFromFile(const std::string& filename)
 /// @param desc 
 void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
 {
-	std::set<std::pair<char, uint32_t>> registers;
+	// 既存の設定をクリア
+	desc.rootParameters.clear();
+	desc.staticSamplers.clear();
+
+	// 重複チェック用のセット
+	using RegisterKey = std::tuple<char, uint32_t, ShaderVisibility>;
+	std::set<RegisterKey> registeredKeys;
 
 	// ファイルを読み込んでレジスタを抽出するラムダ関数
-	auto ExtractRegisters = [&](const std::wstring& path)
+	auto ExtractRegisters = [&](const std::wstring& path, ShaderVisibility visibility)
 		{
 			if (path.empty() || !std::filesystem::exists(path)) return;
 			std::ifstream file(path);
@@ -947,45 +983,127 @@ void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
 				std::smatch match = *i;
 				char type = match[1].str()[0];
 				uint32_t regNum = static_cast<uint32_t>(std::stoul(match[2].str()));
-				registers.insert({ type, regNum });
+
+				RegisterKey key = { type, regNum, visibility };
+
+				// 同一シェーダステージ内での重複指定でなければ追加
+				if (registeredKeys.find(key) == registeredKeys.end())
+				{
+					registeredKeys.insert(key);
+
+					if (type == 's')
+					{
+						CustomStaticSampler sampler{};
+						sampler.shaderRegister = regNum;
+						sampler.visibility = visibility;
+						desc.staticSamplers.push_back(sampler);
+					}
+					else
+					{
+						CustomRootParameter param{};
+						param.shaderRegister = regNum;
+						param.visibility = visibility;
+
+						if (type == 'b') param.type = CustomRootParamType::CBV;
+						
+						else if (type == 't' || type == 'u')
+						{
+							// t (Texture/SRV) と u (UAV) は DescriptorTable として設定
+							param.type = CustomRootParamType::DescriptorTable;
+
+							CustomDescriptorRange range{};
+							range.rangeType = (type == 't') ? D3D12_DESCRIPTOR_RANGE_TYPE_SRV : D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+							range.numDescriptors = 1; // デフォルトで1つ
+							range.baseShaderRegister = regNum;
+							range.registerSpace = 0;
+							range.offsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+							param.descriptorRanges.push_back(range);
+						}
+
+						desc.rootParameters.push_back(param);
+					}
+				}
+			}
+		};
+
+	// ファイルを読み込んでインプットレイアウトを抽出するラムダ関数
+	auto ExtractInputLayouts = [&](const std::wstring& path)
+		{
+			if (path.empty() || !std::filesystem::exists(path)) return;
+			std::ifstream file(path);
+			if (!file.is_open()) return;
+
+			std::ostringstream ss;
+			ss << file.rdbuf();
+			std::string content = ss.str();
+
+			// HLSLの入力レイアウトを正規表現で抽出
+			std::regex reg(R"((float[1-4]?|uint[1-4]?|int[1-4]?)\s+\w+\s*:\s*([A-Za-z_]+)(\d*)\s*;)");
+			auto words_begin = std::sregex_iterator(content.begin(), content.end(), reg);
+			auto words_end = std::sregex_iterator();
+
+			for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+			{
+				std::smatch match = *i;
+				std::string typeStr = match[1].str();
+				std::string semanticName = match[2].str();
+				std::string semanticIndexStr = match[3].str();
+
+				// SV_ で始まるセマンティックはスキップ
+				if (semanticName.find("SV_") == 0) continue;
+
+				// semanticIndex が空の場合は 0 とする
+				uint32_t semanticIndex = semanticIndexStr.empty() ? 0 : std::stoul(semanticIndexStr);
+
+				// 重複チェック
+				bool alreadyExists = false;
+				for (const auto& elem : desc.inputLayouts)
+				{
+					if (elem.semanticName == semanticName && elem.semanticIndex == semanticIndex)
+					{
+						alreadyExists = true;
+						break;
+					}
+				}
+				if (alreadyExists) continue;
+
+				CustomInputElement elem{};
+				elem.semanticName = semanticName;
+				elem.semanticIndex = semanticIndex;
+
+				// 型文字列から DXGI_FORMAT を推論
+				if (typeStr == "float" || typeStr == "float1") elem.format = DXGI_FORMAT_R32_FLOAT;
+				else if (typeStr == "float2") elem.format = DXGI_FORMAT_R32G32_FLOAT;
+				else if (typeStr == "float3") elem.format = DXGI_FORMAT_R32G32B32_FLOAT;
+				else if (typeStr == "float4") elem.format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				else if (typeStr == "uint" || typeStr == "uint1") elem.format = DXGI_FORMAT_R32_UINT;
+				else if (typeStr == "uint2") elem.format = DXGI_FORMAT_R32G32_UINT;
+				else if (typeStr == "uint3") elem.format = DXGI_FORMAT_R32G32B32_UINT;
+				else if (typeStr == "uint4") elem.format = DXGI_FORMAT_R32G32B32A32_UINT;
+				else if (typeStr == "int" || typeStr == "int1") elem.format = DXGI_FORMAT_R32_SINT;
+				else if (typeStr == "int2") elem.format = DXGI_FORMAT_R32G32_SINT;
+				else if (typeStr == "int3") elem.format = DXGI_FORMAT_R32G32B32_SINT;
+				else if (typeStr == "int4") elem.format = DXGI_FORMAT_R32G32B32A32_SINT;
+				else elem.format = DXGI_FORMAT_R32G32B32A32_FLOAT; // 未知の型はデフォルトで設定
+
+				desc.inputLayouts.push_back(elem);
 			}
 		};
 
 	// PSOのタイプに応じて解析するシェーダを切り替え
 	if (desc.type == PSOType::Graphics)
 	{
-		ExtractRegisters(desc.vsPath);
-		ExtractRegisters(desc.psPath);
+		// VSとPSの両方からレジスタを抽出
+		ExtractRegisters(desc.vsPath, ShaderVisibility::Vertex);
+		ExtractRegisters(desc.psPath, ShaderVisibility::Pixel);
+
+		// インプットレイアウトはVSから抽出
+		ExtractInputLayouts(desc.vsPath);
 	}
 	else if (desc.type == PSOType::Compute)
 	{
-		ExtractRegisters(desc.csPath);
-	}
-
-	// 既存の設定をクリア
-	desc.rootParameters.clear();
-	desc.staticSamplers.clear();
-
-	// 抽出したレジスタ情報からパラメータを構築
-	for (const auto& r : registers)
-	{
-		if (r.first == 's')
-		{
-			CustomStaticSampler sampler{};
-			sampler.shaderRegister = r.second;
-			desc.staticSamplers.push_back(sampler);
-		}
-		else
-		{
-			CustomRootParameter param{};
-			param.shaderRegister = r.second;
-
-			if (r.first == 'b') param.type = CustomRootParamType::CBV;
-			else if (r.first == 't') param.type = CustomRootParamType::SRV;
-			else if (r.first == 'u') param.type = CustomRootParamType::UAV;
-
-			desc.rootParameters.push_back(param);
-		}
+		ExtractRegisters(desc.csPath, ShaderVisibility::All);
 	}
 }
 

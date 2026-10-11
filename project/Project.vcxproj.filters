@@ -212,6 +212,15 @@
     <Filter Include="Source\Tool\ECS\ECSEditor\InspectorUI">
       <UniqueIdentifier>{265712d5-07f3-4fc7-aa42-806225b5d3de}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\Render">
+      <UniqueIdentifier>{f4024353-bea6-43fd-baee-cc0612d223c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Render\Render3D">
+      <UniqueIdentifier>{2fcb67e5-b2bb-4d91-a4e9-002d19653cac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Render\Render2D">
+      <UniqueIdentifier>{09f92577-62a2-4314-95e8-1e242e5a83c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -518,6 +527,18 @@
     <FxCompile Include="Assets\Shader\Skybox\Skybox.VS.hlsl">
       <Filter>Shader\Skybox</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\InternalShader\Render\Render3D\Render3D.VS.hlsl">
+      <Filter>Shader\Render\Render3D</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\InternalShader\Render\Render3D\Render3D.PS.hlsl">
+      <Filter>Shader\Render\Render3D</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\InternalShader\Render\Render2D\Render2D.VS.hlsl">
+      <Filter>Shader\Render\Render2D</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\InternalShader\Render\Render2D\Render2D.PS.hlsl">
+      <Filter>Shader\Render\Render2D</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Shader\Fullscreen\Fullscreen.hlsli">
@@ -525,6 +546,12 @@
     </None>
     <None Include="Assets\Shader\Skybox\Skybox.hlsli">
       <Filter>Shader\Skybox</Filter>
+    </None>
+    <None Include="Assets\InternalShader\Render\Render3D\Render3D.hlsli">
+      <Filter>Shader\Render\Render3D</Filter>
+    </None>
+    <None Include="Assets\InternalShader\Render\Render2D\Render2D.hlsli">
+      <Filter>Shader\Render\Render2D</Filter>
     </None>
   </ItemGroup>
 </Project>
