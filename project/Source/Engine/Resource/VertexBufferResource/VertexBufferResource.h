@@ -1,7 +1,6 @@
 #pragma once
 #include <cassert>
 #include <vector>
-#include "Engine.h"
 #include "Func/ResourceFunc/ResourceFunc.h"
 
 namespace Detail
@@ -30,6 +29,10 @@ namespace Detail
 		/// @return 
 		T* GetData(uint32_t frameIndex) { return data_[frameIndex]; }
 
+		/// @brief 頂点数を取得する
+		/// @return 
+		UINT GetNumVertex() const { return numVertex_; }
+
 
 		template<typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -44,6 +47,9 @@ namespace Detail
 
 		/// @brief 最大バッファ数
 		int32_t maxBufferCount_ = 1;
+
+		/// @brief 頂点数
+		UINT numVertex_ = 0;
 
 		/// @brief データ
 		std::vector<T*> data_;
@@ -66,6 +72,9 @@ void Detail::VertexBufferResource<T>::Initialize(ID3D12Device* device, UINT numV
 	// nullptrチェック
 	assert(device);
 	assert(numVertex > 0);
+
+	// 頂点数を設定する
+	numVertex_ = numVertex;
 
 	// バッファ数を設定する
 	maxBufferCount_ = maxBufferCount_ > 1 ? static_cast<int32_t>(maxBufferCount_) : 1;

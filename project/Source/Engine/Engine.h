@@ -65,10 +65,18 @@ public:
 	/// @return 
 	Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return renderContext_->CreatePass(priority, blendMode, drawFunc); }
 
+	/// @brief レンダー3Dエンティティを作成する
+	/// @return 
+	Entity CreateRender3DEntity() { return renderContext_->CreateRender3DEntity(); }
+
 	/// @brief テクスチャを読み込む
 	/// @param filePath 
 	/// @return 
 	uint32_t LoadTexture(const std::string& filePath) { return renderContext_->LoadTexture(filePath); }
+
+	/// @brief レンダーコンテキストを取得する
+	/// @return 
+	Detail::RenderContext* GetRenderContext() { return renderContext_.get(); }
 
 	/// @brief PSOエディタを取得する
 	/// @return 

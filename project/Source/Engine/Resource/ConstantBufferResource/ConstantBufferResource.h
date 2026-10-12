@@ -3,80 +3,109 @@
 #include <cassert>
 
 #include "Func/ResourceFunc/ResourceFunc.h"
-#include "Engine.h"
+#include "RenderContext/DXHeap/DXHeap.h"
 
 namespace Detail
 {
+	class IConstantBufferResource
+	{
+	public:
+
+		/// @brief コンストラクタ
+		IConstantBufferResource() = default;
+
+		/// @brief 仮想デストラクタ
+		virtual ~IConstantBufferResource() = default;
+
+		/// @brief コマンドリストに登録する
+		/// @param commandList 
+		/// @param rootParameterIndex 
+		/// @param frameIndex 
+		virtual void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) = 0;
+
+		/// @brief コマンドリストに登録する
+		/// @param commandList 
+		/// @param rootParameterIndex 
+		/// @param frameIndex 
+		virtual void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) = 0;
+
+		/// @brief GPU仮想アドレスを取得する
+		/// @param frameIndex 
+		/// @return 
+		virtual D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress(uint32_t frameIndex) const = 0;
+
+
+	protected:
+
+		/// @brief リソース配列
+		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
+	};
+
 	/// @brief 定数バッファ
 	/// @tparam T 
 	template<typename T>
-	class ConstantBufferResource
+	class ConstantBufferResource : public IConstantBufferResource
 	{
 	public:
 
 		/// @brief コンストラクタ
 		/// @param device 
-		ConstantBufferResource(id3d12Device* device) { Initialize(device); }
-
-		/// @brief デストラクタ
-		~ConstantBufferResource();
+		ConstantBufferResource(ID3D12Device* device, int32_t maxBuffer = 1) { Initialize(device, maxBuffer); }
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
 		/// @param rootParameterIndex 
 		/// @param frameIndex
-		void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+		void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) override;
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
 		/// @param rootParameterIndex 
 		/// @param frameIndex
-		void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+		void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) override;
 
 		/// @brief データを取得する
 		/// @param frameIndex 
 		/// @return 
 		T* GetData(uint32_t frameIndex) { return data_[frameIndex]; }
 
+		/// @brief GPU仮想アドレスを取得する
+		/// @param frameIndex 
+		/// @return 
+		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress(uint32_t frameIndex) const override{ return resource_[frameIndex]->GetGPUVirtualAddress(); }
+
 
 	private:
 
 		/// @brief 初期化
 		/// @param device 
-		void Initialize(ID3D12Device* device);
-
-		/// @brief リソース配列
-		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
+		void Initialize(ID3D12Device* device, int32_t maxBuffer);
 
 		/// @brief データ配列
 		std::vector<T*> data_{ nullptr, nullptr };
 	};
 }
 
-
 /// @brief 初期化
 /// @param device 
 /// @param log 
 template<typename T>
-void Detail::ConstantBufferResource<T>::Initialize(ID3D12Device* device)
+void Detail::ConstantBufferResource<T>::Initialize(ID3D12Device* device, int32_t maxBuffer)
 {
 	// nullptrチェック
 	assert(device);
 
-	// エンジンのインスタンスを取得する
-	auto engine = Engine::GetInstance();
-
 
 	// 最大バッファ数を取得する
 	int maxBufferCount = 1;
-	if (engine) maxBufferCount = engine->GetMaxBufferCount();
+	if (maxBuffer > 0) maxBufferCount = maxBuffer;
 
 	// リソースとデータの配列をリサイズする
 	resource_.resize(maxBufferCount);
 	data_.resize(maxBufferCount);
 
 	// リソースとデータの割り当て
-	for (uint32_t i = 0; i < maxBufferCount; ++i)
+	for (int32_t i = 0; i < maxBufferCount; ++i)
 	{
 		// リソース生成
 		resource_[i] = CreateBufferResource(device, sizeof(T));

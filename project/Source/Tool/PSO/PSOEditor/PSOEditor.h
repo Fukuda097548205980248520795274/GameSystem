@@ -76,6 +76,11 @@ namespace Detail
 		/// @return 
 		ID3D12RootSignature* GetRootSignature(size_t index) const { return psoItems_[index].rootSig.Get(); }
 
+		/// @brief 名前からPSOItemを取得する
+		/// @param name 
+		/// @return 
+		PSOItem* GetPSOItem(const std::string& name);
+
 		/// @brief PSO設定をJSONファイルに保存する
 		/// @param filepath 
 		void SaveToFile(const std::string& filename);

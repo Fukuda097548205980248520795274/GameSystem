@@ -10,7 +10,9 @@ struct VertexShaderInput
 // 座標変換行列
 struct TransformationMatrix
 {
+    float4x4 world;
     float4x4 worldViewProjection;
+    float4x4 worldInverseTranspose;
 };
 ConstantBuffer<TransformationMatrix> gTransformation : register(b0);
 

@@ -40,11 +40,28 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	shaderCompiler_ = std::make_unique<ShaderCompiler>();
 	shaderCompiler_->Initialize();
 
-	// マルチパスを作成
-	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
+	// ECSEditorを作成
+	ecsEditor_ = std::make_unique<ECSEditor>();
+
+	// ShaderEditorを作成
+	shaderEditor_ = std::make_unique<ShaderEditor>();
+
+	// PSOEditorを作成
+	psoEditor_ = std::make_unique<PSOEditor>();
+
+
 
 	// テクスチャストアを作成
-	textureStore_ = std::make_unique<TextureStore>();
+	textureStore_ = std::make_unique<TextureStore>(core_->GetDevice(), heap_.get(), command_->GetCommandList());
+
+	// プロシージャルメッシュストアを作成
+	proceduralMeshStore_ = std::make_unique<ProceduralMeshStore>(core_->GetDevice());
+
+	// TextureEditorを作成
+	textureEditor_ = std::make_unique<TextureEditor>();
+
+	// マルチパスを作成
+	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
 
 	// レンダーシステムを作成
 	renderSystem_ = std::make_unique<RenderSystem>();
@@ -72,18 +89,6 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	imguiRender_->Initialize(core_->GetDevice(), winApp, heap_.get(), swapChain_.get());
 
 #endif
-
-	// ECSEditorを作成
-	ecsEditor_ = std::make_unique<ECSEditor>();
-
-	// ShaderEditorを作成
-	shaderEditor_ = std::make_unique<ShaderEditor>();
-
-	// PSOEditorを作成
-	psoEditor_ = std::make_unique<PSOEditor>();
-
-	// TextureEditorを作成
-	textureEditor_ = std::make_unique<TextureEditor>();
 
 
 	// 初期化時のコマンドリストを閉じる

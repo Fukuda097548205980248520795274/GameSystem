@@ -3,10 +3,45 @@
 #include <cassert>
 
 #include "Func/ResourceFunc/ResourceFunc.h"
-#include "Engine.h"
+#include "RenderContext/DXHeap/DXHeap.h"
 
 namespace Detail
 {
+	class IStructuredBufferResource
+	{
+	public:
+
+		/// @brief コンストラクタ
+		IStructuredBufferResource() = default;
+
+		/// @brief 仮想デストラクタ
+		virtual ~IStructuredBufferResource() = default;
+
+		/// @brief コマンドリストに登録する
+		/// @param commandList 
+		/// @param rootParameterIndex 
+		/// @param frameIndex 
+		virtual void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) = 0;
+
+		/// @brief コマンドリストに登録する
+		/// @param commandList 
+		/// @param rootParameterIndex 
+		/// @param frameIndex 
+		virtual void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) = 0;
+
+
+	protected:
+
+		/// @brief ヒープ
+		DXHeap* heap_ = nullptr;
+
+		/// @brief リソース
+		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
+
+		/// @brief SRVハンドル
+		std::vector<SRVDescriptorHandle> handle_;
+	};
+
 	/// @brief 構造化バッファリソース
 	/// @tparam T 
 	template<typename T>
@@ -27,13 +62,13 @@ namespace Detail
 		/// @param commandList 
 		/// @param rootParameterIndex 
 		/// @param frameIndex
-		void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+		void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) override;
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
 		/// @param rootParameterIndex 
 		/// @param frameIndex
-		void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+		void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) override;
 
 		/// @brief データを取得する
 		/// @param frameIndex 
@@ -49,17 +84,8 @@ namespace Detail
 		/// @param num 
 		void Initialize(ID3D12Device* device, DXHeap* heap, UINT num);
 
-		/// @brief ヒープ
-		DXHeap* heap_ = nullptr;
-
-		/// @brief リソース
-		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
-
 		/// @brief データ
 		std::vector<T*> data_ = nullptr;
-
-		/// @brief SRVハンドル
-		std::vector<SRVDescriptorHandle> handle_;
 	};
 }
 

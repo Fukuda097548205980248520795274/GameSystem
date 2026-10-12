@@ -52,6 +52,12 @@ namespace Detail
 
 	public:
 
+		/// @brief コンストラクタ
+		/// @param device 
+		/// @param heap 
+		/// @param commandList 
+		TextureStore(ID3D12Device* device, DXHeap* heap, ID3D12GraphicsCommandList* commandList){ Initialize(device, heap, commandList); }
+
 		/// @brief テクスチャを読み込む
 		/// @param filePath 
 		/// @param heap 
@@ -103,6 +109,9 @@ namespace Detail
 
 
 	private:
+
+		/// @brief 初期化
+		void Initialize(ID3D12Device* device, DXHeap* heap, ID3D12GraphicsCommandList* commandList);
 
 		/// @brief パスを正規化する
 		/// @param path 

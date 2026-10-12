@@ -7,6 +7,15 @@
 
 #include "Func/TextureFunc/TextureFunc.h"
 
+/// @brief 初期化
+/// @param device 
+/// @param heap 
+/// @param commandList 
+void Detail::TextureStore::Initialize(ID3D12Device* device, DXHeap* heap, ID3D12GraphicsCommandList* commandList)
+{
+	Load("./Assets/Internal/Texture/white2x2.png", heap, device, commandList);
+}
+
 /// @brief パスを正規化する
 /// @param path 
 /// @return 

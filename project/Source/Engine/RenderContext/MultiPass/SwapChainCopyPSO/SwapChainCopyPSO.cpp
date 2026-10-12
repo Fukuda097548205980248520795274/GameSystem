@@ -13,16 +13,17 @@ void Detail::SwapChainCopyPSO::Initialize(ID3D12Device* device, ShaderCompiler* 
 
 	// エンジンのインスタンスを取得する
 	auto engine = Engine::GetInstance();
+	assert(engine);
 
 	// ピクセルシェーダのバイナリデータを取得する
-	vertexShaderBlob_ = compiler->Compile(L"./Assets/InternalShader/Fullscreen/Fullscreen.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob_ = compiler->Compile(L"./Assets/Internal/Shader/Fullscreen/Fullscreen.VS.hlsl", L"vs_6_0");
 	if (!vertexShaderBlob_) {
 		if (engine) engine->Log(LogLevel::Error, "Fullscreen.VS.hlslのコンパイルに失敗しました");
 		throw std::runtime_error("Fullscreen.VS.hlslのコンパイルに失敗しました");
 	}
 
 	// ピクセルシェーダのバイナリデータを取得する
-	pixelShaderBlob_ = compiler->Compile(L"./Assets/InternalShader/SwapChainCopy/SwapChainCopy.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob_ = compiler->Compile(L"./Assets/Internal/Shader/SwapChainCopy/SwapChainCopy.PS.hlsl", L"ps_6_0");
 	if (!pixelShaderBlob_) {
 		if (engine) engine->Log(LogLevel::Error, "SwapChainCopy.PS.hlslのコンパイルに失敗しました");
 		throw std::runtime_error("SwapChainCopy.PS.hlslのコンパイルに失敗しました");

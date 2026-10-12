@@ -1,11 +1,13 @@
 #pragma once
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include "RenderResourceStore/RenderResourceStore.h"
 #include "ECS/EntityECS/EntityECS.h"
 
 namespace Detail
 {
 	class RegistryECS;
+	class PSOEditor;
 
 	class RenderSystem
 	{
@@ -29,7 +31,13 @@ namespace Detail
 		/// @brief 初期化
 		void Initialize();
 
+		/// @brief レンダーリソースストア
+		std::unique_ptr<RenderResourceStore> renderResourceStore_;
+
 		/// @brief ECSレジストリ
 		RegistryECS* registry_ = nullptr;
+
+		/// @brief PSOエディタ
+		PSOEditor* psoEditor_ = nullptr;
 	};
 }

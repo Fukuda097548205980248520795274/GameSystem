@@ -46,6 +46,15 @@ namespace Detail
 		Custom
 	};
 
+	/// @brief エディタで選択するレンダリングバインディングの種類
+	enum class RenderBinding
+	{
+		Custom,
+		Transform,
+		Material,
+		Texture
+	};
+
 	// 詳細なブレンド設定データ
 	struct CustomBlendDesc
 	{
@@ -75,6 +84,9 @@ namespace Detail
 		CustomRootParamType type = CustomRootParamType::CBV;
 		uint32_t shaderRegister = 0; // b0, t0, u0 などの 0 の部分
 		ShaderVisibility visibility = ShaderVisibility::All;
+
+		// エディタで選択するレンダリングバインディングの種類
+		RenderBinding binding = RenderBinding::Custom;
 
 		// DescriptorTableの場合の設定
 		std::vector<CustomDescriptorRange> descriptorRanges;
@@ -173,6 +185,7 @@ namespace Detail
 		j["type"] = static_cast<int>(param.type);
 		j["shaderRegister"] = param.shaderRegister;
 		j["visibility"] = static_cast<int>(param.visibility);
+		j["binding"] = static_cast<int>(param.binding);
 		
 		j["descriptorRanges"] = json::array();
 		for (const auto& range : param.descriptorRanges)
@@ -306,6 +319,7 @@ namespace Detail
 		param.type = static_cast<CustomRootParamType>(j.value("type", static_cast<int>(param.type)));
 		param.shaderRegister = j.value("shaderRegister", param.shaderRegister);
 		param.visibility = static_cast<ShaderVisibility>(j.value("visibility", static_cast<int>(param.visibility)));
+		param.binding = static_cast<RenderBinding>(j.value("binding", static_cast<int>(param.binding)));
 		
 		// DescriptorRangesの読み込み
 		if (j.contains("descriptorRanges") && j["descriptorRanges"].is_array())

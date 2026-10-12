@@ -14,9 +14,14 @@ Detail::PSOEditor::PSOEditor()
 	defaultRender3DItem.name = "Default_Render3D";
 
 	// デフォルトのシェーダパスを設定する
-	defaultRender3DItem.desc.vsPath = L"./Assets/InternalShader/Render/Render3D/Render3D.VS.hlsl";
-	defaultRender3DItem.desc.psPath = L"./Assets/InternalShader/Render/Render3D/Render3D.PS.hlsl";
+	defaultRender3DItem.desc.vsPath = L"./Assets/Internal/Shader/Render/Render3D/Render3D.VS.hlsl";
+	defaultRender3DItem.desc.psPath = L"./Assets/Internal/Shader/Render/Render3D/Render3D.PS.hlsl";
 	AutoSetupRootParameters(defaultRender3DItem.desc);
+
+	// ルートパラメータのバインディングを自動設定する
+	defaultRender3DItem.desc.rootParameters[0].binding = RenderBinding::Transform;
+	defaultRender3DItem.desc.rootParameters[1].binding = RenderBinding::Material;
+	defaultRender3DItem.desc.rootParameters[2].binding = RenderBinding::Texture;
 
 	// 自動再構築のフラグを立てておき、最初にDrawUIが呼ばれたタイミングでビルドを走らせる
 	defaultRender3DItem.isDirty = true;
@@ -371,6 +376,14 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						p.visibility = static_cast<Detail::ShaderVisibility>(currentVisibility);
 						currentItem.isDirty = true;
 					}
+				}
+
+				// レンダリングバインディングの種類を選択するコンボボックス
+				const char* bindingItems[] = { "カスタム", "トランスフォーム", "マテリアル", "テクスチャ" };
+				int currentBinding = static_cast<int>(p.binding);
+				if (ImGui::Combo("バインディング", &currentBinding, bindingItems, _countof(bindingItems))) {
+					p.binding = static_cast<Detail::RenderBinding>(currentBinding);
+					currentItem.isDirty = true;
 				}
 
 				// Descriptor Table 以外は単一のレジスタとして扱う
@@ -764,6 +777,25 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					}
 				}
 			}
+
+			// その他
+			if (ImGui::CollapsingHeader("その他", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				// トポロジー
+				const char* topologyItems[] = { "三角形", "線", "点" };
+				D3D12_PRIMITIVE_TOPOLOGY_TYPE topologyValues[] =
+				{ D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE, D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT };
+				int currentTopologyIdx = 0;
+				for (int t = 0; t < _countof(topologyValues); ++t)
+				{
+					if (currentDesc.primitiveTopology == topologyValues[t]) { currentTopologyIdx = t; break; }
+				}
+				if (ImGui::Combo("トポロジー", &currentTopologyIdx, topologyItems, _countof(topologyItems)))
+				{
+					currentDesc.primitiveTopology = topologyValues[currentTopologyIdx];
+					currentItem.isDirty = true;
+				}
+			}
 		}
 
 		// 再構築処理
@@ -854,6 +886,19 @@ ID3D12RootSignature* Detail::PSOEditor::GetRootSignature(const std::string& name
 	for (const auto& item : psoItems_)
 	{
 		if (item.name == name) return item.rootSig.Get();
+	}
+
+	return nullptr;
+}
+
+/// @brief 名前からPSOItemを取得する
+/// @param name 
+/// @return 
+Detail::PSOItem* Detail::PSOEditor::GetPSOItem(const std::string& name)
+{
+	for (auto& item : psoItems_)
+	{
+		if (item.name == name) return &item;
 	}
 
 	return nullptr;

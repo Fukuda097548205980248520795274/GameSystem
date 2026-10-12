@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+#include <string>
 #include "Vector/Vector3/Vector3.h"
 #include "Vector/Vector2/Vector2.h"
 #include "Vector/Vector4/Vector4.h"
@@ -55,6 +56,27 @@ struct RenderComponent
 	int priority;
 };
 
+/// @brief 定数バッファコンポーネント
+struct ConstantBufferComponent
+{
+	ConstantBufferComponent(uint32_t handle) : handle(handle) {}
+
+	/// @brief 定数バッファのハンドル（またはID/ポインタ）
+	uint32_t handle;
+};
+
+/// @brief トランスフォーム用定数バッファコンポーネント
+struct TransformConstantBufferComponent : public ConstantBufferComponent
+{
+	TransformConstantBufferComponent(uint32_t handle) : ConstantBufferComponent(handle) {}
+};
+
+/// @brief マテリアル用定数バッファコンポーネント
+struct MaterialConstantBufferComponent : public ConstantBufferComponent
+{
+	MaterialConstantBufferComponent(uint32_t handle) : ConstantBufferComponent(handle) {}
+};
+
 /// @brief スカイボックスコンポーネント
 struct SkyboxComponent
 {
@@ -101,6 +123,15 @@ struct CubemapComponent
 
 	/// @brief キューブマップのハンドル（またはID/ポインタ）
 	uint32_t handle;
+};
+
+/// @brief マテリアルコンポーネント
+struct MaterialComponent
+{
+	MaterialComponent() : psoName("Default_Render3D") {}
+
+	/// @brief 使用するPSO名（PSOEditorで管理されている名前）
+	std::string psoName;
 };
 
 /// @brief UVトランスフォームコンポーネント

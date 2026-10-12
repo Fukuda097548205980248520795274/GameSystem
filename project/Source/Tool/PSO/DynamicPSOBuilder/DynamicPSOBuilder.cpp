@@ -212,7 +212,7 @@ bool Detail::DynamicPSOBuilder::Build(ID3D12Device* device, ShaderCompiler* comp
 		psoDesc.SampleDesc.Count = 1;
 		psoDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 
-		// 4. PSOの生成
+		// PSOの生成
 		hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(outPipelineState));
 		return SUCCEEDED(hr);
 	}

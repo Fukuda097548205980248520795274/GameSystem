@@ -18,6 +18,9 @@ void Game::Initialize()
 
 	// テクスチャを読み込む
 	textureHandle = Engine::GetInstance()->LoadTexture("./Assets/Texture/uvChecker.png");
+
+	// 3D描画用のエンティティを作成
+	render3dEntity = Engine::GetInstance()->CreateRender3DEntity();
 }
 
 /// @brief 更新処理

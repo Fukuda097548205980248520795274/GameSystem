@@ -7,6 +7,7 @@
 #include "Shader/ShaderCompiler/ShaderCompiler.h"
 #include "MultiPass/MultiPass.h"
 #include "Store/TextureStore/TextureStore.h"
+#include "Store/ProceduralMeshStore/ProceduralMeshStore.h"
 #include "ImGuiRender/ImGuiRender.h"
 
 #include "Render/RenderSystem/RenderSystem.h"
@@ -61,6 +62,10 @@ namespace Detail
 		/// @return 
 		Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return multiPass_->CreatePass(priority, blendMode, drawFunc); }
 
+		/// @brief レンダー3Dエンティティを作成する
+		/// @return 
+		Entity CreateRender3DEntity() { return renderSystem_->CreateRender3DEntity(); }
+
 		/// @brief テクスチャを読み込む
 		/// @param filePath 
 		/// @return 
@@ -81,6 +86,14 @@ namespace Detail
 		/// @brief コマンドを取得する
 		/// @return 
 		DXHeap* GetHeap() const { return heap_.get(); }
+
+		/// @brief テクスチャストアを取得する
+		/// @return 
+		TextureStore* GetTextureStore() const { return textureStore_.get(); }
+
+		/// @brief プロシージャルメッシュストアを取得する
+		/// @return 
+		ProceduralMeshStore* GetProceduralMeshStore() const { return proceduralMeshStore_.get(); }
 
 		/// @brief テクスチャファイルがドロップされたときの処理
 		/// @param filePath 
@@ -120,6 +133,9 @@ namespace Detail
 
 		/// @brief テクスチャストア
 		std::unique_ptr<TextureStore> textureStore_ = nullptr;
+
+		/// @brief プロシージャルメッシュストア
+		std::unique_ptr<ProceduralMeshStore> proceduralMeshStore_ = nullptr;
 
 #ifdef DEVELOPMENT
 		/// @brief ImGui描画
@@ -167,12 +183,12 @@ namespace Detail
 		std::unique_ptr<ECSEditor> ecsEditor_ = nullptr;
 
 		/// @brief PSOエディタ
-		std::unique_ptr<Detail::PSOEditor> psoEditor_;
+		std::unique_ptr<PSOEditor> psoEditor_;
 
 		/// @brief シェーダエディタ
-		std::unique_ptr<Detail::ShaderEditor> shaderEditor_;
+		std::unique_ptr<ShaderEditor> shaderEditor_;
 
 		/// @brief テクスチャエディタ
-		std::unique_ptr<Detail::TextureEditor> textureEditor_ = nullptr;
+		std::unique_ptr<TextureEditor> textureEditor_ = nullptr;
 	};
 }

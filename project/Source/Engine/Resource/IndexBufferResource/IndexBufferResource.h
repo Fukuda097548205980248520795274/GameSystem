@@ -25,6 +25,15 @@ namespace Detail
 		/// @param frameIndex
 		void Register(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
 
+		/// @brief データを取得する
+		/// @param frameIndex 
+		/// @return 
+		uint32_t* GetData(uint32_t frameIndex) { return data_[frameIndex]; }
+
+		/// @brief インデックス数を取得する
+		/// @return 
+		UINT GetNumIndex() const { return numIndex_; }
+
 
 		template<typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -39,6 +48,9 @@ namespace Detail
 
 		/// @brief 最大バッファ数
 		int32_t maxBufferCount_ = 1;
+
+		/// @brief インデックス数
+		UINT numIndex_ = 0;
 
 		// データ
 		std::vector<uint32_t*> data_;

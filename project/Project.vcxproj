@@ -164,6 +164,8 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.cpp" />
+    <ClCompile Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.cpp" />
     <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -324,7 +326,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\DXDebug\DXDebug.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.h" />
+    <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.h" />
+    <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.h" />
     <ClInclude Include="Source\Tool\ECS\ECSEditor\ECSEditor.h" />
     <ClInclude Include="Source\Tool\ECS\EntityECS\EntityECS.h" />
     <ClInclude Include="Source\Tool\ECS\RegistryECS\RegistryECS.h" />
@@ -375,7 +380,7 @@
     <ClInclude Include="Source\Tool\Texture\TextureEditor\TextureEditor.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Assets\InternalShader\Render\Render2D\Render2D.PS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render2D\Render2D.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
@@ -383,7 +388,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Assets\InternalShader\Render\Render2D\Render2D.VS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render2D\Render2D.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
@@ -391,7 +396,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Assets\InternalShader\Render\Render3D\Render3D.PS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render3D\Render3D.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
@@ -399,7 +404,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Assets\InternalShader\Render\Render3D\Render3D.VS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render3D\Render3D.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
@@ -441,12 +446,12 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\InternalShader\Render\Render2D\Render2D.hlsli">
+    <None Include="Assets\Internal\Shader\Render\Render2D\Render2D.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="Assets\InternalShader\Render\Render3D\Render3D.hlsli">
+    <None Include="Assets\Internal\Shader\Render\Render3D\Render3D.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

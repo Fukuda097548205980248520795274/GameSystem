@@ -105,7 +105,7 @@ namespace Detail
 		std::unique_ptr<SwapChainCopyPSO> swapChainCopyPSO_;
 
 		/// @brief レンダーパスシステム
-		std::unique_ptr< RenderPassSystem> renderPassSystem_;
+		std::unique_ptr<RenderPassSystem> renderPassSystem_;
 
 
 	private:

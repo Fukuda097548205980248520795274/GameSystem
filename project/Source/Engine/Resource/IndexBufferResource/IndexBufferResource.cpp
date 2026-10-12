@@ -11,6 +11,9 @@ void Detail::IndexBufferResource::Initialize(ID3D12Device* device, uint32_t numI
 	assert(device);
 	assert(numIndex > 0);
 
+	// インデックス数を設定する
+	numIndex_ = numIndex;
+
 	// バッファ数を設定する
 	maxBufferCount_ = maxBufferCount_ > 1 ? static_cast<int32_t>(maxBufferCount_) : 1;
 

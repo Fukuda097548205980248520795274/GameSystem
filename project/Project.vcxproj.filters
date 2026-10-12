@@ -221,6 +221,15 @@
     <Filter Include="Shader\Render\Render2D">
       <UniqueIdentifier>{09f92577-62a2-4314-95e8-1e242e5a83c1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\ECS\ComponentECS\DataForGPU">
+      <UniqueIdentifier>{8cc2a4e1-0043-44a6-af1e-e0c97815bf44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore">
+      <UniqueIdentifier>{1b606748-63fd-492e-95a5-cc2c764e47f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\ProceduralMeshStore">
+      <UniqueIdentifier>{7aaafffe-0637-44bb-85c5-81884c0f3bce}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -360,6 +369,12 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\ECS\ECSEditor\HierarchyUI\HierarchyUI.cpp">
       <Filter>Source\Tool\ECS\ECSEditor\HierarchyUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.cpp">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.cpp">
+      <Filter>Source\Engine\Store\ProceduralMeshStore</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -513,6 +528,15 @@
     <ClInclude Include="Source\Tool\ECS\ECSEditor\ECSEditor.h">
       <Filter>Source\Tool\ECS\ECSEditor</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.h">
+      <Filter>Source\Tool\ECS\ComponentECS\DataForGPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.h">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h">
+      <Filter>Source\Engine\Store\ProceduralMeshStore</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Shader\Fullscreen\Fullscreen.VS.hlsl">
@@ -527,16 +551,16 @@
     <FxCompile Include="Assets\Shader\Skybox\Skybox.VS.hlsl">
       <Filter>Shader\Skybox</Filter>
     </FxCompile>
-    <FxCompile Include="Assets\InternalShader\Render\Render3D\Render3D.VS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render3D\Render3D.VS.hlsl">
       <Filter>Shader\Render\Render3D</Filter>
     </FxCompile>
-    <FxCompile Include="Assets\InternalShader\Render\Render3D\Render3D.PS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render3D\Render3D.PS.hlsl">
       <Filter>Shader\Render\Render3D</Filter>
     </FxCompile>
-    <FxCompile Include="Assets\InternalShader\Render\Render2D\Render2D.VS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render2D\Render2D.VS.hlsl">
       <Filter>Shader\Render\Render2D</Filter>
     </FxCompile>
-    <FxCompile Include="Assets\InternalShader\Render\Render2D\Render2D.PS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Render\Render2D\Render2D.PS.hlsl">
       <Filter>Shader\Render\Render2D</Filter>
     </FxCompile>
   </ItemGroup>
@@ -547,10 +571,10 @@
     <None Include="Assets\Shader\Skybox\Skybox.hlsli">
       <Filter>Shader\Skybox</Filter>
     </None>
-    <None Include="Assets\InternalShader\Render\Render3D\Render3D.hlsli">
+    <None Include="Assets\Internal\Shader\Render\Render3D\Render3D.hlsli">
       <Filter>Shader\Render\Render3D</Filter>
     </None>
-    <None Include="Assets\InternalShader\Render\Render2D\Render2D.hlsli">
+    <None Include="Assets\Internal\Shader\Render\Render2D\Render2D.hlsli">
       <Filter>Shader\Render\Render2D</Filter>
     </None>
   </ItemGroup>
