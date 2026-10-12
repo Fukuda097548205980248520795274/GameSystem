@@ -2,6 +2,19 @@
 #include <cmath>
 #include <cassert>
 
+/// @brief コンストラクタ
+Matrix4x4::Matrix4x4()
+{
+	// 単位行列で初期化
+	for (int i = 0; i < 4; ++i)
+	{
+		for (int j = 0; j < 4; ++j)
+		{
+			m[i][j] = (i == j) ? 1.0f : 0.0f;
+		}
+	}
+}
+
 /// @brief 逆行列
 /// @return 
 Matrix4x4 Matrix4x4::Inverse() const

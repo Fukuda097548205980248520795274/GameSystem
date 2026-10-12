@@ -8,6 +8,9 @@
 // 4x4行列
 struct Matrix4x4
 {
+	/// @brief コンストラクタ
+	Matrix4x4();
+
 	float m[4][4];
 
 	/// @brief 逆行列

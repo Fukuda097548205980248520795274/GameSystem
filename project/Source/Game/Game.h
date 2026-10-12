@@ -38,5 +38,8 @@ private:
 
 	/// @brief 3D描画用のエンティティ
 	Entity render3dEntity;
+
+	/// @brief カメラ用のエンティティ
+	Entity cameraEntity;
 };
 

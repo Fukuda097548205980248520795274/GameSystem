@@ -164,6 +164,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.cpp" />
     <ClCompile Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.cpp" />
     <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
@@ -326,6 +327,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\DXDebug\DXDebug.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.h" />
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.h" />
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.h" />

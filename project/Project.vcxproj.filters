@@ -230,6 +230,9 @@
     <Filter Include="Source\Engine\Store\ProceduralMeshStore">
       <UniqueIdentifier>{7aaafffe-0637-44bb-85c5-81884c0f3bce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\CameraSystem">
+      <UniqueIdentifier>{529668a4-1363-4c53-8b35-b58ce90564fe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -375,6 +378,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.cpp">
       <Filter>Source\Engine\Store\ProceduralMeshStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\CameraSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -536,6 +542,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h">
       <Filter>Source\Engine\Store\ProceduralMeshStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.h">
+      <Filter>Source\Engine\RenderContext\Render\CameraSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

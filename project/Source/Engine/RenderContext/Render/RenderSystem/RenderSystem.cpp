@@ -58,7 +58,7 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	int32_t maxBufferCount = engine->GetMaxBufferCount();
 	assert(maxBufferCount > 0);
 
-	// TransformatDataForGPU用のConstantBufferComponentを追加する
+	// TransformDataForGPU用のConstantBufferComponentを追加する
 	TransformConstantBufferComponent constantBufferComp(renderResourceStore_->CreateConstantBuffer<Detail::TransformDataForGPU>(device, maxBufferCount));
 	registry_->AddComponent(entity, constantBufferComp);
 
@@ -85,6 +85,9 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 
 	auto proceduralMeshStore = engine->GetRenderContext()->GetProceduralMeshStore();
 	if (!proceduralMeshStore) return;
+
+	auto cameraSystem = engine->GetRenderContext()->GetCameraSystem();
+	if (!cameraSystem) return;
 
 	// RenderComponentの配列を取得する
 	auto* passArray = registry_->GetComponentArray<RenderComponent>();
@@ -142,14 +145,32 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			{
 			case RenderBinding::Transform:
 			{
+				// 回転をクォータニオンに変換する
+				Quaternion rotation = 
+					ToQuaternion(transform.rotation.z , Vector3(0.0f, 0.0f, 1.0f)) * 
+					ToQuaternion(transform.rotation.y , Vector3(0.0f, 1.0f, 0.0f)) * 
+					ToQuaternion(transform.rotation.x , Vector3(1.0f, 0.0f, 0.0f));
+
+
+				TransformDataForGPU data;
+				data.world = Make3DAffineMatrix4x4(transform.scale, rotation, transform.position);
+				data.worldViewProjection = data.world * cameraSystem->GetViewMatrix() * cameraSystem->GetProjectionMatrix();
+				data.worldInverseTranspose = data.world.Inverse().Transpose();
+
 				// Transform用のリソースをバインド
+				renderResourceStore_->UpdateConstantBuffer(transformCB.handle, data, frameIndex);
 				auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB.handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
 				break;
 			}
 			case RenderBinding::Material:
 			{
+				UnLightingMaterialDataForGPU data;
+				data.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // デフォルトの色
+				data.uvTransform = Matrix4x4(); // デフォルトのUV変換行列
+
 				// Material用のリソースをバインド
+				renderResourceStore_->UpdateConstantBuffer(materialCB.handle, data, frameIndex);
 				auto cbResource = renderResourceStore_->GetConstantBuffer(materialCB.handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
 				break;

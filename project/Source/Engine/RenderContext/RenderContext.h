@@ -10,6 +10,7 @@
 #include "Store/ProceduralMeshStore/ProceduralMeshStore.h"
 #include "ImGuiRender/ImGuiRender.h"
 
+#include "Render/CameraSystem/CameraSystem.h"
 #include "Render/RenderSystem/RenderSystem.h"
 
 #include "ECS/ECSEditor/ECSEditor.h"
@@ -66,6 +67,10 @@ namespace Detail
 		/// @return 
 		Entity CreateRender3DEntity() { return renderSystem_->CreateRender3DEntity(); }
 
+		/// @brief カメラエンティティを作成する
+		/// @return 
+		Entity CreateCameraEntity() { return cameraSystem_->CreateCameraEntity(); }
+
 		/// @brief テクスチャを読み込む
 		/// @param filePath 
 		/// @return 
@@ -94,6 +99,10 @@ namespace Detail
 		/// @brief プロシージャルメッシュストアを取得する
 		/// @return 
 		ProceduralMeshStore* GetProceduralMeshStore() const { return proceduralMeshStore_.get(); }
+
+		/// @brief カメラシステムを取得する
+		/// @return 
+		CameraSystem* GetCameraSystem() const { return cameraSystem_.get(); }
 
 		/// @brief テクスチャファイルがドロップされたときの処理
 		/// @param filePath 
@@ -153,6 +162,9 @@ namespace Detail
 
 
 	private:
+
+		/// @brief カメラシステム
+		std::unique_ptr<CameraSystem> cameraSystem_ = nullptr;
 
 		/// @brief レンダーシステム
 		std::unique_ptr<RenderSystem> renderSystem_ = nullptr;

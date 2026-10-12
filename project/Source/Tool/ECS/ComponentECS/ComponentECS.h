@@ -56,6 +56,24 @@ struct RenderComponent
 	int priority;
 };
 
+/// @brief カメラコンポーネント
+struct CameraComponent
+{
+	CameraComponent() : fovY(0.35f), aspectRatio(16.0f / 9.0f), nearPlane(0.01f), farPlane(800.0f) {}
+
+	/// @brief 垂直方向の視野角（度）
+	float fovY;
+
+	/// @brief アスペクト比（幅 / 高さ）
+	float aspectRatio;
+
+	/// @brief ニアクリップ平面
+	float nearPlane;
+
+	/// @brief ファークリップ平面
+	float farPlane;
+};
+
 /// @brief 定数バッファコンポーネント
 struct ConstantBufferComponent
 {

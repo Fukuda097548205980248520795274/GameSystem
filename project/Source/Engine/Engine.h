@@ -69,6 +69,10 @@ public:
 	/// @return 
 	Entity CreateRender3DEntity() { return renderContext_->CreateRender3DEntity(); }
 
+	/// @brief カメラエンティティを作成する
+	/// @return 
+	Entity CreateCameraEntity() { return renderContext_->CreateCameraEntity(); }
+
 	/// @brief テクスチャを読み込む
 	/// @param filePath 
 	/// @return 

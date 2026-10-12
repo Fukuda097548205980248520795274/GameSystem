@@ -15,6 +15,9 @@ namespace Detail
 	/// @brief トランスフォームデータをGPU用に格納する構造体
 	struct TransformDataForGPU
 	{
+		// @brief コンストラクタ
+		TransformDataForGPU() : world(), worldViewProjection(), worldInverseTranspose() {}
+
 		/// @brief ワールド行列
 		Matrix4x4 world;
 
@@ -28,6 +31,8 @@ namespace Detail
 	/// @brief ライティングなしのマテリアルデータをGPU用に格納する構造体
 	struct UnLightingMaterialDataForGPU
 	{
+		UnLightingMaterialDataForGPU() : color(1.0f, 1.0f, 1.0f, 1.0f), uvTransform() {}
+
 		/// @brief 色
 		Vector4 color;
 

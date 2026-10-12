@@ -21,6 +21,9 @@ void Game::Initialize()
 
 	// 3D描画用のエンティティを作成
 	render3dEntity = Engine::GetInstance()->CreateRender3DEntity();
+
+	// カメラ用のエンティティを作成
+	cameraEntity = Engine::GetInstance()->CreateCameraEntity();
 }
 
 /// @brief 更新処理

@@ -63,6 +63,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// マルチパスを作成
 	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
 
+	// カメラシステムを作成
+	cameraSystem_ = std::make_unique<CameraSystem>();
+
 	// レンダーシステムを作成
 	renderSystem_ = std::make_unique<RenderSystem>();
 
@@ -178,6 +181,9 @@ void Detail::RenderContext::PostDraw()
 {
 	// コマンドリストを取得
 	auto commandList = command_->GetCommandList();
+
+	// カメラシステムを更新する
+	cameraSystem_->Update();
 
 	// リサイズ処理
 	if (winApp_->IsResized())
