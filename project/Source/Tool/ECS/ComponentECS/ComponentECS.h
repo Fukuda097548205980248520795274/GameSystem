@@ -4,6 +4,7 @@
 #include "Vector/Vector3/Vector3.h"
 #include "Vector/Vector2/Vector2.h"
 #include "Vector/Vector4/Vector4.h"
+#include "Store/ProceduralMeshStore/ProceduralMeshStore.h"
 
 /// @brief トランスフォームコンポーネント
 struct TransformComponent
@@ -54,6 +55,15 @@ struct RenderComponent
 
 	// 描画順序（数値が小さいほど先に描画）
 	int priority;
+};
+
+/// @brief メッシュコンポーネント
+struct MeshComponent
+{
+	MeshComponent() : meshType(Detail::ProceduralMeshType::Cube) {}
+
+	/// @brief メッシュの種類
+	Detail::ProceduralMeshType meshType;
 };
 
 /// @brief カメラコンポーネント
@@ -146,10 +156,13 @@ struct CubemapComponent
 /// @brief マテリアルコンポーネント
 struct MaterialComponent
 {
-	MaterialComponent() : psoName("Default_Render3D") {}
+	MaterialComponent() : psoName("Default_Render3D"), color(1.0f, 1.0f, 1.0f, 1.0f) {}
 
 	/// @brief 使用するPSO名（PSOEditorで管理されている名前）
 	std::string psoName;
+
+	/// @brief マテリアルの色
+	Vector4 color;
 };
 
 /// @brief UVトランスフォームコンポーネント

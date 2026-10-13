@@ -5,29 +5,17 @@ void Detail::ECSEditor::DrawInspector()
 {
 #ifdef DEVELOPMENT
 
-	ImGui::Begin("Inspector");
+	ImGui::Begin("インスペクター");
 
 	if (selectedEntity_ == kNullEntity)
 	{
-		ImGui::Text("No entity selected.");
+		ImGui::Text("Entityが選択されていません。");
 		ImGui::End();
 		return;
 	}
 
 	ImGui::Text("Entity ID: %u", selectedEntity_);
 	ImGui::Separator();
-
-	// TransformComponent
-	if (registry_->HasComponent<TransformComponent>(selectedEntity_))
-	{
-		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
-		{
-			auto& transform = registry_->GetComponent<TransformComponent>(selectedEntity_);
-			ImGui::DragFloat3("Position", &transform.position.x, 0.1f);
-			ImGui::DragFloat3("Rotation", &transform.rotation.x, 0.1f);
-			ImGui::DragFloat3("Scale", &transform.scale.x, 0.1f);
-		}
-	}
 
 	// BlendComponent
 	if (registry_->HasComponent<BlendComponent>(selectedEntity_))
@@ -49,22 +37,56 @@ void Detail::ECSEditor::DrawInspector()
 	// RenderPassComponent
 	if (registry_->HasComponent<RenderPassComponent>(selectedEntity_))
 	{
-		if (ImGui::CollapsingHeader("Render Pass", ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader("描画パス", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& renderPass = registry_->GetComponent<RenderPassComponent>(selectedEntity_);
-			ImGui::Checkbox("Is Enabled", &renderPass.isEnabled);
-			ImGui::DragInt("Priority", &renderPass.priority, 1);
+			ImGui::Checkbox("描画", &renderPass.isEnabled);
+			ImGui::DragInt("描画順", &renderPass.priority, 1);
 		}
 	}
 
 	// RenderComponent
 	if (registry_->HasComponent<RenderComponent>(selectedEntity_))
 	{
-		if (ImGui::CollapsingHeader("Render", ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader("描画", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& render = registry_->GetComponent<RenderComponent>(selectedEntity_);
-			ImGui::Checkbox("Is Enabled", &render.isEnabled);
-			ImGui::DragInt("Priority", &render.priority, 1);
+			ImGui::Checkbox("描画", &render.isEnabled);
+			ImGui::DragInt("描画順", &render.priority, 1);
+		}
+	}
+
+	// TransformComponent
+	if (registry_->HasComponent<TransformComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("トランスフォーム", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& transform = registry_->GetComponent<TransformComponent>(selectedEntity_);
+			ImGui::DragFloat3("位置", &transform.position.x, 0.1f);
+			ImGui::DragFloat3("回転", &transform.rotation.x, 0.01f);
+			ImGui::DragFloat3("大きさ", &transform.scale.x, 0.1f);
+		}
+	}
+
+	// MaterialComponent
+	if (registry_->HasComponent<MaterialComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("マテリアル", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& material = registry_->GetComponent<MaterialComponent>(selectedEntity_);
+			ImGui::ColorEdit4("色", &material.color.x);
+		}
+	}
+
+	// UVTransformComponent
+	if (registry_->HasComponent<UVTransformComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("UVトランスフォーム", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& uvTransform = registry_->GetComponent<UVTransformComponent>(selectedEntity_);
+			ImGui::DragFloat2("オフセット", &uvTransform.offset.x, 0.1f);
+			ImGui::DragFloat("回転", &uvTransform.radian, 0.01f);
+			ImGui::DragFloat2("大きさ", &uvTransform.scale.x, 0.1f);
 		}
 	}
 

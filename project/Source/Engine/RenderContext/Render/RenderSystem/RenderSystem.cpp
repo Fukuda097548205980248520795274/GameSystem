@@ -38,6 +38,10 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	RenderComponent render3DComp;
 	registry_->AddComponent(entity, render3DComp);
 
+	// MeshComponentを追加する
+	MeshComponent meshComp;
+	registry_->AddComponent(entity, meshComp);
+
 	// TransformComponentを追加する
 	TransformComponent transformComp;
 	registry_->AddComponent(entity, transformComp);
@@ -45,6 +49,14 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	// MaterialComponentを追加する
 	MaterialComponent materialComp;
 	registry_->AddComponent(entity, materialComp);
+
+	// UVTransformComponentを追加する
+	UVTransformComponent uvTransformComp;
+	registry_->AddComponent(entity, uvTransformComp);
+
+	// TextureComponentを追加する
+	TextureComponent textureComp;
+	registry_->AddComponent(entity, textureComp);
 
 	auto engine = Engine::GetInstance();
 	assert(engine);
@@ -119,6 +131,9 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		// 必要なコンポーネントを取得
 		auto& transform = registry_->GetComponent<TransformComponent>(entity);
 		auto& material = registry_->GetComponent<MaterialComponent>(entity);
+		auto& uvTransform = registry_->GetComponent<UVTransformComponent>(entity);
+		auto& mesh = registry_->GetComponent<MeshComponent>(entity);
+		auto& texture = registry_->GetComponent<TextureComponent>(entity);
 
 		auto& transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
 		auto& materialCB = registry_->GetComponent<MaterialConstantBufferComponent>(entity);
@@ -132,8 +147,9 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		commandList->SetPipelineState(psoItem->pso.Get());
 		commandList->SetGraphicsRootSignature(psoItem->rootSig.Get());
 
-		// ProceduralMeshStoreからキューブメッシュを登録する
-		proceduralMeshStore->Register(ProceduralMeshType::Cube, commandList);
+
+		// ProceduralMeshStoreからメッシュを登録する
+		proceduralMeshStore->Register(mesh.meshType, commandList);
 
 		// PSOの要求に従って動的にパラメータをバインドする
 		for (UINT i = 0;i < psoItem->desc.rootParameters.size(); ++i)
@@ -166,8 +182,11 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			case RenderBinding::Material:
 			{
 				UnLightingMaterialDataForGPU data;
-				data.color = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // デフォルトの色
-				data.uvTransform = Matrix4x4(); // デフォルトのUV変換行列
+				data.color = material.color; // マテリアルの色を使用
+				data.uvTransform = 
+					Make3DScaleMatrix4x4(Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f)) *
+					Make3DRotateZMatrix4x4(uvTransform.radian) * 
+					Make3DTranslateMatrix4x4(Vector3(uvTransform.offset.x, uvTransform.offset.y, 0.0f));
 
 				// Material用のリソースをバインド
 				renderResourceStore_->UpdateConstantBuffer(materialCB.handle, data, frameIndex);
@@ -178,7 +197,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			case RenderBinding::Texture:
 			{
 				// Texture用のリソースをバインド
-				commandList->SetGraphicsRootDescriptorTable(i, textureStore->GetSrvHandle(0).gpuHandle);
+				commandList->SetGraphicsRootDescriptorTable(i, textureStore->GetSrvHandle(texture.handle).gpuHandle);
 				break;
 			}
 
@@ -191,6 +210,6 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		else if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 		// ドローコール
-		commandList->DrawIndexedInstanced(proceduralMeshStore->GetNumIndex(ProceduralMeshType::Cube), 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(proceduralMeshStore->GetNumIndex(mesh.meshType), 1, 0, 0, 0);
 	}
 }

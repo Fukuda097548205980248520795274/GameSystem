@@ -5,10 +5,10 @@ void Detail::ECSEditor::DrawHierarchy()
 {
 #ifdef DEVELOPMENT
 
-	ImGui::Begin("Hierarchy");
+	ImGui::Begin("ヒエラルキー");
 
 	// エンティティ作成ボタン
-	if (ImGui::Button("Create Entity"))
+	if (ImGui::Button("Entity作成"))
 	{
 		Entity newEntity = registry_->CreateEntity();
 		selectedEntity_ = newEntity;
@@ -16,10 +16,8 @@ void Detail::ECSEditor::DrawHierarchy()
 
 	ImGui::Separator();
 
-	// ※ 事前にRegistryECSへ GetActiveEntities() を追加する想定
-	// std::vector<Entity> を返す関数を呼び出して一覧表示します。
+	// 有効なエンティティの一覧を取得
 	const auto& entities = registry_->GetActiveEntities();
-
 	for (Entity entity : entities)
 	{
 		// エンティティ名（現状はIDで代用）
@@ -35,7 +33,7 @@ void Detail::ECSEditor::DrawHierarchy()
 		// 右クリックでコンテキストメニューを表示
 		if (ImGui::BeginPopupContextItem())
 		{
-			if (ImGui::MenuItem("Destroy Entity"))
+			if (ImGui::MenuItem("Entityを破棄"))
 			{
 				registry_->DestroyEntity(entity);
 				if (selectedEntity_ == entity)
