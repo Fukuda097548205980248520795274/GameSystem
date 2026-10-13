@@ -20,6 +20,23 @@ void Detail::SkyboxSystem::Initialize()
 /// @return 
 Entity Detail::SkyboxSystem::CreateSkyboxEntity()
 {
+	auto engine = Engine::GetInstance();
+	assert(engine);
+
+	auto renderContext = engine->GetRenderContext();
+	assert(renderContext);
+
+	auto device = renderContext->GetCore()->GetDevice();
+	assert(device);
+
+	auto textureStore = renderContext->GetTextureStore();
+	assert(textureStore);
+
+	int32_t maxBufferCount = engine->GetMaxBufferCount();
+	assert(maxBufferCount > 0);
+
+
+	// エンティティを作成する
 	Entity entity = registry_->CreateEntity();
 
 	// SkyboxComponentを追加する
@@ -27,7 +44,7 @@ Entity Detail::SkyboxSystem::CreateSkyboxEntity()
 	registry_->AddComponent(entity, skyboxComp);
 
 	// CubemapComponentを追加する
-	CubemapComponent cubemapComp;
+	CubemapComponent cubemapComp(textureStore->GetDefaultCubemapHandle());
 	registry_->AddComponent(entity, cubemapComp);
 
 	return entity;

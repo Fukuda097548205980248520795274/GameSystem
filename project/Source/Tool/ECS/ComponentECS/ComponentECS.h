@@ -147,7 +147,7 @@ struct RenderTargetComponent
 /// @brief テクスチャコンポーネント
 struct TextureComponent
 {
-	TextureComponent() : handle(0) {}
+	TextureComponent(uint32_t handle) : handle(handle) {}
 
 	/// @brief テクスチャのハンドル（またはID/ポインタ）
 	uint32_t handle;
@@ -156,7 +156,7 @@ struct TextureComponent
 /// @brief キューブマップコンポーネント
 struct CubemapComponent
 {
-	CubemapComponent() : handle(0) {}
+	CubemapComponent(uint32_t handle) : handle(handle) {}
 
 	/// @brief キューブマップのハンドル（またはID/ポインタ）
 	uint32_t handle;

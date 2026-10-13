@@ -8,7 +8,7 @@ D3D12_GPU_VIRTUAL_ADDRESS Detail::RenderResourceStore::GetGPUVirtualAddress(int3
 {
     if (cbHandle >= 0 && cbHandle < constantBuffers_.size() && constantBuffers_[cbHandle])
     {
-        // 仮想アドレス取得のためには、IConstantBufferResource側に対応メソッドが必要です（後述）
+		// IConstantBufferResource からキャストして GetGPUVirtualAddress を呼び出す
         return constantBuffers_[cbHandle]->GetGPUVirtualAddress(frameIndex);
     }
 

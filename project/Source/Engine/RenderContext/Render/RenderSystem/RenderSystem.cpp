@@ -31,6 +31,23 @@ void Detail::RenderSystem::Initialize()
 /// @return 
 Entity Detail::RenderSystem::CreateRender3DEntity()
 {
+	auto engine = Engine::GetInstance();
+	assert(engine);
+
+	auto renderContext = engine->GetRenderContext();
+	assert(renderContext);
+
+	auto device = renderContext->GetCore()->GetDevice();
+	assert(device);
+
+	auto textureStore = renderContext->GetTextureStore();
+	assert(textureStore);
+
+	int32_t maxBufferCount = engine->GetMaxBufferCount();
+	assert(maxBufferCount > 0);
+
+
+
 	// エンティティを作成する
 	Entity entity = registry_->CreateEntity();
 
@@ -55,20 +72,8 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	registry_->AddComponent(entity, uvTransformComp);
 
 	// TextureComponentを追加する
-	TextureComponent textureComp;
+	TextureComponent textureComp(textureStore->GetDefaultTextureHandle());
 	registry_->AddComponent(entity, textureComp);
-
-	auto engine = Engine::GetInstance();
-	assert(engine);
-
-	auto renderContext = engine->GetRenderContext();
-	assert(renderContext);
-
-	auto device = renderContext->GetCore()->GetDevice();
-	assert(device);
-
-	int32_t maxBufferCount = engine->GetMaxBufferCount();
-	assert(maxBufferCount > 0);
 
 	// TransformDataForGPU用のConstantBufferComponentを追加する
 	TransformConstantBufferComponent constantBufferComp(renderResourceStore_->CreateConstantBuffer<Detail::TransformDataForGPU>(device, maxBufferCount));

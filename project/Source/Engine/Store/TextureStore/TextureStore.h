@@ -107,6 +107,14 @@ namespace Detail
 		/// @brief 中間リソースを解放する
 		void ReleaseIntermediateResources();
 
+		/// @brief デフォルトテクスチャハンドルを取得する
+		/// @return 
+		uint32_t GetDefaultTextureHandle() const { return defaultTextureHandle_; }
+
+		/// @brief デフォルトキューブマップハンドルを取得する
+		/// @return 
+		uint32_t GetDefaultCubemapHandle() const { return defaultCubemapHandle_; }
+
 
 	private:
 
@@ -136,5 +144,15 @@ namespace Detail
 
 		/// @brief 保留中のアップロードリソース
 		std::vector<std::pair<Microsoft::WRL::ComPtr<ID3D12Resource>, uint32_t>> pendingUploadResources_;
+
+
+	private:
+
+		// 初期テクスチャハンドル
+		uint32_t defaultTextureHandle_ = kInvalidTextureHandle;
+
+		// 初期キューブマップハンドル
+		uint32_t defaultCubemapHandle_ = kInvalidTextureHandle;
+
 	};
 }

@@ -566,16 +566,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Assets\Shader\Fullscreen\Fullscreen.VS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">
       <Filter>Shader\Fullscreen</Filter>
     </FxCompile>
-    <FxCompile Include="Assets\Shader\SwapChainCopy\SwapChainCopy.PS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\SwapChainCopy\SwapChainCopy.PS.hlsl">
       <Filter>Shader\SwapChainCopy</Filter>
     </FxCompile>
-    <FxCompile Include="Assets\Shader\Skybox\Skybox.PS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Skybox\Skybox.PS.hlsl">
       <Filter>Shader\Skybox</Filter>
     </FxCompile>
-    <FxCompile Include="Assets\Shader\Skybox\Skybox.VS.hlsl">
+    <FxCompile Include="Assets\Internal\Shader\Skybox\Skybox.VS.hlsl">
       <Filter>Shader\Skybox</Filter>
     </FxCompile>
     <FxCompile Include="Assets\Internal\Shader\Render\Render3D\Render3D.VS.hlsl">
@@ -592,10 +592,10 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Shader\Fullscreen\Fullscreen.hlsli">
+    <None Include="Assets\Internal\Shader\Fullscreen\Fullscreen.hlsli">
       <Filter>Shader\Fullscreen</Filter>
     </None>
-    <None Include="Assets\Shader\Skybox\Skybox.hlsli">
+    <None Include="Assets\Internal\Shader\Skybox\Skybox.hlsli">
       <Filter>Shader\Skybox</Filter>
     </None>
     <None Include="Assets\Internal\Shader\Render\Render3D\Render3D.hlsli">
