@@ -7,6 +7,9 @@ void Detail::ECSEditor::DrawInspector()
 
 	ImGui::Begin("インスペクター");
 
+	// エンジンのインスタンスを取得
+	auto engine = Engine::GetInstance();
+
 	if (selectedEntity_ == kNullEntity)
 	{
 		ImGui::Text("Entityが選択されていません。");
@@ -99,8 +102,53 @@ void Detail::ECSEditor::DrawInspector()
 					IM_ASSERT(payload->DataSize == sizeof(uint32_t));
 					uint32_t droppedHandle = *(const uint32_t*)payload->Data;
 
-					// 受け取ったハンドルをコンポーネントに設定
-					texture.handle = droppedHandle;
+					if (engine)
+					{
+						if (auto textureStore = engine->GetRenderContext()->GetTextureStore())
+						{
+							// テクスチャ2Dのみ変更する
+							if(textureStore->GetType(droppedHandle) == TextureType::Texture2D)
+								texture.handle = droppedHandle;
+						}
+
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+		}
+	}
+
+	// CubemapComponent
+	if (registry_->HasComponent<CubemapComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("キューブマップ", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& texture = registry_->GetComponent<CubemapComponent>(selectedEntity_);
+
+			// 現在設定されているキューブマップのハンドル番号を表示
+			ImGui::Text("ハンドル : %u", texture.handle);
+
+			// ドロップを受け付けるための専用エリアを作成
+			ImGui::Button("キューブマップをドロップ", ImVec2(-1, 30));
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				// ペイロード名 "TEXTURE_HANDLE" を受け取る
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_HANDLE"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(uint32_t));
+					uint32_t droppedHandle = *(const uint32_t*)payload->Data;
+
+					if (engine)
+					{
+						if (auto textureStore = engine->GetRenderContext()->GetTextureStore())
+						{
+							// キューブマップのみ変更する
+							if (textureStore->GetType(droppedHandle) == TextureType::Cubemap)
+								texture.handle = droppedHandle;
+						}
+
+					}
 				}
 				ImGui::EndDragDropTarget();
 			}

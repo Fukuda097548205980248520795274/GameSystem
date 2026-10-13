@@ -66,6 +66,15 @@ struct MeshComponent
 	Detail::ProceduralMeshType meshType;
 };
 
+/// @brief モデルコンポーネント
+struct ModelComponent
+{
+	ModelComponent() : modelHandle(0) {}
+	
+	// モデルのハンドル（またはID/ポインタ）
+	uint32_t modelHandle;
+};
+
 /// @brief カメラコンポーネント
 struct CameraComponent
 {

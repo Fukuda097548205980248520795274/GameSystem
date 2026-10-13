@@ -19,6 +19,9 @@ void Game::Initialize()
 	// テクスチャを読み込む
 	textureHandle = Engine::GetInstance()->LoadTexture("./Assets/Texture/uvChecker.png");
 
+	// キューブマップを読み込む
+	cubemapHandle = Engine::GetInstance()->LoadTexture("./Assets/Texture/white_skybox.dds");
+
 	// 3D描画用のエンティティを作成
 	render3dEntity = Engine::GetInstance()->CreateRender3DEntity();
 

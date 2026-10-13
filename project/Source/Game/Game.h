@@ -36,6 +36,9 @@ private:
 	/// @brief 読み込んだテクスチャのハンドル
 	uint32_t textureHandle = 0;
 
+	/// @brief キューブマップのハンドル
+	uint32_t cubemapHandle = 0;
+
 	/// @brief 3D描画用のエンティティ
 	Entity render3dEntity;
 

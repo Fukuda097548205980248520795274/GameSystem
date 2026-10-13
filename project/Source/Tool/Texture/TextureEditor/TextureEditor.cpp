@@ -104,7 +104,15 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 			float previewWidth = std::min(256.0f, static_cast<float>(width));
 			float previewHeight = previewWidth * (static_cast<float>(height) / static_cast<float>(width));
 
-			ImGui::Image(static_cast<ImTextureID>(srvHandle.gpuHandle.ptr), ImVec2(previewWidth, previewHeight));
+			// テクスチャの種類に応じてプレビューを表示
+			if (type == TextureType::Texture2D)
+			{
+				ImGui::Image(static_cast<ImTextureID>(srvHandle.gpuHandle.ptr), ImVec2(previewWidth, previewHeight));
+			}
+			else if (type == TextureType::Cubemap)
+			{
+				ImGui::TextDisabled("キューブマップのプレビューは非対応です");
+			}
 
 			ImGui::EndTooltip();
 		}
