@@ -73,6 +73,10 @@ public:
 	/// @return 
 	Entity CreateCameraEntity() { return renderContext_->CreateCameraEntity(); }
 
+	/// @brief Skyboxエンティティを作成する
+	/// @return 
+	Entity CreateSkyboxEntity() { return renderContext_->CreateSkyboxEntity(); }
+
 	/// @brief テクスチャを読み込む
 	/// @param filePath 
 	/// @return 

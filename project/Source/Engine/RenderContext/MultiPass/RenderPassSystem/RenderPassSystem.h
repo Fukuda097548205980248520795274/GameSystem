@@ -12,6 +12,7 @@ namespace Detail
 	class MultiPass;
 	class OffscreenResource;
 	class RenderSystem;
+	class SkyboxSystem;
 
 	class RenderPassSystem
 	{
@@ -37,7 +38,8 @@ namespace Detail
 		/// @param dsvHandle 
 		/// @param multiPass 
 		/// @param renderSystem 
-		void ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem);
+		/// @param skyboxSystem 
+		void ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem);
 
 		/// @brief レンダーパスを返却する
 		void Return();

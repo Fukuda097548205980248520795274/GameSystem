@@ -72,6 +72,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// レンダーシステムを作成
 	renderSystem_ = std::make_unique<RenderSystem>();
 
+	// Skyboxシステムを作成
+	skyboxSystem_ = std::make_unique<SkyboxSystem>(core_->GetDevice(), shaderCompiler_.get());
+
 
 	// ビューポートの設定
 	viewport_.Width = static_cast<float>(winApp->GetClientWidth());
@@ -207,7 +210,7 @@ void Detail::RenderContext::PostDraw()
 	multiPass_->Clear(commandList, frameIndex_);
 
 	// レンダーパスを実行する
-	multiPass_->Execute(commandList, renderSystem_.get(), frameIndex_);
+	multiPass_->Execute(commandList, renderSystem_.get(), skyboxSystem_.get(), frameIndex_);
 
 	// バックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();

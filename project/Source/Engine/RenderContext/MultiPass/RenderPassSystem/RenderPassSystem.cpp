@@ -49,7 +49,8 @@ Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode, s
 /// @param multiPass 
 /// @param dsvHandle 
 /// @param renderSystem 
-void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem)
+/// @param skyboxSystem 
+void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem)
 {
     auto* passArray = registry_->GetComponentArray<RenderPassComponent>();
     const auto& entities = passArray->GetEntities();
@@ -70,6 +71,8 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
     // priority に基づいて昇順でソート（数値が小さいほど先に描画）
     std::sort(sortedPasses.begin(), sortedPasses.end(), [](const auto& a, const auto& b) {return a.second < b.second;});
 
+    bool isDrawSkybox = false;
+
     // 順次実行
     for (const auto& pair : sortedPasses)
     {
@@ -88,6 +91,15 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
 
         // レンダーターゲットのクリアと設定
         destinationResource->ClearRenderTarget(commandList, dsvHandle, frameIndex);
+
+		// スカイボックスの描画は最初のレンダーパスでのみ行う
+		if (!isDrawSkybox)
+		{
+			// Skyboxの描画
+			skyboxSystem->Execute(commandList);
+
+            isDrawSkybox = true;
+		}
 
 		// 描画処理の実行
 		renderSystem->ExecuteAll(commandList, pair.second);

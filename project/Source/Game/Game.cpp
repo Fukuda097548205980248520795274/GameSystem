@@ -24,6 +24,9 @@ void Game::Initialize()
 
 	// カメラ用のエンティティを作成
 	cameraEntity = Engine::GetInstance()->CreateCameraEntity();
+
+	/// Skybox用のエンティティを作成
+	skyboxEntity = Engine::GetInstance()->CreateSkyboxEntity();
 }
 
 /// @brief 更新処理

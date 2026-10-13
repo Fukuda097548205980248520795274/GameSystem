@@ -1,18 +1,26 @@
 #pragma once
-#include <d3d12.h>
-#include <dxgi1_6.h>
+#include <memory>
+#include "Matrix/Matrix4x4/Matrix4x4.h"
+#include "SkyboxPSO/SkyboxPSO.h"
 #include "ECS/EntityECS/EntityECS.h"
+#include "Resource/VertexBufferResource/VertexBufferResource.h"
+#include "Resource/IndexBufferResource/IndexBufferResource.h"
+#include "Resource/ConstantBufferResource/ConstantBufferResource.h"
 
 namespace Detail
 {
 	class RegistryECS;
+	class ShaderCompiler;
 
 	class SkyboxSystem
 	{
 	public:
 
 		/// @brief コンストラクタ
-		SkyboxSystem() { Initialize(); }
+		SkyboxSystem(ID3D12Device* device, ShaderCompiler* shaderCompiler) { Initialize(device, shaderCompiler); }
+
+		/// @brief デストラクタ
+		~SkyboxSystem() = default;
 
 		/// @brief エンティティを作成する
 		/// @return 
@@ -27,9 +35,27 @@ namespace Detail
 	private:
 
 		/// @brief 初期化
-		void Initialize();
+		void Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler);
 
 		/// @brief ECSレジストリ
 		RegistryECS* registry_ = nullptr;
+
+		/// @brief SkyboxPSO
+		std::unique_ptr<SkyboxPSO> pso_;
+
+
+	private:
+
+		// 頂点リソース
+		std::unique_ptr<VertexBufferResource<Vector4>> vertexResource_ = nullptr;
+
+		// インデックスリソース
+		std::unique_ptr<IndexBufferResource> indexResource_ = nullptr;
+
+		/// @brief 変換行列バッファ
+		std::unique_ptr<ConstantBufferResource<Matrix4x4>> transformBuffer_ = nullptr;
+
+		/// @brief カラーバッファ
+		std::unique_ptr<ConstantBufferResource<Vector4>> colorBuffer_ = nullptr;
 	};
 }

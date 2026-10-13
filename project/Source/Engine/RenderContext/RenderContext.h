@@ -12,6 +12,7 @@
 
 #include "Render/CameraSystem/CameraSystem.h"
 #include "Render/RenderSystem/RenderSystem.h"
+#include "Render/SkyboxSystem/SkyboxSystem.h"
 
 #include "ProfilerEditor/ProfilerEditor.h"
 #include "ECS/ECSEditor/ECSEditor.h"
@@ -71,6 +72,10 @@ namespace Detail
 		/// @brief カメラエンティティを作成する
 		/// @return 
 		Entity CreateCameraEntity() { return cameraSystem_->CreateCameraEntity(); }
+
+		/// @brief Skyboxエンティティを作成する
+		/// @return 
+		Entity CreateSkyboxEntity() { return skyboxSystem_->CreateSkyboxEntity(); }
 
 		/// @brief テクスチャを読み込む
 		/// @param filePath 
@@ -169,6 +174,9 @@ namespace Detail
 
 		/// @brief レンダーシステム
 		std::unique_ptr<RenderSystem> renderSystem_ = nullptr;
+
+		/// @brief Skyboxシステム
+		std::unique_ptr<SkyboxSystem> skyboxSystem_ = nullptr;
 
 
 	private:

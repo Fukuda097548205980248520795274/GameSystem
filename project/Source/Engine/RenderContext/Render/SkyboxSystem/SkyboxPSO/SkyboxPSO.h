@@ -13,11 +13,10 @@ namespace Detail
 	{
 	public:
 
-		/// @brief 初期化
+		/// @brief コンストラクタ
 		/// @param device 
 		/// @param compiler 
-		/// @param log 
-		void Initialize(ID3D12Device* device, ShaderCompiler* compiler);
+		SkyboxPSO(ID3D12Device* device, ShaderCompiler* compiler) { Initialize(device, compiler); }
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
@@ -29,6 +28,12 @@ namespace Detail
 
 
 	protected:
+
+		/// @brief 初期化
+		/// @param device 
+		/// @param compiler 
+		/// @param log 
+		void Initialize(ID3D12Device* device, ShaderCompiler* compiler);
 
 		// 頂点シェーダのバイナリデータ
 		ComPtr<IDxcBlob> vertexShaderBlob_ = nullptr;

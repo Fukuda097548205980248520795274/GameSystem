@@ -222,3 +222,11 @@ void Detail::SkyboxPSO::Initialize(ID3D12Device* device, ShaderCompiler* compile
 	}
 	if (engine)engine->Log(LogLevel::Info, "SkyboxPSO生成");
 }
+
+/// @brief コマンドリストに登録する
+/// @param commandList 
+void Detail::SkyboxPSO::Register(ID3D12GraphicsCommandList* commandList)
+{
+	commandList->SetPipelineState(graphicsPipelineState_.Get());
+	commandList->SetGraphicsRootSignature(rootSignature_.Get());
+}

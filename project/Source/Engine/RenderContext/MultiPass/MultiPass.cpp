@@ -89,15 +89,16 @@ void Detail::MultiPass::RenderSwapChain(ID3D12GraphicsCommandList* commandList, 
 
 /// @brief レンダーパスを実行する
 /// @param commandList 
-void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, int frameIndex)
+void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem, int frameIndex)
 {
 	// nullptrチェック
 	assert(commandList);
 	assert(renderSystem);
+	assert(skyboxSystem);
 	assert(frameIndex >= 0);
 
 	// レンダーパスを実行する
-	renderPassSystem_->ExecuteAll(commandList, depthResource_->GetDsvHandle(frameIndex), this, renderSystem);
+	renderPassSystem_->ExecuteAll(commandList, depthResource_->GetDsvHandle(frameIndex), this, renderSystem, skyboxSystem);
 
 	// レンダーパスの結果が存在しない場合は、ダミーリソースを設定する
 	if (!currentResource_)

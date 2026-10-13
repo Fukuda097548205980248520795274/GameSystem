@@ -41,5 +41,8 @@ private:
 
 	/// @brief カメラ用のエンティティ
 	Entity cameraEntity;
+
+	/// @brief Skybox用のエンティティ
+	Entity skyboxEntity;
 };
 

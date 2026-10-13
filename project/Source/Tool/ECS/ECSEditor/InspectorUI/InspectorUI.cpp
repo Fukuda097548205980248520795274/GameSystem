@@ -65,9 +65,9 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("トランスフォーム", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& transform = registry_->GetComponent<TransformComponent>(selectedEntity_);
-			ImGui::DragFloat3("位置", &transform.position.x, 0.1f);
-			ImGui::DragFloat3("回転", &transform.rotation.x, 0.01f);
-			ImGui::DragFloat3("大きさ", &transform.scale.x, 0.1f);
+			ImGui::DragFloat3("位置##トランスフォーム", &transform.position.x, 0.1f);
+			ImGui::DragFloat3("回転##トランスフォーム", &transform.rotation.x, 0.01f);
+			ImGui::DragFloat3("大きさ##トランスフォーム", &transform.scale.x, 0.1f);
 		}
 	}
 
@@ -161,9 +161,9 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("UVトランスフォーム", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& uvTransform = registry_->GetComponent<UVTransformComponent>(selectedEntity_);
-			ImGui::DragFloat2("オフセット", &uvTransform.offset.x, 0.1f);
-			ImGui::DragFloat("回転", &uvTransform.radian, 0.01f);
-			ImGui::DragFloat2("大きさ", &uvTransform.scale.x, 0.1f);
+			ImGui::DragFloat2("オフセット##UV", &uvTransform.offset.x, 0.1f);
+			ImGui::DragFloat("回転##UV", &uvTransform.radian, 0.01f);
+			ImGui::DragFloat2("大きさ##UV", &uvTransform.scale.x, 0.1f);
 		}
 	}
 
