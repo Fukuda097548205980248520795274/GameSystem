@@ -71,6 +71,16 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 			selectedHandle_ = i;
 		}
 
+		// ドラッグアンドドロップのソースとして設定
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+		{
+			// ペイロードとしてテクスチャハンドル（uint32_t）を設定
+			ImGui::SetDragDropPayload("TEXTURE_HANDLE", &i, sizeof(uint32_t));
+
+			// ドラッグ中にマウスカーソルに追従して表示されるテキスト
+			ImGui::Text("テクスチャ: %s", fileName.c_str());
+			ImGui::EndDragDropSource();
+		}
 		
 		// ツールチップ表示
 		if (ImGui::IsItemHovered())

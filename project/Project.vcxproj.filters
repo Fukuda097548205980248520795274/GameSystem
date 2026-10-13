@@ -233,6 +233,12 @@
     <Filter Include="Source\Engine\RenderContext\Render\CameraSystem">
       <UniqueIdentifier>{529668a4-1363-4c53-8b35-b58ce90564fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Store\ModelStore">
+      <UniqueIdentifier>{8fa2be28-514e-4675-ba4c-14837c1b2c5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\ProfilerEditor">
+      <UniqueIdentifier>{86150f9f-88dd-4c11-93b9-14f7113e1838}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -381,6 +387,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.cpp">
       <Filter>Source\Engine\RenderContext\Render\CameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ProfilerEditor\ProfilerEditor.cpp">
+      <Filter>Source\Tool\ProfilerEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -545,6 +554,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.h">
       <Filter>Source\Engine\RenderContext\Render\CameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\ProfilerEditor\ProfilerEditor.h">
+      <Filter>Source\Tool\ProfilerEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

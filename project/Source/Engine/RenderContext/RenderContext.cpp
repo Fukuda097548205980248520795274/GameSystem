@@ -49,6 +49,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// PSOEditorを作成
 	psoEditor_ = std::make_unique<PSOEditor>();
 
+	// ProfilerEditorを作成
+	profilerEditor_ = std::make_unique<ProfilerEditor>();
+
 
 
 	// テクスチャストアを作成
@@ -160,6 +163,9 @@ void Detail::RenderContext::NewFrame()
 
 	// ECSEditorを更新する
 	ecsEditor_->Update();
+
+	// ProfilerEditorを更新する
+	profilerEditor_->DrawUI();
 
 	// psoEditorを更新する
 	psoEditor_->Update();

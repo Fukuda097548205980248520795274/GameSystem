@@ -212,6 +212,7 @@
     <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxPSO\SkyboxPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.cpp" />
     <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp" />
+    <ClCompile Include="Source\Tool\ProfilerEditor\ProfilerEditor.cpp" />
     <ClCompile Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -348,6 +349,7 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.h" />
     <ClInclude Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.h" />
+    <ClInclude Include="Source\Tool\ProfilerEditor\ProfilerEditor.h" />
     <ClInclude Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.h" />
     <ClInclude Include="Source\Tool\PSO\PSODescription\PSODescription.h" />
     <ClInclude Include="Source\Engine\RenderContext\DXCommand\DXCommand.h" />

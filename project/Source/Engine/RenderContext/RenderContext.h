@@ -13,6 +13,7 @@
 #include "Render/CameraSystem/CameraSystem.h"
 #include "Render/RenderSystem/RenderSystem.h"
 
+#include "ProfilerEditor/ProfilerEditor.h"
 #include "ECS/ECSEditor/ECSEditor.h"
 #include "Shader/ShaderEditor/ShaderEditor.h"
 #include "PSO/PSOEditor/PSOEditor.h"
@@ -190,6 +191,9 @@ namespace Detail
 
 
 	private:
+
+		/// @brief プロファイラエディタ
+		std::unique_ptr<ProfilerEditor> profilerEditor_ = nullptr;
 
 		/// @brief ECSエディタ
 		std::unique_ptr<ECSEditor> ecsEditor_ = nullptr;

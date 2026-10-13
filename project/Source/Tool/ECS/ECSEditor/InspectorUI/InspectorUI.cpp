@@ -78,6 +78,35 @@ void Detail::ECSEditor::DrawInspector()
 		}
 	}
 
+	// TextureComponent
+	if (registry_->HasComponent<TextureComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("テクスチャ", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& texture = registry_->GetComponent<TextureComponent>(selectedEntity_);
+
+			// 現在設定されているテクスチャのハンドル番号を表示
+			ImGui::Text("ハンドル : %u", texture.handle);
+
+			// ドロップを受け付けるための専用エリアを作成
+			ImGui::Button("テクスチャをドロップ", ImVec2(-1, 30));
+
+			if (ImGui::BeginDragDropTarget())
+			{
+				// ペイロード名 "TEXTURE_HANDLE" を受け取る
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_HANDLE"))
+				{
+					IM_ASSERT(payload->DataSize == sizeof(uint32_t));
+					uint32_t droppedHandle = *(const uint32_t*)payload->Data;
+
+					// 受け取ったハンドルをコンポーネントに設定
+					texture.handle = droppedHandle;
+				}
+				ImGui::EndDragDropTarget();
+			}
+		}
+	}
+
 	// UVTransformComponent
 	if (registry_->HasComponent<UVTransformComponent>(selectedEntity_))
 	{
