@@ -59,6 +59,16 @@ void Detail::ECSEditor::DrawInspector()
 		}
 	}
 
+	// SkyboxComponent
+	if (registry_->HasComponent<SkyboxComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("スカイボックス", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& skybox = registry_->GetComponent<SkyboxComponent>(selectedEntity_);
+			ImGui::Checkbox("描画", &skybox.isEnabled);
+		}
+	}
+
 	// TransformComponent
 	if (registry_->HasComponent<TransformComponent>(selectedEntity_))
 	{

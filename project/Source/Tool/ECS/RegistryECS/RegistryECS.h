@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <memory>
 #include <typeindex>
+#include <queue>
 
 #include "ECS/EntityECS/EntityECS.h"
 
@@ -68,6 +69,15 @@ namespace Detail
 		/// @return 
 		const std::vector<Entity>& GetActiveEntities() const { return activeEntities_; }
 
+		/// @brief エンティティが削除されたときに呼ばれるコールバックを設定する
+		/// @tparam T 
+		/// @param callback 
+		template<typename T>
+		void SetOnRemoveComponentCallback(typename ComponentArray<T>::OnRemoveCallback callback)
+		{
+			GetComponentArray<T>()->SetOnRemoveCallback(callback);
+		}
+
 
 	private:
 
@@ -79,5 +89,8 @@ namespace Detail
 
 		/// @brief 有効なエンティティの一覧
 		std::vector<Entity> activeEntities_;
+
+		/// @brief 利用可能なエンティティの一覧
+		std::queue<Entity> availableEntities_;
 	};
 }

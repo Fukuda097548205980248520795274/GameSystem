@@ -118,6 +118,9 @@ struct MaterialConstantBufferComponent : public ConstantBufferComponent
 struct SkyboxComponent
 {
 	SkyboxComponent(){}
+
+	/// @brief スカイボックスの有効/無効フラグ
+	bool isEnabled = true;
 };
 
 /// @brief 合成（ブレンド）のパラメータ

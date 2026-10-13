@@ -1,5 +1,8 @@
 #pragma once
 #include <memory>
+#include <queue>
+#include <vector>
+#include <unordered_map>
 #include "Resource/ConstantBufferResource/ConstantBufferResource.h"
 
 namespace Detail
@@ -17,7 +20,18 @@ namespace Detail
         template<class T>
         int32_t CreateConstantBuffer(ID3D12Device* device, int32_t maxBufferCount)
         {
-            // 定数バッファを生成
+			// 型情報に基づいて空きハンドルのキューを取得
+            auto& freeQueue = freeHandles_[typeid(T)];
+
+            // 空きがあればリソースを再生成せずにハンドルだけ返す
+            if (!freeQueue.empty())
+            {
+                int32_t reusedHandle = freeQueue.front();
+                freeQueue.pop();
+                return reusedHandle;
+            }
+
+            // 空きがなければ新規作成して末尾に追加
             constantBuffers_.push_back(std::make_unique<Detail::ConstantBufferResource<T>>(device, maxBufferCount));
             return static_cast<int32_t>(constantBuffers_.size() - 1);
         }
@@ -62,5 +76,8 @@ namespace Detail
 
         // 定数バッファを一元管理
         std::vector<std::unique_ptr<IConstantBufferResource>> constantBuffers_;
+
+		// 型情報に基づいて空きハンドルのキューを管理
+        std::unordered_map<std::type_index, std::queue<int32_t>> freeHandles_;
 	};
 }

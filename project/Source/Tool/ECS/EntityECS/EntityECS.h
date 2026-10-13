@@ -2,6 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <cassert>
+#include <functional>
 
 // @brief エンティティの型
 using Entity = uint32_t;
@@ -29,6 +30,12 @@ class ComponentArray : public IComponentArray
 {
 public:
 
+	// エンティティが削除されたときに呼ばれるコールバックの型
+	using OnRemoveCallback = std::function<void(Entity, T&)>;
+
+
+public:
+
 	/// @brief コンポーネントを追加する
 	/// @param entity 
 	/// @param component 
@@ -51,6 +58,9 @@ public:
 	{
 		// エンティティが存在しない場合は何もしない
 		if (!Has(entity)) return;
+
+		// 削除前にコールバックを呼び出す
+		if (onRemoveCallback_)onRemoveCallback_(entity, Get(entity));
 
 		uint32_t indexOfRemoved = sparse_[entity];
 		uint32_t indexOfLast = static_cast<uint32_t>(dense_.size() - 1);
@@ -92,6 +102,10 @@ public:
 	/// @return 
 	const std::vector<Entity>& GetEntities() const { return denseToEntity_; }
 
+	/// @brief エンティティが削除されたときに呼ばれるコールバックを設定する
+	/// @param callback 
+	void SetOnRemoveCallback(OnRemoveCallback callback) { onRemoveCallback_ = callback; }
+
 
 private:
 
@@ -103,4 +117,7 @@ private:
 
 	// スパース配列
 	std::vector<uint32_t> sparse_;
+
+	// エンティティが削除されたときに呼ばれるコールバック
+	OnRemoveCallback onRemoveCallback_ = nullptr;
 };

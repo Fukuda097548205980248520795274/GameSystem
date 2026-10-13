@@ -19,10 +19,12 @@ D3D12_GPU_VIRTUAL_ADDRESS Detail::RenderResourceStore::GetGPUVirtualAddress(int3
 /// @param cbHandle 
 void Detail::RenderResourceStore::ReleaseConstantBuffer(int32_t cbHandle)
 {
-    // 範囲チェックを行い、リソースを解放(nullptrにする)
-    if (cbHandle >= 0 && cbHandle < constantBuffers_.size())
+    // 範囲チェックと有効なポインタかの確認
+    if (cbHandle >= 0 && cbHandle < constantBuffers_.size() && constantBuffers_[cbHandle])
     {
-        constantBuffers_[cbHandle].reset();
+		// 型情報に基づいて空きハンドルのキューに戻す
+        auto typeIndex = constantBuffers_[cbHandle]->GetTypeIndex();
+        freeHandles_[typeIndex].push(cbHandle);
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <cassert>
+#include <typeindex>
 
 #include "Func/ResourceFunc/ResourceFunc.h"
 #include "RenderContext/DXHeap/DXHeap.h"
@@ -33,6 +34,10 @@ namespace Detail
 		/// @param frameIndex 
 		/// @return 
 		virtual D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress(uint32_t frameIndex) const = 0;
+
+		/// @brief 型情報を取得する
+		/// @return 
+		virtual std::type_index GetTypeIndex() const = 0;
 
 
 	protected:
@@ -68,6 +73,10 @@ namespace Detail
 		/// @param frameIndex 
 		/// @return 
 		T* GetData(uint32_t frameIndex) { return data_[frameIndex]; }
+
+		/// @brief 型情報を取得する
+		/// @return 
+		std::type_index GetTypeIndex() const override { return typeid(T); }
 
 		/// @brief GPU仮想アドレスを取得する
 		/// @param frameIndex 

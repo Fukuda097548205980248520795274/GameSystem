@@ -21,7 +21,6 @@ void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	pso_ = std::make_unique<SkyboxPSO>(device, shaderCompiler);
 
 
-
 	// インデックスリソースの生成と初期化
 	indexResource_ = std::make_unique<IndexBufferResource>(device, 36, 1);
 	auto indexData = indexResource_->GetData(0);
@@ -150,16 +149,17 @@ void Detail::SkyboxSystem::Execute(ID3D12GraphicsCommandList* commandList)
 	Entity selectedEntity = kNullEntity;
 	for (Entity entity : entities)
 	{
-		auto& pass = registry_->GetComponent<SkyboxComponent>(entity);
+		auto& skybox = registry_->GetComponent<SkyboxComponent>(entity);
 		
-		selectedEntity = entity;
-		break;
+		if (skybox.isEnabled)
+		{
+			selectedEntity = entity;
+			break;
+		}
 	}
 
 	// 選択されたエンティティがない場合は何もしない
 	if (selectedEntity == kNullEntity) return;
-
-	
 
 
 	// PSOをコマンドリストに登録する

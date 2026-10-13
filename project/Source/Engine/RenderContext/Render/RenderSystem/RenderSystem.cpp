@@ -22,6 +22,23 @@ void Detail::RenderSystem::Initialize()
 	registry_ = registry;
 	psoEditor_ = psoEditor;
 
+	// TransformConstantBufferComponentが削除されたときのコールバックを設定する
+	registry_->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp)
+		{
+			if (renderResourceStore_)
+			{
+				renderResourceStore_->ReleaseConstantBuffer(comp.handle);
+			}
+		});
+
+	// MaterialConstantBufferComponentが削除されたときのコールバックを設定する
+	registry_->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp)
+		{
+			if (renderResourceStore_)
+			{
+				renderResourceStore_->ReleaseConstantBuffer(comp.handle);
+			}
+		});
 
 	/// レンダーリソースストアを生成する
 	renderResourceStore_ = std::make_unique<RenderResourceStore>();
