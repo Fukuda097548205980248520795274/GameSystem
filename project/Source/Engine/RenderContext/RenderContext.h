@@ -12,6 +12,7 @@
 
 #include "Render/CameraSystem/CameraSystem.h"
 #include "Render/RenderSystem/RenderSystem.h"
+#include "Render/LightSystem/LightSystem.h"
 #include "Render/SkyboxSystem/SkyboxSystem.h"
 
 #include "ProfilerEditor/ProfilerEditor.h"
@@ -110,6 +111,10 @@ namespace Detail
 		/// @return 
 		CameraSystem* GetCameraSystem() const { return cameraSystem_.get(); }
 
+		/// @brief スワップチェーンを取得する
+		/// @return 
+		DXSwapChain* GetSwapChain() const { return swapChain_.get(); }
+
 		/// @brief テクスチャファイルがドロップされたときの処理
 		/// @param filePath 
 		void OnTextureDropped(const std::string& filePath);
@@ -174,6 +179,9 @@ namespace Detail
 
 		/// @brief レンダーシステム
 		std::unique_ptr<RenderSystem> renderSystem_ = nullptr;
+
+		/// @brief ライトシステム
+		std::unique_ptr<LightSystem> lightSystem_ = nullptr;
 
 		/// @brief Skyboxシステム
 		std::unique_ptr<SkyboxSystem> skyboxSystem_ = nullptr;

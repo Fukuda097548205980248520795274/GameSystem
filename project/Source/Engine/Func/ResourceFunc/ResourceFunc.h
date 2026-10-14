@@ -27,4 +27,17 @@ namespace Detail
 	/// @param height 
 	/// @return 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
+
+	/// @brief UAVリソースを生成する
+	/// @param device 
+	/// @param sizeInBytes 
+	/// @return 
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVResource(ID3D12Device* device, size_t sizeInBytes, ID3D12GraphicsCommandList* commandList);
+
+	/// @brief UAVテクスチャリソースを生成する
+	/// @param device 
+	/// @param width 
+	/// @param height 
+	/// @return 
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVTextureResource(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, uint32_t width, uint32_t height);
 }

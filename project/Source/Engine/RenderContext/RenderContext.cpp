@@ -69,6 +69,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// カメラシステムを作成
 	cameraSystem_ = std::make_unique<CameraSystem>();
 
+	// ライトシステムを作成
+	lightSystem_ = std::make_unique<LightSystem>(core_->GetDevice(), command_->GetCommandList(), shaderCompiler_.get());
+
 	// レンダーシステムを作成
 	renderSystem_ = std::make_unique<RenderSystem>();
 

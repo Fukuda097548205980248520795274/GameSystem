@@ -2,6 +2,8 @@
 #include <cassert>
 #include <stdexcept>
 
+#include "../Barrier/Barrier.h"
+
 /// @brief バッファリソースを生成する
 /// @param device 
 /// @param sizeInBytes 
@@ -175,6 +177,108 @@ Microsoft::WRL::ComPtr<ID3D12Resource> Detail::CreateDepthStencilTextureResource
 	{
 		throw std::runtime_error("Failed to create depth stencil texture resource.");
 	}
+
+	return resource;
+}
+
+
+/// @brief UAVリソースを生成する
+/// @param device 
+/// @param sizeInBytes 
+/// @return 
+Microsoft::WRL::ComPtr<ID3D12Resource> Detail::CreateUAVResource(ID3D12Device* device, size_t sizeInBytes, ID3D12GraphicsCommandList* commandList)
+{
+	// ヒープの設定
+	D3D12_HEAP_PROPERTIES defaultHeapProperties{};
+	defaultHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	// 頂点リソースの設定
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	resourceDesc.Width = sizeInBytes;
+
+	resourceDesc.Height = 1;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.SampleDesc.Count = 1;
+
+	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+	// 頂点リソースを作る
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+	HRESULT hr = device->CreateCommittedResource(&defaultHeapProperties, D3D12_HEAP_FLAG_NONE,
+		&resourceDesc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&resource));
+
+	if (!SUCCEEDED(hr))
+	{
+		throw std::runtime_error("Failed to create UAV resource.");
+	}
+
+	// リソースステート遷移
+	TransitionBarrier(resource.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, commandList);
+
+	return resource;
+}
+
+/// @brief UAVテクスチャリソースを生成する
+/// @param device 
+/// @param width 
+/// @param height 
+/// @return 
+Microsoft::WRL::ComPtr<ID3D12Resource> Detail::CreateUAVTextureResource(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, uint32_t width, uint32_t height)
+{
+	assert(device);
+	assert(commandList);
+
+	/*------------------
+		リソースの設定
+	------------------*/
+
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	resourceDesc.Width = width;
+	resourceDesc.Height = height;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+
+	// UAVとして使用できるようにする
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+
+	/*----------------
+		ヒープの設定
+	----------------*/
+
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+
+	/*----------------------
+		リソースを生成する
+	----------------------*/
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+
+	HRESULT hr = device->CreateCommittedResource(
+		&heapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr,
+		IID_PPV_ARGS(&resource)
+	);
+
+	if (!SUCCEEDED(hr))
+	{
+		throw std::runtime_error("Failed to create UAV texture resource.");
+	}
+
+	// リソースステート遷移
+	TransitionBarrier(resource.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, commandList);
 
 	return resource;
 }

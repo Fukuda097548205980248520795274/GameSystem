@@ -239,6 +239,24 @@
     <Filter Include="Source\Tool\ProfilerEditor">
       <UniqueIdentifier>{86150f9f-88dd-4c11-93b9-14f7113e1838}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Audio\AudioSystem">
+      <UniqueIdentifier>{86055e27-3d1f-445c-9b4c-ddf962cf8746}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\RWStructuredBufferResource">
+      <UniqueIdentifier>{5a00e226-7d49-4e8e-89d8-834b5cc2e8eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\RWTexture2DBufferResource">
+      <UniqueIdentifier>{4dd5e313-582c-49c8-a25a-e9856abaf2bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\LightCulling">
+      <UniqueIdentifier>{35f0b3b5-0737-4b0a-a013-7ba91a647166}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\LightSystem">
+      <UniqueIdentifier>{19502738-eaca-431d-8db1-d7c0bf8d6f16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO">
+      <UniqueIdentifier>{52281c09-43d8-49da-abce-e030e2442809}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -393,6 +411,18 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\ModelStore\ModelStore.cpp">
       <Filter>Source\Engine\Store\ModelStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Audio\AudioSystem\AudioSystem.cpp">
+      <Filter>Source\Engine\Audio\AudioSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.cpp">
+      <Filter>Source\Engine\Resource\RWTexture2DBufferResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\LightSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -564,6 +594,21 @@
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelStore.h">
       <Filter>Source\Engine\Store\ModelStore</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\Audio\AudioSystem\AudioSystem.h">
+      <Filter>Source\Engine\Audio\AudioSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\RWStructuredBufferResource.h">
+      <Filter>Source\Engine\Resource\RWStructuredBufferResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.h">
+      <Filter>Source\Engine\Resource\RWTexture2DBufferResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.h">
+      <Filter>Source\Engine\RenderContext\Render\LightSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.h">
+      <Filter>Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">
@@ -589,6 +634,9 @@
     </FxCompile>
     <FxCompile Include="Assets\Internal\Shader\Render\Render2D\Render2D.PS.hlsl">
       <Filter>Shader\Render\Render2D</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\LightCulling\LightCulling.CS.hlsl">
+      <Filter>Shader\LightCulling</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

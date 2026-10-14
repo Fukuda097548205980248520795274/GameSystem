@@ -29,6 +29,14 @@ public:
 	/// @return 
 	bool GameLoop() { return winApp_->ProcessMessage(); }
 
+	/// @brief クライアント領域の横幅を取得する
+	/// @return 
+	int32_t GetClientWidth() const { return winApp_->GetClientWidth(); }
+
+	/// @brief クライアント領域の縦幅を取得する
+	/// @return 
+	int32_t GetClientHeight() const { return winApp_->GetClientHeight(); }
+
 	/// @brief 最大バッファ数を取得する
 	/// @return 
 	uint32_t GetMaxBufferCount() const { return renderContext_->GetMaxBufferCount(); }

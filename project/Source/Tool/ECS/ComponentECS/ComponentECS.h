@@ -191,3 +191,70 @@ struct UVTransformComponent
 	/// @brief 回転角度（ラジアン）
 	float radian;
 };
+
+/// @brief ディレクショナルライトコンポーネント
+struct DirectionalLightComponent
+{
+	DirectionalLightComponent() : direction(0.0f, -1.0f, 0.0f), color(1.0f, 1.0f, 1.0f), intensity(1.0f) {}
+
+	/// @brief 光の方向（正規化されたベクトル）
+	Vector3 direction;
+
+	/// @brief 光の色
+	Vector3 color;
+
+	/// @brief 光の強さ
+	float intensity;
+};
+
+/// @brief ポイントライトコンポーネント
+struct PointLightComponent
+{
+	PointLightComponent() : position(0.0f, 0.0f, 0.0f), color(1.0f, 1.0f, 1.0f), intensity(1.0f), radius(1.0f), decay(1.0f) {}
+
+	/// @brief 光の位置
+	Vector3 position;
+
+	/// @brief 光の色
+	Vector3 color;
+
+	/// @brief 光の強さ
+	float intensity;
+
+	// @brief 半径
+	float radius;
+
+	// @brief 減衰率
+	float decay;
+};
+
+/// @brief スポットライトコンポーネント
+struct SpotLightComponent
+{
+	SpotLightComponent() : position(0.0f, 0.0f, 0.0f), direction(0.0f, -1.0f, 0.0f), color(1.0f, 1.0f, 1.0f),
+		intensity(1.0f), distance(1.0f), decay(1.0f), cosAngle(1.0f), cosFalloffStart(1.0f) {}
+
+	/// @brief 光の位置
+	Vector3 position;
+
+	/// @brief 光の方向（正規化されたベクトル）
+	Vector3 direction;
+
+	/// @brief 光の色
+	Vector3 color;
+
+	/// @brief 光の強さ
+	float intensity;
+
+	// @brief 半径
+	float distance;
+
+	// @brief 減衰率
+	float decay;
+
+	// @brief スポットライトの角度（コサイン値）
+	float cosAngle;
+
+	// @brief スポットライトの減衰開始角度（コサイン値）
+	float cosFalloffStart;
+};

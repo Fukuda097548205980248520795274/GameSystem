@@ -45,7 +45,7 @@ namespace Detail
 	/// @brief 構造化バッファリソース
 	/// @tparam T 
 	template<typename T>
-	class StructuredBufferResource
+	class StructuredBufferResource : public IStructuredBufferResource
 	{
 	public:
 
@@ -53,7 +53,8 @@ namespace Detail
 		/// @param device 
 		/// @param heap 
 		/// @param num 
-		StructuredBufferResource(ID3D12Device* device, DXHeap* heap, UINT num) { Initialize(device, heap, num); }
+		/// @param frameIndex 
+		StructuredBufferResource(ID3D12Device* device, DXHeap* heap, UINT num, uint32_t frameIndex) { Initialize(device, heap, num, frameIndex); }
 
 		/// @brief デストラクタ
 		~StructuredBufferResource();
@@ -82,10 +83,11 @@ namespace Detail
 		/// @param device 
 		/// @param heap 
 		/// @param num 
-		void Initialize(ID3D12Device* device, DXHeap* heap, UINT num);
+		/// @param frameIndex
+		void Initialize(ID3D12Device* device, DXHeap* heap, UINT num, uint32_t frameIndex);
 
 		/// @brief データ
-		std::vector<T*> data_ = nullptr;
+		std::vector<T*> data_;
 	};
 }
 
@@ -108,28 +110,28 @@ Detail::StructuredBufferResource<T>::~StructuredBufferResource()
 /// @param heap 
 /// @param num 
 /// @param log 
+/// @param frameIndex
 template <typename T>
-void Detail::StructuredBufferResource<T>::Initialize(ID3D12Device* device, DXHeap* heap, UINT num)
+void Detail::StructuredBufferResource<T>::Initialize(ID3D12Device* device, DXHeap* heap, UINT num, uint32_t frameIndex)
 {
 	// nullptrチェック
 	assert(device);
 	assert(heap);
 	assert(num > 0);
 
-	// エンジンのインスタンスを取得する
-	auto engine = Engine::GetInstance();
+	// ヒープを保存する
 	heap_ = heap;
 
 	// 最大バッファ数を取得する
-	int maxBufferCount = 1;
-	if (engine) maxBufferCount = engine->GetMaxBufferCount();
-
+	uint32_t maxBufferCount = 1;
+	if (frameIndex > maxBufferCount) maxBufferCount = frameIndex;
+	
 	// リソースとデータの配列をリサイズする
 	resource_.resize(maxBufferCount);
 	data_.resize(maxBufferCount);
 	handle_.resize(maxBufferCount);
 
-	for (int i = 0; i < maxBufferCount; ++i)
+	for (uint32_t i = 0; i < maxBufferCount; ++i)
 	{
 		// リソース作成
 		resource_[i] = CreateBufferResource(device, sizeof(T) * num);
@@ -148,8 +150,7 @@ void Detail::StructuredBufferResource<T>::Initialize(ID3D12Device* device, DXHea
 		srvDesc.Buffer.StructureByteStride = sizeof(T);
 
 		// ハンドルを取得する
-		handle_[i].cpuHandle = heap->GetSrvDescriptorHandle().cpuHandle;
-		handle_[i].gpuHandle = heap->GetSrvDescriptorHandle().gpuHandle;
+		handle_[i] = heap->GetSrvDescriptorHandle();
 
 		// ビューの生成
 		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, handle_[i].cpuHandle);

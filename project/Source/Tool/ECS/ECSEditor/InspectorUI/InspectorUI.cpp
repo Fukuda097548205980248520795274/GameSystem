@@ -177,6 +177,55 @@ void Detail::ECSEditor::DrawInspector()
 		}
 	}
 
+	// DirectionalLightComponent
+	if (registry_->HasComponent<DirectionalLightComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("平行光源", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& directionalLight = registry_->GetComponent<DirectionalLightComponent>(selectedEntity_);
+			if (ImGui::DragFloat3("方向##平行光源", &directionalLight.direction.x, 0.1f))
+			{
+				// 入力された方向ベクトルを正規化する
+				directionalLight.direction = directionalLight.direction.Normalize();
+			}
+			ImGui::ColorEdit4("色##平行光源", &directionalLight.color.x);
+			ImGui::DragFloat("強さ##平行光源", &directionalLight.intensity, 0.1f);
+		}
+	}
+
+	// PointLightComponent
+	if (registry_->HasComponent<PointLightComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("ポイントライト", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& pointLight = registry_->GetComponent<PointLightComponent>(selectedEntity_);
+			ImGui::ColorEdit4("色##ポイントライト", &pointLight.color.x);
+			ImGui::DragFloat("強さ##ポイントライト", &pointLight.intensity, 0.1f);
+			ImGui::DragFloat("半径##ポイントライト", &pointLight.radius, 0.1f);
+			ImGui::DragFloat("減衰##ポイントライト", &pointLight.decay, 0.1f);
+		}
+	}
+
+	// SpotLightComponent
+	if (registry_->HasComponent<SpotLightComponent>(selectedEntity_))
+	{
+		if (ImGui::CollapsingHeader("スポットライト", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			auto& spotLight = registry_->GetComponent<SpotLightComponent>(selectedEntity_);
+			if (ImGui::DragFloat3("方向##スポットライト", &spotLight.direction.x, 0.1f))
+			{
+				// 入力された方向ベクトルを正規化する
+				spotLight.direction = spotLight.direction.Normalize();
+			}
+			ImGui::ColorEdit4("色##スポットライト", &spotLight.color.x);
+			ImGui::DragFloat("強さ##スポットライト", &spotLight.intensity, 0.1f);
+			ImGui::DragFloat("半径##スポットライト", &spotLight.distance, 0.1f);
+			ImGui::DragFloat("減衰##スポットライト", &spotLight.decay, 0.1f);
+			ImGui::DragFloat("角度##スポットライト", &spotLight.cosAngle, 0.01f);
+			ImGui::DragFloat("減衰開始角度##スポットライト", &spotLight.cosFalloffStart, 0.01f);
+		}
+	}
+
 	ImGui::End();
 
 #endif
