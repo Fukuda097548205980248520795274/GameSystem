@@ -63,9 +63,6 @@ namespace Detail
 		/// @brief スポットライトデータ用の構造化バッファ
 		std::unique_ptr<StructuredBufferResource<SpotLightDataForGPU>> spotLightDataBuffer_ = nullptr;
 
-		/// @brief 透明オブジェクト用のデプスリソース
-		std::unique_ptr<DepthResource> depthResource_ = nullptr;
-
 		/// @brief タイルライトインデックス用のRW構造化バッファ
 		std::unique_ptr<RWStructuredBufferResource<uint32_t>> tileLightIndexBuffer_ = nullptr;
 	};
