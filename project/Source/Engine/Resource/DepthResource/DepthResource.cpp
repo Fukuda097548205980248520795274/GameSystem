@@ -155,6 +155,14 @@ void Detail::DepthResource::ClearDepthStencil(ID3D12GraphicsCommandList* command
 	commandList->ClearDepthStencilView(dsvHandle_[frameIndex], D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
+/// @brief レンダーターゲットに設定する
+/// @param commandList 
+/// @param frameIndex 
+void Detail::DepthResource::SetRenderTargetView(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex)
+{
+	commandList->OMSetRenderTargets(0, nullptr, FALSE, &dsvHandle_[frameIndex]);
+}
+
 /// @brief コマンドリストに登録する
 /// @param commandList
 /// @param rootParameterIndex

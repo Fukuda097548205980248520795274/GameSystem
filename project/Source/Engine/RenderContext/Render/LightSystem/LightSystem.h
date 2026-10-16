@@ -3,6 +3,7 @@
 #include "LightCullingPSO/LightCullingPSO.h"
 
 #include "ECS/ComponentECS/DataForGPU/DataForGPU.h"
+#include "Resource/DepthResource/DepthResource.h"
 #include "Resource/ConstantBufferResource/ConstantBufferResource.h"
 #include "Resource/StructuredBufferResource/StructuredBufferResource.h"
 #include "Resource/RWStructuredBufferResource/RWStructuredBufferResource.h"
@@ -11,6 +12,7 @@ namespace Detail
 {
 	class RegistryECS;
 	class ShaderCompiler;
+	class RenderSystem;
 
 	class LightSystem
 	{
@@ -31,6 +33,12 @@ namespace Detail
 		/// @param width 
 		/// @param height 
 		void Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int32_t width, int32_t height);
+
+		/// @brief ライトカリング
+		/// @param commandList 
+		/// @param frameIndex 
+		/// @param renderSystem 
+		void LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem);
 
 
 
@@ -56,6 +64,9 @@ namespace Detail
 
 		// タイル分割数
 		static constexpr int32_t kTileSize = 16;
+
+		/// @brief ライトカリング用の深度リソース
+		std::unique_ptr<DepthResource> lightCullingDepthResource_;
 
 
 		/// @brief カメラデータ用の定数バッファ

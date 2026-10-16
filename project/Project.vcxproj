@@ -171,6 +171,7 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -382,6 +383,7 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.h" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.h" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.h" />
     <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\IConstantBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.h" />
@@ -443,6 +445,14 @@
     <ClInclude Include="Source\Tool\Texture\TextureEditor\TextureEditor.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnly.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Assets\Internal\Shader\LightCulling\LightCulling.CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>

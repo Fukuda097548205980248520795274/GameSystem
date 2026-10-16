@@ -89,13 +89,17 @@ void Detail::MultiPass::RenderSwapChain(ID3D12GraphicsCommandList* commandList, 
 
 /// @brief レンダーパスを実行する
 /// @param commandList 
-void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem, int frameIndex)
+void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem, LightSystem* lightSystem, int frameIndex)
 {
 	// nullptrチェック
 	assert(commandList);
 	assert(renderSystem);
 	assert(skyboxSystem);
+	assert(lightSystem);
 	assert(frameIndex >= 0);
+
+	// ライトカリングを実行する
+	lightSystem->LightCulling(commandList, frameIndex, renderSystem);
 
 	// レンダーパスを実行する
 	renderPassSystem_->ExecuteAll(commandList, depthResource_->GetDsvHandle(frameIndex), this, renderSystem, skyboxSystem);

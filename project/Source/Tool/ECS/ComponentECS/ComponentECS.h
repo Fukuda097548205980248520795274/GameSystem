@@ -197,6 +197,9 @@ struct DirectionalLightComponent
 {
 	DirectionalLightComponent() : direction(0.0f, -1.0f, 0.0f), color(1.0f, 1.0f, 1.0f), intensity(1.0f) {}
 
+	/// @brief 有効 / 無効フラグ
+	bool isEnabled = true;
+
 	/// @brief 光の方向（正規化されたベクトル）
 	Vector3 direction;
 
@@ -211,6 +214,9 @@ struct DirectionalLightComponent
 struct PointLightComponent
 {
 	PointLightComponent() : position(0.0f, 0.0f, 0.0f), color(1.0f, 1.0f, 1.0f), intensity(1.0f), radius(1.0f), decay(1.0f) {}
+
+	/// @brief 有効 / 無効フラグ
+	bool isEnabled = true;
 
 	/// @brief 光の位置
 	Vector3 position;
@@ -233,6 +239,9 @@ struct SpotLightComponent
 {
 	SpotLightComponent() : position(0.0f, 0.0f, 0.0f), direction(0.0f, -1.0f, 0.0f), color(1.0f, 1.0f, 1.0f),
 		intensity(1.0f), distance(1.0f), decay(1.0f), cosAngle(1.0f), cosFalloffStart(1.0f) {}
+
+	/// @brief 有効 / 無効フラグ
+	bool isEnabled = true;
 
 	/// @brief 光の位置
 	Vector3 position;

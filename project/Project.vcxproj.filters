@@ -257,6 +257,12 @@
     <Filter Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO">
       <UniqueIdentifier>{52281c09-43d8-49da-abce-e030e2442809}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\DetphOnly">
+      <UniqueIdentifier>{37271b53-7ab2-4f7f-90aa-b27665494098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO">
+      <UniqueIdentifier>{0884032a-5189-443d-9da6-99d896ae5255}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -432,6 +438,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.cpp">
       <Filter>Source\Engine\Resource\StructuredBufferResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -627,6 +636,9 @@
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.h">
       <Filter>Source\Engine\Resource\StructuredBufferResource</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.h">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">
@@ -655,6 +667,9 @@
     </FxCompile>
     <FxCompile Include="Assets\Internal\Shader\LightCulling\LightCulling.CS.hlsl">
       <Filter>Shader\LightCulling</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnly.VS.hlsl">
+      <Filter>Shader\DetphOnly</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

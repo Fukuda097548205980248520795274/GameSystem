@@ -73,7 +73,7 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	lightSystem_ = std::make_unique<LightSystem>(core_->GetDevice(), command_->GetCommandList(), shaderCompiler_.get());
 
 	// レンダーシステムを作成
-	renderSystem_ = std::make_unique<RenderSystem>();
+	renderSystem_ = std::make_unique<RenderSystem>(core_->GetDevice(), shaderCompiler_.get());
 
 	// Skyboxシステムを作成
 	skyboxSystem_ = std::make_unique<SkyboxSystem>(core_->GetDevice(), shaderCompiler_.get());
@@ -212,8 +212,8 @@ void Detail::RenderContext::PostDraw()
 	// デプスステンシルのクリア
 	multiPass_->Clear(commandList, frameIndex_);
 
-	// レンダーパスを実行する
-	multiPass_->Execute(commandList, renderSystem_.get(), skyboxSystem_.get(), frameIndex_);
+	// ライトカリングを実行する
+	multiPass_->Execute(commandList, renderSystem_.get(), skyboxSystem_.get(), lightSystem_.get(), frameIndex_);
 
 	// バックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();
@@ -287,6 +287,9 @@ void Detail::RenderContext::Resize(int32_t width, int32_t height)
 
 	// オフスクリーン再生成
 	multiPass_->Resize(core_->GetDevice(), commandList, width, height);
+
+	// ライトシステムのリサイズ
+	lightSystem_->Resize(core_->GetDevice(), commandList, width, height);
 
 #ifdef DEVELOPMENT
 	// IMGUIのリサイズ

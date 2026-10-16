@@ -40,6 +40,11 @@ namespace Detail
 		/// @param frameIndex
 		void ClearDepthStencil(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
 
+		/// @brief レンダーターゲットに設定する
+		/// @param commandList 
+		/// @param frameIndex 
+		void SetRenderTargetView(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
+
 		/// @brief DSV用ハンドルを取得する
 		/// @param frameIndex
 		/// @return 

@@ -43,8 +43,8 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("描画パス", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& renderPass = registry_->GetComponent<RenderPassComponent>(selectedEntity_);
-			ImGui::Checkbox("描画", &renderPass.isEnabled);
-			ImGui::DragInt("描画順", &renderPass.priority, 1);
+			ImGui::Checkbox("描画##描画パス", &renderPass.isEnabled);
+			ImGui::DragInt("描画順##描画パス", &renderPass.priority, 1);
 		}
 	}
 
@@ -54,8 +54,8 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("描画", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& render = registry_->GetComponent<RenderComponent>(selectedEntity_);
-			ImGui::Checkbox("描画", &render.isEnabled);
-			ImGui::DragInt("描画順", &render.priority, 1);
+			ImGui::Checkbox("描画##描画", &render.isEnabled);
+			ImGui::DragInt("描画順##描画", &render.priority, 1);
 		}
 	}
 
@@ -65,7 +65,7 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("スカイボックス", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& skybox = registry_->GetComponent<SkyboxComponent>(selectedEntity_);
-			ImGui::Checkbox("描画", &skybox.isEnabled);
+			ImGui::Checkbox("描画##スカイボックス", &skybox.isEnabled);
 		}
 	}
 
@@ -87,7 +87,7 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("マテリアル", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& material = registry_->GetComponent<MaterialComponent>(selectedEntity_);
-			ImGui::ColorEdit4("色", &material.color.x);
+			ImGui::ColorEdit4("色##マテリアル", &material.color.x);
 		}
 	}
 
@@ -183,6 +183,7 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("平行光源", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& directionalLight = registry_->GetComponent<DirectionalLightComponent>(selectedEntity_);
+			ImGui::Checkbox("有効##平行光源", &directionalLight.isEnabled);
 			if (ImGui::DragFloat3("方向##平行光源", &directionalLight.direction.x, 0.1f))
 			{
 				// 入力された方向ベクトルを正規化する
@@ -199,6 +200,7 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("ポイントライト", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& pointLight = registry_->GetComponent<PointLightComponent>(selectedEntity_);
+			ImGui::Checkbox("有効##ポイントライト", &pointLight.isEnabled);
 			ImGui::ColorEdit4("色##ポイントライト", &pointLight.color.x);
 			ImGui::DragFloat("強さ##ポイントライト", &pointLight.intensity, 0.1f);
 			ImGui::DragFloat("半径##ポイントライト", &pointLight.radius, 0.1f);
@@ -212,6 +214,7 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("スポットライト", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& spotLight = registry_->GetComponent<SpotLightComponent>(selectedEntity_);
+			ImGui::Checkbox("有効##スポットライト", &spotLight.isEnabled);
 			if (ImGui::DragFloat3("方向##スポットライト", &spotLight.direction.x, 0.1f))
 			{
 				// 入力された方向ベクトルを正規化する

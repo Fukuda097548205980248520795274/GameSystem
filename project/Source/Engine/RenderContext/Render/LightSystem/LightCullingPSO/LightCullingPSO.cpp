@@ -139,3 +139,11 @@ void Detail::LightCullingPSO::Initialize(ID3D12Device* device, ShaderCompiler* c
 		assert(false);
 	}
 }
+
+/// @brief コマンドリストに登録する
+/// @param commandList 
+void Detail::LightCullingPSO::Register(ID3D12GraphicsCommandList* commandList)
+{
+	commandList->SetPipelineState(pipelineState_.Get());
+	commandList->SetComputeRootSignature(rootSignature_.Get());
+}

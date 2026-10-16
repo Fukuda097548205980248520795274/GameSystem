@@ -4,8 +4,13 @@
 #include "ECS/ComponentECS/DataForGPU/DataForGPU.h"
 
 /// @brief 初期化
-void Detail::RenderSystem::Initialize()
+void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler)
 {
+	// nullptrチェック
+	assert(device);
+	assert(shaderCompiler);
+
+
 	// Engineのインスタンスを取得する
 	auto  engine = Engine::GetInstance();
 	assert(engine);
@@ -42,6 +47,9 @@ void Detail::RenderSystem::Initialize()
 
 	/// レンダーリソースストアを生成する
 	renderResourceStore_ = std::make_unique<RenderResourceStore>();
+
+	// 深度のみのPSOを生成する
+	depthOnlyPso_ = std::make_unique<DepthOnlyPSO>(device, shaderCompiler);
 }
 
 /// @brief エンティティを作成する
@@ -101,6 +109,84 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	registry_->AddComponent(entity, materialConstantBufferComp);
 
 	return entity;
+}
+
+/// @brief 描画前の深度パスを実行する
+/// @param commandList 
+/// @param priority 
+void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* commandList, int32_t frameIndex)
+{
+	auto engine = Engine::GetInstance();
+	if (!engine) return;
+
+	auto textureStore = engine->GetRenderContext()->GetTextureStore();
+	if (!textureStore) return;
+
+	auto proceduralMeshStore = engine->GetRenderContext()->GetProceduralMeshStore();
+	if (!proceduralMeshStore) return;
+
+	auto cameraSystem = engine->GetRenderContext()->GetCameraSystem();
+	if (!cameraSystem) return;
+
+	// RenderComponentの配列を取得する
+	auto* passArray = registry_->GetComponentArray<RenderComponent>();
+	const auto& entities = passArray->GetEntities();
+
+	// priority に基づいてソートするためのペアのベクターを作成
+	std::vector<Entity> sortedPasses;
+	for (Entity entity : entities)
+	{
+		auto& pass = registry_->GetComponent<RenderComponent>(entity);
+		if (pass.isEnabled)
+		{
+			sortedPasses.push_back(entity);
+		}
+	}
+
+	// ソートされたレンダーパスが空の場合は何もしない
+	if (sortedPasses.empty()) return;
+
+	// ソートされたレンダーパスを実行する
+	for (const auto& entity : sortedPasses)
+	{
+		// 必要なコンポーネントを取得
+		auto& transform = registry_->GetComponent<TransformComponent>(entity);
+		auto& transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
+		auto& mesh = registry_->GetComponent<MeshComponent>(entity);
+
+
+		// 深度のみのPSOを登録する
+		depthOnlyPso_->Register(commandList);
+
+		// ProceduralMeshStoreからメッシュを登録する
+		proceduralMeshStore->Register(mesh.meshType, commandList);
+
+		{
+			// 回転をクォータニオンに変換する
+			Quaternion rotation =
+				ToQuaternion(transform.rotation.z, Vector3(0.0f, 0.0f, 1.0f)) *
+				ToQuaternion(transform.rotation.y, Vector3(0.0f, 1.0f, 0.0f)) *
+				ToQuaternion(transform.rotation.x, Vector3(1.0f, 0.0f, 0.0f));
+
+			// データをGPU用に渡す
+			TransformDataForGPU data;
+			data.world = Make3DAffineMatrix4x4(transform.scale, rotation, transform.position);
+			data.worldViewProjection = data.world * cameraSystem->GetViewMatrix() * cameraSystem->GetProjectionMatrix();
+			data.worldInverseTranspose = data.world.Inverse().Transpose();
+
+			// Transform用のリソースをバインド
+			renderResourceStore_->UpdateConstantBuffer(transformCB.handle, data, frameIndex);
+			auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB.handle);
+			if (cbResource)cbResource->RegisterGraphics(commandList, 0, frameIndex);
+		}
+
+
+		// プリミティブトポロジーを設定
+		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		// ドローコール
+		commandList->DrawIndexedInstanced(proceduralMeshStore->GetNumIndex(mesh.meshType), 1, 0, 0, 0);
+	}
 }
 
 /// @brief すべての3D描画を実行する
