@@ -9,9 +9,13 @@
 
 namespace Detail
 {
+	/// @brief ECSレジストリ
 	class RegistryECS;
+
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief スカイボックスシステム
 	class SkyboxSystem
 	{
 	public:

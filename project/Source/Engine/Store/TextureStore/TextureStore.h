@@ -20,6 +20,7 @@ namespace Detail
 	/// @brief 無効なテクスチャハンドル
 	constexpr uint32_t kInvalidTextureHandle = UINT32_MAX;
 
+	/// @brief テクスチャストア
 	class TextureStore
 	{
 	public:

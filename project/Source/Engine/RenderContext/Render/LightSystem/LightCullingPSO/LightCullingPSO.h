@@ -6,8 +6,10 @@
 
 namespace Detail
 {
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief ライトカリングPSO
 	class LightCullingPSO
 	{
 	public:

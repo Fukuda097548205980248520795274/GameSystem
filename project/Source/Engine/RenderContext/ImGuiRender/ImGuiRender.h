@@ -14,10 +14,16 @@
 
 namespace Detail
 {
+	/// @brief ウィンドウアプリケーション
 	class WinApp;
+
+	/// @brief DXスワップチェーン
 	class DXSwapChain;
+
+	/// @brief オフスクリーンリソース
 	class OffscreenResource;
 	
+	/// @brief ImGuiレンダー
 	class ImGuiRender
 	{
 	public:

@@ -1,6 +1,7 @@
 #include "../ECSEditor.h"
 #include "Engine.h"
 
+/// @brief インスペクターUIを描画する
 void Detail::ECSEditor::DrawInspector()
 {
 #ifdef DEVELOPMENT

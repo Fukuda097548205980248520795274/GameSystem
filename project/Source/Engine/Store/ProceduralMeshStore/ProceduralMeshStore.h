@@ -21,6 +21,7 @@ namespace Detail
 		std::unique_ptr<IndexBufferResource> indexBuffer;
 	};
 
+	/// @brief プロシージャルメッシュストア
 	class ProceduralMeshStore
 	{
 	public:

@@ -7,8 +7,10 @@
 
 namespace Detail
 {
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief スカイボックスPSO
 	class SkyboxPSO
 	{
 	public:

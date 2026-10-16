@@ -1,6 +1,7 @@
 #include "../ECSEditor.h"
 #include "Engine.h"
 
+//// @brief ヒエラルキーUIを描画する
 void Detail::ECSEditor::DrawHierarchy()
 {
 #ifdef DEVELOPMENT

@@ -6,6 +6,7 @@
 
 namespace Detail
 {
+	/// @brief DXCore
 	class DXCore
 	{
 	public:

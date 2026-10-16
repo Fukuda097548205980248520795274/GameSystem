@@ -4,6 +4,7 @@
 
 namespace Detail
 {
+	/// @brief RW2Dテクスチャリソース
 	class RWTexture2DBufferResource
 	{
 	public:

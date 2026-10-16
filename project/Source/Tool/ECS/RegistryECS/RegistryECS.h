@@ -8,6 +8,7 @@
 
 namespace Detail
 {
+	/// @brief ECSレジストリ
 	class RegistryECS
 	{
 	public:

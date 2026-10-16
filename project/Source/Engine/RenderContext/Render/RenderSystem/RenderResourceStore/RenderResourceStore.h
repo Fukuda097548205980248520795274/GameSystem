@@ -7,6 +7,7 @@
 
 namespace Detail
 {
+	/// @brief レンダーリソースストア
 	class RenderResourceStore
 	{
     public:

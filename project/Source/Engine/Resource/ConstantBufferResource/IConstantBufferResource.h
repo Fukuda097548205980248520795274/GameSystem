@@ -8,6 +8,7 @@
 
 namespace Detail
 {
+	/// @brief 定数バッファリソース : インタフェース
 	class IConstantBufferResource
 	{
 	public:

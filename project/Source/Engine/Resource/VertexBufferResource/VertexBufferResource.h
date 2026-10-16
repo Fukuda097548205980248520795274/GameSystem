@@ -1,12 +1,12 @@
 #pragma once
-#include <cassert>
-#include <vector>
-#include "Func/ResourceFunc/ResourceFunc.h"
+#include "IVertexBufferResource.h"
 
 namespace Detail
 {
+	/// @brief 頂点バッファリソース
+	/// @tparam T 
 	template<typename T>
-	class VertexBufferResource
+	class VertexBufferResource : public IVertexBufferResource
 	{
 	public:
 
@@ -19,23 +19,11 @@ namespace Detail
 		/// @brief デストラクタ
 		~VertexBufferResource() = default;
 
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param frameIndex 
-		void Register(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
-
 		/// @brief データを取得する
 		/// @param frameIndex 
 		/// @return 
 		T* GetData(uint32_t frameIndex) { return data_[frameIndex]; }
 
-		/// @brief 頂点数を取得する
-		/// @return 
-		UINT GetNumVertex() const { return numVertex_; }
-
-
-		template<typename T>
-		using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 	private:
 
@@ -45,20 +33,8 @@ namespace Detail
 		/// @param log 
 		void Initialize(ID3D12Device* device, UINT numVertex, uint32_t maxBufferCount);
 
-		/// @brief 最大バッファ数
-		int32_t maxBufferCount_ = 1;
-
-		/// @brief 頂点数
-		UINT numVertex_ = 0;
-
 		/// @brief データ
 		std::vector<T*> data_;
-
-		/// @brief リソース
-		std::vector<ComPtr<ID3D12Resource>> resource_;
-
-		/// @brief ビュー
-		std::vector<D3D12_VERTEX_BUFFER_VIEW> view_;
 	};
 }
 
@@ -77,14 +53,14 @@ void Detail::VertexBufferResource<T>::Initialize(ID3D12Device* device, UINT numV
 	numVertex_ = numVertex;
 
 	// バッファ数を設定する
-	maxBufferCount_ = maxBufferCount_ > 1 ? static_cast<int32_t>(maxBufferCount_) : 1;
+	maxBufferCount_ = maxBufferCount > 1 ? maxBufferCount : 1;
 
 	// データ、リソース、ビューの配列を確保する
 	data_.resize(maxBufferCount_);
 	resource_.resize(maxBufferCount_);
 	view_.resize(maxBufferCount_);
 
-	for (int i = 0; i < maxBufferCount_; ++i)
+	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
 		// リソース生成
 		resource_[i] = CreateBufferResource(device, sizeof(T) * numVertex);
@@ -95,19 +71,4 @@ void Detail::VertexBufferResource<T>::Initialize(ID3D12Device* device, UINT numV
 		view_[i].SizeInBytes = sizeof(T) * numVertex;
 		view_[i].StrideInBytes = sizeof(T);
 	}
-}
-
-/// @brief コマンドリストに登録する
-/// @param commandList 
-/// @param frameIndex 
-template<typename T>
-void Detail::VertexBufferResource<T>::Register(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex)
-{
-	assert(commandList);
-
-	// フレームインデックスを最大バッファ数でラップする
-	frameIndex = static_cast<int32_t>(frameIndex) < maxBufferCount_ ? frameIndex : 0;
-	
-	// ビューをコマンドリストに設定する
-	commandList->IASetVertexBuffers(0, 1, &view_[frameIndex]);
 }

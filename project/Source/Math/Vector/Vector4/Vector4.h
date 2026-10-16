@@ -14,7 +14,10 @@ struct TVector4
 	TVector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
 };
 
+/// @brief 4次元ベクトル
 using Vector4 = TVector4<float>;
+
+/// @brief 4次元ベクトル（整数）
 using Vector4int = TVector4<int>;
 
 /// @brief 線形補間を行う

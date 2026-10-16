@@ -7,12 +7,22 @@
 
 namespace Detail
 {
+	/// @brief DXヒープ
 	class DXHeap;
+
+	/// @brief ウィンドウアプリケーション
 	class WinApp;
+
+	/// @brief DXコア
 	class DXCore;
+
+	/// @brief DXコマンド
 	class DXCommand;
+
+	/// @brief DXフェンス
 	class DXFence;
 
+	/// @brief DXスワップチェーン
 	class DXSwapChain
 	{
 	public:

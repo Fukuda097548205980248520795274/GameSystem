@@ -4,8 +4,10 @@
 
 namespace Detail
 {
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief 動的PSOビルダー
 	class DynamicPSOBuilder
 	{
 	public:

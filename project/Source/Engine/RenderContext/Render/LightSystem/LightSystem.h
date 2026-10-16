@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "LightCullingPSO/LightCullingPSO.h"
+#include "ECS/EntityECS/EntityECS.h"
 
 #include "ECS/ComponentECS/DataForGPU/DataForGPU.h"
 #include "Resource/DepthResource/DepthResource.h"
@@ -10,10 +11,16 @@
 
 namespace Detail
 {
+	/// @brief ECSレジストリ
 	class RegistryECS;
+
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
+
+	/// @brief レンダーシステム
 	class RenderSystem;
 
+	/// @brief ライトシステム
 	class LightSystem
 	{
 	public:
@@ -33,6 +40,35 @@ namespace Detail
 		/// @param width 
 		/// @param height 
 		void Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int32_t width, int32_t height);
+
+		/// @brief 平行光源のエンティティを作成する
+		/// @param direction 
+		/// @param color 
+		/// @param intensity 
+		/// @return 
+		Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity);
+
+		/// @brief ポイントライトのエンティティを作成する
+		/// @param position 
+		/// @param color 
+		/// @param intensity 
+		/// @param radius 
+		/// @param decay 
+		/// @return 
+		Entity CreatePointLightEntity(const Vector3& position, const Vector4& color, float intensity, float radius, float decay);
+
+		/// @brief スポットライトのエンティティを作成する
+		/// @param position 
+		/// @param direction 
+		/// @param color 
+		/// @param intensity 
+		/// @param radius 
+		/// @param decay 
+		/// @param innerConeAngle 
+		/// @param outerConeAngle 
+		/// @return 
+		Entity CreateSpotLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color, 
+			float intensity, float radius, float decay, float cosAngle, float cosFalloffStart);
 
 		/// @brief ライトカリング
 		/// @param commandList 

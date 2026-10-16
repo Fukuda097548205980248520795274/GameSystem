@@ -4,8 +4,10 @@
 
 namespace Detail
 {
+	/// @brief ECSレジストリ
 	class RegistryECS;
 
+	/// @brief カメラシステム
 	class CameraSystem
 	{
 	public:

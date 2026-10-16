@@ -161,7 +161,10 @@ namespace
 	}
 }
 
+/// @brief 2次元ベクトル
 using Vector2 = TVector2<float>;
+
+/// @brief 2次元ベクトル（整数）
 using Vector2int = TVector2<int>;
 
 /// @brief 内積

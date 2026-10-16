@@ -56,11 +56,87 @@ void Detail::LightSystem::Resize(ID3D12Device* device, ID3D12GraphicsCommandList
 	tileLightIndexBuffer_->Resize(device, commandList, tileWidth * tileHeight);
 }
 
+/// @brief 平行光源のエンティティを作成する
+/// @param direction 
+/// @param color 
+/// @param intensity 
+/// @return 
+Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity)
+{
+	Entity entity = registry_->CreateEntity();
+
+	DirectionalLightComponent directionalLight;
+	directionalLight.direction = direction.Normalize();
+	directionalLight.color = Vector3(color.x, color.y, color.z);
+	directionalLight.intensity = intensity;
+	registry_->AddComponent(entity, directionalLight);
+
+	return entity;	
+}
+
+/// @brief ポイントライトのエンティティを作成する
+/// @param position 
+/// @param color 
+/// @param intensity 
+/// @param radius 
+/// @param decay 
+/// @return 
+Entity Detail::LightSystem::CreatePointLightEntity(const Vector3& position, const Vector4& color, float intensity, float radius, float decay)
+{
+	Entity entity = registry_->CreateEntity();
+
+	PointLightComponent pointLight;
+	pointLight.position = position;
+	pointLight.color = Vector3(color.x, color.y, color.z);
+	pointLight.intensity = intensity;
+	pointLight.radius = radius;
+	pointLight.decay = decay;
+	registry_->AddComponent(entity, pointLight);
+
+	return entity;
+}
+
+/// @brief スポットライトのエンティティを作成する
+/// @param position 
+/// @param direction 
+/// @param color 
+/// @param intensity 
+/// @param radius 
+/// @param decay 
+/// @param cosAngle 
+/// @param cosFalloffStart 
+/// @return 
+Entity Detail::LightSystem::CreateSpotLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color,
+	float intensity, float radius, float decay, float cosAngle, float cosFalloffStart)
+{
+	Entity entity = registry_->CreateEntity();
+
+	SpotLightComponent spotLight;
+	spotLight.position = position;
+	spotLight.direction = direction.Normalize();
+	spotLight.color = Vector3(color.x, color.y, color.z);
+	spotLight.intensity = intensity;
+	spotLight.distance = radius;
+	spotLight.decay = decay;
+	spotLight.cosAngle = cosAngle;
+	spotLight.cosFalloffStart = cosFalloffStart;
+	registry_->AddComponent(entity, spotLight);
+
+	return entity;
+}
+
 /// @brief ライトカリング
 /// @param commandList 
 /// @param frameIndex 
 void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem)
 {
+	/*---------------------------
+		ライトのデータを設定する
+	---------------------------*/
+
+	
+
+
 	/*---------------------------------------
 	    描画するオブジェクトの深度値を取得する
 	---------------------------------------*/

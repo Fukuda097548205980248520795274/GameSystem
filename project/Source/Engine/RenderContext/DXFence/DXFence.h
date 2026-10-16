@@ -7,6 +7,7 @@
 
 namespace Detail
 {
+	/// @brief DXフェンス
 	class DXFence
 	{
 	public:

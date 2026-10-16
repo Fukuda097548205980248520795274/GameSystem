@@ -5,6 +5,7 @@
 
 namespace Detail
 {
+	/// @brief DXデバッグ
 	class DXDebug
 	{
 	public:

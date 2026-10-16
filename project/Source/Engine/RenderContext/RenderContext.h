@@ -25,9 +25,13 @@
 
 namespace Detail
 {
+	/// @brief ウィンドウアプリケーション
 	class WinApp;
+
+	/// @brief DXデバッグ
 	class DXDebug;
 
+	/// @brief レンダーコンテキスト
 	class RenderContext
 	{
 	public:

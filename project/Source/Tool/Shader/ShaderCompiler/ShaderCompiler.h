@@ -18,6 +18,7 @@ namespace Detail
 		std::string errorMessage;
 	};
 
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler
 	{
 	public:

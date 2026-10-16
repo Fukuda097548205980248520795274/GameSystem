@@ -5,8 +5,10 @@
 
 namespace Detail
 {
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief シェーダエディタ
 	class ShaderEditor
 	{
 	public:

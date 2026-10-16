@@ -26,6 +26,7 @@ namespace Detail
 		}
 	};
 
+	/// @brief オーディオストア
 	class AudioStore
 	{
 	public:

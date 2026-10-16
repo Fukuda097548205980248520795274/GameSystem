@@ -9,6 +9,7 @@
 
 namespace Detail
 {
+	/// @brief RWストラクチャードバッファリソース : インタフェース
 	class IRWStructuredBufferResource
 	{
 	public:

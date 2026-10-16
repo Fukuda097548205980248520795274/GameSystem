@@ -12,6 +12,7 @@ enum class LogLevel
 
 namespace Detail
 {
+	/// @brief ロガー
 	class Logger
 	{
 	public:

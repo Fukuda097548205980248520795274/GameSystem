@@ -94,7 +94,7 @@ namespace Detail
 		std::vector<ModelNode> nodes;
 	};
 
-
+	/// @brief モデルストア
 	class ModelStore
 	{
 	public:

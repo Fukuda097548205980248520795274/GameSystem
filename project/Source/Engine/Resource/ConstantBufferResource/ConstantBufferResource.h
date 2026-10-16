@@ -4,7 +4,7 @@
 namespace Detail
 {
 
-	/// @brief 定数バッファ
+	/// @brief 定数バッファリソース
 	/// @tparam T 
 	template<typename T>
 	class ConstantBufferResource : public IConstantBufferResource

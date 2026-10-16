@@ -2,6 +2,7 @@
 
 namespace Detail
 {
+	/// @brief プロファイラーエディター
 	class ProfilerEditor
 	{
     public:

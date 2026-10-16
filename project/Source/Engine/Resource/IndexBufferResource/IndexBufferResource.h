@@ -7,6 +7,7 @@
 
 namespace Detail
 {
+	/// @brief インデックスバッファリソース
 	class IndexBufferResource
 	{
 	public:

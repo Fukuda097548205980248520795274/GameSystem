@@ -6,8 +6,10 @@
 
 namespace Detail
 {
+	/// @brief DXヒープ
 	class DXHeap;
 
+	/// @brief 深度リソース
 	class DepthResource
 	{
 	public:

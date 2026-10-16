@@ -179,7 +179,10 @@ namespace
 	}
 }
 
+/// @brief 3次元ベクトル
 using Vector3 = TVector3<float>;
+
+/// @brief 3次元ベクトル（整数）
 using Vector3int = TVector3<int>;
 
 /// @brief 内積

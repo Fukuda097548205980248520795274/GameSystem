@@ -7,13 +7,25 @@
 
 namespace Detail
 {
+	/// @brief ECSレジストリ
 	class RegistryECS;
+
+	/// @brief レンダーターゲットプール
 	class RenderTargetPool;
+
+	/// @brief マルチパス
 	class MultiPass;
+
+	/// @brief オフスクリーンリソース
 	class OffscreenResource;
+
+	/// @brief レンダーシステム
 	class RenderSystem;
+
+	/// @brief スカイボックスシステム
 	class SkyboxSystem;
 
+	/// @brief レンダーパスシステム
 	class RenderPassSystem
 	{
 	public:

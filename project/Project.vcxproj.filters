@@ -442,6 +442,9 @@
     <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.cpp">
       <Filter>Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.cpp">
+      <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -638,6 +641,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.h">
       <Filter>Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.h">
+      <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

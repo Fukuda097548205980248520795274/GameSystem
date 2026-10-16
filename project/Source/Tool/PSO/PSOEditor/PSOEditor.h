@@ -5,8 +5,10 @@
 
 namespace Detail
 {
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief PSOアイテム
 	struct PSOItem
 	{
 		// 名前
@@ -37,6 +39,7 @@ namespace Detail
 		uint32_t frameAge = 0;
 	};
 
+	/// @brief PSOエディタ
 	class PSOEditor
 	{
 	public:

@@ -14,6 +14,7 @@ namespace Detail
 		D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 	};
 
+	/// @brief DXヒープ
 	class DXHeap
 	{
 	public:

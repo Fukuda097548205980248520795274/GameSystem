@@ -7,6 +7,7 @@
 
 #include "Func/ConvertString/ConvertString.h"
 
+// ImGui_ImplWin32_WndProcHandlerの宣言
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 /// @brief ウィンドウプロシージャ
@@ -54,8 +55,7 @@ LRESULT CALLBACK Detail::WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, 
 				DragQueryFileW(hDrop, i, filePathW.data(), length + 1);
 				filePathW.resize(length); // 末尾のnull文字を除外
 
-				// std::wstring から std::string へ変換 (Shift-JIS または UTF-8)
-				// ※プロジェクト内に独自の wstring -> string 変換関数があればそちらを使用してください
+				// ワイド文字列をマルチバイト文字列に変換
 				int bufferSize = WideCharToMultiByte(CP_ACP, 0, filePathW.c_str(), -1, nullptr, 0, nullptr, nullptr);
 				std::string filePath(bufferSize, 0);
 				WideCharToMultiByte(CP_ACP, 0, filePathW.c_str(), -1, &filePath[0], bufferSize, nullptr, nullptr);

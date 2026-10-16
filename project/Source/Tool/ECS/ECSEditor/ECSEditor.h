@@ -4,6 +4,7 @@
 
 namespace Detail
 {
+	/// @brief ECSエディタ
 	class ECSEditor
 	{
 	public:

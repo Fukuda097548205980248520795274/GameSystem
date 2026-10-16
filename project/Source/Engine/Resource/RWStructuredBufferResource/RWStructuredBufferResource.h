@@ -3,6 +3,8 @@
 
 namespace Detail
 {
+	/// @brief RWストラクチャードバッファリソース
+	/// @tparam T 
 	template<typename T>
 	class RWStructuredBufferResource : public IRWStructuredBufferResource
 	{

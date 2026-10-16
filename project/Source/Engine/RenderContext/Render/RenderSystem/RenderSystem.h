@@ -7,10 +7,16 @@
 
 namespace Detail
 {
+	/// @brief ECSレジストリ
 	class RegistryECS;
+
+	/// @brief PSOエディタ
 	class PSOEditor;
+
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief レンダーシステム
 	class RenderSystem
 	{
 	public:

@@ -6,9 +6,13 @@
 
 namespace Detail
 {
+	/// @brief レンダーコンテキスト
 	class RenderContext;
+
+	/// @brief テクスチャストア
 	class TextureStore;
 
+	/// @brief テクスチャエディタ
 	class TextureEditor
 	{
 	public:

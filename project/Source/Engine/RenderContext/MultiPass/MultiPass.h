@@ -6,11 +6,19 @@
 
 namespace Detail
 {
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
+
+	/// @brief レンダーシステム
 	class RenderSystem;
+
+	/// @brief スカイボックスシステム
 	class SkyboxSystem;
+
+	/// @brief ライトシステム
 	class LightSystem;
 
+	/// @brief マルチパス
 	class MultiPass
 	{
 	public:

@@ -6,8 +6,10 @@
 
 namespace Detail
 {
+	/// @brief シェーダコンパイラ
 	class ShaderCompiler;
 
+	/// @brief 深度のみPSO
 	class DepthOnlyPSO
 	{
 	public:

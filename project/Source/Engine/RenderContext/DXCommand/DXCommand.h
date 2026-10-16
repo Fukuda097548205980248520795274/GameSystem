@@ -6,6 +6,7 @@
 
 namespace Detail
 {
+	/// @brief DXコマンド
 	class DXCommand
 	{
 	public:

@@ -6,8 +6,10 @@
 
 namespace Detail
 {
+	/// @brief DXヒープ
 	class DXHeap;
 
+	/// @brief オフスクリーンリソース
 	class OffscreenResource
 	{
 	public:

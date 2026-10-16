@@ -3,6 +3,7 @@
 
 namespace Detail
 {
+	/// @brief GPUに送るメッシュの頂点データ
 	struct VertexMeshDataForGPU
 	{
 		/// @brief 位置

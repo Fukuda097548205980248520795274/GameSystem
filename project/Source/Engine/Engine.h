@@ -7,8 +7,23 @@
 #include "ECS/RegistryECS/RegistryECS.h"
 #include "RenderContext/RenderContext.h"
 
+/// @brief エンジン
 class Engine
 {
+public:
+
+	/// @brief パスキー
+	struct PassKey
+	{
+		PassKey() = default;
+		friend Engine;
+	};
+
+	/// @brief パスキーを受け取るコンストラクタ
+	/// @param  
+	explicit Engine(PassKey) {}
+
+
 public:
 
 	/// @brief デストラクタ

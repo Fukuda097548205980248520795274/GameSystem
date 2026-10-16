@@ -6,6 +6,7 @@
 
 namespace Detail
 {
+	/// @brief ウィンドウアプリケーション
 	class WinApp
 	{
 	public:

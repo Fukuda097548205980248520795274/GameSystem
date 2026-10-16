@@ -7,6 +7,7 @@
 
 namespace Detail
 {
+	/// @brief ストラクチャードバッファリソース : インタフェーズ
 	class IStructuredBufferResource
 	{
 	public:

@@ -1,6 +1,7 @@
 #include "ProfilerEditor.h"
 #include "Engine.h"
 
+//// @brief UIを描画する
 void Detail::ProfilerEditor::DrawUI()
 {
 #ifdef DEVELOPMENT

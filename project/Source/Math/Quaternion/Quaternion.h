@@ -1,6 +1,7 @@
 #pragma once
 #include "../Vector/Vector3/Vector3.h"
 
+/// @brief クォータニオン
 struct Quaternion
 {
 	float x;

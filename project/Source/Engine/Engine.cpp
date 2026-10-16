@@ -56,7 +56,7 @@ Engine* Engine::GetInstance(uint32_t screenWidth, uint32_t screenHeight, const s
 {
 	if (!instance_)
 	{
-		instance_.reset(new Engine());
+		instance_ = std::make_unique<Engine>(PassKey());
 		instance_->Initialize(screenWidth, screenHeight, title);
 	}
 

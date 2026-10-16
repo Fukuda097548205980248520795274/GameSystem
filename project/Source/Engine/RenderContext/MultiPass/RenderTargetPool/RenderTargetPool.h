@@ -7,9 +7,13 @@
 
 namespace Detail
 {
+	/// @brief DXヒープ
 	class DXHeap;
+
+	/// @brief DXスワップチェーン
 	class DXSwapChain;
 
+	/// @brief レンダーターゲットプール
 	class RenderTargetPool
 	{
 	public:
