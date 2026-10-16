@@ -39,15 +39,15 @@ void Detail::OffscreenResource::Initialize(ID3D12Device* device, DXHeap* heap, i
 	heap_ = heap;
 	
 	// 最大バッファ数を取得する
-	uint32_t maxBufferCount = 1;
-	if (engine) maxBufferCount = engine->GetMaxBufferCount();
+	int maxBufferCount = engine->GetMaxBufferCount();
+	if (maxBufferCount > 0) maxBufferCount_ = maxBufferCount;
 
 	// 配列のサイズを確保する
-	resource_.resize(maxBufferCount);
-	rtvHandle_.resize(maxBufferCount);
-	srvHandle_.resize(maxBufferCount);
+	resource_.resize(maxBufferCount_);
+	rtvHandle_.resize(maxBufferCount_);
+	srvHandle_.resize(maxBufferCount_);
 
-	for (uint32_t i = 0; i < maxBufferCount; ++i)
+	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
 		// 書き込み可能なリソーステクスチャを生成する
 		resource_[i] = CreateRenderTextureResource(device, width, height, Vector4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -99,13 +99,7 @@ void Detail::OffscreenResource::Resize(ID3D12Device* device, int32_t width, int3
 {
 	assert(device);
 
-	// エンジンのインスタンスを取得する
-	auto engine = Engine::GetInstance();
-
-	uint32_t maxBufferCount = 1;
-	if (engine) maxBufferCount = engine->GetMaxBufferCount();
-
-	for (uint32_t i = 0; i < maxBufferCount; ++i)
+	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
 		// リソース開放
 		resource_[i].Reset();

@@ -20,6 +20,13 @@ namespace Detail
 		/// @brief デストラクタ
 		~RWTexture2DBufferResource();
 
+		/// @brief リサイズ
+		/// @param device 
+		/// @param commandList 
+		/// @param width 
+		/// @param height 
+		void Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, uint32_t width, uint32_t height);
+
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
 		/// @param rootParameterIndex 
@@ -73,6 +80,9 @@ namespace Detail
 
 		// @brief ヒープ
 		DXHeap* heap_ = nullptr;
+
+		/// @brief 最大バッファ数
+		uint32_t maxBufferCount_ = 1;
 
 		/// @brief リソース
 		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;

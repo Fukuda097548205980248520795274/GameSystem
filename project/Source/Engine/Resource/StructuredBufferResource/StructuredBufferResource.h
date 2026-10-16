@@ -1,47 +1,8 @@
 #pragma once
-#include <vector>
-#include <cassert>
-
-#include "Func/ResourceFunc/ResourceFunc.h"
-#include "RenderContext/DXHeap/DXHeap.h"
+#include "IStructuredBufferResource.h"
 
 namespace Detail
 {
-	class IStructuredBufferResource
-	{
-	public:
-
-		/// @brief コンストラクタ
-		IStructuredBufferResource() = default;
-
-		/// @brief 仮想デストラクタ
-		virtual ~IStructuredBufferResource() = default;
-
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param rootParameterIndex 
-		/// @param frameIndex 
-		virtual void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) = 0;
-
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param rootParameterIndex 
-		/// @param frameIndex 
-		virtual void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) = 0;
-
-
-	protected:
-
-		/// @brief ヒープ
-		DXHeap* heap_ = nullptr;
-
-		/// @brief リソース
-		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
-
-		/// @brief SRVハンドル
-		std::vector<SRVDescriptorHandle> handle_;
-	};
-
 	/// @brief 構造化バッファリソース
 	/// @tparam T 
 	template<typename T>
@@ -59,17 +20,10 @@ namespace Detail
 		/// @brief デストラクタ
 		~StructuredBufferResource();
 
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param rootParameterIndex 
-		/// @param frameIndex
-		void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) override;
-
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param rootParameterIndex 
-		/// @param frameIndex
-		void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex) override;
+		/// @brief リサイズ
+		/// @param device 
+		/// @param num 
+		void Resize(ID3D12Device* device, UINT num) override;
 
 		/// @brief データを取得する
 		/// @param frameIndex 
@@ -123,15 +77,14 @@ void Detail::StructuredBufferResource<T>::Initialize(ID3D12Device* device, DXHea
 	heap_ = heap;
 
 	// 最大バッファ数を取得する
-	uint32_t maxBufferCount = 1;
-	if (frameIndex > maxBufferCount) maxBufferCount = frameIndex;
+	if (frameIndex > maxBufferCount_) maxBufferCount_ = frameIndex;
 	
 	// リソースとデータの配列をリサイズする
-	resource_.resize(maxBufferCount);
-	data_.resize(maxBufferCount);
-	handle_.resize(maxBufferCount);
+	resource_.resize(maxBufferCount_);
+	data_.resize(maxBufferCount_);
+	handle_.resize(maxBufferCount_);
 
-	for (uint32_t i = 0; i < maxBufferCount; ++i)
+	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
 		// リソース作成
 		resource_[i] = CreateBufferResource(device, sizeof(T) * num);
@@ -157,21 +110,38 @@ void Detail::StructuredBufferResource<T>::Initialize(ID3D12Device* device, DXHea
 	}
 }
 
-/// @brief コマンドリストに登録する
-/// @param commandList 
-/// @param rootParameterIndex 
-template <typename T>
-void Detail::StructuredBufferResource<T>::RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex)
+/// @brief リサイズ
+/// @param device 
+/// @param num 
+template<typename T>
+void Detail::StructuredBufferResource<T>::Resize(ID3D12Device* device, UINT num)
 {
-	commandList->SetGraphicsRootDescriptorTable(rootParameterIndex, handle_[frameIndex].gpuHandle);
-}
+	// nullptrチェック
+	assert(device);
+	assert(num > 0);
 
-/// @brief コマンドリストに登録する
-/// @param commandList 
-/// @param rootParameterIndex 
-/// @param frameIndex
-template <typename T>
-void Detail::StructuredBufferResource<T>::RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex)
-{
-	commandList->SetComputeRootDescriptorTable(rootParameterIndex, handle_[frameIndex].gpuHandle);
+	for (uint32_t i = 0; i < maxBufferCount_; ++i)
+	{
+		// 既存のリソースを解放する
+		resource_[i].Reset();
+
+		// リソース作成
+		resource_[i] = CreateBufferResource(device, sizeof(T) * num);
+
+		// データを割りあてる
+		resource_[i]->Map(0, nullptr, reinterpret_cast<void**>(&data_[i]));
+
+		// SRVの設定
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+		srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		srvDesc.Buffer.FirstElement = 0;
+		srvDesc.Buffer.NumElements = num;
+		srvDesc.Buffer.StructureByteStride = sizeof(T);
+
+		// ビューの生成
+		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, handle_[i].cpuHandle);
+	}
 }

@@ -25,6 +25,13 @@ namespace Detail
 		/// @brief デストラクタ
 		~LightSystem() = default;
 
+		/// @brief リサイズ
+		/// @param device 
+		/// @param commandList 
+		/// @param width 
+		/// @param height 
+		void Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int32_t width, int32_t height);
+
 
 
 	private:

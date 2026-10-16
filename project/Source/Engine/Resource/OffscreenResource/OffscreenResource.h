@@ -102,6 +102,9 @@ namespace Detail
 		/// @brief ヒープ
 		DXHeap* heap_ = nullptr;
 
+		/// @brief 最大バッファ数
+		uint32_t maxBufferCount_ = 1;
+
 		// リソース
 		std::vector<ComPtr<ID3D12Resource>> resource_;
 

@@ -40,16 +40,16 @@ void Detail::DepthResource::Initialize(ID3D12Device* device, int32_t width, int3
 	heap_ = heap;
 
 	// 最大バッファ数を取得する
-	uint32_t maxBufferCount = 1;
-	if (engine) maxBufferCount = engine->GetMaxBufferCount();
+	uint32_t maxBufferCount = engine->GetMaxBufferCount();
+	if (maxBufferCount > 0) maxBufferCount_ = maxBufferCount;
 
 	// リソースとハンドルの配列をリサイズする
-	resource_.resize(maxBufferCount);
-	dsvHandle_.resize(maxBufferCount);
-	dsvReadOnlyHandle_.resize(maxBufferCount);
-	srvHandle_.resize(maxBufferCount);
+	resource_.resize(maxBufferCount_);
+	dsvHandle_.resize(maxBufferCount_);
+	dsvReadOnlyHandle_.resize(maxBufferCount_);
+	srvHandle_.resize(maxBufferCount_);
 
-	for (uint32_t i = 0; i < maxBufferCount; ++i)
+	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
 		// デプスステンシル用のリソースを生成する
 		resource_[i] = CreateDepthStencilTextureResource(device, width, height);
@@ -104,11 +104,7 @@ void Detail::DepthResource::Resize(ID3D12Device* device, int32_t width, int32_t 
 {
 	assert(device);
 
-	auto engine = Engine::GetInstance();
-	uint32_t maxBufferCount = 1;
-	if (engine) maxBufferCount = engine->GetMaxBufferCount();
-
-	for (uint32_t i = 0; i < maxBufferCount; ++i)
+	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
 		// リソース開放
 		resource_[i].Reset();

@@ -424,6 +424,15 @@
     <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.cpp">
       <Filter>Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\ConstantBufferResource\IConstantBufferResource.cpp">
+      <Filter>Source\Engine\Resource\ConstantBufferResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.cpp">
+      <Filter>Source\Engine\Resource\RWStructuredBufferResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.cpp">
+      <Filter>Source\Engine\Resource\StructuredBufferResource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.h">
@@ -608,6 +617,15 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.h">
       <Filter>Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\IConstantBufferResource.h">
+      <Filter>Source\Engine\Resource\ConstantBufferResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.h">
+      <Filter>Source\Engine\Resource\RWStructuredBufferResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.h">
+      <Filter>Source\Engine\Resource\StructuredBufferResource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

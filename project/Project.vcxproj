@@ -175,7 +175,22 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.cpp" />
+    <ClCompile Include="Source\Engine\Resource\ConstantBufferResource\IConstantBufferResource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Source\Engine\Store\ModelStore\ModelStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -368,8 +383,11 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.h" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.h" />
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.h" />
+    <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\IConstantBufferResource.h" />
+    <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\RWStructuredBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.h" />
+    <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.h" />
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelStore.h" />
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.h" />

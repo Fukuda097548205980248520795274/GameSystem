@@ -31,7 +31,17 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 	spotLightDataBuffer_ = std::make_unique<StructuredBufferResource<SpotLightDataForGPU>>(device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetFrameIndex());
 
 	// タイルライトインデックス用のRW構造化バッファを作成
-	int width = engine->GetClientWidth() / kTileSize;
-	int height = engine->GetClientHeight() / kTileSize;
-	tileLightIndexBuffer_ = std::make_unique<RWStructuredBufferResource<uint32_t>>(device, commandList, engine->GetRenderContext()->GetHeap(), width * height, engine->GetFrameIndex());
+	int tileWidth = engine->GetClientWidth() / kTileSize;
+	int tileHeight = engine->GetClientHeight() / kTileSize;
+	tileLightIndexBuffer_ = std::make_unique<RWStructuredBufferResource<uint32_t>>(device, commandList, engine->GetRenderContext()->GetHeap(), tileWidth * tileHeight, engine->GetFrameIndex());
+}
+
+/// @brief リサイズ
+/// @param device 
+/// @param commandList 
+/// @param width 
+/// @param height 
+void Detail::LightSystem::Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, int32_t width, int32_t height)
+{
+	
 }
