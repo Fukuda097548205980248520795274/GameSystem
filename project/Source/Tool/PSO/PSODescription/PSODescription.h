@@ -52,6 +52,10 @@ namespace Detail
 		Custom,
 		Transform,
 		Material,
+		Camera,
+		PointLight,
+		SpotLight,
+		LightCullingTitle,
 		Texture
 	};
 

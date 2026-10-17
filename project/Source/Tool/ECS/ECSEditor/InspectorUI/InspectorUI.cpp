@@ -76,7 +76,7 @@ void Detail::ECSEditor::DrawInspector()
 		if (ImGui::CollapsingHeader("トランスフォーム", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			auto& transform = registry_->GetComponent<TransformComponent>(selectedEntity_);
-			ImGui::DragFloat3("位置##トランスフォーム", &transform.position.x, 0.1f);
+			ImGui::DragFloat3("位置##トランスフォーム", &transform.position.x, 0.01f);
 			ImGui::DragFloat3("回転##トランスフォーム", &transform.rotation.x, 0.01f);
 			ImGui::DragFloat3("大きさ##トランスフォーム", &transform.scale.x, 0.1f);
 		}
@@ -202,6 +202,7 @@ void Detail::ECSEditor::DrawInspector()
 		{
 			auto& pointLight = registry_->GetComponent<PointLightComponent>(selectedEntity_);
 			ImGui::Checkbox("有効##ポイントライト", &pointLight.isEnabled);
+			ImGui::DragFloat3("位置##ポイントライト", &pointLight.position.x, 0.01f);
 			ImGui::ColorEdit4("色##ポイントライト", &pointLight.color.x);
 			ImGui::DragFloat("強さ##ポイントライト", &pointLight.intensity, 0.1f);
 			ImGui::DragFloat("半径##ポイントライト", &pointLight.radius, 0.1f);
@@ -216,6 +217,7 @@ void Detail::ECSEditor::DrawInspector()
 		{
 			auto& spotLight = registry_->GetComponent<SpotLightComponent>(selectedEntity_);
 			ImGui::Checkbox("有効##スポットライト", &spotLight.isEnabled);
+			ImGui::DragFloat3("位置##スポットライト", &spotLight.position.x, 0.01f);
 			if (ImGui::DragFloat3("方向##スポットライト", &spotLight.direction.x, 0.1f))
 			{
 				// 入力された方向ベクトルを正規化する

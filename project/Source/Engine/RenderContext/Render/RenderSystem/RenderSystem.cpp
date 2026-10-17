@@ -209,6 +209,9 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	auto cameraSystem = engine->GetRenderContext()->GetCameraSystem();
 	if (!cameraSystem) return;
 
+	auto lightSystem = engine->GetRenderContext()->GetLightSystem();
+	if (!lightSystem) return;
+
 	// RenderComponentの配列を取得する
 	auto* passArray = registry_->GetComponentArray<RenderComponent>();
 	const auto& entities = passArray->GetEntities();
@@ -300,6 +303,34 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				renderResourceStore_->UpdateConstantBuffer(materialCB.handle, data, frameIndex);
 				auto cbResource = renderResourceStore_->GetConstantBuffer(materialCB.handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+				break;
+			}
+			case RenderBinding::Camera:
+			{
+				// Camera用のリソースをバインド
+				auto cbResource = lightSystem->GetCameraDataBuffer();
+				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+				break;
+			}
+			case RenderBinding::PointLight:
+			{
+				// PointLight用のリソースをバインド
+				auto cbResource = lightSystem->GetPointLightDataBuffer();
+				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+				break;
+			}
+			case RenderBinding::SpotLight:
+			{
+				// SpotLight用のリソースをバインド
+				auto cbResource = lightSystem->GetSpotLightDataBuffer();
+				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+				break;
+			}
+			case RenderBinding::LightCullingTitle:
+			{
+				// LightCullingTitle用のリソースをバインド
+				auto cbResource = lightSystem->GetTileLightIndexBuffer();
+				if (cbResource)cbResource->RegisterGraphicsSRV(commandList, i, frameIndex);
 				break;
 			}
 			case RenderBinding::Texture:

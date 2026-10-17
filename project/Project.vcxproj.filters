@@ -263,6 +263,9 @@
     <Filter Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO">
       <UniqueIdentifier>{0884032a-5189-443d-9da6-99d896ae5255}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\Camera">
+      <UniqueIdentifier>{94535a7a-f945-4e70-ba54-a66bc97761a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -690,6 +693,12 @@
     </None>
     <None Include="Assets\Internal\Shader\Render\Render2D\Render2D.hlsli">
       <Filter>Shader\Render\Render2D</Filter>
+    </None>
+    <None Include="Assets\Internal\Shader\LightCulling\LightData.hlsli">
+      <Filter>Shader\LightCulling</Filter>
+    </None>
+    <None Include="Assets\Internal\Shader\Camera\CameraData.hlsli">
+      <Filter>Shader\Camera</Filter>
     </None>
   </ItemGroup>
 </Project>

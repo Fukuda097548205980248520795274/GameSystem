@@ -27,6 +27,12 @@ void Game::Initialize()
 
 	/// Skybox用のエンティティを作成
 	skyboxEntity = Engine::GetInstance()->CreateSkyboxEntity();
+
+	// ポイントライト
+	Engine::GetInstance()->CreatePointLightEntity(Vector3(0.0f, 5.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, 10.0f, 1.0f);
+
+	// スポットライトのエンティティを作成
+	Engine::GetInstance()->CreateSpotLightEntity(Vector3(0.0f, 5.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 10.0f, 10.0f, 1.0f, cosf(DirectX::XMConvertToRadians(15.0f)), cosf(DirectX::XMConvertToRadians(30.0f)));
 }
 
 /// @brief 更新処理

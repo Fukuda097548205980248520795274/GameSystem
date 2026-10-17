@@ -79,6 +79,37 @@ namespace Detail
 			GetComponentArray<T>()->SetOnRemoveCallback(callback);
 		}
 
+		/// @brief 指定されたコンポーネントを1つ以上持つエンティティに対して処理を行う
+		/// @tparam ...Components 
+		/// @tparam Func 
+		/// @param func 
+		template<typename... Components, typename Func>
+		void ForEachEntityWithAny(Func&& func)
+		{
+			// 各コンポーネントの配列を取得する
+			auto arrays = std::tuple{ GetComponentArray<Components>()... };
+
+			// 有効なエンティティの一覧をループする
+			for (Entity entity : activeEntities_)
+			{
+				// 各コンポーネントの配列から、エンティティが持つコンポーネントへのポインタを取得する
+				auto components = std::apply(
+					[&](auto*... array) {
+						return std::tuple<Components*...>{(array->Has(entity) ? &array->Get(entity) : nullptr)...};
+					}, arrays);
+
+				// 1つでもコンポーネントを持っているか確認する
+				const bool hasAny = std::apply(
+					[](auto*... component) {return ((component != nullptr) || ...);}, components);
+
+				// 指定されたコンポーネントを1つも持っていない場合はスキップする
+				if (!hasAny)continue;
+
+				// Entity と各コンポーネントへのポインタを渡す
+				std::apply([&](auto*... component) {func(entity, component...);}, components);
+			}
+		}
+
 
 	private:
 

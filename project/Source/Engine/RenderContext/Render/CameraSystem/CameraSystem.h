@@ -34,6 +34,14 @@ namespace Detail
 		/// @return 
 		Matrix4x4 GetProjectionMatrix() const { return projectionMatrix_; }
 
+		/// @brief 近平面の距離を取得する
+		/// @return 
+		float GetNearZ()const { return nearZ_; }
+
+		/// @brief 遠平面の距離を取得する
+		/// @return 
+		float GetFarZ()const { return farZ_; }
+
 
 	private:
 
@@ -57,5 +65,11 @@ namespace Detail
 
 		// 射影行列
 		Matrix4x4 projectionMatrix_;
+
+		/// @brief 近平面の距離
+		float nearZ_ = 0.1f;
+
+		/// @brief 遠平面の距離
+		float farZ_ = 1000.0f;
 	};
 }

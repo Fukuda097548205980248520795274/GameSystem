@@ -11,6 +11,9 @@ namespace Detail
 		
 		/// @brief テクスチャ座標
 		Vector2 texcoord;
+
+		/// @brief 法線
+		Vector3 normal;
 	};
 
 	/// @brief トランスフォームデータをGPU用に格納する構造体
@@ -81,6 +84,19 @@ namespace Detail
 		int32_t numSpotLights;
 
 		float padding[1]; // パディング
+	};
+
+	/// @brief 平行光源データをGPUに格納する構造体
+	struct DirectionalLightDataForGPU
+	{
+		/// @brief 色
+		Vector4 color;
+
+		/// @brief 方向
+		Vector3 direction;
+
+		/// @brief 強さ
+		float intensity;
 	};
 
 	// @brief ポイントライトデータをGPU用に格納する構造体

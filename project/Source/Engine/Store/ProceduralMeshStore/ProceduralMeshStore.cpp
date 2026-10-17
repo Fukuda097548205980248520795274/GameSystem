@@ -81,55 +81,79 @@ void Detail::ProceduralMeshStore::CreateCubeMesh(ID3D12Device* device)
 	// ローカル座標を与える
 	vertexData[0].position = Vector4(-1.0f, -1.0f, -1.0f, 1.0f);
 	vertexData[0].texcoord = Vector2(0.0f, 1.0f);
+	vertexData[0].normal = Vector3(0.0f, 0.0f, -1.0f);
 	vertexData[1].position = Vector4(-1.0f, 1.0f, -1.0f, 1.0f);
 	vertexData[1].texcoord = Vector2(0.0f, 0.0f);
+	vertexData[1].normal = Vector3(0.0f, 0.0f, -1.0f);
 	vertexData[2].position = Vector4(1.0f, -1.0f, -1.0f, 1.0f);
 	vertexData[2].texcoord = Vector2(1.0f, 1.0f);
+	vertexData[2].normal = Vector3(0.0f, 0.0f, -1.0f);
 	vertexData[3].position = Vector4(1.0f, 1.0f, -1.0f, 1.0f);
 	vertexData[3].texcoord = Vector2(1.0f, 0.0f);
+	vertexData[3].normal = Vector3(0.0f, 0.0f, -1.0f);
 	
 	vertexData[4].position = Vector4(1.0f, -1.0f, -1.0f, 1.0f);
 	vertexData[4].texcoord = Vector2(0.0f, 1.0f);
+	vertexData[4].normal = Vector3(1.0f, 0.0f, 0.0f);
 	vertexData[5].position = Vector4(1.0f, 1.0f, -1.0f, 1.0f);
 	vertexData[5].texcoord = Vector2(0.0f, 0.0f);
+	vertexData[5].normal = Vector3(1.0f, 0.0f, 0.0f);
 	vertexData[6].position = Vector4(1.0f, -1.0f, 1.0f, 1.0f);
 	vertexData[6].texcoord = Vector2(1.0f, 1.0f);
+	vertexData[6].normal = Vector3(1.0f, 0.0f, 0.0f);
 	vertexData[7].position = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertexData[7].texcoord = Vector2(1.0f, 0.0f);
+	vertexData[7].normal = Vector3(1.0f, 0.0f, 0.0f);
 	
 	vertexData[8].position = Vector4(1.0f, -1.0f, 1.0f, 1.0f);
 	vertexData[8].texcoord = Vector2(0.0f, 1.0f);
+	vertexData[8].normal = Vector3(0.0f, 0.0f, 1.0f);
 	vertexData[9].position = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertexData[9].texcoord = Vector2(0.0f, 0.0f);
+	vertexData[9].normal = Vector3(0.0f, 0.0f, 1.0f);
 	vertexData[10].position = Vector4(-1.0f, -1.0f, 1.0f, 1.0f);
 	vertexData[10].texcoord = Vector2(1.0f, 1.0f);
+	vertexData[10].normal = Vector3(0.0f, 0.0f, 1.0f);
 	vertexData[11].position = Vector4(-1.0f, 1.0f, 1.0f, 1.0f);
 	vertexData[11].texcoord = Vector2(1.0f, 0.0f);
+	vertexData[11].normal = Vector3(0.0f, 0.0f, 1.0f);
 	
 	vertexData[12].position = Vector4(-1.0f, -1.0f, 1.0f, 1.0f);
 	vertexData[12].texcoord = Vector2(0.0f, 1.0f);
+	vertexData[12].normal = Vector3(-1.0f, 0.0f, 0.0f);
 	vertexData[13].position = Vector4(-1.0f, 1.0f, 1.0f, 1.0f);
 	vertexData[13].texcoord = Vector2(0.0f, 0.0f);
+	vertexData[13].normal = Vector3(-1.0f, 0.0f, 0.0f);
 	vertexData[14].position = Vector4(-1.0f, -1.0f, -1.0f, 1.0f);
 	vertexData[14].texcoord = Vector2(1.0f, 1.0f);
+	vertexData[14].normal = Vector3(-1.0f, 0.0f, 0.0f);
 	vertexData[15].position = Vector4(-1.0f, 1.0f, -1.0f, 1.0f);
 	vertexData[15].texcoord = Vector2(1.0f, 0.0f);
+	vertexData[15].normal = Vector3(-1.0f, 0.0f, 0.0f);
 	
 	vertexData[16].position = Vector4(-1.0f, 1.0f, -1.0f, 1.0f);
 	vertexData[16].texcoord = Vector2(0.0f, 1.0f);
+	vertexData[16].normal = Vector3(0.0f, 1.0f, 0.0f);
 	vertexData[17].position = Vector4(-1.0f, 1.0f, 1.0f, 1.0f);
 	vertexData[17].texcoord = Vector2(0.0f, 0.0f);
+	vertexData[17].normal = Vector3(0.0f, 1.0f, 0.0f);
 	vertexData[18].position = Vector4(1.0f, 1.0f, -1.0f, 1.0f);
 	vertexData[18].texcoord = Vector2(1.0f, 1.0f);
+	vertexData[18].normal = Vector3(0.0f, 1.0f, 0.0f);
 	vertexData[19].position = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	vertexData[19].texcoord = Vector2(1.0f, 0.0f);
+	vertexData[19].normal = Vector3(0.0f, 1.0f, 0.0f);
 	
 	vertexData[20].position = Vector4(1.0f, -1.0f, -1.0f, 1.0f);
 	vertexData[20].texcoord = Vector2(0.0f, 1.0f);
+	vertexData[20].normal = Vector3(0.0f, -1.0f, 0.0f);
 	vertexData[21].position = Vector4(1.0f, -1.0f, 1.0f, 1.0f);
 	vertexData[21].texcoord = Vector2(0.0f, 0.0f);
+	vertexData[21].normal = Vector3(0.0f, -1.0f, 0.0f);
 	vertexData[22].position = Vector4(-1.0f, -1.0f, -1.0f, 1.0f);
 	vertexData[22].texcoord = Vector2(1.0f, 1.0f);
+	vertexData[22].normal = Vector3(0.0f, -1.0f, 0.0f);
 	vertexData[23].position = Vector4(-1.0f, -1.0f, 1.0f, 1.0f);
 	vertexData[23].texcoord = Vector2(1.0f, 0.0f);
+	vertexData[23].normal = Vector3(0.0f, -1.0f, 0.0f);
 }

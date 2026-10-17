@@ -1,95 +1,10 @@
-
-// タイルベースのライトカリング用コンピュートシェーダー
-#define TILE_SIZE 16
-
-// タイルごとの最大ライト数（ポイントライト + スポットライト）
-#define MAX_LIGHTS_PER_TILE 256
-
-// ポイントライト
-struct PointLight
-{
-	// 色（RGBA）
-	float4 color;
-	
-	// 位置
-	float3 position;
-	
-	// ライトの強度（明るさ）
-	float intensity;
-	
-	// ライトの影響範囲（半径）
-	float radius;
-	
-	// 減衰率
-	float decay;
-};
-
-// スポットライト
-struct SpotLight
-{
-	// 色（RGBA）
-	float4 color;
-	
-	// 位置
-	float3 position;
-	
-	// ライトの強度（明るさ）
-	float intensity;
-	
-	// スポットライトの方向（正規化済み）
-	float3 direction;
-	
-	// ライトの影響範囲（半径）
-	float distance;
-	
-	// 減衰率
-	float decay;
-	
-	// スポットライトの角度（ラジアン）
-	float cosAngle;
-	
-	// スポットライトの減衰開始角度のコサイン値
-	float cosFalloffStart;
-};
+#include "LightData.hlsli"
+#include "../Camera/CameraData.hlsli"
 
 // カメラ情報
-struct Camera
-{
-	// カメラの近平面距離
-	float nearZ;
-	
-	// カメラの遠平面距離
-	float farZ;
-	
-	 // スクリーンの幅と高さ（ピクセル単位）
-	float2 screenDimensions;
-	
-	// カメラのワールド空間での位置
-	float3 worldPosition;
-	
-	// ビュー行列
-	float4x4 view;
-	
-	// 投影行列
-	float4x4 projection;
-	
-	// 逆投影行列
-	float4x4 inverseProjection;
-};
 ConstantBuffer<Camera> gCamera : register(b0);
 
 // ライトの数
-struct NumLight
-{
-	// 平行光源の数
-	int directionalLight;
-	
-	// ポイントライトの数
-	int pointLight;
-	
-	// スポットライトの数
-	int spotLight;
-};
 ConstantBuffer<NumLight> gNumLight : register(b1);
 
 // ライト情報のバッファ
@@ -271,36 +186,33 @@ void main(uint3 groupID : SV_GroupID,uint3 groupThreadID : SV_GroupThreadID,uint
 	// 共有メモリのライトインデックスを全スレッドで使用できるように同期
 	GroupMemoryBarrierWithGroupSync();
 
-	// 結果をグローバルバッファに書き出し（グループ内の先頭スレッドから順に）
-	if (localIndex == 0)
-	{
-		// 結果をグローバルバッファに書き出し（全スレッドで手分けして並列処理）
-		uint numTilesX = (uint) ceil(gCamera.screenDimensions.x / (float) TILE_SIZE);
-		uint tileIndex = groupID.y * numTilesX + groupID.x;
-		uint bufferOffset = tileIndex * (MAX_LIGHTS_PER_TILE * 2 + 2);
+	
+    uint numTilesX = (uint) ceil(gCamera.screenDimensions.x / (float) TILE_SIZE);
 
-		uint ptCount = min(s_PointLightCount, MAX_LIGHTS_PER_TILE);
-		uint spCount = min(s_SpotLightCount, MAX_LIGHTS_PER_TILE);
+    uint tileIndex = groupID.y * numTilesX + groupID.x;
 
-		uint spOffset = bufferOffset + MAX_LIGHTS_PER_TILE + 1;
-		
-		// スレッド0がカウントを書き込む
-		if (localIndex == 0)
-		{
-			gTileLightIndexBuffer[bufferOffset] = ptCount;
-			gTileLightIndexBuffer[spOffset] = spCount;
-		}
+    uint bufferOffset = tileIndex * (MAX_LIGHTS_PER_TILE * 2 + 2);
 
-		// 全スレッドでポイントライトのインデックスを書き込む
-		for (uint p = localIndex; p < ptCount; p += TILE_SIZE * TILE_SIZE)
-		{
-			gTileLightIndexBuffer[bufferOffset + 1 + p] = s_PointLightIndices[p];
-		}
+    uint ptCount = min(s_PointLightCount, MAX_LIGHTS_PER_TILE);
+    uint spCount = min(s_SpotLightCount, MAX_LIGHTS_PER_TILE);
 
-		// 全スレッドでスポットライトのインデックスを書き込む
-		for (uint s = localIndex; s < spCount; s += TILE_SIZE * TILE_SIZE)
-		{
-			gTileLightIndexBuffer[spOffset + 1 + s] = s_SpotLightIndices[s];
-		}
-	}
+    uint spOffset = bufferOffset + MAX_LIGHTS_PER_TILE + 1;
+
+		// 個数はスレッド0だけが書き込む
+    if (localIndex == 0)
+    {
+        gTileLightIndexBuffer[bufferOffset] = ptCount;
+        gTileLightIndexBuffer[spOffset] = spCount;
+    }
+
+		// インデックスは全スレッドで分担して書き込む
+    for (uint p = localIndex; p < ptCount; p += TILE_SIZE * TILE_SIZE)
+    {
+        gTileLightIndexBuffer[bufferOffset + 1 + p] = s_PointLightIndices[p];
+    }
+
+    for (uint s = localIndex; s < spCount; s += TILE_SIZE * TILE_SIZE)
+    {
+        gTileLightIndexBuffer[spOffset + 1 + s] = s_SpotLightIndices[s];
+    }
 }

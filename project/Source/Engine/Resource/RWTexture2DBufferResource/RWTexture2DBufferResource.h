@@ -60,6 +60,15 @@ namespace Detail
 		/// @param after 
 		void AllBarrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
 
+		/// @brief UAVバリアを張る
+		/// @param commandList 
+		/// @param frameIndex 
+		void BarrierUAV(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
+
+		/// @brief 全てのUAVバリアを張る
+		/// @param commandList 
+		void AllBarrierUAV(ID3D12GraphicsCommandList* commandList);
+
 		/// @brief 横幅を取得する
 		/// @return 
 		int32_t GetWidth()const { return width_; }

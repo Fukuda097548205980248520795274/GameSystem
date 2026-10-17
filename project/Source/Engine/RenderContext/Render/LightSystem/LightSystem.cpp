@@ -28,6 +28,9 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 	// ライト数データ用の構造化バッファを作成
 	numLightDataBuffer_ = std::make_unique<ConstantBufferResource<NumLightDataForGPU>>(device, engine->GetMaxBufferCount());
 
+	// 平行光源データ用の構造化バッファを作成
+	directionalLightDataBuffer_ = std::make_unique<StructuredBufferResource<DirectionalLightDataForGPU>>(device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
+
 	// ポイントライトデータ用の構造化バッファを作成
 	pointLightDataBuffer_ = std::make_unique<StructuredBufferResource<PointLightDataForGPU>>(device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
 
@@ -35,9 +38,22 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 	spotLightDataBuffer_ = std::make_unique<StructuredBufferResource<SpotLightDataForGPU>>(device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
 
 	// タイルライトインデックス用のRW構造化バッファを作成
-	int tileWidth = engine->GetClientWidth() / kTileSize;
-	int tileHeight = engine->GetClientHeight() / kTileSize;
-	tileLightIndexBuffer_ = std::make_unique<RWStructuredBufferResource<uint32_t>>(device, commandList, engine->GetRenderContext()->GetHeap(), tileWidth * tileHeight, engine->GetMaxBufferCount());
+	int width = engine->GetClientWidth();
+	int height = engine->GetClientHeight();
+
+	// タイルの幅と高さを計算
+	const int tileWidth =(width + kTileSize - 1) / kTileSize;
+	const int tileHeight =(height + kTileSize - 1) / kTileSize;
+
+	// タイルの総数を計算
+	const int tileCount = tileWidth * tileHeight;
+
+	// タイルごとの要素数を計算
+	const int elementsPerTile =256 * 2 + 2;
+
+	// RW構造化バッファを作成
+	tileLightIndexBuffer_ = std::make_unique<RWStructuredBufferResource<uint32_t>>(device, commandList, engine->GetRenderContext()->GetHeap(), tileCount * elementsPerTile, engine->GetMaxBufferCount());
+	tileLightIndexBuffer_->AllBarrier(commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
 /// @brief リサイズ
@@ -50,10 +66,19 @@ void Detail::LightSystem::Resize(ID3D12Device* device, ID3D12GraphicsCommandList
 	// ライトカリング用の深度リソースをリサイズ
 	lightCullingDepthResource_->Resize(device, width, height);
 
-	// カメラデータ用の定数バッファをリサイズ
-	int tileWidth = width / kTileSize;
-	int tileHeight = height / kTileSize;
-	tileLightIndexBuffer_->Resize(device, commandList, tileWidth * tileHeight);
+	// タイルの幅と高さを計算
+	const int tileWidth = (width + kTileSize - 1) / kTileSize;
+	const int tileHeight = (height + kTileSize - 1) / kTileSize;
+
+	// タイルの総数を計算
+	const int tileCount = tileWidth * tileHeight;
+
+	// タイルごとの要素数を計算
+	const int elementsPerTile = 256 * 2 + 2;
+	
+	// RW構造化バッファをリサイズ
+	tileLightIndexBuffer_->Resize(device, commandList, tileCount * elementsPerTile);
+	tileLightIndexBuffer_->AllBarrier(commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
 /// @brief 平行光源のエンティティを作成する
@@ -130,12 +155,89 @@ Entity Detail::LightSystem::CreateSpotLightEntity(const Vector3& position, const
 /// @param frameIndex 
 void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem)
 {
+	tileLightIndexBuffer_->Barrier(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, frameIndex);
+
 	/*---------------------------
 		ライトのデータを設定する
 	---------------------------*/
 
-	
+	// ライト数
+	int numDirectionalLights = 0;
+	int numPointLights = 0;
+	int numSpotLights = 0;
 
+	// ライト数データを設定する
+	registry_->ForEachEntityWithAny<DirectionalLightComponent, PointLightComponent, SpotLightComponent>(
+		[&](Entity entity, DirectionalLightComponent* directionalLight, PointLightComponent* pointLight, SpotLightComponent* spotLight)
+		{
+			// 平行光源
+			if (directionalLight && directionalLight->isEnabled)
+			{
+				if (numDirectionalLights < kMaxNumLights)
+				{
+					auto& lightData = directionalLightDataBuffer_->GetData(frameIndex)[numDirectionalLights];
+					lightData.direction = directionalLight->direction;
+					lightData.color = Vector4(directionalLight->color.x, directionalLight->color.y, directionalLight->color.z, 1.0f);
+					lightData.intensity = directionalLight->intensity;
+					numDirectionalLights++;
+				}
+			}
+
+			// ポイントライト
+			if (pointLight && pointLight->isEnabled)
+			{
+				if (numPointLights < kMaxNumLights)
+				{
+					auto& lightData = pointLightDataBuffer_->GetData(frameIndex)[numPointLights];
+					lightData.position = pointLight->position;
+					lightData.color = Vector4(pointLight->color.x, pointLight->color.y, pointLight->color.z, 1.0f);
+					lightData.intensity = pointLight->intensity;
+					lightData.radius = pointLight->radius;
+					lightData.decay = pointLight->decay;
+					numPointLights++;
+				}
+			}
+
+			// スポットライト
+			if (spotLight && spotLight->isEnabled)
+			{
+				if (numSpotLights < kMaxNumLights)
+				{
+					auto& lightData = spotLightDataBuffer_->GetData(frameIndex)[numSpotLights];
+					lightData.position = spotLight->position;
+					lightData.direction = spotLight->direction;
+					lightData.color = Vector4(spotLight->color.x, spotLight->color.y, spotLight->color.z, 1.0f);
+					lightData.intensity = spotLight->intensity;
+					lightData.distance = spotLight->distance;
+					lightData.decay = spotLight->decay;
+					lightData.cosAngle = spotLight->cosAngle;
+					lightData.cosFalloffStart = spotLight->cosFalloffStart;
+					numSpotLights++;
+				}
+			}
+		});
+
+	// ライト数データをGPUに転送する
+	auto& numLightData = numLightDataBuffer_->GetData(frameIndex)[0];
+	numLightData.numDirectionalLights = numDirectionalLights;
+	numLightData.numPointLights = numPointLights;
+	numLightData.numSpotLights = numSpotLights;
+
+	// カメラデータをGPUに転送する
+	auto cameraSystem = Engine::GetInstance()->GetRenderContext()->GetCameraSystem();
+	if (cameraSystem)
+	{
+		auto& cameraData = cameraDataBuffer_->GetData(frameIndex)[0];
+		Matrix4x4 cameraMatrix = cameraSystem->GetCameraMatrix();
+
+		cameraData.nearZ = cameraSystem->GetNearZ();
+		cameraData.farZ = cameraSystem->GetFarZ();
+		cameraData.screenDimensions = Vector2(static_cast<float>(Engine::GetInstance()->GetClientWidth()), static_cast<float>(Engine::GetInstance()->GetClientHeight()));
+		cameraData.worldPosition = Vector3(cameraMatrix.m[3][0], cameraMatrix.m[3][1], cameraMatrix.m[3][2]);
+		cameraData.view = cameraSystem->GetViewMatrix();
+		cameraData.projection = cameraSystem->GetProjectionMatrix();
+		cameraData.inverseProjection = cameraSystem->GetProjectionMatrix().Inverse();
+	}
 
 	/*---------------------------------------
 	    描画するオブジェクトの深度値を取得する
@@ -156,7 +258,7 @@ void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, u
 	---------------------------------------*/
 
 	// ライトカリング用の深度リソースにバリアを張る
-	lightCullingDepthResource_->Barrier(commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, frameIndex);
+	lightCullingDepthResource_->Barrier(commandList, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, frameIndex);
 
 
 	// ライトカリングPSOを登録する
@@ -185,5 +287,9 @@ void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, u
 
 
 	// ライトカリング用の深度リソースにバリアを張る
-	lightCullingDepthResource_->Barrier(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE, frameIndex);
+	lightCullingDepthResource_->Barrier(commandList, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE, frameIndex);
+
+
+	// タイルライトインデックス用のRW構造化バッファにバリアを張る
+	tileLightIndexBuffer_->Barrier(commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, frameIndex);
 }

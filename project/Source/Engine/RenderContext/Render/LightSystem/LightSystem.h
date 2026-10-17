@@ -57,6 +57,22 @@ namespace Detail
 		/// @return 
 		Entity CreatePointLightEntity(const Vector3& position, const Vector4& color, float intensity, float radius, float decay);
 
+		/// @brief カリング用カメラデータを取得する
+		/// @return 
+		ConstantBufferResource<LightCullingCameraDataForGPU>* GetCameraDataBuffer() const { return cameraDataBuffer_.get(); }
+
+		/// @brief ポイントライトデータを取得する
+		/// @return 
+		StructuredBufferResource<PointLightDataForGPU>* GetPointLightDataBuffer()const { return pointLightDataBuffer_.get(); }
+
+		/// @brief スポットライトデータを取得する
+		/// @return 
+		StructuredBufferResource<SpotLightDataForGPU>* GetSpotLightDataBuffer()const { return spotLightDataBuffer_.get(); }
+
+		/// @brief ライトカリング用タイルデータを取得する
+		/// @return 
+		RWStructuredBufferResource<uint32_t>* GetTileLightIndexBuffer()const { return tileLightIndexBuffer_.get(); }
+
 		/// @brief スポットライトのエンティティを作成する
 		/// @param position 
 		/// @param direction 
@@ -110,6 +126,9 @@ namespace Detail
 
 		/// @brief ライトデータ用の構造化バッファ
 		std::unique_ptr<ConstantBufferResource<NumLightDataForGPU>> numLightDataBuffer_ = nullptr;
+
+		/// @brief 平行光源用の構造化バッファ
+		std::unique_ptr<StructuredBufferResource<DirectionalLightDataForGPU>> directionalLightDataBuffer_ = nullptr;
 
 		/// @brief ポイントライトデータ用の構造化バッファ
 		std::unique_ptr<StructuredBufferResource<PointLightDataForGPU>> pointLightDataBuffer_ = nullptr;

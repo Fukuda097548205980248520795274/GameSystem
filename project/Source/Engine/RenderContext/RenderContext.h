@@ -82,6 +82,34 @@ namespace Detail
 		/// @return 
 		Entity CreateSkyboxEntity() { return skyboxSystem_->CreateSkyboxEntity(); }
 
+		/// @brief 平行光源エンティティを作成する
+		/// @param direction 
+		/// @param color 
+		/// @param intensity 
+		/// @return 
+		Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity) { return lightSystem_->CreateDirectionalLightEntity(direction, color, intensity); }
+
+		/// @brief ポイントライトエンティティを作成する
+		/// @param position 
+		/// @param color 
+		/// @param intensity 
+		/// @param radius 
+		/// @param decay 
+		/// @return 
+		Entity CreatePointLightEntity(const Vector3& position, const Vector4& color, float intensity, float radius, float decay) { return lightSystem_->CreatePointLightEntity(position, color, intensity, radius, decay); }
+
+		/// @brief スポットライトエンティティを作成する
+		/// @param position 
+		/// @param direction 
+		/// @param color 
+		/// @param intensity 
+		/// @param radius 
+		/// @param decay 
+		/// @param cosAngle 
+		/// @param cosFalloffStart 
+		/// @return 
+		Entity CreateSpotLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color, float intensity, float radius, float decay, float cosAngle, float cosFalloffStart) { return lightSystem_->CreateSpotLightEntity(position, direction, color, intensity, radius, decay, cosAngle, cosFalloffStart); }
+
 		/// @brief テクスチャを読み込む
 		/// @param filePath 
 		/// @return 
@@ -114,6 +142,10 @@ namespace Detail
 		/// @brief カメラシステムを取得する
 		/// @return 
 		CameraSystem* GetCameraSystem() const { return cameraSystem_.get(); }
+
+		/// @brief ライトシステムを取得する
+		/// @return 
+		LightSystem* GetLightSystem() const { return lightSystem_.get(); }
 
 		/// @brief スワップチェーンを取得する
 		/// @return 

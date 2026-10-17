@@ -44,3 +44,21 @@ void Detail::IRWStructuredBufferResource::AllBarrier(ID3D12GraphicsCommandList* 
 		TransitionBarrier(resource_[i].Get(), before, after, commandList);
 	}
 }
+
+/// @brief UAVバリアを張る
+/// @param commandList 
+/// @param frameIndex 
+void Detail::IRWStructuredBufferResource::BarrierUAV(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex)
+{
+	UAVBarrier(resource_[frameIndex].Get(), commandList);
+}
+
+/// @brief 全てのUAVバリアを張る
+/// @param commandList 
+void Detail::IRWStructuredBufferResource::AllBarrierUAV(ID3D12GraphicsCommandList* commandList)
+{
+	for (int i = 0; i < resource_.size(); ++i)
+	{
+		UAVBarrier(resource_[i].Get(), commandList);
+	}
+}

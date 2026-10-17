@@ -46,6 +46,10 @@ void Detail::CameraSystem::Update()
 	// プロジェクション行列
 	auto& cameraComp = registry_->GetComponent<CameraComponent>(currentEntity_);
 	projectionMatrix_ = MakePerspectiveFovMatrix4x4(cameraComp.fovY, cameraComp.aspectRatio, cameraComp.nearPlane, cameraComp.farPlane);
+
+	// 近平面と遠平面の距離を保存する
+	nearZ_ = cameraComp.nearPlane;
+	farZ_ = cameraComp.farPlane;
 }
 
 /// @brief エンティティを作成する
