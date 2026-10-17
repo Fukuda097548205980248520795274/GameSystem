@@ -190,7 +190,7 @@ void Detail::ECSEditor::DrawInspector()
 				// 入力された方向ベクトルを正規化する
 				directionalLight.direction = directionalLight.direction.Normalize();
 			}
-			ImGui::ColorEdit4("色##平行光源", &directionalLight.color.x);
+			ImGui::ColorEdit3("色##平行光源", &directionalLight.color.x);
 			ImGui::DragFloat("強さ##平行光源", &directionalLight.intensity, 0.1f);
 		}
 	}
@@ -203,7 +203,7 @@ void Detail::ECSEditor::DrawInspector()
 			auto& pointLight = registry_->GetComponent<PointLightComponent>(selectedEntity_);
 			ImGui::Checkbox("有効##ポイントライト", &pointLight.isEnabled);
 			ImGui::DragFloat3("位置##ポイントライト", &pointLight.position.x, 0.01f);
-			ImGui::ColorEdit4("色##ポイントライト", &pointLight.color.x);
+			ImGui::ColorEdit3("色##ポイントライト", &pointLight.color.x);
 			ImGui::DragFloat("強さ##ポイントライト", &pointLight.intensity, 0.1f);
 			ImGui::DragFloat("半径##ポイントライト", &pointLight.radius, 0.1f);
 			ImGui::DragFloat("減衰##ポイントライト", &pointLight.decay, 0.1f);
@@ -223,7 +223,7 @@ void Detail::ECSEditor::DrawInspector()
 				// 入力された方向ベクトルを正規化する
 				spotLight.direction = spotLight.direction.Normalize();
 			}
-			ImGui::ColorEdit4("色##スポットライト", &spotLight.color.x);
+			ImGui::ColorEdit3("色##スポットライト", &spotLight.color.x);
 			ImGui::DragFloat("強さ##スポットライト", &spotLight.intensity, 0.1f);
 			ImGui::DragFloat("半径##スポットライト", &spotLight.distance, 0.1f);
 			ImGui::DragFloat("減衰##スポットライト", &spotLight.decay, 0.1f);

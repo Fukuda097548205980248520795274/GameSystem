@@ -117,6 +117,9 @@ namespace Detail
 		// タイル分割数
 		static constexpr int32_t kTileSize = 16;
 
+		// 最大タイルあたりのライト数
+		static constexpr int32_t kMaxLightPerTile = 256;
+
 		/// @brief ライトカリング用の深度リソース
 		std::unique_ptr<DepthResource> lightCullingDepthResource_;
 

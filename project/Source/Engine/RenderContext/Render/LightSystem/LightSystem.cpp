@@ -49,7 +49,7 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 	const int tileCount = tileWidth * tileHeight;
 
 	// タイルごとの要素数を計算
-	const int elementsPerTile =256 * 2 + 2;
+	const int elementsPerTile = kMaxLightPerTile * 2 + 2;
 
 	// RW構造化バッファを作成
 	tileLightIndexBuffer_ = std::make_unique<RWStructuredBufferResource<uint32_t>>(device, commandList, engine->GetRenderContext()->GetHeap(), tileCount * elementsPerTile, engine->GetMaxBufferCount());
@@ -74,7 +74,7 @@ void Detail::LightSystem::Resize(ID3D12Device* device, ID3D12GraphicsCommandList
 	const int tileCount = tileWidth * tileHeight;
 
 	// タイルごとの要素数を計算
-	const int elementsPerTile = 256 * 2 + 2;
+	const int elementsPerTile = kMaxLightPerTile * 2 + 2;
 	
 	// RW構造化バッファをリサイズ
 	tileLightIndexBuffer_->Resize(device, commandList, tileCount * elementsPerTile);
@@ -227,16 +227,16 @@ void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, u
 	auto cameraSystem = Engine::GetInstance()->GetRenderContext()->GetCameraSystem();
 	if (cameraSystem)
 	{
-		auto& cameraData = cameraDataBuffer_->GetData(frameIndex)[0];
+		auto cameraData = cameraDataBuffer_->GetData(frameIndex);
 		Matrix4x4 cameraMatrix = cameraSystem->GetCameraMatrix();
 
-		cameraData.nearZ = cameraSystem->GetNearZ();
-		cameraData.farZ = cameraSystem->GetFarZ();
-		cameraData.screenDimensions = Vector2(static_cast<float>(Engine::GetInstance()->GetClientWidth()), static_cast<float>(Engine::GetInstance()->GetClientHeight()));
-		cameraData.worldPosition = Vector3(cameraMatrix.m[3][0], cameraMatrix.m[3][1], cameraMatrix.m[3][2]);
-		cameraData.view = cameraSystem->GetViewMatrix();
-		cameraData.projection = cameraSystem->GetProjectionMatrix();
-		cameraData.inverseProjection = cameraSystem->GetProjectionMatrix().Inverse();
+		cameraData->nearZ = cameraSystem->GetNearZ();
+		cameraData->farZ = cameraSystem->GetFarZ();
+		cameraData->screenDimensions = Vector2(static_cast<float>(Engine::GetInstance()->GetClientWidth()), static_cast<float>(Engine::GetInstance()->GetClientHeight()));
+		cameraData->worldPosition = Vector3(cameraMatrix.m[3][0], cameraMatrix.m[3][1], cameraMatrix.m[3][2]);
+		cameraData->view = cameraSystem->GetViewMatrix();
+		cameraData->projection = cameraSystem->GetProjectionMatrix();
+		cameraData->inverseProjection = cameraSystem->GetProjectionMatrix().Inverse();
 	}
 
 	/*---------------------------------------
