@@ -78,7 +78,7 @@ struct ModelComponent
 /// @brief カメラコンポーネント
 struct CameraComponent
 {
-	CameraComponent() : fovY(0.35f), aspectRatio(16.0f / 9.0f), nearPlane(0.01f), farPlane(800.0f) {}
+	CameraComponent() : fovY(0.35f), aspectRatio(16.0f / 9.0f), nearPlane(0.1f), farPlane(800.0f) {}
 
 	/// @brief 垂直方向の視野角（度）
 	float fovY;

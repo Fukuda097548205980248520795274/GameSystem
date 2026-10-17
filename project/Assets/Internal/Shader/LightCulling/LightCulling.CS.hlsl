@@ -47,17 +47,30 @@ float AsUintToFloat(uint i)
 // NDC座標からビュー空間への変換関数
 float3 ScreenToView(float2 screenPos, float depth, float2 screenDimensions, float4x4 inverseProjection)
 {
-	// スクリーンのピクセル座標をNDC空間 (-1.0 ～ 1.0) に変換
-	float2 ndc;
-	ndc.x = (screenPos.x / screenDimensions.x) * 2.0f - 1.0f;
-	ndc.y = -(screenPos.y / screenDimensions.y) * 2.0f + 1.0f;
+	// ピクセル座標をNDC座標に変換
+    float2 ndc;
+    ndc.x = screenPos.x / screenDimensions.x * 2.0f - 1.0f;
+    ndc.y = 1.0f - screenPos.y / screenDimensions.y * 2.0f;
 
-	// NDC座標を逆投影行列で変換
-	float4 clipPos = float4(ndc, depth, 1.0f);
-	float4 viewPos = mul(clipPos, inverseProjection);
-	
-	// 同次座標のW除算を行って3D座標を取得
-	return viewPos.xyz / viewPos.w;
+    // Direct3Dの深度範囲は0～1
+    float4 clipPos = float4(ndc, depth, 1.0f);
+
+    // 逆射影変換
+    float4 viewPos = mul(clipPos, inverseProjection);
+
+    // 同次座標からビュー空間座標へ
+    return viewPos.xyz / viewPos.w;
+}
+
+// 深度値からビュー空間のZ座標を計算する関数
+float DepthToViewZ(float depth, float4x4 inverseProjection)
+{
+    float4 viewPos = mul(
+        float4(0.0f, 0.0f, depth, 1.0f),
+        inverseProjection
+    );
+
+    return viewPos.z / viewPos.w;
 }
 
 [numthreads(TILE_SIZE, TILE_SIZE, 1)]
@@ -67,7 +80,7 @@ void main(uint3 groupID : SV_GroupID,uint3 groupThreadID : SV_GroupThreadID,uint
 	uint localIndex = groupThreadID.y * TILE_SIZE + groupThreadID.x;
 	if (localIndex == 0)
 	{
-		s_MinDepthInt = 0x7F7FFFFF; // floatの最大値
+		s_MinDepthInt = 0xFFFFFFFF; // floatの最大値
 		s_MaxDepthInt = 0;
 		s_PointLightCount = 0;
 		s_SpotLightCount = 0;
@@ -77,13 +90,16 @@ void main(uint3 groupID : SV_GroupID,uint3 groupThreadID : SV_GroupThreadID,uint
 	GroupMemoryBarrierWithGroupSync();
 
 	
-	// タイル内の各ピクセルの深度を取得して、共有メモリに最小/最大深度を格納
+	// タイル内の各ピクセルの深度を取得して最小/最大深度を計算
 	if (dispatchThreadID.x < (uint) gCamera.screenDimensions.x && dispatchThreadID.y < (uint) gCamera.screenDimensions.y)
 	{
-		float depth = gDepthTexture.Load(int3(dispatchThreadID.x, dispatchThreadID.y, 0));
-		InterlockedMin(s_MinDepthInt, FloatToAsUint(depth));
-		InterlockedMax(s_MaxDepthInt, FloatToAsUint(depth));
-	}
+        float depth = gDepthTexture.Load(int3(dispatchThreadID.xy, 0));
+        uint depthInt = asuint(depth);
+		
+		// 共有メモリに最小/最大深度を格納
+        InterlockedMin(s_MinDepthInt, depthInt);
+        InterlockedMax(s_MaxDepthInt, depthInt);
+    }
 	
 	// 共有メモリの最小/最大深度を全スレッドで使用できるように同期
 	GroupMemoryBarrierWithGroupSync();
@@ -92,9 +108,9 @@ void main(uint3 groupID : SV_GroupID,uint3 groupThreadID : SV_GroupThreadID,uint
 	// タイルの視錐台を計算（グループ内の先頭スレッドのみ）
 	if (localIndex == 0)
 	{
-		// 共有メモリからMin/Max深度を取得
-        float minDepth = 0.0f;
-		float maxDepth = 1.0f;
+		// 共有メモリから最小/最大深度を取得
+        float minDepth = AsUintToFloat(s_MinDepthInt);
+		float maxDepth = AsUintToFloat(s_MaxDepthInt);
 
 		// タイルのスクリーン座標範囲を計算
         float2 tileMin = float2(groupID.x * TILE_SIZE, groupID.y * TILE_SIZE);
@@ -113,8 +129,8 @@ void main(uint3 groupID : SV_GroupID,uint3 groupThreadID : SV_GroupThreadID,uint
 		s_FrustumPlanes[3] = float4(normalize(cross(viewBottomLeft, viewBottomRight)), 0.0f); 
 
 		// 近クリップ平面と遠クリップ平面の距離を計算
-        float3 viewMin = ScreenToView(float2(0.0f, 0.0f), minDepth, gCamera.screenDimensions, gCamera.inverseProjection);
-        float3 viewMax = ScreenToView(float2(0.0f, 0.0f), maxDepth, gCamera.screenDimensions, gCamera.inverseProjection);
+        float3 viewMin = DepthToViewZ(minDepth, gCamera.inverseProjection);
+        float3 viewMax = DepthToViewZ(maxDepth, gCamera.inverseProjection);
 
 		// 近クリップ平面と遠クリップ平面の法線はZ軸方向
 		s_FrustumPlanes[4] = float4(0.0f, 0.0f, 1.0f, -viewMin.z); 
@@ -126,78 +142,113 @@ void main(uint3 groupID : SV_GroupID,uint3 groupThreadID : SV_GroupThreadID,uint
 
 	
 	// ポイントライトの交差判定（各スレッドが分担して処理）
-	for (uint i = localIndex; i < (uint) gNumLight.pointLight; i += TILE_SIZE * TILE_SIZE)
-	{
-		PointLight light = gPointLight[i];
-		
-		// ライト位置をビュー空間に変換
+    for (uint i = localIndex; i < (uint) gNumLight.pointLight; i += TILE_SIZE * TILE_SIZE)
+    {
+        PointLight light = gPointLight[i];
+	
         float3 viewLightPos = mul(float4(light.position, 1.0f), gCamera.view).xyz;
-		
-		bool inFrustum = true;
-		
-		// ポイントライトは球体として判定する
-		for (int p = 0; p < 6; ++p)
-		{
-            float distance = dot(s_FrustumPlanes[p].xyz, viewLightPos) + s_FrustumPlanes[p].w;
-			
-			// 平面の外側（マイナス方向）に半径以上離れていれば、完全に範囲外
-			if (distance < -light.radius)
-			{
-				inFrustum = false;
-				break;
-			}
-		}
-		
-		// 範囲内のライトを共有メモリに追加
-		if (inFrustum)
-		{
-			uint index;
-			InterlockedAdd(s_PointLightCount, 1, index);
-			
-			// インデックスが最大数を超えないように制限
-			if (index < MAX_LIGHTS_PER_TILE)
-			{
-				s_PointLightIndices[index] = i;
-			}
-		}
-	}
 
-	// スポットライトの交差判定（同様に手分けして処理）
-	for (uint j = localIndex; j < (uint) gNumLight.spotLight; j += TILE_SIZE * TILE_SIZE)
-	{
-		SpotLight light = gSpotLight[j];
+	    // XY軸の判定
+        bool inFrustumXY = true;
+
+	    // XY軸：左右・上下
+        for (int p = 0; p < 4; ++p)
+        {
+            float distance = dot(s_FrustumPlanes[p].xyz, viewLightPos) + s_FrustumPlanes[p].w;
+
+            if (distance < -light.radius)
+            {
+                inFrustumXY = false;
+                break;
+            }
+        }
+
+        if (inFrustumXY)
+        {
+		    // Z軸の判定
+            bool inFrustumZ = true;
 		
-		// ライト位置をビュー空間に変換
-		float3 viewLightPos = mul(float4(light.position, 1.0f), gCamera.view).xyz;
+		    // Z軸：Near・Far
+            for (int p = 4; p < 6; ++p)
+            {
+                float distance = dot(s_FrustumPlanes[p].xyz, viewLightPos) + s_FrustumPlanes[p].w;
+
+                if (distance < -light.radius * 2.0f)
+                {
+                    inFrustumZ = false;
+                    break;
+                }
+            }
+	
+		    // 範囲内のライトを共有メモリに追加
+            if (inFrustumZ)
+            {
+                uint index;
+                InterlockedAdd(s_PointLightCount, 1, index);
 		
-		bool inFrustum = true;
+			    // インデックスが最大数を超えないように制限
+                if (index < MAX_LIGHTS_PER_TILE)
+                {
+                    s_PointLightIndices[index] = i;
+                }
+            }
+        }
+    }
+
+    // スポットライトの交差判定（同様に手分けして処理）
+    for (uint j = localIndex; j < (uint) gNumLight.spotLight; j += TILE_SIZE * TILE_SIZE)
+    {
+        SpotLight light = gSpotLight[j];
+	
+	
+        float3 viewLightPos = mul(float4(light.position, 1.0f), gCamera.view).xyz;
+
+	    // XY軸の判定
+        bool inFrustumXY = true;
+
+	    // XY軸：左右・上下
+        for (int p = 0; p < 4; ++p)
+        {
+            float distance = dot(s_FrustumPlanes[p].xyz, viewLightPos) + s_FrustumPlanes[p].w;
+
+            if (distance < -light.distance)
+            {
+                inFrustumXY = false;
+                break;
+            }
+        }
+
+        if (inFrustumXY)
+        {
+		    // Z軸の判定
+            bool inFrustumZ = true;
 		
-		// スポットライトは簡易的に distance を半径とした球体として判定する
-		for (int p = 0; p < 6; ++p)
-		{
-			float d = dot(s_FrustumPlanes[p].xyz, viewLightPos) + s_FrustumPlanes[p].w;
-			
-			// 平面の外側（マイナス方向）に distance 以上離れていれば、完全に範囲外
-			if (d < -light.distance)
-			{
-				inFrustum = false;
-				break;
-			}
-		}
+		    // Z軸：Near・Far
+            for (int p = 4; p < 6; ++p)
+            {
+                float distance = dot(s_FrustumPlanes[p].xyz, viewLightPos) + s_FrustumPlanes[p].w;
+
+                if (distance < -light.distance * 2.0f)
+                {
+                    inFrustumZ = false;
+                    break;
+                }
+            }
+	
+		    // 範囲内のライトを共有メモリに追加
+            if (inFrustumZ)
+            {
+                uint index;
+                InterlockedAdd(s_SpotLightCount, 1, index);
 		
-		// 範囲内のライトを共有メモリに追加
-		if (inFrustum)
-		{
-			uint index;
-			InterlockedAdd(s_SpotLightCount, 1, index);
-			
-			// インデックスが最大数を超えないように制限
-			if (index < MAX_LIGHTS_PER_TILE)
-			{
-				s_SpotLightIndices[index] = j;
-			}
-		}
-	}
+			    // インデックスが最大数を超えないように制限
+                if (index < MAX_LIGHTS_PER_TILE)
+                {
+                    s_SpotLightIndices[index] = j;
+                }
+            }
+        }
+    }
 	
 	// 共有メモリのライトインデックスを全スレッドで使用できるように同期
 	GroupMemoryBarrierWithGroupSync();
