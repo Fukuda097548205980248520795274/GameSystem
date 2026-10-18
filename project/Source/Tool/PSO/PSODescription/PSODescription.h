@@ -53,6 +53,8 @@ namespace Detail
 		Transform,
 		Material,
 		Camera,
+		NumLights,
+		DirectionalLight,
 		PointLight,
 		SpotLight,
 		LightCullingTitle,

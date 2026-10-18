@@ -312,6 +312,20 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
 				break;
 			}
+			case RenderBinding::NumLights:
+			{
+				// NumLights用のリソースをバインド
+				auto cbResource = lightSystem->GetNumLightDataBuffer();
+				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+				break;
+			}
+			case RenderBinding::DirectionalLight:
+			{
+				// DirectionalLight用のリソースをバインド
+				auto cbResource = lightSystem->GetDirectionalLightDataBuffer();
+				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+				break;
+			}
 			case RenderBinding::PointLight:
 			{
 				// PointLight用のリソースをバインド

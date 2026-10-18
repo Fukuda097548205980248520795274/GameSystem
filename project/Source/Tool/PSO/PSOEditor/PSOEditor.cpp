@@ -22,10 +22,12 @@ Detail::PSOEditor::PSOEditor()
 	defaultRender3DItem.desc.rootParameters[0].binding = RenderBinding::Transform;
 	defaultRender3DItem.desc.rootParameters[1].binding = RenderBinding::Material;
 	defaultRender3DItem.desc.rootParameters[2].binding = RenderBinding::Camera;
-	defaultRender3DItem.desc.rootParameters[3].binding = RenderBinding::PointLight;
-	defaultRender3DItem.desc.rootParameters[4].binding = RenderBinding::SpotLight;
-	defaultRender3DItem.desc.rootParameters[5].binding = RenderBinding::LightCullingTitle;
-	defaultRender3DItem.desc.rootParameters[6].binding = RenderBinding::Texture;
+	defaultRender3DItem.desc.rootParameters[3].binding = RenderBinding::NumLights;
+	defaultRender3DItem.desc.rootParameters[4].binding = RenderBinding::DirectionalLight;
+	defaultRender3DItem.desc.rootParameters[5].binding = RenderBinding::PointLight;
+	defaultRender3DItem.desc.rootParameters[6].binding = RenderBinding::SpotLight;
+	defaultRender3DItem.desc.rootParameters[7].binding = RenderBinding::LightCullingTitle;
+	defaultRender3DItem.desc.rootParameters[8].binding = RenderBinding::Texture;
 
 	// 自動再構築のフラグを立てておき、最初にDrawUIが呼ばれたタイミングでビルドを走らせる
 	defaultRender3DItem.isDirty = true;

@@ -5,6 +5,19 @@
 // タイルごとの最大ライト数（ポイントライト + スポットライト）
 #define MAX_LIGHTS_PER_TILE 256
 
+// 平行光源
+struct DirectionalLight
+{
+	// 色（RGBA）
+    float4 color;
+	
+	// ライトの方向（正規化済み）
+    float3 direction;
+	
+	// ライトの強度（明るさ）
+    float intensity;
+};
+
 // ポイントライト
 struct PointLight
 {

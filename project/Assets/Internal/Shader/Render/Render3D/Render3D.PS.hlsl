@@ -22,11 +22,15 @@ ConstantBuffer<Material> gMaterial : register(b0);
 // カメラ情報
 ConstantBuffer<Camera> gCamera : register(b1);
 
-// ライト情報のバッファ
-StructuredBuffer<PointLight> gPointLight : register(t1);
-StructuredBuffer<SpotLight> gSpotLight : register(t2);
+// ライトの数
+ConstantBuffer<NumLight> gNumLight : register(b2);
 
-StructuredBuffer<uint> gTileLightIndexBuffer : register(t3);
+// ライト情報のバッファ
+StructuredBuffer<DirectionalLight> gDirectionalLight : register(t1);
+StructuredBuffer<PointLight> gPointLight : register(t2);
+StructuredBuffer<SpotLight> gSpotLight : register(t3);
+
+StructuredBuffer<uint> gTileLightIndexBuffer : register(t4);
 
 // テクスチャ
 Texture2D<float4> gTexture : register(t0);
@@ -38,11 +42,13 @@ PixelShaderOutput main(VertexShaderOutput input)
 {
 	PixelShaderOutput output;
 	
-	float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvMatrix); // UV座標を座標変換
-	float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy); // テクスチャの色
+	// UV座標を変換してテクスチャをサンプリング
+	float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvMatrix);
+	float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
 	
+	// アルファ値が0の場合は描画しない
 	if (gMaterial.color.a * textureColor.a == 0.0f)
-		discard; // a = 0は描画しない
+		discard;
 	
 	// アルベド色を計算
 	float3 albedo = (gMaterial.color * textureColor).rgb;
@@ -64,6 +70,21 @@ PixelShaderOutput main(VertexShaderOutput input)
 	uint pointLightCount = gTileLightIndexBuffer[bufferOffset];
 	uint spotLightOffset = bufferOffset + MAX_LIGHTS_PER_TILE + 1;
 	uint spotLightCount = gTileLightIndexBuffer[spotLightOffset];
+	
+	// 平行光源の計算
+    for (uint k = 0; k < gNumLight.directionalLight; ++k)
+	{
+		DirectionalLight light = gDirectionalLight[k];
+		
+		// ライト方向と距離を計算
+		float3 lightDir = -light.direction;
+		
+		// 法線とライト方向の内積を計算
+		float nDotL = max(0.0f, dot(normal, lightDir));
+		
+		// ライトを加算
+		finalLight += albedo * light.color.rgb * light.intensity * nDotL;
+	}
 
 	// ポイントライトの計算
 	for (uint i = 0; i < pointLightCount; ++i)
@@ -79,7 +100,10 @@ PixelShaderOutput main(VertexShaderOutput input)
 		// ライトの影響範囲内であれば計算
 		if (dist < light.radius)
 		{
+			// 減衰を計算
 			float attenuation = pow(max(0.0f, 1.0f - (dist / light.radius)), light.decay);
+			
+			// 法線とライト方向の内積を計算
 			float nDotL = max(0.0f, dot(normal, lightDir));
 			
 			// ライトを加算
@@ -101,7 +125,10 @@ PixelShaderOutput main(VertexShaderOutput input)
 		// ライトの影響範囲内であれば計算
 		if (dist < light.distance)
 		{
+			// 減衰を計算
 			float attenuation = pow(max(0.0f, 1.0f - (dist / light.distance)), light.decay);
+			
+			// 法線とライト方向の内積を計算
 			float nDotL = max(0.0f, dot(normal, lightDir));
 			
 			// スポットライトの角度減衰

@@ -61,6 +61,14 @@ namespace Detail
 		/// @return 
 		ConstantBufferResource<LightCullingCameraDataForGPU>* GetCameraDataBuffer() const { return cameraDataBuffer_.get(); }
 
+		/// @brief ライト数データを取得する
+		/// @return 
+		ConstantBufferResource<NumLightDataForGPU>* GetNumLightDataBuffer() const { return numLightDataBuffer_.get(); }
+
+		/// @brief 平行光源データを取得する
+		/// @return 
+		StructuredBufferResource<DirectionalLightDataForGPU>* GetDirectionalLightDataBuffer()const { return directionalLightDataBuffer_.get(); }
+
 		/// @brief ポイントライトデータを取得する
 		/// @return 
 		StructuredBufferResource<PointLightDataForGPU>* GetPointLightDataBuffer()const { return pointLightDataBuffer_.get(); }
