@@ -385,7 +385,7 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 				}
 
 				// レンダリングバインディングの種類を選択するコンボボックス
-				const char* bindingItems[] = { "カスタム", "トランスフォーム", "マテリアル", "テクスチャ" };
+				const char* bindingItems[] = { "Custom", "Transform", "Material", "Camera", "NumLights", "DirectionalLight", "PointLight", "SpotLight", "LightCullingTitle", "Texture" };
 				int currentBinding = static_cast<int>(p.binding);
 				if (ImGui::Combo("バインディング", &currentBinding, bindingItems, _countof(bindingItems))) {
 					p.binding = static_cast<Detail::RenderBinding>(currentBinding);

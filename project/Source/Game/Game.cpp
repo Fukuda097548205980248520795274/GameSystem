@@ -28,8 +28,9 @@ void Game::Initialize()
 	/// Skybox用のエンティティを作成
 	skyboxEntity = Engine::GetInstance()->CreateSkyboxEntity();
 
-	// 平行光源用のエンティティを作成
-	Engine::GetInstance()->CreateDirectionalLightEntity(Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f);
+
+	// 点光源用のエンティティを作成
+	Engine::GetInstance()->CreatePointLightEntity(Vector3(0.0f, 0.0f, 15.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 2.0f, 2.0f);
 }
 
 /// @brief 更新処理
