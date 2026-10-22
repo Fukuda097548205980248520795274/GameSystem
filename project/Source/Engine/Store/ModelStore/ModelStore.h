@@ -1,109 +1,51 @@
 #pragma once
-#include "Matrix/Matrix4x4/Matrix4x4.h"
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <optional>
+#include "ModelData.h"
+#include <d3d12.h>
+#include <dxgi1_6.h>
 
 namespace Detail
 {
-	/// @brief マテリアルデータ
-	struct MaterialData
-	{
-		// テクスチャハンドル
-		uint32_t handle;
-	};
+	/// @brief テクスチャ
+	class TextureStore;
 
-	/// @brief モデル用頂点データ
-	struct ModelVertexData
-	{
-		// ローカル座標
-		Vector4 position;
-
-		// UV座標
-		Vector2 texcoord;
-
-		// 法線
-		Vector3 normal;
-	};
-
-	// クォータニオンの3Dトランスフォーム
-	struct QuaternionTransform3D
-	{
-		// 拡縮
-		Vector3 scale;
-
-		// 回転
-		Quaternion rotate;
-
-		// 移動
-		Vector3 translate;
-	};
-
-	/// @brief モデルノード
-	struct ModelNode
-	{
-		// 名前
-		std::string name;
-
-		// ローカル行列
-		Matrix4x4 localMatrix;
-
-		// ワールド行列
-		Matrix4x4 worldMatrix;
-
-		// クォータニオン用のトランスフォーム
-		QuaternionTransform3D transform;
-
-		// 子ノードインデックス
-		std::vector<int32_t> children;
-
-		// 親ノードインデックス
-		std::optional<int32_t> parent;
-
-		// メッシュインデックス
-		std::optional<int32_t> meshIndex;
-	};
-
-	/// @brief メッシュデータ
-	struct MeshData
-	{
-		// インデックスデータ
-		std::vector<uint32_t> indices;
-
-		// 頂点データ
-		std::vector<ModelVertexData> vertices;
-
-		// マテリアルデータ
-		MaterialData material;
-	};
-
-	/// @brief モデルデータ
-	struct ModelData
-	{
-		// メッシュデータ
-		std::vector<MeshData> meshes;
-
-		// メッシュインデックス
-		std::unordered_map<std::string, int32_t> meshIndices;
-
-		// メッシュ名
-		std::vector<std::string> meshNames;
-
-		// ノード
-		std::vector<ModelNode> nodes;
-	};
+	/// @brief ヒープ
+	class DXHeap;
 
 	/// @brief モデルストア
 	class ModelStore
 	{
 	public:
 
+		/// @brief コンストラクタ
+		ModelStore() = default;
+
+		/// @brief デストラクタ
+		~ModelStore() = default;
+
+		/// @brief 読み込み
+		/// @param directory 
+		/// @param fileName 
+		/// @param device 
+		/// @return 
+		uint32_t Load(const std::string& directory, const std::string& fileName,
+			TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+
+		/// @brief コマンドリストに登録する
+		/// @param commandList 
+		/// @param modelHandle 
+		/// @param meshIndex 
+		void Register(ID3D12GraphicsCommandList* commandList, uint32_t modelHandle, int32_t meshIndex);
+
+		/// @brief モデルデータを取得する
+		/// @param handle 
+		/// @return 
+		ModelData* GetModelData(uint32_t handle) { return dataTable_[handle].get(); }
 
 
 	private:
 
-
+		// データテーブル
+		std::vector<std::unique_ptr<ModelData>> dataTable_;
 
 	};
 }

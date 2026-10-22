@@ -392,6 +392,7 @@
     <ClInclude Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.h" />
+    <ClInclude Include="Source\Engine\Store\ModelStore\ModelData.h" />
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelStore.h" />
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.h" />

@@ -648,6 +648,9 @@
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.h">
       <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\Store\ModelStore\ModelData.h">
+      <Filter>Source\Engine\Store\ModelStore</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">

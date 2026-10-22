@@ -15,7 +15,7 @@ void Detail::IndexBufferResource::Initialize(ID3D12Device* device, uint32_t numI
 	numIndex_ = numIndex;
 
 	// バッファ数を設定する
-	maxBufferCount_ = maxBufferCount_ > 1 ? static_cast<int32_t>(maxBufferCount_) : 1;
+	maxBufferCount_ = maxBufferCount > 1 ? static_cast<int32_t>(maxBufferCount) : 1;
 
 	// データ、リソース、ビューの配列を確保する
 	data_.resize(maxBufferCount_);
