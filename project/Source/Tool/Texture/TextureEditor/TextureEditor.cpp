@@ -9,47 +9,61 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 	// Engineのインスタンスを取得
 	auto engine = Engine::GetInstance();
 
-	// ドロップされたファイルの処理
-	{
-		std::lock_guard<std::mutex> lock(dropMutex_);
-		for (const auto& originalPath : droppedFilesQueue_)
-		{
-			std::filesystem::path srcPath(originalPath);
-
-			// コピー先ディレクトリが存在しなければ作成
-			if (!std::filesystem::exists(kDir))
-				std::filesystem::create_directories(kDir);
-
-			// コピー先のパスを構築
-			std::filesystem::path destPath = kDir + srcPath.filename().string();
-
-			try
-			{
-				// ファイルをプロジェクト内にコピー（既に存在する場合は上書き）
-				std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
-
-				// コピーした新しいパスでテクスチャをロード
-				uint32_t handle = renderContext->LoadTexture(destPath.string());
-				if (handle != kInvalidTextureHandle)
-				{
-					selectedHandle_ = handle; // 読み込んだものを選択状態に
-				}
-			}
-			catch (const std::filesystem::filesystem_error& e)
-			{
-				// エラーログ
-				if (engine)engine->Log(LogLevel::Error, "テクスチャファイルのコピーに失敗しました : " + std::string(e.what()));
-			}
-		}
-		droppedFilesQueue_.clear(); // 処理が終わったらクリア
-	}
-
 
 	if (!ImGui::Begin("テクスチャエディタ"))
 	{
 		ImGui::End();
 		return;
 	}
+
+
+	// テクスチャエディタのウィンドウ（子ウィンドウ含む）がホバーされているか判定
+	bool isHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows);
+
+	// ドロップされたファイルの処理
+	{
+		std::lock_guard<std::mutex> lock(dropMutex_);
+		if (!droppedFilesQueue_.empty())
+		{
+			// ウィンドウ上にドロップされた場合のみ読み込みを実行
+			if (isHovered)
+			{
+				for (const auto& originalPath : droppedFilesQueue_)
+				{
+					std::filesystem::path srcPath(originalPath);
+
+					// コピー先ディレクトリが存在しなければ作成
+					if (!std::filesystem::exists(kDir))
+						std::filesystem::create_directories(kDir);
+
+					// コピー先のパスを構築
+					std::filesystem::path destPath = kDir + srcPath.filename().string();
+
+					try
+					{
+						// ファイルをプロジェクト内にコピー（既に存在する場合は上書き）
+						std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
+
+						// コピーした新しいパスでテクスチャをロード
+						TextureHandle handle = renderContext->LoadTexture(destPath.string());
+						if (handle.IsValid())
+						{
+							selectedHandle_ = handle; // 読み込んだものを選択状態に
+						}
+					}
+					catch (const std::filesystem::filesystem_error& e)
+					{
+						// エラーログ
+						if (engine) engine->Log(LogLevel::Error, "テクスチャファイルのコピーに失敗しました : " + std::string(e.what()));
+					}
+				}
+			}
+
+			// 処理が終わった、または別ウィンドウへのドロップだった場合は破棄してクリア
+			droppedFilesQueue_.clear();
+		}
+	}
+
 
 	ImGui::Text("ロード済み テクスチャ");
 
@@ -59,38 +73,41 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 	size_t texCount = textureStore->GetTextureCount();
 	for (uint32_t i = 0; i < texCount; ++i)
 	{
-		std::string filePath = textureStore->GetFilePath(i);
+		// 有効なテクスチャハンドルかどうかを確認
+		TextureHandle handle = textureStore->GetHandleByIndex(i);
+		if (!handle.IsValid()) continue;
+
+		std::string filePath = textureStore->GetFilePath(handle);
 		if (filePath.empty()) continue;
 
 		size_t slashPos = filePath.find_last_of("/\\");
 		std::string fileName = (slashPos != std::string::npos) ? filePath.substr(slashPos + 1) : filePath;
 
-		bool isSelected = (selectedHandle_ == i);
+		bool isSelected = (selectedHandle_ == handle);
 		if (ImGui::Selectable((fileName + "##" + std::to_string(i)).c_str(), isSelected))
 		{
-			selectedHandle_ = i;
+			selectedHandle_ = handle;
 		}
 
 		// ドラッグアンドドロップのソースとして設定
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 		{
-			// ペイロードとしてテクスチャハンドル（uint32_t）を設定
-			ImGui::SetDragDropPayload("TEXTURE_HANDLE", &i, sizeof(uint32_t));
+			// ドラッグ中のペイロードとしてテクスチャハンドルを設定
+			ImGui::SetDragDropPayload("TEXTURE_HANDLE", &handle, sizeof(TextureHandle));
 
-			// ドラッグ中にマウスカーソルに追従して表示されるテキスト
 			ImGui::Text("テクスチャ: %s", fileName.c_str());
 			ImGui::EndDragDropSource();
 		}
-		
+
 		// ツールチップ表示
 		if (ImGui::IsItemHovered())
 		{
 			ImGui::BeginTooltip();
 
-			std::string path = textureStore->GetFilePath(i);
-			size_t width = textureStore->GetTextureWidth(i);
-			size_t height = textureStore->GetTextureHeight(i);
-			TextureType type = textureStore->GetType(i);
+			std::string path = textureStore->GetFilePath(handle);
+			size_t width = textureStore->GetTextureWidth(handle);
+			size_t height = textureStore->GetTextureHeight(handle);
+			TextureType type = textureStore->GetType(handle);
 
 			ImGui::Text("ファイルパス : %s", path.c_str());
 			ImGui::Text("解像度 : %zu x %zu", width, height);
@@ -98,13 +115,11 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 
 			ImGui::Separator();
 
-			SRVDescriptorHandle srvHandle = textureStore->GetSrvHandle(i);
+			SRVDescriptorHandle srvHandle = textureStore->GetSrvHandle(handle);
 
-			// ツールチップ内のプレビュー画像は大きくなりすぎないようにサイズ制限 (最大幅 256px)
 			float previewWidth = std::min(256.0f, static_cast<float>(width));
 			float previewHeight = previewWidth * (static_cast<float>(height) / static_cast<float>(width));
 
-			// テクスチャの種類に応じてプレビューを表示
 			if (type == TextureType::Texture2D)
 			{
 				ImGui::Image(static_cast<ImTextureID>(srvHandle.gpuHandle.ptr), ImVec2(previewWidth, previewHeight));
@@ -121,7 +136,7 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 
 	
 	// 選択されたテクスチャが有効な場合に削除ボタンを表示
-	if (selectedHandle_ != UINT32_MAX && selectedHandle_ < texCount)
+	if (selectedHandle_.IsValid())
 	{
 		if (ImGui::Button("選択したテクスチャを削除", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
 		{
@@ -131,11 +146,11 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 				if (std::filesystem::exists(path))
 					std::filesystem::remove(path);
 
-				// テクスチャストアからも削除
+				// テクスチャストアから削除
 				textureStore->Remove(selectedHandle_, renderContext->GetCore()->GetDevice(), renderContext->GetHeap());
 
 				// 選択状態をリセット
-				selectedHandle_ = UINT32_MAX;
+				selectedHandle_ = TextureHandle::Invalid();
 			}
 			catch (const std::filesystem::filesystem_error& e)
 			{

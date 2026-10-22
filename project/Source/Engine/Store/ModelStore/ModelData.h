@@ -9,13 +9,15 @@
 #include "Resource/VertexBufferResource/VertexBufferResource.h"
 #include "Resource/IndexBufferResource/IndexBufferResource.h"
 
+#include "Store/TextureStore/TextureData.h"
+
 namespace Detail
 {
 	/// @brief マテリアルデータ
 	struct MaterialData
 	{
 		// テクスチャハンドル
-		uint32_t handle;
+		Detail::TextureHandle handle;
 	};
 
 	/// @brief モデル用頂点データ
@@ -103,5 +105,27 @@ namespace Detail
 
 		// ノード
 		std::vector<ModelNode> nodes;
+	};
+
+	/// @brief モデルハンドル
+	struct ModelHandle
+	{
+		// インデックス
+		uint32_t index = 0;
+
+		// 世代番号
+		uint32_t generation = 0;
+
+		/// @brief 有効なハンドルかどうかを判定する
+		/// @return
+		bool IsValid() const { return generation != 0; }
+
+		// 比較演算子
+		bool operator==(const ModelHandle& other) const { return index == other.index && generation == other.generation; }
+		bool operator!=(const ModelHandle& other) const { return !(*this == other); }
+
+		/// @brief 無効なハンドルを取得する
+		/// @return 
+		static ModelHandle Invalid() { return ModelHandle{ 0, 0 }; }
 	};
 }

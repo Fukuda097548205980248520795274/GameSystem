@@ -395,6 +395,7 @@
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelData.h" />
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelStore.h" />
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h" />
+    <ClInclude Include="Source\Engine\Store\TextureStore\TextureData.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.h" />
     <ClInclude Include="Source\Tool\ECS\ECSEditor\ECSEditor.h" />

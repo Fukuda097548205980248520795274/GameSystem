@@ -27,11 +27,12 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 	std::string directory = path.parent_path().string();
 
 	// シーンのデータ
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices |
-		aiProcess_RemoveRedundantMaterials | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(filePath.c_str(),aiProcess_FlipWindingOrder |aiProcess_FlipUVs |
+		aiProcess_JoinIdenticalVertices |aiProcess_RemoveRedundantMaterials |aiProcess_CalcTangentSpace |aiProcess_GenSmoothNormals);
 
-	// メッシュがないのは対応しない
-	assert(scene->HasMeshes());
+	// 読み込みに失敗した場合は空のModelDataを返す
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode || !scene->HasMeshes())
+		return ModelData();
 
 	// 頂点データ
 	Vector4 position = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -55,11 +56,9 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 		MeshData meshData;
 
 
-		// 法線がないメッシュは非対応
-		assert(mesh->HasNormals());
-
-		// UV座標がないのは非対応
-		assert(mesh->HasTextureCoords(0));
+		// 法線、テクスチャ座標がない場合は中止する
+		if (!mesh->HasNormals())
+			return ModelData();
 
 
 		// メッシュの名前を取得する
@@ -81,7 +80,17 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 			ModelVertexData vertex;
 			vertex.position = Vector4(position.x, position.y, position.z, 1.0f);
 			vertex.normal = Vector3(normal.x, normal.y, normal.z);
-			vertex.texcoord = Vector2(texcoord.x, texcoord.y);
+
+			// テクスチャ座標がある場合は取得する
+			if (mesh->HasTextureCoords(0))
+			{
+				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+				vertex.texcoord = Vector2(texcoord.x, texcoord.y);
+			}
+			else
+			{
+				vertex.texcoord = Vector2(0.0f, 0.0f);
+			}
 
 			// 右手から左手に変換
 			vertex.position.x *= -1.0f;
@@ -149,21 +158,10 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 		std::memcpy(indexData, indices.data(), sizeof(uint32_t) * (mesh->mNumFaces * 3));
 	}
 
-	return modelData;
-}
-
-/// @brief ノードを読み込む
-/// @param modelData 
-/// @param filePath 
-void Detail::LoadNode(ModelData& modelData, const std::string& filePath)
-{
-	// AssImpでファイルを開く
-	Assimp::Importer importer;
-
-	// シーンのデータ
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);
-
+	// ノードを再帰的に読み込む
 	ReadNodeRecursive(scene->mRootNode, -1, modelData);
+
+	return modelData;
 }
 
 /// @brief ノードの再帰読み込み

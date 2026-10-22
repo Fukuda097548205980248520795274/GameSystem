@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <string>
+#include "Store/ModelStore/ModelData.h"
 #include "Vector/Vector3/Vector3.h"
 #include "Vector/Vector2/Vector2.h"
 #include "Vector/Vector4/Vector4.h"
@@ -69,10 +70,10 @@ struct MeshComponent
 /// @brief モデルコンポーネント
 struct ModelComponent
 {
-	ModelComponent() : modelHandle(0) {}
+	ModelComponent() : handle(Detail::ModelHandle::Invalid()) {}
 	
-	// モデルのハンドル（またはID/ポインタ）
-	uint32_t modelHandle;
+	// 世代付きモデルハンドル
+	Detail::ModelHandle handle;
 };
 
 /// @brief カメラコンポーネント
@@ -150,19 +151,19 @@ struct RenderTargetComponent
 /// @brief テクスチャコンポーネント
 struct TextureComponent
 {
-	TextureComponent(uint32_t handle) : handle(handle) {}
+	TextureComponent(Detail::TextureHandle handle) : handle(handle) {}
 
 	/// @brief テクスチャのハンドル（またはID/ポインタ）
-	uint32_t handle;
+	Detail::TextureHandle handle;
 };
 
 /// @brief キューブマップコンポーネント
 struct CubemapComponent
 {
-	CubemapComponent(uint32_t handle) : handle(handle) {}
+	CubemapComponent(Detail::TextureHandle handle) : handle(handle) {}
 
 	/// @brief キューブマップのハンドル（またはID/ポインタ）
-	uint32_t handle;
+	Detail::TextureHandle handle;
 };
 
 /// @brief マテリアルコンポーネント

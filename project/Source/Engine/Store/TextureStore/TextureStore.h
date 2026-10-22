@@ -1,56 +1,17 @@
 #pragma once
-#include "RenderContext/DXHeap/DXHeap.h"
 #include "ECS/ComponentECS/ComponentECS.h"
-#include <DirectXTex.h>
-#include <d3dx12.h>
+#include "TextureData.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <queue>
 
 namespace Detail
 {
-	/// @brief テクスチャの種類
-	enum class TextureType
-	{
-		Texture2D,
-		Cubemap
-	};
-
-	/// @brief 無効なテクスチャハンドル
-	constexpr uint32_t kInvalidTextureHandle = UINT32_MAX;
-
 	/// @brief テクスチャストア
 	class TextureStore
 	{
-	public:
-
-		/// @brief テクスチャデータ
-		struct TextureData
-		{
-			/// @brief リソース
-			Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-
-			// ミップマップ付きテクスチャデータ
-			DirectX::TexMetadata metadata{};
-
-			/// @brief SRVハンドル
-			SRVDescriptorHandle srvHandle;
-
-			// テクスチャのハンドル（またはID/ポインタ）
-			uint32_t handle = kInvalidTextureHandle;
-
-			// 名前
-			std::string name{};
-
-			/// @brief 種類
-			TextureType type_;
-
-			/// @brief ハッシュ値
-			uint64_t hash = 0;
-		};
-
-
 	public:
 
 		/// @brief コンストラクタ
@@ -65,56 +26,61 @@ namespace Detail
 		/// @param device 
 		/// @param commandList 
 		/// @return 
-		uint32_t Load(const std::string& filePath, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+		TextureHandle Load(const std::string& filePath, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 
 		/// @brief ファイルパスを取得する
 		/// @param handle 
 		/// @return 
-		std::string GetFilePath(uint32_t handle) const;
+		std::string GetFilePath(TextureHandle handle) const;
 
 		/// @brief SRV用GPUハンドルを取得する
 		/// @param handle 
 		/// @return 
-		SRVDescriptorHandle GetSrvHandle(uint32_t handle) const;
+		SRVDescriptorHandle GetSrvHandle(TextureHandle handle) const;
 
 		/// @brief テクスチャの幅を取得する
 		/// @param handle 
 		/// @return 
-		size_t GetTextureWidth(uint32_t handle) const;
+		size_t GetTextureWidth(TextureHandle handle) const;
 
 		/// @brief テクスチャの高さを取得する
 		/// @param handle 
 		/// @return 
-		size_t GetTextureHeight(uint32_t handle) const;
+		size_t GetTextureHeight(TextureHandle handle) const;
 
 		/// @brief ハンドルを取得する
 		/// @param filePath 
 		/// @return 
-		uint32_t GetHandle(const std::string& filePath) const;
+		TextureHandle GetHandle(const std::string& filePath) const;
 
 		/// @brief テクスチャの種類を取得する
 		/// @param handle 
 		/// @return 
-		TextureType GetType(uint32_t handle) const;
+		TextureType GetType(TextureHandle handle) const;
+
+		/// @brief ハンドルのインデックスを取得する
+		/// @param index 
+		/// @return 
+		TextureHandle GetHandleByIndex(uint32_t index) const;
 
 		/// @brief テクスチャの数を取得する
 		/// @return 
-		size_t GetTextureCount() const { return dataTable_.size(); }
+		size_t GetTextureCount() const { return slots_.size(); }
 
 		/// @brief テクスチャを削除する
 		/// @param handle 
-		void Remove(uint32_t handle, ID3D12Device* device, DXHeap* heap);
+		void Remove(TextureHandle handle, ID3D12Device* device, DXHeap* heap);
 
 		/// @brief 中間リソースを解放する
 		void ReleaseIntermediateResources();
 
 		/// @brief デフォルトテクスチャハンドルを取得する
 		/// @return 
-		uint32_t GetDefaultTextureHandle() const { return defaultTextureHandle_; }
+		TextureHandle GetDefaultTextureHandle() const { return defaultTextureHandle_; }
 
 		/// @brief デフォルトキューブマップハンドルを取得する
 		/// @return 
-		uint32_t GetDefaultCubemapHandle() const { return defaultCubemapHandle_; }
+		TextureHandle GetDefaultCubemapHandle() const { return defaultCubemapHandle_; }
 
 
 	private:
@@ -132,28 +98,53 @@ namespace Detail
 		/// @return 
 		uint64_t ComputeImageHash(const DirectX::ScratchImage& image) const;
 
+
 	private:
 
-		/// @brief テクスチャデータのテーブル
-		std::vector<std::unique_ptr<TextureData>> dataTable_;
+		// スロット内部情報
+		struct Slot
+		{
+			// テクスチャデータ
+			std::unique_ptr<TextureData> data = nullptr;
 
-		/// @brief ファイルパスとハンドルのマップ
-		std::unordered_map<std::string, uint32_t> pathToHandleMap_;
+			// スロットの世代番号
+			uint32_t generation = 1;
 
-		/// @brief ハッシュ値とハンドルのマップ
-		std::unordered_map<uint64_t, uint32_t> hashToHandleMap_;
+			// スロットが使用中かどうか
+			bool inUse = false;
+		};
 
-		/// @brief 保留中のアップロードリソース
+		/// @brief テクスチャデータを取得する
+		/// @param handle 
+		/// @return 
+		TextureData* GetTextureData(TextureHandle handle) const;
+
+
+	private:
+
+		// データテーブル
+		std::vector<Slot> slots_;
+
+		// 空きスロットのインデックスキュー
+		std::queue<uint32_t> freeSlots_;
+
+		// ファイルパス / ハンドルのマップ
+		std::unordered_map<std::string, TextureHandle> pathToHandleMap_;
+
+		// ハッシュ値 / ハンドルのマップ
+		std::unordered_map<uint64_t, TextureHandle> hashToHandleMap_;
+
+		// 中間リソースのアップロード待ちリスト
 		std::vector<std::pair<Microsoft::WRL::ComPtr<ID3D12Resource>, uint32_t>> pendingUploadResources_;
 
 
 	private:
 
 		// 初期テクスチャハンドル
-		uint32_t defaultTextureHandle_ = kInvalidTextureHandle;
+		TextureHandle defaultTextureHandle_ = TextureHandle::Invalid();
 
 		// 初期キューブマップハンドル
-		uint32_t defaultCubemapHandle_ = kInvalidTextureHandle;
+		TextureHandle defaultCubemapHandle_ = TextureHandle::Invalid();
 
 	};
 }

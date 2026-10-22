@@ -651,6 +651,9 @@
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelData.h">
       <Filter>Source\Engine\Store\ModelStore</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\Store\TextureStore\TextureData.h">
+      <Filter>Source\Engine\Store\TextureStore</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">

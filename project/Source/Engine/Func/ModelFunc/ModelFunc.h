@@ -20,11 +20,6 @@ namespace Detail
 	/// @return 
 	ModelData LoadModel(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 
-	/// @brief ノードを読み込む
-	/// @param modelData 
-	/// @param filePath 
-	void LoadNode(ModelData& modelData, const std::string& filePath);
-
 	/// @brief ノードの再帰読み込み
 	/// @param aiNode 
 	/// @param parentIndex 

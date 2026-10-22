@@ -17,7 +17,7 @@ void Game::Initialize()
 	renderPassEntity = Engine::GetInstance()->CreatePass(0, BlendMode::None, [this]() {});
 
 	// テクスチャを読み込む
-	textureHandle = Engine::GetInstance()->LoadTexture("./Assets/Texture/uvChecker.png");
+	Engine::GetInstance()->LoadTexture("./Assets/Texture/uvChecker.png");
 
 	// 3D描画用のエンティティを作成
 	render3dEntity = Engine::GetInstance()->CreateRender3DEntity();
@@ -27,6 +27,8 @@ void Game::Initialize()
 
 	/// Skybox用のエンティティを作成
 	skyboxEntity = Engine::GetInstance()->CreateSkyboxEntity();
+
+	Engine::GetInstance()->LoadModel("./Assets/Model/suzanne/suzanne.obj");
 
 
 	// 点光源用のエンティティを作成

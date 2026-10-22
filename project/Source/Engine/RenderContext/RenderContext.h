@@ -114,13 +114,13 @@ namespace Detail
 		/// @brief テクスチャを読み込む
 		/// @param filePath 
 		/// @return 
-		uint32_t LoadTexture(const std::string& filePath) { return textureStore_->Load(filePath, heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
+		TextureHandle LoadTexture(const std::string& filePath) { return textureStore_->Load(filePath, heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
 
 		/// @brief モデルを読み込む
 		/// @param dir 
 		/// @param fileName 
 		/// @return 
-		uint32_t LoadModel(const std::string& filePath) { return modelStore_->Load(filePath, textureStore_.get(), heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
+		ModelHandle LoadModel(const std::string& filePath) { return modelStore_->Load(filePath, textureStore_.get(), heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
 
 		/// @brief PSOエディタを取得する
 		/// @return 

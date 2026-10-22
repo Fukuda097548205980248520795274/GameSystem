@@ -100,7 +100,7 @@ void Detail::ECSEditor::DrawInspector()
 			auto& texture = registry_->GetComponent<TextureComponent>(selectedEntity_);
 
 			// 現在設定されているテクスチャのハンドル番号を表示
-			ImGui::Text("ハンドル : %u", texture.handle);
+			ImGui::Text("ハンドル : Index(%u), Gen(%u)", texture.handle.index, texture.handle.generation);
 
 			// ドロップを受け付けるための専用エリアを作成
 			ImGui::Button("テクスチャをドロップ", ImVec2(-1, 30));
@@ -110,15 +110,15 @@ void Detail::ECSEditor::DrawInspector()
 				// ペイロード名 "TEXTURE_HANDLE" を受け取る
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_HANDLE"))
 				{
-					IM_ASSERT(payload->DataSize == sizeof(uint32_t));
-					uint32_t droppedHandle = *(const uint32_t*)payload->Data;
+					IM_ASSERT(payload->DataSize == sizeof(Detail::TextureHandle));
+					Detail::TextureHandle droppedHandle = *(const Detail::TextureHandle*)payload->Data;
 
 					if (engine)
 					{
 						if (auto textureStore = engine->GetRenderContext()->GetTextureStore())
 						{
 							// テクスチャ2Dのみ変更する
-							if(textureStore->GetType(droppedHandle) == TextureType::Texture2D)
+							if (textureStore->GetType(droppedHandle) == TextureType::Texture2D)
 								texture.handle = droppedHandle;
 						}
 
@@ -137,7 +137,7 @@ void Detail::ECSEditor::DrawInspector()
 			auto& texture = registry_->GetComponent<CubemapComponent>(selectedEntity_);
 
 			// 現在設定されているキューブマップのハンドル番号を表示
-			ImGui::Text("ハンドル : %u", texture.handle);
+			ImGui::Text("ハンドル : Index(%u), Gen(%u)", texture.handle.index, texture.handle.generation);
 
 			// ドロップを受け付けるための専用エリアを作成
 			ImGui::Button("キューブマップをドロップ", ImVec2(-1, 30));
@@ -147,8 +147,8 @@ void Detail::ECSEditor::DrawInspector()
 				// ペイロード名 "TEXTURE_HANDLE" を受け取る
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE_HANDLE"))
 				{
-					IM_ASSERT(payload->DataSize == sizeof(uint32_t));
-					uint32_t droppedHandle = *(const uint32_t*)payload->Data;
+					IM_ASSERT(payload->DataSize == sizeof(Detail::TextureHandle));
+					Detail::TextureHandle droppedHandle = *(const Detail::TextureHandle*)payload->Data;
 
 					if (engine)
 					{

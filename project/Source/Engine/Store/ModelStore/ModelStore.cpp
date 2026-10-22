@@ -6,23 +6,113 @@
 /// @param fileName 
 /// @param device 
 /// @return 
-uint32_t Detail::ModelStore::Load(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+Detail::ModelHandle Detail::ModelStore::Load(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	ModelData modelData = LoadModel(filePath, textureStore, heap, device, commandList);
+	// キャッシュチェック
+	auto it = cache_.find(filePath);
+	if (it != cache_.end())
+	{
+		// 既存のハンドルが有効か確認
+		if (GetModelData(it->second) != nullptr)
+		{
+			return it->second;
+		}
+	}
 
-	uint32_t handle = static_cast<uint32_t>(dataTable_.size());
-	dataTable_.push_back(std::make_unique<ModelData>(std::move(modelData)));
+	// モデルデータのロード
+	ModelData modelData = LoadModel(filePath, textureStore, heap, device, commandList);
+	if (modelData.meshes.empty())
+	{
+		return ModelHandle::Invalid();
+	}
+
+	// スロットの割り当て
+	uint32_t slotIndex = 0;
+	if (!freeSlots_.empty())
+	{
+		// 空いているスロットを再利用
+		slotIndex = freeSlots_.front();
+		freeSlots_.pop();
+	}
+	else
+	{
+		// 新規スロット作成
+		slotIndex = static_cast<uint32_t>(slots_.size());
+		slots_.emplace_back();
+	}
+
+	// スロットにモデルデータを格納
+	Slot& slot = slots_[slotIndex];
+	slot.data = std::make_unique<ModelData>(std::move(modelData));
+	slot.inUse = true;
+
+	// キャッシュに登録
+	ModelHandle handle{ slotIndex, slot.generation };
+	cache_[filePath] = handle;
 
 	return handle;
+}
+
+/// @brief モデルの破棄
+/// @param handle 
+void Detail::ModelStore::Unload(ModelHandle handle)
+{
+	if (!handle.IsValid() || handle.index >= slots_.size()) return;
+
+	Slot& slot = slots_[handle.index];
+
+	// 世代が一致し、使用中の場合のみ削除を実行
+	if (slot.inUse && slot.generation == handle.generation)
+	{
+		// キャッシュから削除
+		if (slot.data)
+		{
+			cache_.erase(slot.data->filePath);
+		}
+
+		// メモリ解放とフラグ更新
+		slot.data.reset();
+		slot.inUse = false;
+
+		// 世代番号をインクリメントして、古いハンドルが無効になるようにする
+		slot.generation++;
+
+		// 再利用キューに追加
+		freeSlots_.push(handle.index);
+	}
 }
 
 /// @brief コマンドリストに登録する
 /// @param commandList 
 /// @param modelHandle 
 /// @param meshIndex 
-void Detail::ModelStore::Register(ID3D12GraphicsCommandList* commandList, uint32_t modelHandle, int32_t meshIndex)
+void Detail::ModelStore::Register(ID3D12GraphicsCommandList* commandList, ModelHandle handle, int32_t meshIndex)
 {
-	// メッシュの頂点バッファをコマンドリストに登録する
-	dataTable_[modelHandle]->meshes[meshIndex].vertexBufferResource->Register(commandList, 0);
-	dataTable_[modelHandle]->meshes[meshIndex].indexBufferResource->Register(commandList, 0);
+	// モデルデータを取得する
+	ModelData* data = GetModelData(handle);
+
+	// モデルデータが存在しない場合は処理を中止する
+	if (!data) return;
+
+	data->meshes[meshIndex].vertexBufferResource->Register(commandList, 0);
+	data->meshes[meshIndex].indexBufferResource->Register(commandList, 0);
+}
+
+/// @brief モデルデータを取得する
+/// @param handle 
+/// @return 
+Detail::ModelData* Detail::ModelStore::GetModelData(ModelHandle handle)
+{
+	// ハンドルが無効、またはインデックスが範囲外の場合はnullptrを返す
+	if (!handle.IsValid() || handle.index >= slots_.size())
+		return nullptr;
+
+	// スロットを取得する
+	Slot& slot = slots_[handle.index];
+
+	// スロットが使用中でない、または世代番号が一致しない場合は無効なハンドルとみなす
+	if (!slot.inUse || slot.generation != handle.generation)
+		return nullptr;
+
+	return slot.data.get();
 }

@@ -131,7 +131,12 @@ public:
 	/// @brief テクスチャを読み込む
 	/// @param filePath 
 	/// @return 
-	uint32_t LoadTexture(const std::string& filePath) { return renderContext_->LoadTexture(filePath); }
+	Detail::TextureHandle LoadTexture(const std::string& filePath) { return renderContext_->LoadTexture(filePath); }
+
+	/// @brief モデルを読み込む
+	/// @param filePath 
+	/// @return 
+	Detail::ModelHandle LoadModel(const std::string& filePath) { return renderContext_->LoadModel(filePath); }
 
 	/// @brief レンダーコンテキストを取得する
 	/// @return 

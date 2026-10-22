@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <mutex>
 #include <vector>
+#include "Store/TextureStore/TextureData.h"
 
 namespace Detail
 {
@@ -44,7 +45,7 @@ namespace Detail
 		char inputFilePath_[256] = "";
 
 		// 選択中のテクスチャハンドル
-		uint32_t selectedHandle_ = UINT32_MAX;
+		TextureHandle selectedHandle_ = TextureHandle::Invalid();
 
 
 	private:
