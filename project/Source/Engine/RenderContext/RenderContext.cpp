@@ -63,6 +63,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// TextureEditorを作成
 	textureEditor_ = std::make_unique<TextureEditor>();
 
+	// モデルストアを作成
+	modelStore_ = std::make_unique<ModelStore>();
+
 	// マルチパスを作成
 	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
 

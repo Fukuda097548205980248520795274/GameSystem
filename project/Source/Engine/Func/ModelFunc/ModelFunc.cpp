@@ -1,5 +1,6 @@
 #include "ModelFunc.h"
 #include <cassert>
+#include <filesystem>
 #include "Store/TextureStore/TextureStore.h"
 
 /// @brief モデルを読み込む
@@ -10,8 +11,7 @@
 /// @param device 
 /// @param commandList 
 /// @return 
-Detail::ModelData Detail::LoadModel(const std::string& directory, const std::string& fileName,
-	TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
 	// nullptrチェック
 	assert(textureStore);
@@ -21,7 +21,10 @@ Detail::ModelData Detail::LoadModel(const std::string& directory, const std::str
 
 	// AssImpでファイルを開く
 	Assimp::Importer importer;
-	std::string filePath = directory + "/" + fileName;
+
+	// ファイルパスを分解する
+	std::filesystem::path path(filePath);
+	std::string directory = path.parent_path().string();
 
 	// シーンのデータ
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices |
@@ -151,13 +154,11 @@ Detail::ModelData Detail::LoadModel(const std::string& directory, const std::str
 
 /// @brief ノードを読み込む
 /// @param modelData 
-/// @param directory 
-/// @param fileName 
-void Detail::LoadNode(ModelData& modelData, const std::string& directory, const std::string& fileName)
+/// @param filePath 
+void Detail::LoadNode(ModelData& modelData, const std::string& filePath)
 {
 	// AssImpでファイルを開く
 	Assimp::Importer importer;
-	std::string filePath = directory + "/" + fileName;
 
 	// シーンのデータ
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices);

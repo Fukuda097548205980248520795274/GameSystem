@@ -7,6 +7,7 @@
 #include "Shader/ShaderCompiler/ShaderCompiler.h"
 #include "MultiPass/MultiPass.h"
 #include "Store/TextureStore/TextureStore.h"
+#include "Store/ModelStore/ModelStore.h"
 #include "Store/ProceduralMeshStore/ProceduralMeshStore.h"
 #include "ImGuiRender/ImGuiRender.h"
 
@@ -115,6 +116,12 @@ namespace Detail
 		/// @return 
 		uint32_t LoadTexture(const std::string& filePath) { return textureStore_->Load(filePath, heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
 
+		/// @brief モデルを読み込む
+		/// @param dir 
+		/// @param fileName 
+		/// @return 
+		uint32_t LoadModel(const std::string& filePath) { return modelStore_->Load(filePath, textureStore_.get(), heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
+
 		/// @brief PSOエディタを取得する
 		/// @return 
 		PSOEditor* GetPSOEditor() { return psoEditor_.get(); }
@@ -134,6 +141,10 @@ namespace Detail
 		/// @brief テクスチャストアを取得する
 		/// @return 
 		TextureStore* GetTextureStore() const { return textureStore_.get(); }
+
+		/// @brief モデルストアを取得する
+		/// @return 
+		ModelStore* GetModelStore() const { return modelStore_.get(); }
 
 		/// @brief プロシージャルメッシュストアを取得する
 		/// @return 
@@ -189,6 +200,9 @@ namespace Detail
 
 		/// @brief テクスチャストア
 		std::unique_ptr<TextureStore> textureStore_ = nullptr;
+
+		/// @brief モデルストア
+		std::unique_ptr<ModelStore> modelStore_ = nullptr;
 
 		/// @brief プロシージャルメッシュストア
 		std::unique_ptr<ProceduralMeshStore> proceduralMeshStore_ = nullptr;

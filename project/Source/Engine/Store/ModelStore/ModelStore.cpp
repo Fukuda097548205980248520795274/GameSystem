@@ -6,10 +6,9 @@
 /// @param fileName 
 /// @param device 
 /// @return 
-uint32_t Detail::ModelStore::Load(const std::string& directory, const std::string& fileName,
-	TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+uint32_t Detail::ModelStore::Load(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
 {
-	ModelData modelData = LoadModel(directory, fileName, textureStore, heap, device, commandList);
+	ModelData modelData = LoadModel(filePath, textureStore, heap, device, commandList);
 
 	uint32_t handle = static_cast<uint32_t>(dataTable_.size());
 	dataTable_.push_back(std::make_unique<ModelData>(std::move(modelData)));

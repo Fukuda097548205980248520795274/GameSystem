@@ -27,8 +27,7 @@ namespace Detail
 		/// @param fileName 
 		/// @param device 
 		/// @return 
-		uint32_t Load(const std::string& directory, const std::string& fileName,
-			TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+		uint32_t Load(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 

@@ -12,21 +12,18 @@ namespace Detail
 	class DXHeap;
 
 	/// @brief モデルを読み込む
-	/// @param directory 
-	/// @param fileName 
+	/// @param filePath
 	/// @param textureStore 
 	/// @param heap 
 	/// @param device 
 	/// @param commandList 
 	/// @return 
-	ModelData LoadModel(const std::string& directory, const std::string& fileName,
-		TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	ModelData LoadModel(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
 
 	/// @brief ノードを読み込む
 	/// @param modelData 
-	/// @param directory 
-	/// @param fileName 
-	void LoadNode(ModelData& modelData, const std::string& directory, const std::string& fileName);
+	/// @param filePath 
+	void LoadNode(ModelData& modelData, const std::string& filePath);
 
 	/// @brief ノードの再帰読み込み
 	/// @param aiNode 
