@@ -63,6 +63,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// TextureEditorを作成
 	textureEditor_ = std::make_unique<TextureEditor>();
 
+	// ModelEditorを作成
+	modelEditor_ = std::make_unique<ModelEditor>();
+
 	// モデルストアを作成
 	modelStore_ = std::make_unique<ModelStore>();
 
@@ -187,6 +190,9 @@ void Detail::RenderContext::NewFrame()
 
 	// テクスチャエディタのUIを描画する
 	textureEditor_->DrawUI(this, textureStore_.get());
+
+	// モデルエディタのUIを描画する
+	modelEditor_->DrawUI(this, modelStore_.get());
 
 #endif
 }

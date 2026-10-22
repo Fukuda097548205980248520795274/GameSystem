@@ -116,3 +116,16 @@ Detail::ModelData* Detail::ModelStore::GetModelData(ModelHandle handle)
 
 	return slot.data.get();
 }
+
+/// @brief インデックスでハンドルを取得する
+/// @param index 
+/// @return 
+Detail::ModelHandle Detail::ModelStore::GetHandleByIndex(uint32_t index) const
+{
+	// インデックスが範囲外、またはスロットが使用中でない場合は無効なハンドルを返す
+	if (index >= slots_.size() || !slots_[index].inUse)
+		return ModelHandle::Invalid();
+
+	// スロットが使用中であれば、世代番号とともにハンドルを返す
+	return ModelHandle{ index, slots_[index].generation };
+}

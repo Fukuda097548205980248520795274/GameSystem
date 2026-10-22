@@ -28,8 +28,6 @@ void Game::Initialize()
 	/// Skybox用のエンティティを作成
 	skyboxEntity = Engine::GetInstance()->CreateSkyboxEntity();
 
-	Engine::GetInstance()->LoadModel("./Assets/Model/suzanne/suzanne.obj");
-
 
 	// 点光源用のエンティティを作成
 	Engine::GetInstance()->CreatePointLightEntity(Vector3(0.0f, 0.0f, 15.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 2.0f, 2.0f);

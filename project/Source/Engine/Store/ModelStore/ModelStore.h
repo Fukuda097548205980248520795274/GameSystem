@@ -45,6 +45,15 @@ namespace Detail
 		/// @return 
 		ModelData* GetModelData(ModelHandle handle);
 
+		/// @brief モデルの数を取得する
+		/// @return 
+		size_t GetModelCount() const { return slots_.size(); }
+
+		/// @brief インデックスでハンドルを取得する
+		/// @param index 
+		/// @return 
+		ModelHandle GetHandleByIndex(uint32_t index) const;
+
 
 	private:
 

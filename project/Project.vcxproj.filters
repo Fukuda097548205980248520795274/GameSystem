@@ -266,6 +266,12 @@
     <Filter Include="Shader\Camera">
       <UniqueIdentifier>{94535a7a-f945-4e70-ba54-a66bc97761a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\Model">
+      <UniqueIdentifier>{4ace3346-ec21-49e7-9583-a23d26ab79bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Model\ModelEditor">
+      <UniqueIdentifier>{c883a571-cf34-49ef-bf0d-6fc11dee87fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -447,6 +453,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.cpp">
       <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Model\ModelEditor\ModelEditor.cpp">
+      <Filter>Source\Tool\Model\ModelEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -653,6 +662,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureData.h">
       <Filter>Source\Engine\Store\TextureStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Model\ModelEditor\ModelEditor.h">
+      <Filter>Source\Tool\Model\ModelEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

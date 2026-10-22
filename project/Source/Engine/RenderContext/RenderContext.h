@@ -21,6 +21,7 @@
 #include "Shader/ShaderEditor/ShaderEditor.h"
 #include "PSO/PSOEditor/PSOEditor.h"
 #include "Texture/TextureEditor/TextureEditor.h"
+#include "Model/ModelEditor/ModelEditor.h"
 
 #include <memory>
 
@@ -272,5 +273,8 @@ namespace Detail
 
 		/// @brief テクスチャエディタ
 		std::unique_ptr<TextureEditor> textureEditor_ = nullptr;
+
+		/// @brief モデルエディタ
+		std::unique_ptr<ModelEditor> modelEditor_ = nullptr;
 	};
 }

@@ -41,6 +41,7 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 
 	// モデルデータ
 	ModelData modelData;
+	modelData.filePath = filePath;
 
 	// メッシュの数を確保する
 	modelData.meshes.resize(scene->mNumMeshes);
