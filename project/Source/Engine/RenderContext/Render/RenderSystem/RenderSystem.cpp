@@ -128,6 +128,11 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 	registry_->AddComponent(parentEntity, TransformComponent());
 	registry_->AddComponent(parentEntity, HierarchyComponent());
 
+	// 親エンティティにModelComponentを追加する
+	ModelComponent modelComp;
+	modelComp.handle = modelHandle;
+	registry_->AddComponent(parentEntity, modelComp);
+
 	// モデルデータを取得する
 	auto modelData = modelStore->GetModelData(modelHandle);
 	if (!modelData) return parentEntity;
@@ -148,10 +153,10 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 		// RenderComponentを追加する
 		registry_->AddComponent(childEntity, RenderComponent());
 
-		// ModelComponentを追加する
-		ModelComponent modelComp(i);
-		modelComp.handle = modelHandle;
-		registry_->AddComponent(childEntity, modelComp);
+		// MeshDrawComponentを追加する
+		MeshDrawComponent meshDrawComp(i);
+		meshDrawComp.handle = modelHandle;
+		registry_->AddComponent(childEntity, meshDrawComp);
 
 		// TransformComponent、MaterialComponent、UVTransformComponent、TextureComponentを追加する
 		registry_->AddComponent(childEntity, TransformComponent());
@@ -220,12 +225,12 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 	for (const auto& entity : sortedPasses)
 	{
 		// メッシュインデックスを設定
-		auto modelComp = registry_->GetComponent<ModelComponent>(entity);
-		if (modelComp == nullptr) continue;
+		auto meshDrawComp = registry_->GetComponent<MeshDrawComponent>(entity);
+		if (meshDrawComp == nullptr) continue;
 
 		// モデルデータを取得する
-		auto modelData = modelStore->GetModelData(modelComp->handle);
-		if (!modelData || modelComp->meshIndex < 0 || modelComp->meshIndex >= modelData->meshes.size()) continue;
+		auto modelData = modelStore->GetModelData(meshDrawComp->handle);
+		if (!modelData || meshDrawComp->meshIndex < 0 || meshDrawComp->meshIndex >= modelData->meshes.size()) continue;
 
 		// 深度のみのPSOを登録する
 		depthOnlyPso_->Register(commandList);
@@ -238,7 +243,7 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 		if (!transform || !transformCB)continue;
 
 		// meshIndex を使用
-		modelStore->Register(commandList, modelComp->handle, modelComp->meshIndex);
+		modelStore->Register(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
 
 		{
 			// データをGPU用に渡す
@@ -254,7 +259,7 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 		}
 
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandList->DrawIndexedInstanced(modelData->meshes[modelComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(modelData->meshes[meshDrawComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
 	}
 }
 
@@ -312,12 +317,12 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	for (const auto& [entity, priority] : sortedPasses)
 	{
 		// 必要なコンポーネントを取得
-		auto modelComp = registry_->GetComponent<ModelComponent>(entity);
-		if (!modelComp) continue;
+		auto meshDrawComp = registry_->GetComponent<MeshDrawComponent>(entity);
+		if (!meshDrawComp) continue;
 
 		// モデルデータを取得する
-		auto modelData = modelStore->GetModelData(modelComp->handle);
-		if (!modelData || modelComp->meshIndex < 0 || modelComp->meshIndex >= modelData->meshes.size()) continue;
+		auto modelData = modelStore->GetModelData(meshDrawComp->handle);
+		if (!modelData || meshDrawComp->meshIndex < 0 || meshDrawComp->meshIndex >= modelData->meshes.size()) continue;
 
 		// ループを削除し、エンティティの components を直接取得
 		auto material = registry_->GetComponent<MaterialComponent>(entity);
@@ -336,7 +341,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		commandList->SetGraphicsRootSignature(psoItem->rootSig.Get());
 
 		//meshIndex を使用して登録
-		modelStore->Register(commandList, modelComp->handle, modelComp->meshIndex);
+		modelStore->Register(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
 
 		// PSOの要求に従って動的にパラメータをバインドする
 		for (UINT i = 0;i < psoItem->desc.rootParameters.size(); ++i)
@@ -433,7 +438,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		else if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 		// meshIndex を使用してドローコール
-		commandList->DrawIndexedInstanced(modelData->meshes[modelComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(modelData->meshes[meshDrawComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
 	}
 }
 

@@ -83,8 +83,17 @@ struct MeshComponent
 /// @brief モデルコンポーネント
 struct ModelComponent
 {
-	ModelComponent(int32_t meshIndex) : handle(Detail::ModelHandle::Invalid()), meshIndex(meshIndex) {}
+	ModelComponent() : handle(Detail::ModelHandle::Invalid()) {}
 	
+	// 世代付きモデルハンドル
+	Detail::ModelHandle handle;
+};
+
+/// @brief メッシュ描画コンポーネント
+struct MeshDrawComponent
+{
+	MeshDrawComponent(int32_t meshIndex) : handle(Detail::ModelHandle::Invalid()), meshIndex(meshIndex) {}
+
 	// 世代付きモデルハンドル
 	Detail::ModelHandle handle;
 
