@@ -59,6 +59,15 @@ uint64_t Detail::TextureStore::ComputeImageHash(const DirectX::ScratchImage& ima
 	return hash;
 }
 
+/// @brief 更新処理
+/// @param maxBufferCount 
+/// @param frameIndex 
+void Detail::TextureStore::Update(uint32_t maxBufferCount, uint32_t frameIndex)
+{
+	// アップロード待ちリソースの解放
+	ProcessDeferredDeletions(maxBufferCount, frameIndex);
+}
+
 /// @brief テクスチャを読み込む
 /// @param filePath 
 /// @param heap 
@@ -273,36 +282,47 @@ Detail::TextureHandle Detail::TextureStore::GetHandleByIndex(uint32_t index) con
 /// @param handle 
 /// @param device
 /// @param heap
-void Detail::TextureStore::Remove(TextureHandle handle, ID3D12Device* device, DXHeap* heap)
+void Detail::TextureStore::Remove(TextureHandle handle, DXHeap* heap, uint32_t frameIndex)
 {
 	if (!handle.IsValid() || handle.index >= slots_.size()) return;
 
 	Slot& slot = slots_[handle.index];
 
-	// ハンドルが有効で、スロットが使用中であることを確認
 	if (slot.inUse && slot.generation == handle.generation)
 	{
 		if (auto engine = Engine::GetInstance())
-			engine->WaitForGPU();
+		{
+			// 削除対象のテクスチャを使用しているエンティティを検索し、デフォルトテクスチャに切り替える
+			if (auto registry = engine->GetRegistryECS())
+			{
+				auto* textureArray = registry->GetComponentArray<TextureComponent>();
+				if (textureArray)
+				{
+					for (Entity entity : textureArray->GetEntities())
+					{
+						auto texComp = registry->GetComponent<TextureComponent>(entity);
+						if (texComp && texComp->handle == handle)
+						{
+							texComp->handle = defaultTextureHandle_;
+						}
+					}
+				}
+			}
+		}
 
-		// ディスクリプタヒープからSRVハンドルを解放する
 		if (slot.data)
 		{
 			std::string normPath = NormalizePath(slot.data->name);
 			pathToHandleMap_.erase(normPath);
 			hashToHandleMap_.erase(slot.data->hash);
 
-			if (heap) heap->FreeSrvDescriptorHandle(slot.data->srvHandle);
+			// 即座に破棄せず、所有権を破棄キューに移動する
+			deferredDeletionQueue_.push({ std::move(slot.data), heap, frameIndex });
 		}
 
-		// データ解放・フラグ更新・世代繰り上げ
-		slot.data.reset();
+		// スロットは空いたものとして即座に再利用可能にする
 		slot.inUse = false;
-
-		// 世代番号を繰り上げることで、古いハンドルが無効になるようにする
 		slot.generation++;
-
-		// 空きスロットのインデックスをキューに追加
 		freeSlots_.push(handle.index);
 	}
 }
@@ -319,4 +339,36 @@ void Detail::TextureStore::ReleaseIntermediateResources()
 			}),
 		pendingUploadResources_.end()
 	);
+}
+
+/// @brief 破棄を遅延処理する
+/// @param maxBufferCount 
+/// @param frameIndex 
+void Detail::TextureStore::ProcessDeferredDeletions(uint32_t maxBufferCount, uint32_t frameIndex)
+{
+	while (!deferredDeletionQueue_.empty())
+	{
+		// キュー先頭の破棄要求フレームを取得
+		uint32_t requestedFrame = deferredDeletionQueue_.front().requestedFrameIndex;
+
+		// 破棄要求からGPUが十分に処理を進めたか判定
+		if (frameIndex - requestedFrame >= maxBufferCount)
+		{
+			auto& item = deferredDeletionQueue_.front();
+
+			// SRVハンドルを解放
+			if (item.heap && item.data)
+			{
+				item.heap->FreeSrvDescriptorHandle(item.data->srvHandle);
+			}
+
+			// キューからポップすることでリソースが安全に解放される
+			deferredDeletionQueue_.pop();
+		}
+		else
+		{
+			// 先頭要素がまだ破棄できないならループを抜ける
+			break;
+		}
+	}
 }

@@ -165,6 +165,14 @@ void Detail::RenderContext::NewFrame()
 		textureStore_->ReleaseIntermediateResources();
 	}
 
+
+	// テクスチャストアを更新する
+	textureStore_->Update(kBufferCount, frameIndex_);
+
+	// モデルストアを更新する
+	modelStore_->Update(kBufferCount, frameIndex_);
+
+
 #ifdef DEVELOPMENT
 
 	// フレームの開始をImGuiに伝える

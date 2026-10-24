@@ -1,6 +1,15 @@
 #include "ModelStore.h"
 #include "Func/ModelFunc/ModelFunc.h"
 
+/// @brief 更新処理
+/// @param maxBufferCount 
+/// @param frameIndex 
+void Detail::ModelStore::Update(uint32_t maxBufferCount, uint32_t frameIndex)
+{
+	// 破棄を遅延処理する
+	ProcessDeferredDeletions(maxBufferCount, frameIndex);
+}
+
 /// @brief 読み込み
 /// @param directory 
 /// @param fileName 
@@ -55,29 +64,26 @@ Detail::ModelHandle Detail::ModelStore::Load(const std::string& filePath, Textur
 
 /// @brief モデルの破棄
 /// @param handle 
-void Detail::ModelStore::Unload(ModelHandle handle)
+/// @param frameIndex 
+void Detail::ModelStore::Unload(ModelHandle handle, uint32_t frameIndex)
 {
 	if (!handle.IsValid() || handle.index >= slots_.size()) return;
 
 	Slot& slot = slots_[handle.index];
 
-	// 世代が一致し、使用中の場合のみ削除を実行
 	if (slot.inUse && slot.generation == handle.generation)
 	{
-		// キャッシュから削除
 		if (slot.data)
 		{
 			cache_.erase(slot.data->filePath);
+
+			// 即座に破棄せず、所有権を破棄キューに移動する
+			deferredDeletionQueue_.push({ std::move(slot.data), frameIndex });
 		}
 
-		// メモリ解放とフラグ更新
-		slot.data.reset();
+		// スロットは空いたものとして即座に再利用可能にする
 		slot.inUse = false;
-
-		// 世代番号をインクリメントして、古いハンドルが無効になるようにする
 		slot.generation++;
-
-		// 再利用キューに追加
 		freeSlots_.push(handle.index);
 	}
 }
@@ -128,4 +134,28 @@ Detail::ModelHandle Detail::ModelStore::GetHandleByIndex(uint32_t index) const
 
 	// スロットが使用中であれば、世代番号とともにハンドルを返す
 	return ModelHandle{ index, slots_[index].generation };
+}
+
+/// @brief 破棄を遅延処理する
+/// @param maxBufferCount 
+/// @param frameIndex 
+void Detail::ModelStore::ProcessDeferredDeletions(uint32_t maxBufferCount, uint32_t frameIndex)
+{
+	while (!deferredDeletionQueue_.empty())
+	{
+		// キュー先頭の破棄要求フレームを取得
+		int32_t requestedFrame = deferredDeletionQueue_.front().requestedFrameIndex;
+
+		// 破棄要求からGPUが十分に処理を進めたか判定
+		if (frameIndex - requestedFrame >= maxBufferCount)
+		{
+			// キューからポップすることで、std::unique_ptrが破棄されリソースが安全に解放される
+			deferredDeletionQueue_.pop();
+		}
+		else
+		{
+			// 先頭要素がまだ破棄できないなら、後続の要素もまだ破棄できないのでループを抜ける
+			break;
+		}
+	}
 }

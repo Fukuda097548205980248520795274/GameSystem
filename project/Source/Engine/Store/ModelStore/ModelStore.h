@@ -23,6 +23,11 @@ namespace Detail
 		/// @brief デストラクタ
 		~ModelStore() = default;
 
+		/// @brief 更新処理
+		/// @param maxBufferCount 
+		/// @param frameIndex 
+		void Update(uint32_t maxBufferCount, uint32_t frameIndex);
+
 		/// @brief 読み込み
 		/// @param directory 
 		/// @param fileName 
@@ -32,7 +37,7 @@ namespace Detail
 
 		/// @brief モデルの破棄
 		/// @param handle 
-		void Unload(ModelHandle handle);
+		void Unload(ModelHandle handle, uint32_t frameIndex);
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
@@ -78,6 +83,24 @@ namespace Detail
 
 		// キャッシュ
 		std::unordered_map<std::string, ModelHandle> cache_;
+
+
+	private:
+
+		/// @brief 破棄を遅延処理する
+		/// @param maxBufferCount 
+		/// @param frameIndex 
+		void ProcessDeferredDeletions(uint32_t maxBufferCount, uint32_t frameIndex);
+
+		/// @brief 破棄待ちのデータ
+		struct DeferredDeletionData
+		{
+			std::unique_ptr<ModelData> data;
+			uint32_t requestedFrameIndex;
+		};
+
+		// 破棄待ちキュー
+		std::queue<DeferredDeletionData> deferredDeletionQueue_;
 
 	};
 }

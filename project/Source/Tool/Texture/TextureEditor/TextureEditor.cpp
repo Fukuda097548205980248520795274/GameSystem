@@ -147,7 +147,7 @@ void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* t
 					std::filesystem::remove(path);
 
 				// テクスチャストアから削除
-				textureStore->Remove(selectedHandle_, renderContext->GetCore()->GetDevice(), renderContext->GetHeap());
+				textureStore->Remove(selectedHandle_, renderContext->GetHeap(), engine->GetFrameIndex());
 
 				// 選択状態をリセット
 				selectedHandle_ = TextureHandle::Invalid();

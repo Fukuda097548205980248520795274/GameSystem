@@ -21,6 +21,17 @@ void Detail::ECSEditor::DrawHierarchy()
 	const auto& entities = registry_->GetActiveEntities();
 	for (Entity entity : entities)
 	{
+		// 子エンティティかどうかの判定
+		bool isChild = false;
+		if (auto hierarchyComp = registry_->GetComponent<HierarchyComponent>(entity))
+		{
+			isChild = hierarchyComp->parent != kNullEntity;
+		}
+
+		// 子エンティティの場合はスキップ
+		if (isChild)continue;
+
+
 		// エンティティ名（現状はIDで代用）
 		std::string label = "Entity " + std::to_string(entity);
 

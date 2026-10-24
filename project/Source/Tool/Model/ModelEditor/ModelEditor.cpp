@@ -160,7 +160,7 @@ void Detail::ModelEditor::DrawUI(RenderContext* renderContext, ModelStore* model
 				}
 
 				// モデルストアから削除
-				modelStore->Unload(selectedHandle_);
+				modelStore->Unload(selectedHandle_, engine->GetFrameIndex());
 
 				// 選択状態をリセット
 				selectedHandle_ = ModelHandle::Invalid();

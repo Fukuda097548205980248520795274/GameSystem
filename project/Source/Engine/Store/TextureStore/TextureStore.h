@@ -20,6 +20,11 @@ namespace Detail
 		/// @param commandList 
 		TextureStore(ID3D12Device* device, DXHeap* heap, ID3D12GraphicsCommandList* commandList){ Initialize(device, heap, commandList); }
 
+		/// @brief 更新処理
+		/// @param maxBufferCount 
+		/// @param frameIndex 
+		void Update(uint32_t maxBufferCount, uint32_t frameIndex);
+
 		/// @brief テクスチャを読み込む
 		/// @param filePath 
 		/// @param heap 
@@ -69,7 +74,7 @@ namespace Detail
 
 		/// @brief テクスチャを削除する
 		/// @param handle 
-		void Remove(TextureHandle handle, ID3D12Device* device, DXHeap* heap);
+		void Remove(TextureHandle handle, DXHeap* heap, uint32_t frameIndex);
 
 		/// @brief 中間リソースを解放する
 		void ReleaseIntermediateResources();
@@ -136,6 +141,25 @@ namespace Detail
 
 		// 中間リソースのアップロード待ちリスト
 		std::vector<std::pair<Microsoft::WRL::ComPtr<ID3D12Resource>, uint32_t>> pendingUploadResources_;
+
+
+	private:
+
+		/// @brief 破棄を遅延処理する
+		/// @param maxBufferCount 
+		/// @param frameIndex 
+		void ProcessDeferredDeletions(uint32_t maxBufferCount, uint32_t frameIndex);
+
+		/// @brief 破棄待ちのデータ
+		struct DeferredDeletionData
+		{
+			std::unique_ptr<TextureData> data;
+			DXHeap* heap;
+			uint32_t requestedFrameIndex;
+		};
+
+		// 破棄待ちキュー
+		std::queue<DeferredDeletionData> deferredDeletionQueue_;
 
 
 	private:
