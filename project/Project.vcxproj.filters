@@ -272,6 +272,15 @@
     <Filter Include="Source\Tool\Model\ModelEditor">
       <UniqueIdentifier>{c883a571-cf34-49ef-bf0d-6fc11dee87fb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Store\HandleData">
+      <UniqueIdentifier>{9c1be2d0-b066-4023-99af-0266b00f7f10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\AnimationStore">
+      <UniqueIdentifier>{01069265-6840-4d09-a7db-20338c7b66a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\SkeletonStore">
+      <UniqueIdentifier>{cc3d23d4-88db-4862-b489-66753c0581dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -456,6 +465,12 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\Model\ModelEditor\ModelEditor.cpp">
       <Filter>Source\Tool\Model\ModelEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\SkeletonStore\SkeletonStore.cpp">
+      <Filter>Source\Engine\Store\SkeletonStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\AnimationStore\AnimationStore.cpp">
+      <Filter>Source\Engine\Store\AnimationStore</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -665,6 +680,15 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\Model\ModelEditor\ModelEditor.h">
       <Filter>Source\Tool\Model\ModelEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\HandleData\HandleData.h">
+      <Filter>Source\Engine\Store\HandleData</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\SkeletonStore\SkeletonStore.h">
+      <Filter>Source\Engine\Store\SkeletonStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\AnimationStore\AnimationStore.h">
+      <Filter>Source\Engine\Store\AnimationStore</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

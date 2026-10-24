@@ -149,9 +149,9 @@ void Detail::SkyboxSystem::Execute(ID3D12GraphicsCommandList* commandList)
 	Entity selectedEntity = kNullEntity;
 	for (Entity entity : entities)
 	{
-		auto& skybox = registry_->GetComponent<SkyboxComponent>(entity);
+		auto skybox = registry_->GetComponent<SkyboxComponent>(entity);
 		
-		if (skybox.isEnabled)
+		if (skybox && skybox->isEnabled)
 		{
 			selectedEntity = entity;
 			break;
@@ -182,8 +182,9 @@ void Detail::SkyboxSystem::Execute(ID3D12GraphicsCommandList* commandList)
 	colorBuffer_->RegisterGraphics(commandList, 1, frameIndex);
 
 	// CubemapComponentを取得する
-	auto& cubemapComp = registry_->GetComponent<CubemapComponent>(selectedEntity);
-	commandList->SetGraphicsRootDescriptorTable(2, textureStore->GetSrvHandle(cubemapComp.handle).gpuHandle);
+	auto cubemapComp = registry_->GetComponent<CubemapComponent>(selectedEntity);
+	if (!cubemapComp) return;
+	commandList->SetGraphicsRootDescriptorTable(2, textureStore->GetSrvHandle(cubemapComp->handle).gpuHandle);
 
 	// プリミティブトポロジーを設定する
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

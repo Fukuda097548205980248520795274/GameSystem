@@ -76,6 +76,11 @@ namespace Detail
 		/// @return 
 		Entity CreateRender3DEntity() { return renderSystem_->CreateRender3DEntity(); }
 
+		/// @brief モデルエンティティを作成する
+		/// @param modelHandle 
+		/// @return 
+		Entity CreateModelEntity(ModelHandle modelHandle) { return renderSystem_->CreateModelEntity(modelHandle); }
+
 		/// @brief カメラエンティティを作成する
 		/// @return 
 		Entity CreateCameraEntity() { return cameraSystem_->CreateCameraEntity(); }

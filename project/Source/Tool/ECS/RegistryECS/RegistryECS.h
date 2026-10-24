@@ -36,9 +36,27 @@ namespace Detail
 		/// @param entity 
 		/// @return 
 		template<typename T>
-		T& GetComponent(Entity entity)
+		T* GetComponent(Entity entity)
 		{
-			return GetComponentArray<T>()->Get(entity);
+			if (HasComponent<T>(entity))
+				return &GetComponentArray<T>()->Get(entity);
+
+			// コンポーネントが存在しない場合は nullptr を返す
+			return nullptr;
+		}
+
+		/// @brief　コンポーネントを取得する（const版）
+		/// @tparam T 
+		/// @param entity 
+		/// @return 
+		template<typename T>
+		const T* GetComponent(Entity entity) const
+		{
+			if (HasComponent<T>(entity))
+				return &GetComponentArray<T>()->Get(entity);
+
+			// コンポーネントが存在しない場合は nullptr を返す
+			return nullptr;
 		}
 
 		/// @brief コンポーネント配列を取得する

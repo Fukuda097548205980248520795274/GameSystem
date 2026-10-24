@@ -33,6 +33,10 @@ namespace Detail
 		/// @param registry 
 		void DrawInspector();
 
+		/// @brief エンティティコンポーネントUIの描画
+		/// @param entity
+		void DrawEntityComponents(Entity entity);
+
 
 	private:
 

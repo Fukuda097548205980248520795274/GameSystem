@@ -92,6 +92,11 @@ public:
 	/// @return 
 	Entity CreateRender3DEntity() { return renderContext_->CreateRender3DEntity(); }
 
+	/// @brief モデルエンティティを作成する
+	/// @param modelHandle 
+	/// @return 
+	Entity CreateModelEntity(Detail::ModelHandle modelHandle) { return renderContext_->CreateModelEntity(modelHandle); }
+
 	/// @brief カメラエンティティを作成する
 	/// @return 
 	Entity CreateCameraEntity() { return renderContext_->CreateCameraEntity(); }

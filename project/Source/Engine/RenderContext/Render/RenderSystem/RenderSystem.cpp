@@ -111,6 +111,73 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	return entity;
 }
 
+/// @brief モデルエンティティを作成する
+/// @param modelHandle 
+/// @return 
+Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
+{
+	auto engine = Engine::GetInstance();
+	auto renderContext = engine->GetRenderContext();
+	auto device = renderContext->GetCore()->GetDevice();
+	auto textureStore = renderContext->GetTextureStore();
+	auto modelStore = renderContext->GetModelStore();
+	int32_t maxBufferCount = engine->GetMaxBufferCount();
+
+	// 親エンティティ（ルート）の作成
+	Entity parentEntity = registry_->CreateEntity();
+	registry_->AddComponent(parentEntity, TransformComponent());
+	registry_->AddComponent(parentEntity, HierarchyComponent());
+
+	// モデルデータを取得する
+	auto modelData = modelStore->GetModelData(modelHandle);
+	if (!modelData) return parentEntity;
+
+	// 子エンティティの作成
+	std::vector<Entity> tempChildren;
+	tempChildren.reserve(modelData->meshes.size());
+
+	for (int32_t i = 0; i < static_cast<int32_t>(modelData->meshes.size()); ++i)
+	{
+		Entity childEntity = registry_->CreateEntity();
+
+		// HierarchyComponentを追加して親エンティティを設定する
+		HierarchyComponent childHierarchy;
+		childHierarchy.parent = parentEntity;
+		registry_->AddComponent(childEntity, childHierarchy);
+
+		// RenderComponentを追加する
+		registry_->AddComponent(childEntity, RenderComponent());
+
+		// ModelComponentを追加する
+		ModelComponent modelComp(i);
+		modelComp.handle = modelHandle;
+		registry_->AddComponent(childEntity, modelComp);
+
+		// TransformComponent、MaterialComponent、UVTransformComponent、TextureComponentを追加する
+		registry_->AddComponent(childEntity, TransformComponent());
+		registry_->AddComponent(childEntity, MaterialComponent());
+		registry_->AddComponent(childEntity, UVTransformComponent());
+		registry_->AddComponent(childEntity, TextureComponent(textureStore->GetDefaultTextureHandle()));
+
+		// TransformDataForGPU用のConstantBufferComponentを追加する
+		registry_->AddComponent(childEntity, TransformConstantBufferComponent(
+			renderResourceStore_->CreateConstantBuffer<Detail::TransformDataForGPU>(device, maxBufferCount)));
+		registry_->AddComponent(childEntity, MaterialConstantBufferComponent(
+			renderResourceStore_->CreateConstantBuffer<Detail::UnLightingMaterialDataForGPU>(device, maxBufferCount)));
+
+		// 子エンティティを一時的なベクターに追加する
+		tempChildren.push_back(childEntity);
+	}
+
+	// 親エンティティのHierarchyComponentに子エンティティを設定する
+	if (auto safeParentHierarchy = registry_->GetComponent<HierarchyComponent>(parentEntity))
+	{
+		safeParentHierarchy->children = std::move(tempChildren);
+	}
+
+	return parentEntity;
+}
+
 /// @brief 描画前の深度パスを実行する
 /// @param commandList 
 /// @param priority 
@@ -128,6 +195,9 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 	auto cameraSystem = engine->GetRenderContext()->GetCameraSystem();
 	if (!cameraSystem) return;
 
+	auto modelStore = engine->GetRenderContext()->GetModelStore();
+	if (!modelStore) return;
+
 	// RenderComponentの配列を取得する
 	auto* passArray = registry_->GetComponentArray<RenderComponent>();
 	const auto& entities = passArray->GetEntities();
@@ -136,8 +206,8 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 	std::vector<Entity> sortedPasses;
 	for (Entity entity : entities)
 	{
-		auto& pass = registry_->GetComponent<RenderComponent>(entity);
-		if (pass.isEnabled)
+		auto pass = registry_->GetComponent<RenderComponent>(entity);
+		if (pass && pass->isEnabled)
 		{
 			sortedPasses.push_back(entity);
 		}
@@ -149,43 +219,42 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 	// ソートされたレンダーパスを実行する
 	for (const auto& entity : sortedPasses)
 	{
-		// 必要なコンポーネントを取得
-		auto& transform = registry_->GetComponent<TransformComponent>(entity);
-		auto& transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
-		auto& mesh = registry_->GetComponent<MeshComponent>(entity);
+		// メッシュインデックスを設定
+		auto modelComp = registry_->GetComponent<ModelComponent>(entity);
+		if (modelComp == nullptr) continue;
 
+		// モデルデータを取得する
+		auto modelData = modelStore->GetModelData(modelComp->handle);
+		if (!modelData || modelComp->meshIndex < 0 || modelComp->meshIndex >= modelData->meshes.size()) continue;
 
 		// 深度のみのPSOを登録する
 		depthOnlyPso_->Register(commandList);
 
-		// ProceduralMeshStoreからメッシュを登録する
-		proceduralMeshStore->Register(mesh.meshType, commandList);
+		// ループを削除
+		auto transform = registry_->GetComponent<TransformComponent>(entity);
+		auto transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
+
+		// コンポーネントが存在しない場合はスキップする
+		if (!transform || !transformCB)continue;
+
+		// meshIndex を使用
+		modelStore->Register(commandList, modelComp->handle, modelComp->meshIndex);
 
 		{
-			// 回転をクォータニオンに変換する
-			Quaternion rotation =
-				ToQuaternion(transform.rotation.z, Vector3(0.0f, 0.0f, 1.0f)) *
-				ToQuaternion(transform.rotation.y, Vector3(0.0f, 1.0f, 0.0f)) *
-				ToQuaternion(transform.rotation.x, Vector3(1.0f, 0.0f, 0.0f));
-
 			// データをGPU用に渡す
 			TransformDataForGPU data;
-			data.world = Make3DAffineMatrix4x4(transform.scale, rotation, transform.position);
+			data.world = CalculateGlobalWorldMatrix(entity);
 			data.worldViewProjection = data.world * cameraSystem->GetViewMatrix() * cameraSystem->GetProjectionMatrix();
 			data.worldInverseTranspose = data.world.Inverse().Transpose();
 
 			// Transform用のリソースをバインド
-			renderResourceStore_->UpdateConstantBuffer(transformCB.handle, data, frameIndex);
-			auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB.handle);
+			renderResourceStore_->UpdateConstantBuffer(transformCB->handle, data, frameIndex);
+			auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB->handle);
 			if (cbResource)cbResource->RegisterGraphics(commandList, 0, frameIndex);
 		}
 
-
-		// プリミティブトポロジーを設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		// ドローコール
-		commandList->DrawIndexedInstanced(proceduralMeshStore->GetNumIndex(mesh.meshType), 1, 0, 0, 0);
+		commandList->DrawIndexedInstanced(modelData->meshes[modelComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
 	}
 }
 
@@ -212,6 +281,9 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	auto lightSystem = engine->GetRenderContext()->GetLightSystem();
 	if (!lightSystem) return;
 
+	auto modelStore = engine->GetRenderContext()->GetModelStore();
+	if (!modelStore) return;
+
 	// RenderComponentの配列を取得する
 	auto* passArray = registry_->GetComponentArray<RenderComponent>();
 	const auto& entities = passArray->GetEntities();
@@ -223,10 +295,10 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	std::vector<std::pair<Entity, int>> sortedPasses;
 	for (Entity entity : entities)
 	{
-		auto& pass = registry_->GetComponent<RenderComponent>(entity);
-		if (pass.isEnabled && pass.priority == priority)
+		auto pass = registry_->GetComponent<RenderComponent>(entity);
+		if (pass && pass->isEnabled && pass->priority == priority)
 		{
-			sortedPasses.push_back({ entity, pass.priority });
+			sortedPasses.push_back({ entity, pass->priority });
 		}
 	}
 
@@ -240,27 +312,31 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	for (const auto& [entity, priority] : sortedPasses)
 	{
 		// 必要なコンポーネントを取得
-		auto& transform = registry_->GetComponent<TransformComponent>(entity);
-		auto& material = registry_->GetComponent<MaterialComponent>(entity);
-		auto& uvTransform = registry_->GetComponent<UVTransformComponent>(entity);
-		auto& mesh = registry_->GetComponent<MeshComponent>(entity);
-		auto& texture = registry_->GetComponent<TextureComponent>(entity);
+		auto modelComp = registry_->GetComponent<ModelComponent>(entity);
+		if (!modelComp) continue;
 
-		auto& transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
-		auto& materialCB = registry_->GetComponent<MaterialConstantBufferComponent>(entity);
+		// モデルデータを取得する
+		auto modelData = modelStore->GetModelData(modelComp->handle);
+		if (!modelData || modelComp->meshIndex < 0 || modelComp->meshIndex >= modelData->meshes.size()) continue;
 
-		// PSOエディタ（または管理クラス）からPSOとルートシグネチャを取得
-		auto psoItem = psoEditor_->GetPSOItem(material.psoName);
+		// ループを削除し、エンティティの components を直接取得
+		auto material = registry_->GetComponent<MaterialComponent>(entity);
+		auto uvTransform = registry_->GetComponent<UVTransformComponent>(entity);
+		auto texture = registry_->GetComponent<TextureComponent>(entity);
+		auto transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
+		auto materialCB = registry_->GetComponent<MaterialConstantBufferComponent>(entity);
+		if (!material || !uvTransform || !texture || !transformCB || !materialCB) continue;
+
+		// PSOを取得する
+		auto psoItem = psoEditor_->GetPSOItem(material->psoName);
 		if (!psoItem || !psoItem->pso) continue;
 
-
-		// PSOとルートシグネチャをコマンドリストに設定
+		// PSOとルートシグネチャを設定する
 		commandList->SetPipelineState(psoItem->pso.Get());
 		commandList->SetGraphicsRootSignature(psoItem->rootSig.Get());
 
-
-		// ProceduralMeshStoreからメッシュを登録する
-		proceduralMeshStore->Register(mesh.meshType, commandList);
+		//meshIndex を使用して登録
+		modelStore->Register(commandList, modelComp->handle, modelComp->meshIndex);
 
 		// PSOの要求に従って動的にパラメータをバインドする
 		for (UINT i = 0;i < psoItem->desc.rootParameters.size(); ++i)
@@ -272,36 +348,30 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			{
 			case RenderBinding::Transform:
 			{
-				// 回転をクォータニオンに変換する
-				Quaternion rotation = 
-					ToQuaternion(transform.rotation.z , Vector3(0.0f, 0.0f, 1.0f)) * 
-					ToQuaternion(transform.rotation.y , Vector3(0.0f, 1.0f, 0.0f)) * 
-					ToQuaternion(transform.rotation.x , Vector3(1.0f, 0.0f, 0.0f));
-
-
+				// Transform用のデータをGPU用に渡す
 				TransformDataForGPU data;
-				data.world = Make3DAffineMatrix4x4(transform.scale, rotation, transform.position);
+				data.world = CalculateGlobalWorldMatrix(entity);
 				data.worldViewProjection = data.world * cameraSystem->GetViewMatrix() * cameraSystem->GetProjectionMatrix();
 				data.worldInverseTranspose = data.world.Inverse().Transpose();
 
 				// Transform用のリソースをバインド
-				renderResourceStore_->UpdateConstantBuffer(transformCB.handle, data, frameIndex);
-				auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB.handle);
+				renderResourceStore_->UpdateConstantBuffer(transformCB->handle, data, frameIndex);
+				auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB->handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
 				break;
 			}
 			case RenderBinding::Material:
 			{
 				UnLightingMaterialDataForGPU data;
-				data.color = material.color; // マテリアルの色を使用
-				data.uvTransform = 
-					Make3DScaleMatrix4x4(Vector3(uvTransform.scale.x, uvTransform.scale.y, 1.0f)) *
-					Make3DRotateZMatrix4x4(uvTransform.radian) * 
-					Make3DTranslateMatrix4x4(Vector3(uvTransform.offset.x, uvTransform.offset.y, 0.0f));
+				data.color = material->color; // マテリアルの色を使用
+				data.uvTransform =
+					Make3DScaleMatrix4x4(Vector3(uvTransform->scale.x, uvTransform->scale.y, 1.0f)) *
+					Make3DRotateZMatrix4x4(uvTransform->radian) *
+					Make3DTranslateMatrix4x4(Vector3(uvTransform->offset.x, uvTransform->offset.y, 0.0f));
 
 				// Material用のリソースをバインド
-				renderResourceStore_->UpdateConstantBuffer(materialCB.handle, data, frameIndex);
-				auto cbResource = renderResourceStore_->GetConstantBuffer(materialCB.handle);
+				renderResourceStore_->UpdateConstantBuffer(materialCB->handle, data, frameIndex);
+				auto cbResource = renderResourceStore_->GetConstantBuffer(materialCB->handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
 				break;
 			}
@@ -350,19 +420,50 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			case RenderBinding::Texture:
 			{
 				// Texture用のリソースをバインド
-				commandList->SetGraphicsRootDescriptorTable(i, textureStore->GetSrvHandle(texture.handle).gpuHandle);
+				commandList->SetGraphicsRootDescriptorTable(i, textureStore->GetSrvHandle(texture->handle).gpuHandle);
 				break;
 			}
 
 			}
 		}
 
-		// トポロジを設定する
+		// プリミティブトポロジーを設定する
 		if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		else if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		else if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-		// ドローコール
-		commandList->DrawIndexedInstanced(proceduralMeshStore->GetNumIndex(mesh.meshType), 1, 0, 0, 0);
+		// meshIndex を使用してドローコール
+		commandList->DrawIndexedInstanced(modelData->meshes[modelComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
 	}
+}
+
+/// @brief グローバルなワールド行列を計算する
+/// @param entity 
+/// @return 
+Matrix4x4 Detail::RenderSystem::CalculateGlobalWorldMatrix(Entity entity)
+{
+	auto transform = registry_->GetComponent<TransformComponent>(entity);
+	if (!transform) return Matrix4x4(); // TransformComponentが存在しない場合は単位行列を返す
+
+	// 自身のローカル行列を計算
+	Quaternion rotation =
+		ToQuaternion(transform->rotation.z, Vector3(0.0f, 0.0f, 1.0f)) *
+		ToQuaternion(transform->rotation.y, Vector3(0.0f, 1.0f, 0.0f)) *
+		ToQuaternion(transform->rotation.x, Vector3(1.0f, 0.0f, 0.0f));
+
+	Matrix4x4 localWorld = Make3DAffineMatrix4x4(transform->scale, rotation, transform->position);
+
+	// 親子関係コンポーネントがあり、かつ親が設定されている場合は親の行列を掛ける
+	if (registry_->HasComponent<HierarchyComponent>(entity))
+	{
+		auto hierarchy = registry_->GetComponent<HierarchyComponent>(entity);
+		if (hierarchy && hierarchy->parent != kNullEntity)
+		{
+			Matrix4x4 parentWorld = CalculateGlobalWorldMatrix(hierarchy->parent);
+
+			return localWorld * parentWorld;
+		}
+	}
+
+	return localWorld;
 }

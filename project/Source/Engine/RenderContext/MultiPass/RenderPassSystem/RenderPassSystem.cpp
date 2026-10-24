@@ -61,10 +61,10 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
     for (Entity entity : entities)
     {
 		// RenderPassComponent を取得して、isEnabled が true の場合のみ追加
-        auto& passComp = registry_->GetComponent<RenderPassComponent>(entity);
-        if (passComp.isEnabled)
+        auto passComp = registry_->GetComponent<RenderPassComponent>(entity);
+        if (passComp && passComp->isEnabled)
         {
-            sortedPasses.push_back({ entity, passComp.priority });
+            sortedPasses.push_back({ entity, passComp->priority });
         }
     }
 
@@ -77,7 +77,8 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
     for (const auto& pair : sortedPasses)
     {
         Entity entity = pair.first;
-        auto& blendComp = registry_->GetComponent<BlendComponent>(entity);
+        auto blendComp = registry_->GetComponent<BlendComponent>(entity);
+		if (!blendComp) continue;
 
         // オフスクリーンリソースの貸出
         OffscreenResource* destinationResource = renderTargetPool_->Rent(commandList);

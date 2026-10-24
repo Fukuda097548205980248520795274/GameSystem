@@ -1,9 +1,11 @@
 #pragma once
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include "Matrix/Matrix4x4/Matrix4x4.h"
 #include "RenderResourceStore/RenderResourceStore.h"
 #include "ECS/EntityECS/EntityECS.h"
 #include "DepthOnlyPSO/DepthOnlyPSO.h"
+#include "Store/ModelStore/ModelData.h"
 
 namespace Detail
 {
@@ -30,6 +32,11 @@ namespace Detail
 		/// @return 
 		Entity CreateRender3DEntity();
 
+		/// @brief モデルエンティティを作成する
+		/// @param modelHandle 
+		/// @return 
+		Entity CreateModelEntity(ModelHandle modelHandle);
+
 		/// @brief 描画前の深度パスを実行する
 		/// @param commandList 
 		/// @param priority 
@@ -44,7 +51,16 @@ namespace Detail
 	private:
 
 		/// @brief 初期化
+		/// @param device 
+		/// @param shaderCompiler 
 		void Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler);
+
+		/// @brief グローバルなワールド行列を計算する
+		/// @param entity 
+		/// @return 
+		Matrix4x4 CalculateGlobalWorldMatrix(Entity entity);
+
+	private:
 
 		/// @brief レンダーリソースストア
 		std::unique_ptr<RenderResourceStore> renderResourceStore_;

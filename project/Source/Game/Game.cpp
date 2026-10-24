@@ -20,14 +20,13 @@ void Game::Initialize()
 	Engine::GetInstance()->LoadTexture("./Assets/Texture/uvChecker.png");
 
 	// 3D描画用のエンティティを作成
-	render3dEntity = Engine::GetInstance()->CreateRender3DEntity();
+	render3dEntity = Engine::GetInstance()->CreateModelEntity(Engine::GetInstance()->LoadModel("./Assets/Model/suzanne/suzanne.obj"));
 
 	// カメラ用のエンティティを作成
 	cameraEntity = Engine::GetInstance()->CreateCameraEntity();
 
 	/// Skybox用のエンティティを作成
 	skyboxEntity = Engine::GetInstance()->CreateSkyboxEntity();
-
 
 	// 点光源用のエンティティを作成
 	Engine::GetInstance()->CreatePointLightEntity(Vector3(0.0f, 0.0f, 15.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 2.0f, 2.0f);

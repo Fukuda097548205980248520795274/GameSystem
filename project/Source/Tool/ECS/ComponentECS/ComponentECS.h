@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <string>
+#include "../EntityECS/EntityECS.h"
 #include "Store/ModelStore/ModelData.h"
 #include "Vector/Vector3/Vector3.h"
 #include "Vector/Vector2/Vector2.h"
@@ -32,6 +33,18 @@ enum class BlendMode
 	Subtract,
 	Multiply,
 	Screen,
+};
+
+/// @brief 親子関係コンポーネント
+struct HierarchyComponent
+{
+	HierarchyComponent() : parent(kNullEntity) {}
+
+	/// @brief 親エンティティ
+	Entity parent;
+
+	/// @brief 子エンティティのリスト
+	std::vector<Entity> children;
 };
 
 /// @brief パスの基本的な制御と実行順序
@@ -70,10 +83,13 @@ struct MeshComponent
 /// @brief モデルコンポーネント
 struct ModelComponent
 {
-	ModelComponent() : handle(Detail::ModelHandle::Invalid()) {}
+	ModelComponent(int32_t meshIndex) : handle(Detail::ModelHandle::Invalid()), meshIndex(meshIndex) {}
 	
 	// 世代付きモデルハンドル
 	Detail::ModelHandle handle;
+
+	// メッシュのインデックス（モデル内のメッシュを指定するために使用される）
+	int32_t meshIndex;
 };
 
 /// @brief カメラコンポーネント
@@ -268,3 +284,4 @@ struct SpotLightComponent
 	// @brief スポットライトの減衰開始角度（コサイン値）
 	float cosFalloffStart;
 };
+

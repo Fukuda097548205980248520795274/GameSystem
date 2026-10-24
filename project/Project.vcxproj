@@ -193,6 +193,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.cpp" />
+    <ClCompile Include="Source\Engine\Store\AnimationStore\AnimationStore.cpp" />
     <ClCompile Include="Source\Engine\Store\ModelStore\ModelStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -201,6 +202,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Store\SkeletonStore\SkeletonStore.cpp" />
     <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -393,9 +395,12 @@
     <ClInclude Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.h" />
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.h" />
+    <ClInclude Include="Source\Engine\Store\AnimationStore\AnimationStore.h" />
+    <ClInclude Include="Source\Engine\Store\HandleData\HandleData.h" />
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelData.h" />
     <ClInclude Include="Source\Engine\Store\ModelStore\ModelStore.h" />
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.h" />
+    <ClInclude Include="Source\Engine\Store\SkeletonStore\SkeletonStore.h" />
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureData.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.h" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.h" />
