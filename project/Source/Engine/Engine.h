@@ -6,6 +6,7 @@
 #include "DXDebug/DXDebug.h"
 #include "ECS/RegistryECS/RegistryECS.h"
 #include "RenderContext/RenderContext.h"
+#include "Input/Input.h"
 
 /// @brief エンジン
 class Engine
@@ -59,9 +60,6 @@ public:
 	/// @brief フレームインデックスを取得する
 	/// @return 
 	uint32_t GetFrameIndex() const { return renderContext_->GetFrameIndex(); }
-
-	/// @brief シーン前処理
-	void PerScene();
 
 	/// @brief 新フレーム処理
 	void NewFrame();
@@ -188,6 +186,10 @@ private:
 
 	/// @brief ECSレジストリ
 	std::unique_ptr<Detail::RegistryECS> registry_;
+
+	/// @brief 入力処理
+	std::unique_ptr<Detail::Input> input_;
+
 
 #ifdef _DEBUG
 

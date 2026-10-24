@@ -281,6 +281,9 @@
     <Filter Include="Source\Engine\Store\SkeletonStore">
       <UniqueIdentifier>{cc3d23d4-88db-4862-b489-66753c0581dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Input">
+      <UniqueIdentifier>{22385612-dff8-415a-9006-99a3a121cc61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -471,6 +474,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\AnimationStore\AnimationStore.cpp">
       <Filter>Source\Engine\Store\AnimationStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Input\Input.cpp">
+      <Filter>Source\Engine\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -689,6 +695,12 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Store\AnimationStore\AnimationStore.h">
       <Filter>Source\Engine\Store\AnimationStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Audio\AudioStore\AudioData.h">
+      <Filter>Source\Engine\Audio\AudioStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Input\Input.h">
+      <Filter>Source\Engine\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

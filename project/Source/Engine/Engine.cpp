@@ -31,6 +31,10 @@ Engine::~Engine()
 	dxDebug_ = nullptr;
 #endif
 
+	// 入力処理を破棄
+	input_.reset();
+	input_ = nullptr;
+
 	// ECSレジストリを破棄
 	registry_.reset();
 	registry_ = nullptr;
@@ -73,15 +77,12 @@ Engine* Engine::GetInstance()
 	return instance_.get();
 }
 
-/// @brief シーン前処理
-void Engine::PerScene()
-{
-
-}
-
 /// @brief 新フレーム処理
 void Engine::NewFrame()
 {
+	// 全ての入力情報を取得する
+	input_->CheckInputInfo();
+
 	// 新フレーム処理
 	renderContext_->NewFrame();
 
@@ -94,12 +95,15 @@ void Engine::PostDraw()
 {
 	// 描画後処理
 	renderContext_->PostDraw();
+
+	// 全ての入力情報をコピーする
+	input_->CopyInputInfo();
 }
 
 /// @brief 初期化
 /// @param screenWidth 
 /// @param screenHeight 
-/// @param title 
+/// @param title
 void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 {
 	// 例外が発生したときに起動する
@@ -125,6 +129,9 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 
 	// ECSレジストリを作成
 	registry_ = std::make_unique<Detail::RegistryECS>();
+
+	// 入力処理を作成
+	input_ = std::make_unique<Detail::Input>(winApp_.get());
 
 	// DirectXデバッグのポインタ
 	Detail::DXDebug* dxDebug = nullptr;

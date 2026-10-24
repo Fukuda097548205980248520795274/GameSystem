@@ -26,20 +26,6 @@ namespace
 	}
 }
 
-/// @brief デストラクタ
-Detail::AudioStore::AudioData::~AudioData()
-{
-	// フォーマットを解放する
-	if (waveFormat) 
-	{
-		CoTaskMemFree(waveFormat);
-		waveFormat = nullptr;
-	}
-
-	// メディアデータをクリアする
-	mediaData.clear();
-}
-
 
 
 /// @brief デストラクタ
@@ -322,7 +308,7 @@ void Detail::AudioStore::SetPitch(uint32_t hPlay, float pitch)
 /// @brief ハンドルに対応するプレイデータを探す
 /// @param handle 
 /// @return 
-Detail::AudioStore::PlayData* Detail::AudioStore::FindPlayData(uint32_t hPlay)
+Detail::PlayData* Detail::AudioStore::FindPlayData(uint32_t hPlay)
 {
 	for (std::unique_ptr<PlayData>& playDatum : playTable_)
 	{
@@ -338,7 +324,7 @@ Detail::AudioStore::PlayData* Detail::AudioStore::FindPlayData(uint32_t hPlay)
 /// @brief ハンドルに対応するオーディオデータを探す
 /// @param handle 
 /// @return 
-const Detail::AudioStore::AudioData* Detail::AudioStore::FindAudioData(uint32_t hAudio) const
+const Detail::AudioData* Detail::AudioStore::FindAudioData(uint32_t hAudio) const
 {
 	if (hAudio >= audioTable_.size())
 		return nullptr;
