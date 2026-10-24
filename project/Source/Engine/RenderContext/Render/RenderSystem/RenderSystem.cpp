@@ -157,7 +157,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 		registry_->AddComponent(childEntity, TransformComponent());
 		registry_->AddComponent(childEntity, MaterialComponent());
 		registry_->AddComponent(childEntity, UVTransformComponent());
-		registry_->AddComponent(childEntity, TextureComponent(textureStore->GetDefaultTextureHandle()));
+		registry_->AddComponent(childEntity, TextureComponent(modelData->meshes[i].material.handle));
 
 		// TransformDataForGPU用のConstantBufferComponentを追加する
 		registry_->AddComponent(childEntity, TransformConstantBufferComponent(

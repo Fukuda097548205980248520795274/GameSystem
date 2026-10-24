@@ -23,41 +23,71 @@ void Detail::ModelEditor::DrawUI(RenderContext* renderContext, ModelStore* model
 		std::lock_guard<std::mutex> lock(dropMutex_);
 		if (!droppedFilesQueue_.empty())
 		{
-			// ウィンドウ上にドロップされた場合のみ読み込みを実行
 			if (isHovered)
 			{
+				std::vector<std::string> modelPathsToLoad;
+
+				if (!std::filesystem::exists(kDir))
+					std::filesystem::create_directories(kDir);
+
 				for (const auto& originalPath : droppedFilesQueue_)
 				{
 					std::filesystem::path srcPath(originalPath);
-
-					// コピー先ディレクトリが存在しなければ作成
-					if (!std::filesystem::exists(kDir))
-						std::filesystem::create_directories(kDir);
-
-					// コピー先のパスを構築
 					std::filesystem::path destPath = kDir + srcPath.filename().string();
 
 					try
 					{
-						// ファイルをプロジェクト内にコピー（既に存在する場合は上書き）
-						std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
-
-						// コピーした新しいパスでモデルをロード (RenderContext側にLoadModelがある想定)
-						ModelHandle handle = renderContext->LoadModel(destPath.string());
-						if (handle.IsValid())
+						// フォルダがドロップされた場合の処理
+						if (std::filesystem::is_directory(srcPath))
 						{
-							selectedHandle_ = handle; // 読み込んだものを選択状態に
+							// フォルダごと再帰的にコピー
+							std::filesystem::copy(srcPath, destPath, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
+
+							// フォルダ内からメインのモデルファイルを探す
+							for (const auto& entry : std::filesystem::recursive_directory_iterator(destPath))
+							{
+								if (entry.is_regular_file())
+								{
+									std::string ext = entry.path().extension().string();
+									std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+									if (ext == ".obj" || ext == ".gltf" || ext == ".glb" || ext == ".fbx")
+									{
+										modelPathsToLoad.push_back(entry.path().string());
+									}
+								}
+							}
+						}
+						else
+						{
+							// ファイルが単体/複数ドロップされた場合の処理
+							std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
+
+							std::string ext = srcPath.extension().string();
+							std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+
+							if (ext == ".obj" || ext == ".gltf" || ext == ".glb" || ext == ".fbx")
+							{
+								modelPathsToLoad.push_back(destPath.string());
+							}
 						}
 					}
 					catch (const std::filesystem::filesystem_error& e)
 					{
-						// エラーログ
-						if (engine) engine->Log(LogLevel::Error, "モデルファイルのコピーに失敗しました : " + std::string(e.what()));
+						if (engine) engine->Log(LogLevel::Error, "ファイル/フォルダのコピーに失敗しました : " + std::string(e.what()));
+					}
+				}
+
+				// 見つかったモデルをロード
+				for (const auto& loadPath : modelPathsToLoad)
+				{
+					ModelHandle handle = renderContext->LoadModel(loadPath);
+					if (handle.IsValid())
+					{
+						selectedHandle_ = handle;
 					}
 				}
 			}
-
-			// 処理が終わった、または別ウィンドウへのドロップだった場合は破棄してクリア
 			droppedFilesQueue_.clear();
 		}
 	}

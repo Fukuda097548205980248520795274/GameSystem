@@ -136,10 +136,14 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 
 			// テクスチャファイルパス
 			meshData.material.handle = textureStore->Load(directory + "/" + textureFilePath.C_Str(), heap, device, commandList);
+
+			// テクスチャハンドルが無効な場合はデフォルトテクスチャを使用する
+			if (!meshData.material.handle.IsValid())
+				meshData.material.handle = textureStore->GetDefaultTextureHandle();
 		} 
 		else
 		{
-			meshData.material.handle = textureStore->Load("./Assets/Textures/white2x2.png", heap, device, commandList);
+			meshData.material.handle = textureStore->GetDefaultTextureHandle();
 		}
 
 

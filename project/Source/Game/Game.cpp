@@ -20,7 +20,7 @@ void Game::Initialize()
 	Engine::GetInstance()->LoadTexture("./Assets/Texture/uvChecker.png");
 
 	// 3D描画用のエンティティを作成
-	render3dEntity = Engine::GetInstance()->CreateModelEntity(Engine::GetInstance()->LoadModel("./Assets/Model/suzanne/suzanne.obj"));
+	render3dEntity = Engine::GetInstance()->CreateModelEntity(Engine::GetInstance()->LoadModel("./Assets/Model/multiMaterial/multiMaterial.obj"));
 
 	// カメラ用のエンティティを作成
 	cameraEntity = Engine::GetInstance()->CreateCameraEntity();
