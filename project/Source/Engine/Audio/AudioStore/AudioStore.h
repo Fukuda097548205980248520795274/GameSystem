@@ -9,13 +9,12 @@ namespace Detail
 	class AudioStore
 	{
 	public:
+		
+		/// @brief コンストラクタ
+		AudioStore() { Initialize(); }
 
 		/// @brief デストラクタ
 		~AudioStore();
-
-		/// @brief 初期化
-		/// @param log 
-		void Initialize();
 
 		/// @brief 更新処理
 		void Update();
@@ -60,6 +59,9 @@ namespace Detail
 
 
 	private:
+
+		/// @brief 初期化
+		void Initialize();
 
 		/// @brief ハンドルに対応するプレイデータを探す
 		/// @param handle 

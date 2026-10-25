@@ -6,6 +6,8 @@
 #include "Func/RandomFunc/RandomFunc.h"
 #include <format>
 
+#include "Engine.h"
+
 namespace
 {
 	// 音声を停止して破棄する関数
@@ -46,29 +48,38 @@ Detail::AudioStore::~AudioStore()
 /// @param log 
 void Detail::AudioStore::Initialize()
 {
+	// エンジンのインスタンスを取得する
+	auto engine = Engine::GetInstance();
+
 	// MFの初期化（ローカル版）
 	HRESULT hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 	assert(SUCCEEDED(hr));
 	if (FAILED(hr))
 	{
+		if (engine)engine->Log(LogLevel::Error, std::format("MF初期化 : 0x{:X}", hr));
 		throw std::runtime_error("Error : MFStartup");
 	}
+	if (engine)engine->Log(LogLevel::Info, "MF初期化");
 
 	// XAudio2を初期化する
 	hr = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	assert(SUCCEEDED(hr));
 	if (FAILED(hr))
 	{
+		if (engine)engine->Log(LogLevel::Error, std::format("XAudio2初期化 : 0x{:X}", hr));
 		throw std::runtime_error("Error : XAudio2Create");
 	}
+	if (engine)engine->Log(LogLevel::Info, "XAudio2初期化");
 
 	// マスターボイスを生成する
 	hr = xAudio2_->CreateMasteringVoice(&masterVoice_);
 	assert(SUCCEEDED(hr));
 	if (FAILED(hr))
 	{
+		if (engine)engine->Log(LogLevel::Error, std::format("マスターボイス生成 : 0x{:X}", hr));
 		throw std::runtime_error("Error : CreateMasteringVoice");
 	}
+	if (engine)engine->Log(LogLevel::Info, "マスターボイス生成");
 }
 
 /// @brief 更新処理

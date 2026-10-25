@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <string>
+#include "Input/Input.h"
 #include "../EntityECS/EntityECS.h"
 #include "Store/ModelStore/ModelData.h"
 #include "Vector/Vector3/Vector3.h"
@@ -294,3 +295,52 @@ struct SpotLightComponent
 	float cosFalloffStart;
 };
 
+
+
+/// @brief 入力デバイスの種類
+enum class InputDeviceType
+{
+	KeyboardMouse,
+	Gamepad
+};
+
+/// @brief 入力コンポーネント
+struct InputComponent
+{
+	InputComponent() :
+		deviceType(InputDeviceType::KeyboardMouse),
+		gamepadNumber(0),
+		moveUpKey(DIK_W),      // DIK_W
+		moveDownKey(DIK_S),    // DIK_S
+		moveLeftKey(DIK_A),    // DIK_A
+		moveRightKey(DIK_D),   // DIK_D
+		actionKey(DIK_SPACE),      // DIK_SPACE
+		actionButton(XINPUT_GAMEPAD_A), // XINPUT_GAMEPAD_A
+		moveInput(0.0f, 0.0f),
+		cameraInput(0.0f, 0.0f),
+		isActionPressed(false),
+		isActionTriggered(false) {
+	}
+
+	/// @brief 使用する入力デバイス
+	InputDeviceType deviceType;
+
+	/// @brief ゲームパッド番号（0～3）
+	int gamepadNumber;
+
+	// --- キーボード割り当て（DirectInputの DIK_* を想定） ---
+	uint32_t moveUpKey;
+	uint32_t moveDownKey;
+	uint32_t moveLeftKey;
+	uint32_t moveRightKey;
+	uint32_t actionKey;
+
+	// --- ゲームパッド割り当て（XInputの XINPUT_GAMEPAD_* を想定） ---
+	uint32_t actionButton;
+
+	// --- 現在の入力状態（InputSystem側で毎フレーム更新される値） ---
+	Vector2 moveInput;
+	Vector2 cameraInput;
+	bool isActionPressed;
+	bool isActionTriggered;
+};

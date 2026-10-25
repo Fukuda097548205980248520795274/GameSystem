@@ -4,6 +4,8 @@
 #include <cmath>
 #include <algorithm>
 
+#include "Engine.h"
+
 /// @brief 初期化
 /// @param winApp 
 void Detail::Input::Initialize(const WinApp* winApp)
@@ -11,9 +13,17 @@ void Detail::Input::Initialize(const WinApp* winApp)
 	// nullptrチェック
 	assert(winApp);
 
+	// エンジンのインスタンスを取得する
+	auto engine = Engine::GetInstance();
+
 	// DirectInputを初期化する
 	HRESULT hr = DirectInput8Create(winApp->GetWndClass().hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput_, nullptr);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr))
+	{
+		if (engine)engine->Log(LogLevel::Error, std::format("DirectInputの初期化 : 0x{:X}", hr));
+		throw std::runtime_error("DirectInputの初期化に失敗しました。");
+	}
+	if (engine)engine->Log(LogLevel::Info, "DirectInputの初期化に成功");
 
 
 	/*--------------------
@@ -22,15 +32,30 @@ void Detail::Input::Initialize(const WinApp* winApp)
 
 	// キーボードデバイスの生成
 	hr = directInput_->CreateDevice(GUID_SysKeyboard, &keyboard_, NULL);
-	assert(SUCCEEDED(hr));
+	if(FAILED(hr))
+	{
+		if (engine)engine->Log(LogLevel::Error, std::format("キーボードデバイスの生成 : 0x{:X}", hr));
+		throw std::runtime_error("キーボードデバイスの生成に失敗しました。");
+	}
+	if (engine)engine->Log(LogLevel::Info, "キーボードデバイスの生成に成功");
 
 	// 入力データの形式
 	hr = keyboard_->SetDataFormat(&c_dfDIKeyboard);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr))
+	{
+		if (engine)engine->Log(LogLevel::Error, std::format("キーボードのデータ形式の設定 : 0x{:X}", hr));
+		throw std::runtime_error("キーボードのデータ形式の設定に失敗しました。");
+	}
+	if (engine)engine->Log(LogLevel::Info, "キーボードのデータ形式の設定に成功");
 
 	// 排他制御レベルのセット
 	hr = keyboard_->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr))
+	{
+		if (engine)engine->Log(LogLevel::Error, std::format("キーボードの排他制御レベルのセット : 0x{:X}", hr));
+		throw std::runtime_error("キーボードの排他制御レベルのセットに失敗しました。");
+	}
+	if (engine)engine->Log(LogLevel::Info, "キーボードの排他制御レベルのセットに成功");
 
 
 	/*----------------
@@ -39,15 +64,30 @@ void Detail::Input::Initialize(const WinApp* winApp)
 
 	// マウスデバイスの生成
 	hr = directInput_->CreateDevice(GUID_SysMouse, &mouse_, NULL);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr))
+	{
+		if (engine)engine->Log(LogLevel::Error, std::format("マウスデバイスの生成 : 0x{:X}", hr));
+		throw std::runtime_error("マウスデバイスの生成に失敗しました。");
+	}
+	if (engine)engine->Log(LogLevel::Info, "マウスデバイスの生成に成功");
 
 	// 入力データの形式セット
 	hr = mouse_->SetDataFormat(&c_dfDIMouse);
-	assert(SUCCEEDED(hr));
+	if(FAILED(hr))
+	{
+		if (engine)engine->Log(LogLevel::Error, std::format("マウスのデータ形式の設定 : 0x{:X}", hr));
+		throw std::runtime_error("マウスのデータ形式の設定に失敗しました。");
+	}
+	if (engine)engine->Log(LogLevel::Info, "マウスのデータ形式の設定に成功");
 
 	// 排他制御レベルのセット
 	hr = mouse_->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-	assert(SUCCEEDED(hr));
+	if(FAILED(hr))
+	{
+		if (engine)engine->Log(LogLevel::Error, std::format("マウスの排他制御レベルのセット : 0x{:X}", hr));
+		throw std::runtime_error("マウスの排他制御レベルのセットに失敗しました。");
+	}
+	if (engine)engine->Log(LogLevel::Info, "マウスの排他制御レベルのセットに成功");
 }
 
 /// @brief 全ての入力情報を取得する

@@ -31,6 +31,10 @@ Engine::~Engine()
 	dxDebug_ = nullptr;
 #endif
 
+	// オーディオシステムを破棄
+	audioSystem_.reset();
+	audioSystem_ = nullptr;
+
 	// 入力処理を破棄
 	input_.reset();
 	input_ = nullptr;
@@ -83,6 +87,9 @@ void Engine::NewFrame()
 	// 全ての入力情報を取得する
 	input_->CheckInputInfo();
 
+	// オーディオシステムの更新
+	audioSystem_->Update();
+
 	// 新フレーム処理
 	renderContext_->NewFrame();
 
@@ -132,6 +139,9 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 
 	// 入力処理を作成
 	input_ = std::make_unique<Detail::Input>(winApp_.get());
+
+	// オーディオシステムを作成
+	audioSystem_ = std::make_unique<Detail::AudioSystem>();
 
 	// DirectXデバッグのポインタ
 	Detail::DXDebug* dxDebug = nullptr;

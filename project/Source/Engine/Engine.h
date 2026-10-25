@@ -6,6 +6,7 @@
 #include "DXDebug/DXDebug.h"
 #include "ECS/RegistryECS/RegistryECS.h"
 #include "RenderContext/RenderContext.h"
+#include "Audio/AudioSystem/AudioSystem.h"
 #include "Input/Input.h"
 
 /// @brief エンジン
@@ -153,6 +154,10 @@ public:
 	/// @return 
 	Detail::ShaderEditor* GetShaderEditor() { return renderContext_->GetShaderEditor(); }
 
+	/// @brief 入力処理を取得する
+	/// @return 
+	Detail::Input* GetInput() { return input_.get(); }
+
 	/// @brief テクスチャファイルがドロップされたときの処理
 	/// @param filePath 
 	void OnTextureDropped(const std::string& filePath) { renderContext_->OnTextureDropped(filePath); }
@@ -189,6 +194,9 @@ private:
 
 	/// @brief 入力処理
 	std::unique_ptr<Detail::Input> input_;
+
+	/// @brief オーディオシステム
+	std::unique_ptr<Detail::AudioSystem> audioSystem_;
 
 
 #ifdef _DEBUG
