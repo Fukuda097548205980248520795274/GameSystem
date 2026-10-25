@@ -316,6 +316,57 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 			}
 		}
 
+		// AudioComponent
+		if (registry_->HasComponent<AudioComponent>(entity))
+		{
+			if (ImGui::CollapsingHeader("オーディオ", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				auto audio = registry_->GetComponent<AudioComponent>(entity);
+				if (audio)
+				{
+					// ハンドル表示
+					ImGui::Text("オーディオハンドル : %u", audio->audioHandle);
+
+					// パラメータ設定
+					ImGui::DragFloat("音量##オーディオ", &audio->volume, 0.01f, 0.0f, 1.0f);
+					ImGui::DragFloat("ピッチ##オーディオ", &audio->pitch, 0.01f, 0.1f, 4.0f); // ピッチの範囲目安
+					ImGui::Checkbox("ループ##オーディオ", &audio->isLoop);
+
+					// 重複再生の許可設定（SE用）
+					ImGui::Checkbox("重複再生を許可 (SE用)##オーディオ", &audio->allowOverlap);
+
+					ImGui::Separator();
+
+					// 再生・停止ボタンの実装
+					if (ImGui::Button("再生", ImVec2(80, 0)))
+					{
+						if (engine)
+						{
+							// エンジンからAudioSystemを取得して再生（メソッド名は実装に合わせて調整してください）
+							if (auto audioSystem = engine->GetAudioSystem())
+							{
+								audioSystem->PlayAudio(entity);
+							}
+						}
+					}
+
+					ImGui::SameLine();
+
+					if (ImGui::Button("停止", ImVec2(80, 0)))
+					{
+						if (engine)
+						{
+							// エンジンからAudioSystemを取得して停止
+							if (auto audioSystem = engine->GetAudioSystem())
+							{
+								audioSystem->StopAudio(entity);
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// InputComponent
 		if (registry_->HasComponent<InputComponent>(entity))
 		{

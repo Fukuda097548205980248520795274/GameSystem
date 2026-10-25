@@ -104,6 +104,14 @@ public:
 	/// @return 
 	Entity CreateSkyboxEntity() { return renderContext_->CreateSkyboxEntity(); }
 
+	/// @brief オーディオエンティティを作成する
+	/// @param audioHandle 
+	/// @param volume 
+	/// @param pitch 
+	/// @param isLoop 
+	/// @return 
+	Entity CreateAudioEntity(uint32_t audioHandle, float volume = 0.5f, float pitch = 1.0f, bool isLoop = false) { return audioSystem_->CreateAudioEntity(audioHandle, volume, pitch, isLoop); }
+
 	/// @brief 平行光源エンティティを作成する
 	/// @param direction 
 	/// @param color 
@@ -158,9 +166,18 @@ public:
 	/// @return 
 	Detail::Input* GetInput() { return input_.get(); }
 
+	/// @brief オーディオシステムを取得する
+	/// @return 
+	Detail::AudioSystem* GetAudioSystem() { return audioSystem_.get(); }
+
 	/// @brief テクスチャファイルがドロップされたときの処理
 	/// @param filePath 
 	void OnTextureDropped(const std::string& filePath) { renderContext_->OnTextureDropped(filePath); }
+
+	/// @brief オーディオを読み込む
+	/// @param filePath 
+	/// @return 
+	uint32_t LoadAudio(const std::string& filePath) { return audioSystem_->Load(filePath); }
 
 
 

@@ -30,6 +30,9 @@ void Game::Initialize()
 
 	// 点光源用のエンティティを作成
 	Engine::GetInstance()->CreatePointLightEntity(Vector3(0.0f, 0.0f, 15.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, 2.0f, 2.0f);
+
+	// オーディオエンティティを作成
+	Engine::GetInstance()->CreateAudioEntity(Engine::GetInstance()->LoadAudio("./Assets/Sound/Undaunted_Heart.mp3"));
 }
 
 /// @brief 更新処理

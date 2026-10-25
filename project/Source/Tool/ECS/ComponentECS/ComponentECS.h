@@ -296,6 +296,37 @@ struct SpotLightComponent
 };
 
 
+/// @brief オーディオコンポーネント
+struct AudioComponent
+{
+	AudioComponent() :
+		audioHandle(0),
+		volume(1.0f),
+		pitch(1.0f),
+		isLoop(false),
+		allowOverlap(false){
+	}
+
+	/// @brief 再生するオーディオデータのハンドル（AudioStore::Loadの戻り値）
+	uint32_t audioHandle;
+
+	// 複数のハンドルを管理するリスト
+	std::vector<uint32_t> playHandles;
+
+	/// @brief 音量 (0.0f ～ 1.0f)
+	float volume;
+
+	/// @brief ピッチ周波数比
+	float pitch;
+
+	/// @brief ループ再生するか
+	bool isLoop;
+
+	// 重複再生（多重再生）を許可するか
+	bool allowOverlap;
+};
+
+
 
 /// @brief 入力デバイスの種類
 enum class InputDeviceType
