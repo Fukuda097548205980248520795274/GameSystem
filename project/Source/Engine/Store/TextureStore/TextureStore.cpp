@@ -14,7 +14,7 @@
 void Detail::TextureStore::Initialize(ID3D12Device* device, DXHeap* heap, ID3D12GraphicsCommandList* commandList)
 {
 	// 初期テクスチャを読み込む
-	defaultTextureHandle_ = Load("./Assets/Internal/Texture/white2x2.png", heap, device, commandList);
+	defaultTextureHandle_ = Load("./Assets/Internal/Texture/white2x2.dds", heap, device, commandList);
 	defaultCubemapHandle_ = Load("./Assets/Internal/Texture/white_skybox.dds", heap, device, commandList);
 }
 
