@@ -61,5 +61,8 @@ namespace Detail
 
 		// DXCインクルードハンドラ
 		Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_ = nullptr;
+
+		/// @brief シェーダの加工済みデータの保存先ディレクトリ
+		std::string kCookedDir = "./Cooked/Shader/";
 	};
 }

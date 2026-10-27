@@ -99,6 +99,9 @@ namespace Detail
 
 	private:
 
+		/// @brief JSONファイルをバイナリに変換する
+		void ConvertJsonToBin();
+
 		/// @brief 選択されているPSOファイルの名前を取得する
 		/// @return 
 		std::string GetSelectedPsoFileName() const;
@@ -133,6 +136,13 @@ namespace Detail
 
 		/// @brief PSO設定の保存先ディレクトリ
 		const std::string kDir = "./Assets/Data/PSO/";
+
+		/// @brief PSO 加工済みデータの保存先ディレクトリ
+		const std::string kCookedDir = "./Cooked/Data/PSO/";
+
+		/// @brief 拡張子
+		const std::string kExtJson = ".json";
+		const std::string kExtBin = ".bin";
 
 		// PSOデータファイルリスト
 		std::vector<std::string> psoFileList_;

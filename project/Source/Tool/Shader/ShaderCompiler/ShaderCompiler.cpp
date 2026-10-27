@@ -38,108 +38,80 @@ void Detail::ShaderCompiler::Initialize()
 /// @return 
 Microsoft::WRL::ComPtr<IDxcBlob> Detail::ShaderCompiler::Compile(const std::wstring& filePath, const wchar_t* profile)
 {
-	// エンジンのインスタンスを取得する
 	auto engine = Engine::GetInstance();
 
-	/*----------------------s
-		HLSLファイルを読む
-	----------------------*/
+	// Cookedディレクトリの準備
+	if (!std::filesystem::exists(kCookedDir))
+	{
+		std::filesystem::create_directories(kCookedDir);
+	}
 
-	// コンパイルをするシェーダの情報をログに出力する
-	if (engine)engine->Log(LogLevel::Info, ConvertString(std::format(L"コンパイル開始 , パス : {} , プロファイル : {}", filePath, profile)));
+	// CSOファイルのパスを構築
+	std::filesystem::path hlslPath(filePath);
+	std::string csoFileName = hlslPath.stem().string() + "_" + ConvertString(profile) + ".cso";
+	std::string csoPathStr = kCookedDir + csoFileName;
+	std::filesystem::path csoPath(csoPathStr);
+
+	// CSOが存在し、かつHLSLより新しい場合はCSOを読み込む
+	if (std::filesystem::exists(csoPath) && std::filesystem::exists(hlslPath))
+	{
+		if (std::filesystem::last_write_time(csoPath) >= std::filesystem::last_write_time(hlslPath))
+		{
+			if (engine) engine->Log(LogLevel::Info, "CSOキャッシュを読み込みます: " + csoPathStr);
+
+			IDxcBlobEncoding* csoBlob = nullptr;
+			std::wstring wCsoPath = ConvertString(csoPathStr);
+			HRESULT hr = dxcUtils_->LoadFile(wCsoPath.c_str(), nullptr, &csoBlob);
+			if (SUCCEEDED(hr))
+			{
+				return csoBlob;
+			}
+		}
+	}
+
+	if (engine) engine->Log(LogLevel::Info, ConvertString(std::format(L"コンパイル開始 , パス : {} , プロファイル : {}", filePath, profile)));
 
 	// HLSLファイルを読む
 	IDxcBlobEncoding* shaderSource = nullptr;
 	HRESULT hr = dxcUtils_->LoadFile(filePath.c_str(), nullptr, &shaderSource);
 	assert(SUCCEEDED(hr));
-	if (engine)engine->Log(LogLevel::Info, "読み込み完了");
 
-	// 読み込んだファイルの内容を設定する
 	DxcBuffer shaderSourceBuffer;
 	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
 	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
 	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
-	if (engine)
-	{
-		engine->Log(LogLevel::Info, std::format("シェーダソース ポインタ : {}, シェーダソース サイズ : {} bytes, シェーダソース エンコーディング : DXC_CP_UTF8", shaderSourceBuffer.Ptr, shaderSourceBuffer.Size, shaderSourceBuffer.Encoding));
 
-	}
-
-
-	/*------------------
-		コンパイルする
-	------------------*/
-
-	LPCWSTR arguments[] =
-	{
-		// コンパイル対象のHLSLファイル名
-		filePath.c_str(),
-
-		// エントリーポイントの指定
-		L"-E", L"main",
-
-		// ShaderProfileの設定
-		L"-T", profile,
-
-		// デバッグ用の情報を埋め込む
-		L"-Zi", L"-Qembed_debug",
-
-		// 最適化を外す
-		L"-Od",
-
-		// メモリレイアウトは行優先
-		L"-Zpr"
+	LPCWSTR arguments[] = {
+		filePath.c_str(), L"-E", L"main", L"-T", profile, L"-Zi", L"-Qembed_debug", L"-Od", L"-Zpr"
 	};
 
-	// 実際にシェーダをコンパイルする
 	IDxcResult* shaderResult = nullptr;
-	hr = dxcCompiler_->Compile(
-		// 読み込んだファイル
-		&shaderSourceBuffer,
-
-		// コンパイルオプション
-		arguments,
-
-		//　コンパイルオプションの数
-		_countof(arguments),
-
-		// includeが含まれた諸々
-		includeHandler_.Get(),
-
-		// コンパイル結果
-		IID_PPV_ARGS(&shaderResult)
-	);
-
+	hr = dxcCompiler_->Compile(&shaderSourceBuffer, arguments, _countof(arguments), includeHandler_.Get(), IID_PPV_ARGS(&shaderResult));
 	assert(SUCCEEDED(hr));
-
-
-	/*----------------------------------
-		警告・エラーがでていないか確認する
-	----------------------------------*/
 
 	IDxcBlobUtf8* shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0)
 	{
-		// エラーをログに出力する
-		if (engine)engine->Log(LogLevel::Error, shaderError->GetStringPointer());
+		if (engine) engine->Log(LogLevel::Error, shaderError->GetStringPointer());
 		assert(false);
 	}
 
-
-	/*-------------------------------
-		コンパイル結果を受け取って返す
-	-------------------------------*/
-
-	// コンパイル結果から実行用のバイナリ部分を取得する
 	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 
-	// コンパイル成功ログ
-	if (engine)engine->Log(LogLevel::Info, ConvertString(std::format(L"コンパイル成功 , パス : {} , プロファイル : {}", filePath, profile)));
+	// コンパイル成功後、CSOとしてファイルに保存する
+	std::ofstream csoFile(csoPathStr, std::ios::binary);
+	if (csoFile.is_open())
+	{
+		csoFile.write(reinterpret_cast<const char*>(shaderBlob->GetBufferPointer()), shaderBlob->GetBufferSize());
+		csoFile.close();
+		if (engine) engine->Log(LogLevel::Info, "CSOファイルを保存しました: " + csoPathStr);
+	}
 
-	// リソースを解放
+	if (engine) engine->Log(LogLevel::Info, ConvertString(std::format(L"コンパイル成功 , パス : {} , プロファイル : {}", filePath, profile)));
+
 	shaderSource->Release();
 	shaderResult->Release();
 
@@ -227,8 +199,39 @@ Detail::ShaderCompileResult Detail::ShaderCompiler::CompileSource(const std::str
 Detail::ShaderCompileResult Detail::ShaderCompiler::CompileFile(const std::wstring& filePath, const wchar_t* profile, const wchar_t* entryPoint)
 {
 	ShaderCompileResult result;
+	auto engine = Engine::GetInstance();
 
-	// ファイルを読み込んで文字列化
+	if (!std::filesystem::exists(kCookedDir))
+	{
+		std::filesystem::create_directories(kCookedDir);
+	}
+
+	std::filesystem::path hlslPath(filePath);
+	// プロファイルとエントリーポイントをファイル名に含めて競合を防ぐ
+	std::string csoFileName = hlslPath.stem().string() + "_" + ConvertString(entryPoint) + "_" + ConvertString(profile) + ".cso";
+	std::string csoPathStr = kCookedDir + csoFileName;
+	std::filesystem::path csoPath(csoPathStr);
+
+	// CSO判定 (HLSLファイルよりCSOが新しければ読み込む)
+	if (std::filesystem::exists(csoPath) && std::filesystem::exists(hlslPath))
+	{
+		if (std::filesystem::last_write_time(csoPath) >= std::filesystem::last_write_time(hlslPath))
+		{
+			if (engine) engine->Log(LogLevel::Info, "CSOキャッシュを読み込みます: " + csoPathStr);
+
+			IDxcBlobEncoding* csoBlob = nullptr;
+			std::wstring wCsoPath = ConvertString(csoPathStr);
+			HRESULT hr = dxcUtils_->LoadFile(wCsoPath.c_str(), nullptr, &csoBlob);
+			if (SUCCEEDED(hr))
+			{
+				result.success = true;
+				result.blob = csoBlob;
+				return result;
+			}
+		}
+	}
+
+	// キャッシュがない、または古い場合は通常通り文字列化してCompileSourceへ
 	std::ifstream file(filePath, std::ios::in | std::ios::binary);
 	if (!file.is_open()) {
 		result.errorMessage = "Failed to open file: " + ConvertString(filePath);
@@ -239,6 +242,18 @@ Detail::ShaderCompileResult Detail::ShaderCompiler::CompileFile(const std::wstri
 	ss << file.rdbuf();
 	std::string source = ss.str();
 
-	// CompileSource に委譲
-	return CompileSource(source, filePath, profile, entryPoint);
+	result = CompileSource(source, filePath, profile, entryPoint);
+
+	// 成功したらCSOファイルを保存する
+	if (result.success && result.blob)
+	{
+		std::ofstream csoFile(csoPathStr, std::ios::binary);
+		if (csoFile.is_open())
+		{
+			csoFile.write(reinterpret_cast<const char*>(result.blob->GetBufferPointer()), result.blob->GetBufferSize());
+			csoFile.close();
+		}
+	}
+
+	return result;
 }

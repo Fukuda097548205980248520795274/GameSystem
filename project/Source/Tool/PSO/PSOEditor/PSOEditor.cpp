@@ -5,6 +5,7 @@
 /// @brief コンストラクタ
 Detail::PSOEditor::PSOEditor()
 {
+	// PSOファイルリストとシェーダファイルリストを更新する
 	RefreshPsoFileList();
 	RefreshShaderFileList();
 
@@ -914,11 +915,11 @@ Detail::PSOItem* Detail::PSOEditor::GetPSOItem(const std::string& name)
 /// @param filepath 
 void Detail::PSOEditor::SaveToFile(const std::string& filename)
 {
-	// ディレクトリが存在しない場合は作成
-	if (!std::filesystem::exists(kDir))
-		std::filesystem::create_directories(kDir);
+	// ディレクトリが存在しない場合は作成 (Cooked側)
+	if (!std::filesystem::exists(kCookedDir))
+		std::filesystem::create_directories(kCookedDir);
 
-	const std::string filePath = kDir + filename + ".json";
+	const std::string filePath = kCookedDir + filename + kExtBin;
 
 	json jArray = json::array();
 	for (const auto& item : psoItems_)
@@ -926,7 +927,6 @@ void Detail::PSOEditor::SaveToFile(const std::string& filename)
 		json jItem;
 		jItem["name"] = item.name;
 
-		// 既存の ToJson 関数を呼び出して desc を変換
 		json jDesc;
 		ToJson(jDesc, item.desc);
 		jItem["desc"] = jDesc;
@@ -934,13 +934,12 @@ void Detail::PSOEditor::SaveToFile(const std::string& filename)
 		jArray.push_back(jItem);
 	}
 
-	std::ofstream file(filePath);
+	std::ofstream file(filePath, std::ios::binary);
 	if (file.is_open())
 	{
-		// インデント幅4で整形して出力
-		file << jArray.dump(4);
-
-		// ファイルを閉じる
+		// MessagePackとしてバイナリ書き込み
+		std::vector<uint8_t> v = json::to_msgpack(jArray);
+		file.write(reinterpret_cast<const char*>(v.data()), v.size());
 		file.close();
 	}
 }
@@ -949,55 +948,83 @@ void Detail::PSOEditor::SaveToFile(const std::string& filename)
 /// @param filename 
 void Detail::PSOEditor::LoadFromFile(const std::string& filename)
 {
-	const std::string filePath = kDir + filename + ".json";
-	std::ifstream file(filePath);
+	const std::string binPath = kCookedDir + filename + kExtBin;
+	std::ifstream binFile(binPath, std::ios::binary);
 
-	if (file.is_open())
+	json jArray;
+	bool isLoaded = false;
+
+	// Cookedディレクトリから .bin ファイルの読み込みを試みる
+	if (binFile.is_open())
 	{
 		try
 		{
-			json jArray;
-			file >> jArray;
+			binFile.seekg(0, std::ios::end);
+			size_t size = binFile.tellg();
+			binFile.seekg(0, std::ios::beg);
 
-			psoItems_.clear();
-			for (const auto& jItem : jArray)
-			{
-				PSOItem newItem;
-				newItem.name = jItem.value("name", "Loaded PSO");
+			std::vector<uint8_t> v(size);
+			binFile.read(reinterpret_cast<char*>(v.data()), size);
+			binFile.close();
 
-				if (jItem.contains("desc"))
-				{
-					// 既存の FromJson 関数を呼び出して desc を復元
-					FromJson(jItem["desc"], newItem.desc);
-				}
-
-				// 読み込み直後は再ビルドが必要なのでフラグを立てる
-				newItem.isDirty = true;
-				newItem.isBuildFailed = false;
-				newItem.statusMessage = "Not Built";
-
-				psoItems_.push_back(newItem);
-			}
-
-			// psoItems_が空でない場合は最初のアイテムを選択、空の場合は選択なしにする
-			if (!psoItems_.empty())
-			{
-				selectedIndex_ = 0;
-			}
-			else
-			{
-				selectedIndex_ = -1;
-			}
+			jArray = json::from_msgpack(v);
+			isLoaded = true;
 		}
 		catch (const std::exception& e)
 		{
-			// JSONのパースに失敗した場合のエラーログ
 			auto engine = Engine::GetInstance();
-			if (engine) engine->Log(LogLevel::Error, "PSO設定の読み込みに失敗 : " + std::string(e.what()));
+			if (engine) engine->Log(LogLevel::Error, "BINファイルの解析に失敗 : " + std::string(e.what()));
+		}
+	}
+	else
+	{
+		// .bin が存在しない・読み込めない場合は元の .json からの読み込みを試みる (フォールバック)
+		const std::string jsonPath = kDir + filename + kExtJson;
+		std::ifstream jsonFile(jsonPath);
+
+		if (jsonFile.is_open())
+		{
+			try
+			{
+				jsonFile >> jArray;
+				jsonFile.close();
+				isLoaded = true;
+			}
+			catch (const std::exception& e)
+			{
+				auto engine = Engine::GetInstance();
+				if (engine) engine->Log(LogLevel::Error, "JSONファイルのフォールバック読み込みに失敗 : " + std::string(e.what()));
+			}
+		}
+	}
+
+	// データの展開処理
+	if (isLoaded)
+	{
+		psoItems_.clear();
+		for (const auto& jItem : jArray)
+		{
+			PSOItem newItem;
+			newItem.name = jItem.value("name", "Loaded PSO");
+
+			if (jItem.contains("desc"))
+			{
+				FromJson(jItem["desc"], newItem.desc);
+			}
+
+			newItem.isDirty = true;
+			newItem.isBuildFailed = false;
+			newItem.statusMessage = "Not Built";
+			psoItems_.push_back(newItem);
 		}
 
-		// ファイルを閉じる
-		file.close();
+		selectedIndex_ = !psoItems_.empty() ? 0 : -1;
+
+		// JSONから読み込んだ場合、次回以降のためにCookedにBINとして保存し直す
+		if (!binFile.is_open())
+		{
+			SaveToFile(filename);
+		}
 	}
 }
 
@@ -1158,6 +1185,57 @@ void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
 	}
 }
 
+/// @brief JSONファイルをバイナリに変換する
+void Detail::PSOEditor::ConvertJsonToBin()
+{
+	std::filesystem::path srcDir(kDir);
+	std::filesystem::path dstDir(kCookedDir);
+
+	// Cooked用ディレクトリが存在しない場合は作成
+	if (!std::filesystem::exists(dstDir))
+	{
+		std::filesystem::create_directories(dstDir);
+	}
+
+	if (!std::filesystem::exists(srcDir)) return;
+
+	for (const auto& entry : std::filesystem::directory_iterator(srcDir))
+	{
+		if (entry.is_regular_file() && entry.path().extension() == kExtJson)
+		{
+			std::string filePath = entry.path().string();
+			std::ifstream file(filePath);
+			if (file.is_open())
+			{
+				try
+				{
+					json jArray;
+					file >> jArray;
+					file.close();
+
+					// Cookedディレクトリに .bin として書き出し
+					std::string filename = entry.path().stem().string();
+					std::string binPath = kCookedDir + filename + kExtBin;
+
+					std::ofstream binFile(binPath, std::ios::binary);
+					if (binFile.is_open())
+					{
+						std::vector<uint8_t> v = json::to_msgpack(jArray);
+						binFile.write(reinterpret_cast<const char*>(v.data()), v.size());
+						binFile.close();
+					}
+					// ※ 元の .json ファイルは削除せず維持する
+				}
+				catch (const std::exception& e)
+				{
+					auto engine = Engine::GetInstance();
+					if (engine) engine->Log(LogLevel::Error, "JSON から BIN への変換に失敗: " + std::string(e.what()));
+				}
+			}
+		}
+	}
+}
+
 /// @brief 選択されているPSOファイルの名前を取得する
 /// @return 
 std::string Detail::PSOEditor::GetSelectedPsoFileName() const
@@ -1186,17 +1264,18 @@ void Detail::PSOEditor::RefreshPsoFileList()
 {
 	psoFileList_.clear();
 
-	std::filesystem::path dirPath(kDir);
+	// Cookedディレクトリを対象にする
+	std::filesystem::path dirPath(kCookedDir);
 	if (!std::filesystem::exists(dirPath))
 	{
 		std::filesystem::create_directories(dirPath);
 		return;
 	}
 
-	// PSO保存用ディレクトリ配下の.jsonファイルを再帰走査
+	// PSO保存用ディレクトリ配下の.binファイルを再帰走査
 	for (const auto& entry : std::filesystem::recursive_directory_iterator(dirPath))
 	{
-		if (entry.is_regular_file() && entry.path().extension() == ".json")
+		if (entry.is_regular_file() && entry.path().extension() == kExtBin)
 		{
 			psoFileList_.push_back(entry.path().string());
 		}

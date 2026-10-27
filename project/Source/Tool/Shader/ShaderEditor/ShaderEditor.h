@@ -64,5 +64,8 @@ namespace Detail
 
 		// デフォルトのシェーダディレクトリ
 		const std::string kDir = "./Assets/Shader/";
+
+		/// @brief　コンパイル済みシェーダの出力ディレクトリ
+		const std::string kCookedDir = "./Cooked/Shader/";
 	};
 }
