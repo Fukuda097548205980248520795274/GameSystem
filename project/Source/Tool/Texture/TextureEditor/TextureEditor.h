@@ -51,6 +51,6 @@ namespace Detail
 	private:
 
 		// デフォルトのテクスチャディレクトリ
-		const std::string kDir = "./Assets/Texture/";
+		const std::string kDir = "./Cooked/Texture/";
 	};
 }

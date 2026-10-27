@@ -79,27 +79,70 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 	assert(heap && device && commandList);
 	auto engine = Engine::GetInstance();
 
-	// 既に読み込み済みか検索
+	if (!std::filesystem::exists(filePath)) {
+		if (engine) engine->Log(LogLevel::Error, "ファイルが存在しません : " + filePath);
+		return TextureHandle::Invalid();
+	}
+
+	// 1. 正規化パスを用いた既存ロードの確認（※元のパスのまま判定）
 	std::string normPath = NormalizePath(filePath);
 	auto it = pathToHandleMap_.find(normPath);
 	if (it != pathToHandleMap_.end())
 	{
-		// ハンドルが今も有効かチェックして返す
 		if (GetTextureData(it->second) != nullptr)
 			return it->second;
 	}
 
-	// 画像読み込み
-	DirectX::ScratchImage image = LoadTextureGetMipImages(filePath);
-	if (image.GetImageCount() == 0)
+	std::string extension = std::filesystem::path(filePath).extension().string();
+	std::string extLower = extension;
+	std::transform(extLower.begin(), extLower.end(), extLower.begin(), ::tolower);
+
+	std::string cookedDdsPath;
+
+	// 2. DDSかそれ以外かで分岐
+	if (extLower == ".dds")
 	{
-		if (engine) engine->Log(LogLevel::Error, "テクスチャの読み込みに失敗 : " + filePath);
+		// DDSの場合は変換やハッシュ付与をスキップし、そのまま使う
+		cookedDdsPath = filePath;
+	}
+	else
+	{
+		// PNGなどの場合はファイルハッシュを計算し、キャッシュ用のDDSファイル名を決定
+		uint64_t fileHash = ComputeFileHash(filePath);
+		std::string ddsFileName = std::filesystem::path(filePath).stem().string() + "_" + std::to_string(fileHash) + ".dds";
+		cookedDdsPath = kCookedTextureDir + ddsFileName;
+
+		// キャッシュが存在しない場合のみ変換を実行
+		if (!std::filesystem::exists(cookedDdsPath))
+		{
+			if (!ConvertToDDS(filePath, kCookedTextureDir, ddsFileName)) 
+			{
+				if (engine) engine->Log(LogLevel::Error, "DDS変換に失敗しました : " + filePath);
+				return TextureHandle::Invalid();
+			}
+		}
+	}
+
+	// 3. 画像読み込みと例外・エラー対策
+	DirectX::ScratchImage image;
+	try
+	{
+		image = LoadTextureGetMipImages(cookedDdsPath);
+		if (image.GetImageCount() == 0)
+		{
+			if (engine) engine->Log(LogLevel::Error, "テクスチャの読み込みに失敗 : " + cookedDdsPath);
+			return TextureHandle::Invalid();
+		}
+	}
+	catch (const std::exception& e)
+	{
+		if (engine) engine->Log(LogLevel::Error, "テクスチャ読み込み例外: " + std::string(e.what()));
 		return TextureHandle::Invalid();
 	}
 
-	// ハッシュ値の確認
-	uint64_t hash = ComputeImageHash(image);
-	auto hashIt = hashToHandleMap_.find(hash);
+	// 4. 画像ピクセルからのハッシュ（既存の仕組みを維持）
+	uint64_t imageHash = ComputeImageHash(image);
+	auto hashIt = hashToHandleMap_.find(imageHash);
 	if (hashIt != hashToHandleMap_.end())
 	{
 		if (GetTextureData(hashIt->second) != nullptr)
@@ -110,11 +153,14 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 		}
 	}
 
-	// テクスチャリソースの作成
+	// 5. テクスチャリソースの作成
 	auto textureData = std::make_unique<TextureData>();
+
+	// ★修正点: 参照パスは「変換後のDDS」ではなく「元のファイルパス」を保持する
 	textureData->name = filePath;
+
 	textureData->metadata = image.GetMetadata();
-	textureData->hash = hash;
+	textureData->hash = imageHash;
 
 	const DirectX::TexMetadata& metadata = image.GetMetadata();
 	textureData->type_ = metadata.IsCubemap() ? TextureType::Cubemap : TextureType::Texture2D;
@@ -174,7 +220,7 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 	slot.data->handle = handle.index; // 内部保持用
 
 	pathToHandleMap_[normPath] = handle;
-	hashToHandleMap_[hash] = handle;
+	hashToHandleMap_[imageHash] = handle;
 
 	return handle;
 }
@@ -371,4 +417,95 @@ void Detail::TextureStore::ProcessDeferredDeletions(uint32_t maxBufferCount, uin
 			break;
 		}
 	}
+}
+
+/// @brief ファイルのハッシュ値を計算する
+/// @param filePath
+/// @return
+uint64_t Detail::TextureStore::ComputeFileHash(const std::string& filePath) const
+{
+	std::ifstream file(filePath, std::ios::binary);
+	if (!file) return 0;
+
+	uint64_t hash = 14695981039346656037ULL; // FNV-1a初期値
+	char buffer[4096];
+	while (file.read(buffer, sizeof(buffer))) 
+	{
+		std::streamsize bytes = file.gcount();
+		for (std::streamsize i = 0; i < bytes; ++i)
+		{
+			hash ^= static_cast<uint8_t>(buffer[i]);
+			hash *= 1099511628211ULL;
+		}
+	}
+
+	// 残りの端数分
+	std::streamsize bytes = file.gcount();
+	for (std::streamsize i = 0; i < bytes; ++i) {
+		hash ^= static_cast<uint8_t>(buffer[i]);
+		hash *= 1099511628211ULL;
+	}
+
+	return hash;
+}
+
+/// @brief DDSに変換する
+/// @param sourcePath 
+/// @param destDir 
+/// @param outFileName
+/// @return 
+bool Detail::TextureStore::ConvertToDDS(const std::string& sourcePath, const std::string& destDir, const std::string& outFileName) const
+{
+	auto engine = Engine::GetInstance();
+
+	std::filesystem::path texconvPath = std::filesystem::absolute(kTexConvDir);
+	std::filesystem::path src = std::filesystem::absolute(sourcePath);
+	std::filesystem::path dest = std::filesystem::absolute(destDir);
+
+	// パスの正規化（余計な . や .. を整理）
+	dest = dest.lexically_normal();
+
+	if (!std::filesystem::exists(texconvPath)) {
+		if (engine) engine->Log(LogLevel::Error, "texconv.exeが見つかりません : " + texconvPath.string());
+		return false;
+	}
+	if (!std::filesystem::exists(src)) return false;
+
+	if (!std::filesystem::exists(dest)) {
+		std::filesystem::create_directories(dest);
+	}
+
+	// ★重要: パスの末尾が \ や / の場合、" で囲んだ際に \" となり引数が壊れるため削除する
+	std::string destStr = dest.string();
+	if (!destStr.empty() && (destStr.back() == '\\' || destStr.back() == '/')) {
+		destStr.pop_back();
+	}
+
+	// コマンド構築（destStrを使う）
+	std::string command = "\"\"" + texconvPath.string() + "\" " + kTexConvArgs + " -o \"" + destStr + "\" \"" + src.string() + "\"\"";
+
+	if (engine) engine->Log(LogLevel::Info, "実行コマンド: " + command);
+
+	int result = std::system(command.c_str());
+	if (result != 0) {
+		if (engine) engine->Log(LogLevel::Error, "DDS変換コマンドが失敗しました。終了コード: " + std::to_string(result));
+		return false;
+	}
+
+	// 出力ファイルの確認とリネーム
+	std::filesystem::path originalOutPath = dest / src.filename();
+	originalOutPath.replace_extension(".dds");
+
+	std::filesystem::path finalOutPath = dest / outFileName;
+
+	if (std::filesystem::exists(originalOutPath)) {
+		if (std::filesystem::exists(finalOutPath)) {
+			std::filesystem::remove(finalOutPath);
+		}
+		std::filesystem::rename(originalOutPath, finalOutPath);
+		return true;
+	}
+
+	if (engine) engine->Log(LogLevel::Error, "変換後のDDSファイルが見つかりません: " + originalOutPath.string());
+	return false;
 }

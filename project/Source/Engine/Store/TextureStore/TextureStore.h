@@ -145,6 +145,30 @@ namespace Detail
 
 	private:
 
+		/// @brief ファイルのハッシュ値を計算する
+		/// @param filePath
+		/// @return
+		uint64_t ComputeFileHash(const std::string& filePath) const;
+
+		/// @brief DDSに変換する
+		/// @param sourcePath 
+		/// @param destDir 
+		/// @param outFileName
+		/// @return 
+		bool ConvertToDDS(const std::string& sourcePath, const std::string& destDir, const std::string& outFileName) const;
+
+		// DirectXTexのtexconv.exeの相対パス
+		const std::string kTexConvDir = "./Externals/DirectXTex/texconv.exe"; 
+
+		// 出力用のテクスチャディレクトリ
+		const std::string kCookedTextureDir = "./Cooked/Texture/";
+
+		// texconv.exeの引数
+		const std::string kTexConvArgs = "-y -f BC7_UNORM -m 1 -srgb";
+
+
+	private:
+
 		/// @brief 破棄を遅延処理する
 		/// @param maxBufferCount 
 		/// @param frameIndex 
