@@ -164,7 +164,7 @@ namespace Detail
 		const std::string kCookedTextureDir = "./Cooked/Texture/";
 
 		// texconv.exeの引数
-		const std::string kTexConvArgs = "-y -f BC7_UNORM -m 1 -srgb";
+		const std::string kTexConvArgs = "-y -f BC7_UNORM_SRGB -m 1 -srgb";
 
 
 	private:

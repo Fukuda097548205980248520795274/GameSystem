@@ -102,5 +102,10 @@ namespace Detail
 		// 破棄待ちキュー
 		std::queue<DeferredDeletionData> deferredDeletionQueue_;
 
+
+	private:
+
+		// 出力用ディレクトリ
+		const std::string kCookedDir = "./Cooked/Model/";
 	};
 }
