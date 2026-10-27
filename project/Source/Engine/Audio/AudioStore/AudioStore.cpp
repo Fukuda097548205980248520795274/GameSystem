@@ -124,21 +124,47 @@ uint32_t Detail::AudioStore::Load(const std::string& filePath)
 			return data->handle;
 	}
 
-	// wStringに変換する
-	const std::wstring kFilePathW = ConvertString(filePath);
+	auto engine = Engine::GetInstance();
 
-	// ソースレーダを作成する
+	if (!std::filesystem::exists(filePath))
+	{
+		if (engine) engine->Log(LogLevel::Error, "サウンドファイルが存在しません : " + filePath);
+		return 0; // 無効なハンドルを返す
+	}
+
+	// ファイルのハッシュ値を計算する
+	uint64_t fileHash = ComputeFileHash(filePath);
+	std::filesystem::path srcPath(filePath);
+	std::string extension = srcPath.extension().string();
+	std::string stem = srcPath.stem().string();
+
+	// 中間データのファイル名を作成する
+	std::string cookedFileName = stem + "_" + std::to_string(fileHash) + extension;
+	std::string cookedFilePath = kCookedDir + cookedFileName;
+
+	// キャッシュが存在しない場合はコピーを実行
+	if (!std::filesystem::exists(cookedFilePath))
+	{
+		if (!std::filesystem::exists(kCookedDir))
+		{
+			std::filesystem::create_directories(kCookedDir);
+		}
+		std::filesystem::copy_file(filePath, cookedFilePath, std::filesystem::copy_options::overwrite_existing);
+		if (engine) engine->Log(LogLevel::Info, "サウンドの中間データを作成しました : " + cookedFilePath);
+	}
+
+	// Media Foundation には中間データ（Cooked）のパスを渡して読み込む
+	const std::wstring kFilePathW = ConvertString(cookedFilePath);
+
+	// ソースリーダーを作成する
 	ComPtr<IMFSourceReader> pMFSourceReader{ nullptr };
 	HRESULT hr = MFCreateSourceReaderFromURL(kFilePathW.c_str(), NULL, &pMFSourceReader);
 	assert(SUCCEEDED(hr));
 
-
-	// メディアタイプの作成
 	ComPtr<IMFMediaType> pReader{ nullptr };
 	hr = MFCreateMediaType(&pReader);
 	assert(SUCCEEDED(hr));
 
-	// ソースレーダとメディアタイプの設定
 	pReader->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 	pReader->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
 	hr = pMFSourceReader->SetCurrentMediaType((DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, pReader.Get());
@@ -152,6 +178,8 @@ uint32_t Detail::AudioStore::Load(const std::string& filePath)
 
 	// オーディオデータを作成する
 	std::unique_ptr<AudioData> audioDatum = std::make_unique<AudioData>();
+
+	// 内部の参照用パスには元の Assets のパスを保持しておく
 	audioDatum->filePath = filePath;
 
 	// サウンドハンドルを取得する
@@ -160,6 +188,10 @@ uint32_t Detail::AudioStore::Load(const std::string& filePath)
 
 	// ウェーブフォーマットを作成する
 	MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &audioDatum->waveFormat, nullptr);
+
+	// PCM形式の場合、cbSizeを0に設定する
+	if (audioDatum->waveFormat && audioDatum->waveFormat->wFormatTag == WAVE_FORMAT_PCM)
+		audioDatum->waveFormat->cbSize = 0;
 
 	while (true)
 	{
@@ -386,4 +418,44 @@ float Detail::AudioStore::ClampVolume(float volume)
 	const float kMaxSoundVolume = 1.0f;
 	const float kMinSoundVolume = 0.0f;
 	return std::clamp(volume, kMinSoundVolume, kMaxSoundVolume);
+}
+
+/// @brief パスを正規化する
+/// @param path 
+/// @return 
+std::string Detail::AudioStore::NormalizePath(const std::string& path) const
+{
+	std::filesystem::path p(path);
+	std::string normalized = p.lexically_normal().string();
+	std::transform(normalized.begin(), normalized.end(), normalized.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+	return normalized;
+}
+
+/// @brief ファイルのハッシュ値を計算する
+/// @param filePath
+/// @return
+uint64_t Detail::AudioStore::ComputeFileHash(const std::string& filePath) const
+{
+	std::ifstream file(filePath, std::ios::binary);
+	if (!file) return 0;
+
+	uint64_t hash = 14695981039346656037ULL; // FNV-1a初期値
+	char buffer[4096];
+	while (file.read(buffer, sizeof(buffer)))
+	{
+		std::streamsize bytes = file.gcount();
+		for (std::streamsize i = 0; i < bytes; ++i)
+		{
+			hash ^= static_cast<uint8_t>(buffer[i]);
+			hash *= 1099511628211ULL;
+		}
+	}
+
+	std::streamsize bytes = file.gcount();
+	for (std::streamsize i = 0; i < bytes; ++i) {
+		hash ^= static_cast<uint8_t>(buffer[i]);
+		hash *= 1099511628211ULL;
+	}
+
+	return hash;
 }

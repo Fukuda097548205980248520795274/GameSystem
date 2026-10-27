@@ -82,6 +82,17 @@ namespace Detail
 		static float ClampVolume(float volume);
 
 
+		/// @brief パスを正規化する
+		/// @param path 
+		/// @return 
+		std::string NormalizePath(const std::string& path) const;
+
+		/// @brief ファイルのハッシュ値を計算する
+		/// @param filePath
+		/// @return
+		uint64_t ComputeFileHash(const std::string& filePath) const;
+
+
 
 		// XAudio2
 		ComPtr<IXAudio2> xAudio2_ = nullptr;
@@ -97,5 +108,8 @@ namespace Detail
 
 		// プレイテーブル
 		std::list<std::unique_ptr<PlayData>> playTable_;
+
+		/// @brief 出力用ディレクトリ
+		const std::string kCookedDir = "./Cooked/Sound/";
 	};
 }
