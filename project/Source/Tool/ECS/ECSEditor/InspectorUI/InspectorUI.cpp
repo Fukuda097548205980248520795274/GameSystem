@@ -61,6 +61,37 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 					{
 						script->scriptClass = classBuf;
 					}
+
+					// asファイル生成ボタン
+					if (ImGui::Button("asファイルを生成"))
+					{
+						if (!script->moduleName.empty() && !script->scriptClass.empty())
+						{
+							// モジュール名をベースに .as ファイルを作成（プロジェクトのルート等に保存されます）
+							std::string fileName = script->moduleName + ".as";
+							std::ofstream ofs(fileName);
+							if (ofs.is_open())
+							{
+								// AngelScriptのクラス雛形を出力
+								ofs << "class " << script->scriptClass << "\n";
+								ofs << "{\n";
+								ofs << "\t" << script->scriptClass << "()\n";
+								ofs << "\t{\n";
+								ofs << "\t\t// コンストラクタ\n";
+								ofs << "\t}\n\n";
+								ofs << "\tvoid Initialize()\n";
+								ofs << "\t{\n";
+								ofs << "\t\t// 初期化処理\n";
+								ofs << "\t}\n\n";
+								ofs << "\tvoid Update(float deltaTime)\n";
+								ofs << "\t{\n";
+								ofs << "\t\t// 更新処理\n";
+								ofs << "\t}\n";
+								ofs << "}\n";
+								ofs.close();
+							}
+						}
+					}
 				}
 			}
 		}
@@ -545,6 +576,50 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 				}
 			}
 		}
+
+
+		ImGui::Separator();
+		if (ImGui::Button("コンポーネントを追加", ImVec2(-1, 30)))
+		{
+			ImGui::OpenPopup("AddComponentPopup");
+		}
+
+		if (ImGui::BeginPopup("AddComponentPopup"))
+		{
+			// 各コンポーネントを持っていなければメニューに表示する
+			if (!registry_->HasComponent<ScriptComponent>(entity) && ImGui::MenuItem("ScriptComponent"))
+				registry_->AddComponent<ScriptComponent>(entity, ScriptComponent{});
+
+			if (!registry_->HasComponent<BlendComponent>(entity) && ImGui::MenuItem("BlendComponent"))
+				registry_->AddComponent<BlendComponent>(entity, BlendComponent{});
+
+			if (!registry_->HasComponent<RenderPassComponent>(entity) && ImGui::MenuItem("RenderPassComponent"))
+				registry_->AddComponent<RenderPassComponent>(entity, RenderPassComponent{});
+
+			if (!registry_->HasComponent<RenderComponent>(entity) && ImGui::MenuItem("RenderComponent"))
+				registry_->AddComponent<RenderComponent>(entity, RenderComponent{});
+
+			if (!registry_->HasComponent<SkyboxComponent>(entity) && ImGui::MenuItem("SkyboxComponent"))
+				registry_->AddComponent<SkyboxComponent>(entity, SkyboxComponent{});
+
+			if (!registry_->HasComponent<TransformComponent>(entity) && ImGui::MenuItem("TransformComponent"))
+				registry_->AddComponent<TransformComponent>(entity, TransformComponent{});
+
+			if (!registry_->HasComponent<MaterialComponent>(entity) && ImGui::MenuItem("MaterialComponent"))
+				registry_->AddComponent<MaterialComponent>(entity, MaterialComponent{});
+
+			if (!registry_->HasComponent<DirectionalLightComponent>(entity) && ImGui::MenuItem("DirectionalLightComponent"))
+				registry_->AddComponent<DirectionalLightComponent>(entity, DirectionalLightComponent{});
+
+			if (!registry_->HasComponent<AudioComponent>(entity) && ImGui::MenuItem("AudioComponent"))
+				registry_->AddComponent<AudioComponent>(entity, AudioComponent{});
+
+			if (!registry_->HasComponent<InputComponent>(entity) && ImGui::MenuItem("InputComponent"))
+				registry_->AddComponent<InputComponent>(entity, InputComponent{});
+
+			ImGui::EndPopup();
+		}
+
 
 		ImGui::TreePop();
 	}

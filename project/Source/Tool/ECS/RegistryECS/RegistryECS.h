@@ -128,6 +128,16 @@ namespace Detail
 			}
 		}
 
+		/// @brief コンポーネントを削除する
+		/// @tparam T 
+		/// @param entity 
+		template<typename T>
+		void RemoveComponent(Entity entity)
+		{
+			// ComponentArray に実装されているであろう RemoveEntity を呼び出す
+			GetComponentArray<T>()->RemoveEntity(entity);
+		}
+
 
 	private:
 

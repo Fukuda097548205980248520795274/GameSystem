@@ -37,10 +37,8 @@ void Detail::ScriptManager::MessageCallback(const asSMessageInfo* msg)
     if (msg->type == asMSGTYPE_ERROR) level = LogLevel::Error;
     else if (msg->type == asMSGTYPE_WARNING) level = LogLevel::Warning;
 
-    std::string logMsg = std::string(msg->section) + " (" +
-        std::to_string(msg->row) + ", " +
-        std::to_string(msg->col) + ") : " + msg->message;
-
+	// メッセージの整形
+    std::string logMsg = std::string(msg->section) + " (" + std::to_string(msg->row) + ", " + std::to_string(msg->col) + ") : " + msg->message;
     Engine::GetInstance()->Log(level, logMsg);
 }
 
@@ -64,19 +62,19 @@ bool Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, con
 /// @brief C++ エンジンAPIのバインド
 void Detail::ScriptManager::RegisterEngineAPI()
 {
-    // --- Vector3 のバインド (Value Type) ---
+	// Vector3 の登録
     scriptEngine_->RegisterObjectType("Vector3", sizeof(Vector3), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector3>());
     scriptEngine_->RegisterObjectProperty("Vector3", "float x", asOFFSET(Vector3, x));
     scriptEngine_->RegisterObjectProperty("Vector3", "float y", asOFFSET(Vector3, y));
     scriptEngine_->RegisterObjectProperty("Vector3", "float z", asOFFSET(Vector3, z));
 
-    // --- TransformComponent のバインド (Ref Type / Direct Struct) ---
+	// TransformComponent の登録
     scriptEngine_->RegisterObjectType("TransformComponent", sizeof(TransformComponent), asOBJ_VALUE | asGetTypeTraits<TransformComponent>());
     scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 position", asOFFSET(TransformComponent, position));
     scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 rotation", asOFFSET(TransformComponent, rotation));
     scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 scale", asOFFSET(TransformComponent, scale));
 
-    // --- ロガー／グローバル関数のバインド ---
+	// Log 関数の登録
     scriptEngine_->RegisterGlobalFunction("void Log(const string &in)",
         asFUNCTIONPR([](const std::string& str) {Engine::GetInstance()->Log(LogLevel::Info, str);}, 
             (const std::string&), void), asCALL_CDECL);
