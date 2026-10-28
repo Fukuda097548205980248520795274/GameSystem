@@ -48,6 +48,10 @@ Engine::~Engine()
 	winApp_.reset();
 	winApp_ = nullptr;
 
+	// スクリプトシステムを破棄
+	scriptSystem_.reset();
+	scriptSystem_ = nullptr;
+
 	// ロガーを破棄
 	logger_.reset();
 	logger_ = nullptr;
@@ -101,6 +105,9 @@ void Engine::NewFrame()
 /// @brief 描画後処理
 void Engine::PostDraw()
 {
+	// スクリプトシステムの更新
+	scriptSystem_->Update(registry_.get());
+
 	// 描画後処理
 	renderContext_->PostDraw();
 
@@ -122,6 +129,9 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 
 	// ロガーを作成
 	logger_ = std::make_unique<Detail::Logger>();
+
+	// スクリプトシステムを作成
+	scriptSystem_ = std::make_unique<Detail::ScriptSystem>();
 
 	// ウィンドウアプリケーションを作成
 	winApp_ = std::make_unique<Detail::WinApp>();

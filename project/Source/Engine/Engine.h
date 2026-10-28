@@ -5,6 +5,7 @@
 #include "Logger/Logger.h"
 #include "WinApp/WinApp.h"
 #include "DXDebug/DXDebug.h"
+#include "Script/ScriptSystem/ScriptSystem.h"
 #include "ECS/RegistryECS/RegistryECS.h"
 #include "RenderContext/RenderContext.h"
 #include "Audio/AudioSystem/AudioSystem.h"
@@ -203,6 +204,9 @@ private:
 
 	/// @brief ロガー
 	std::unique_ptr<Detail::Logger> logger_;
+
+	/// @brief スクリプトシステム
+	std::unique_ptr<Detail::ScriptSystem> scriptSystem_;
 
 	/// @brief ウィンドウアプリケーション
 	std::unique_ptr<Detail::WinApp> winApp_;

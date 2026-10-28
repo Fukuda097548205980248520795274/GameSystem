@@ -1,6 +1,9 @@
 #pragma once
 #include <functional>
 #include <string>
+#include <angelscript.h>
+#include <scriptbuilder/scriptbuilder.h>
+#include <scriptstdstring/scriptstdstring.h>
 #include "Input/Input.h"
 #include "Audio/AudioStore/AudioData.h"
 #include "../EntityECS/EntityECS.h"
@@ -9,6 +12,34 @@
 #include "Vector/Vector2/Vector2.h"
 #include "Vector/Vector4/Vector4.h"
 #include "Store/ProceduralMeshStore/ProceduralMeshStore.h"
+
+/// @brief スクリプトコンポーネント
+struct ScriptComponent
+{
+	/// @brief コンストラクタ
+	ScriptComponent() = default;
+
+	/// @brief コンストラクタ
+	/// @param module 
+	/// @param className 
+	ScriptComponent(const std::string& module, const std::string& className) : moduleName(module), scriptClass(className) {}
+
+	// @brief スクリプトモジュール名
+	std::string moduleName;
+
+	// @brief スクリプトクラス名
+	std::string scriptClass;
+
+
+	// スクリプトオブジェクトのインスタンスを保持するためのメンバ変数
+	asIScriptObject* scriptObject = nullptr;
+
+	// スクリプトの更新関数（Update）を保持するためのメンバ変数
+	asIScriptFunction* updateFunc = nullptr;
+
+	// スクリプトの初期化関数（コンストラクタ）を保持するためのメンバ変数
+	asIScriptFunction* initFunc = nullptr;
+};
 
 /// @brief トランスフォームコンポーネント
 struct TransformComponent

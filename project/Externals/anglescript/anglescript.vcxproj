@@ -140,6 +140,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="add_on\scriptbuilder\scriptbuilder.h" />
     <ClInclude Include="add_on\scriptstdstring\scriptstdstring.h" />
     <ClInclude Include="include\angelscript.h" />
     <ClInclude Include="source\as_array.h" />
@@ -181,6 +182,7 @@
     <ClInclude Include="source\as_variablescope.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="add_on\scriptbuilder\scriptbuilder.cpp" />
     <ClCompile Include="add_on\scriptstdstring\scriptstdstring.cpp" />
     <ClCompile Include="add_on\scriptstdstring\scriptstdstring_utils.cpp" />
     <ClCompile Include="source\as_atomic.cpp" />

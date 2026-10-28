@@ -13,6 +13,9 @@
     <Filter Include="add_on\scriptstdstring">
       <UniqueIdentifier>{8347474d-1409-4889-826b-3ee401ae1c7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="add_on\scriptbuilder">
+      <UniqueIdentifier>{2381d0f6-4c32-49bc-b85c-f24c45384f62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\angelscript.h">
@@ -131,6 +134,9 @@
     </ClInclude>
     <ClInclude Include="add_on\scriptstdstring\scriptstdstring.h">
       <Filter>add_on\scriptstdstring</Filter>
+    </ClInclude>
+    <ClInclude Include="add_on\scriptbuilder\scriptbuilder.h">
+      <Filter>add_on\scriptbuilder</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -262,6 +268,9 @@
     </ClCompile>
     <ClCompile Include="add_on\scriptstdstring\scriptstdstring_utils.cpp">
       <Filter>add_on\scriptstdstring</Filter>
+    </ClCompile>
+    <ClCompile Include="add_on\scriptbuilder\scriptbuilder.cpp">
+      <Filter>add_on\scriptbuilder</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

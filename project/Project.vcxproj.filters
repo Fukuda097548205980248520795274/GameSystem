@@ -284,6 +284,15 @@
     <Filter Include="Source\Engine\Input">
       <UniqueIdentifier>{22385612-dff8-415a-9006-99a3a121cc61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\Script">
+      <UniqueIdentifier>{40183603-6b97-4e33-96bc-c1bf499a95e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Script\ScriptManager">
+      <UniqueIdentifier>{1d50b0fe-f198-490f-b2a6-d219826b4783}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Script\ScriptSystem">
+      <UniqueIdentifier>{500f56ce-22b2-4bf6-ba07-31ca4f97e95d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -477,6 +486,12 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Input\Input.cpp">
       <Filter>Source\Engine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Script\ScriptManager\ScriptManager.cpp">
+      <Filter>Source\Tool\Script\ScriptManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Script\ScriptSystem\ScriptSystem.cpp">
+      <Filter>Source\Tool\Script\ScriptSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -701,6 +716,12 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Input\Input.h">
       <Filter>Source\Engine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Script\ScriptManager\ScriptManager.h">
+      <Filter>Source\Tool\Script\ScriptManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Script\ScriptSystem\ScriptSystem.h">
+      <Filter>Source\Tool\Script\ScriptSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

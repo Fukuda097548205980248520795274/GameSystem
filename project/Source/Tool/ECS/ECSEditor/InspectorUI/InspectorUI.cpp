@@ -35,6 +35,36 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 	std::string nodeName = "Entity " + std::to_string(entity);
 	if (ImGui::TreeNodeEx(nodeName.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 	{
+
+		// ScriptComponent
+		if (registry_->HasComponent<ScriptComponent>(entity))
+		{
+			if (ImGui::CollapsingHeader("スクリプト", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				auto script = registry_->GetComponent<ScriptComponent>(entity);
+				if (script)
+				{
+					// スクリプトモジュール名とクラス名を編集可能なテキストボックスとして表示
+					char moduleBuf[128];
+					char classBuf[128];
+					strcpy_s(moduleBuf, script->moduleName.c_str());
+					strcpy_s(classBuf, script->scriptClass.c_str());
+
+					// モジュール名の入力テキストボックス
+					if (ImGui::InputText("Module", moduleBuf, sizeof(moduleBuf)))
+					{
+						script->moduleName = moduleBuf;
+					}
+
+					// クラス名の入力テキストボックス
+					if (ImGui::InputText("Class", classBuf, sizeof(classBuf)))
+					{
+						script->scriptClass = classBuf;
+					}
+				}
+			}
+		}
+
 		// BlendComponent
 		if (registry_->HasComponent<BlendComponent>(entity))
 		{
