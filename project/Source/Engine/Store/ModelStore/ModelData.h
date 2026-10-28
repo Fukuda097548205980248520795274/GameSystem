@@ -1,14 +1,14 @@
 #pragma once
-#include "Matrix/Matrix4x4/Matrix4x4.h"
 #include <vector>
 #include <string>
 #include <unordered_map>
 #include <optional>
 #include <memory>
 
+#include "Store/HandleData/HandleData.h"
 #include "Resource/VertexBufferResource/VertexBufferResource.h"
 #include "Resource/IndexBufferResource/IndexBufferResource.h"
-
+#include "Matrix/Matrix4x4/Matrix4x4.h"
 #include "Store/TextureStore/TextureData.h"
 
 namespace Detail
@@ -107,25 +107,11 @@ namespace Detail
 		std::vector<ModelNode> nodes;
 	};
 
+
+
+	/// @brief モデルのタグ
+	struct ModelTag {};
+
 	/// @brief モデルハンドル
-	struct ModelHandle
-	{
-		// インデックス
-		uint32_t index = 0;
-
-		// 世代番号
-		uint32_t generation = 0;
-
-		/// @brief 有効なハンドルかどうかを判定する
-		/// @return
-		bool IsValid() const { return generation != 0; }
-
-		// 比較演算子
-		bool operator==(const ModelHandle& other) const { return index == other.index && generation == other.generation; }
-		bool operator!=(const ModelHandle& other) const { return !(*this == other); }
-
-		/// @brief 無効なハンドルを取得する
-		/// @return 
-		static ModelHandle Invalid() { return ModelHandle{ 0, 0 }; }
-	};
+	using ModelHandle = Handle<ModelTag>;
 }

@@ -12,6 +12,7 @@ namespace Detail
 	/// @brief ヒープ
 	class DXHeap;
 
+
 	/// @brief モデルストア
 	class ModelStore
 	{

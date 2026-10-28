@@ -4,6 +4,7 @@
 namespace Detail
 {
 	/// @brief 基底ハンドル
+	template <typename Tag>
 	struct Handle
 	{
 		// インデックス
@@ -24,4 +25,6 @@ namespace Detail
 		/// @return 
 		static Handle Invalid() { return Handle{ 0, 0 }; }
 	};
+
+
 }
