@@ -80,7 +80,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;$(ProjectDir)Externals\anglescript\include\;$(ProjectDir)Externals\anglescript\add_on\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -88,7 +88,7 @@
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Debug;%(AdditionalLibraryDirectories);$(SolutionDir)..\build\output\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;%(AdditionalDependencies);imgui.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;%(AdditionalDependencies);imgui.lib;anglescript.lib</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -110,14 +110,14 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;$(ProjectDir)Externals\anglescript\include\;$(ProjectDir)Externals\anglescript\add_on\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Release;%(AdditionalLibraryDirectories);$(SolutionDir)..\build\output\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies);imgui.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies);imgui.lib;anglescript.lib</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -141,7 +141,7 @@
       <TreatWarningAsError>false</TreatWarningAsError>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Source\Engine\;$(ProjectDir)Source\Game\;$(ProjectDir)Externals\DirectXTex\;$(ProjectDir)Externals\assimp\include\;$(ProjectDir)Externals\imgui\;$(ProjectDir)Externals\nlohmann\;$(ProjectDir)Source\Math\;$(ProjectDir)Source\Tool\;$(ProjectDir)Externals\anglescript\include\;$(ProjectDir)Externals\anglescript\add_on\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,7 +149,7 @@
       <AdditionalOptions>/ignore:4049 /ignore:4098 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration />
       <AdditionalLibraryDirectories>$(ProjectDir)Externals\assimp\lib\Release;%(AdditionalLibraryDirectories);$(SolutionDir)..\build\output\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies);imgui.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;%(AdditionalDependencies);imgui.lib;anglescript.lib</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -387,6 +387,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Externals\anglescript\anglescript.vcxproj">
+      <Project>{aa2419e6-d345-4075-97f2-f20c6e3ba01a}</Project>
+    </ProjectReference>
     <ProjectReference Include="Externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
     </ProjectReference>

@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "Func/CrashHandler/CrashHandler.h"
+#include <scriptstdstring/scriptstdstring.h>
 
 #pragma comment(lib,"winmm.lib")
 #pragma comment(lib,"Dbghelp.lib")

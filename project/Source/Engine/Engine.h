@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <angelscript.h>
 
 #include "Logger/Logger.h"
 #include "WinApp/WinApp.h"
