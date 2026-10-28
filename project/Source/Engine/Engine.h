@@ -110,7 +110,7 @@ public:
 	/// @param pitch 
 	/// @param isLoop 
 	/// @return 
-	Entity CreateAudioEntity(uint32_t audioHandle, float volume = 0.5f, float pitch = 1.0f, bool isLoop = false) { return audioSystem_->CreateAudioEntity(audioHandle, volume, pitch, isLoop); }
+	Entity CreateAudioEntity(Detail::AudioHandle audioHandle, float volume = 0.5f, float pitch = 1.0f, bool isLoop = false) { return audioSystem_->CreateAudioEntity(audioHandle, volume, pitch, isLoop); }
 
 	/// @brief 平行光源エンティティを作成する
 	/// @param direction 
@@ -177,7 +177,7 @@ public:
 	/// @brief オーディオを読み込む
 	/// @param filePath 
 	/// @return 
-	uint32_t LoadAudio(const std::string& filePath) { return audioSystem_->Load(filePath); }
+	Detail::AudioHandle LoadAudio(const std::string& filePath) { return audioSystem_->Load(filePath); }
 
 
 

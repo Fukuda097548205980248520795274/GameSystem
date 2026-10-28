@@ -22,37 +22,37 @@ namespace Detail
 		/// @brief ファイルを読む
 		/// @param filePath 
 		/// @return 
-		uint32_t Load(const std::string& filePath);
+		AudioHandle Load(const std::string& filePath);
 
 		/// @brief 音声を流す
 		/// @param handle 
 		/// @param volume 
 		/// @return 
-		uint32_t PlayAudio(uint32_t hAudio, float volume, bool isLoop = false);
+		PlayHandle PlayAudio(AudioHandle hAudio, float volume, bool isLoop = false);
 
 		/// @brief ファイルパスを取得する
 		/// @param handle 
 		/// @return 
-		std::string GetFilePath(uint32_t hAudio) const { return audioTable_[hAudio]->filePath; }
+		std::string GetFilePath(AudioHandle hAudio) const { return audioTable_[hAudio.index]->filePath; }
 
 		/// @brief 音声を停止する
 		/// @param handle 
-		void StopAudio(uint32_t hPlay);
+		void StopAudio(PlayHandle hPlay);
 
 		/// @brief 音声が流れているかどうか
 		/// @param handle 
 		/// @return 
-		bool IsAudioPlay(uint32_t hPlay);
+		bool IsAudioPlay(PlayHandle hPlay);
 
 		/// @brief 音量を設定する
 		/// @param handle 
 		/// @param volume 
-		void SetVolume(uint32_t hPlay, float volume);
+		void SetVolume(PlayHandle hPlay, float volume);
 
 		/// @brief ピッチを設定する
 		/// @param handle 
 		/// @param pitch 
-		void SetPitch(uint32_t hPlay, float pitch);
+		void SetPitch(PlayHandle hPlay, float pitch);
 
 		// Microsoft::WRL:: 省略
 		template<class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -66,15 +66,15 @@ namespace Detail
 		/// @brief ハンドルに対応するプレイデータを探す
 		/// @param handle 
 		/// @return 
-		PlayData* FindPlayData(uint32_t hPlay);
+		PlayData* FindPlayData(PlayHandle hPlay);
 
 		/// @brief ハンドルに対応するオーディオデータを探す
 		/// @param handle 
 		/// @return 
-		const AudioData* FindAudioData(uint32_t hAudio) const;
+		const AudioData* FindAudioData(AudioHandle hAudio) const;
 
 		/// @brief ユニークなプレイハンドルを生成する 
-		uint32_t GenerateUniquePlayHandle() const;
+		PlayHandle GenerateUniquePlayHandle() const;
 
 		/// @brief 音量を制御する
 		/// @param volume 

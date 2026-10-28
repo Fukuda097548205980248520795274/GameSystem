@@ -27,7 +27,7 @@ void Detail::AudioSystem::Update()
 /// @param pitch 
 /// @param isLoop 
 /// @return 
-Entity Detail::AudioSystem::CreateAudioEntity(uint32_t audioHandle, float volume, float pitch, bool isLoop)
+Entity Detail::AudioSystem::CreateAudioEntity(AudioHandle audioHandle, float volume, float pitch, bool isLoop)
 {
 	// ECSレジストリから新しいエンティティを作成
 	Entity entity = registry_->CreateEntity();
@@ -46,15 +46,15 @@ Entity Detail::AudioSystem::CreateAudioEntity(uint32_t audioHandle, float volume
 /// @brief 再生
 /// @param entity 
 /// @return 
-uint32_t Detail::AudioSystem::PlayAudio(Entity entity)
+Detail::PlayHandle Detail::AudioSystem::PlayAudio(Entity entity)
 {
 	auto audioComponent = registry_->GetComponent<AudioComponent>(entity);
-	if (!audioComponent) return 0;
+	if (!audioComponent) return PlayHandle();
 
 	// 重複再生を許可しない場合は、現在鳴っている音をすべて停止する
 	if (!audioComponent->allowOverlap)
 	{
-		for (uint32_t handle : audioComponent->playHandles)
+		for (auto handle : audioComponent->playHandles)
 		{
 			audioStore_->StopAudio(handle);
 		}
@@ -65,16 +65,16 @@ uint32_t Detail::AudioSystem::PlayAudio(Entity entity)
 		// 重複再生する場合、すでに再生が終了した古いハンドルをリストから除外しておく（メモリ肥大化防止）
 		audioComponent->playHandles.erase(
 			std::remove_if(audioComponent->playHandles.begin(), audioComponent->playHandles.end(),
-				[this](uint32_t h) { return !audioStore_->IsAudioPlay(h); }),
+				[this](Detail::PlayHandle h) { return !audioStore_->IsAudioPlay(h); }),
 			audioComponent->playHandles.end()
 		);
 	}
 
 	// オーディオを再生
-	uint32_t newHandle = audioStore_->PlayAudio(audioComponent->audioHandle, audioComponent->volume, audioComponent->isLoop);
+	Detail::PlayHandle newHandle = audioStore_->PlayAudio(audioComponent->audioHandle, audioComponent->volume, audioComponent->isLoop);
 
 	// 新たな再生ハンドルが有効であれば、ピッチを設定してリストに追加
-	if (newHandle != 0)
+	if (newHandle.IsValid())
 	{
 		audioStore_->SetVolume(newHandle, audioComponent->volume);
 		audioStore_->SetPitch(newHandle, audioComponent->pitch);
@@ -93,7 +93,7 @@ void Detail::AudioSystem::StopAudio(Entity entity)
 	if (!audioComponent) return;
 
 	// 保持しているすべての音声を停止する
-	for (uint32_t handle : audioComponent->playHandles)
+	for (Detail::PlayHandle handle : audioComponent->playHandles)
 	{
 		audioStore_->StopAudio(handle);
 	}

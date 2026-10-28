@@ -2,6 +2,7 @@
 #include <functional>
 #include <string>
 #include "Input/Input.h"
+#include "Audio/AudioStore/AudioData.h"
 #include "../EntityECS/EntityECS.h"
 #include "Store/ModelStore/ModelData.h"
 #include "Vector/Vector3/Vector3.h"
@@ -300,7 +301,7 @@ struct SpotLightComponent
 struct AudioComponent
 {
 	AudioComponent() :
-		audioHandle(0),
+		audioHandle(Detail::AudioHandle::Invalid()),
 		volume(1.0f),
 		pitch(1.0f),
 		isLoop(false),
@@ -308,10 +309,10 @@ struct AudioComponent
 	}
 
 	/// @brief 再生するオーディオデータのハンドル（AudioStore::Loadの戻り値）
-	uint32_t audioHandle;
+	Detail::AudioHandle audioHandle;
 
 	// 複数のハンドルを管理するリスト
-	std::vector<uint32_t> playHandles;
+	std::vector<Detail::PlayHandle> playHandles;
 
 	/// @brief 音量 (0.0f ～ 1.0f)
 	float volume;

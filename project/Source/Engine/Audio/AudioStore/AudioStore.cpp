@@ -115,21 +115,21 @@ void Detail::AudioStore::Update()
 /// @brief ファイルを読む
 /// @param filePath 
 /// @return 
-uint32_t Detail::AudioStore::Load(const std::string& filePath)
+Detail::AudioHandle Detail::AudioStore::Load(const std::string& filePath)
 {
-	// 同じファイルパスを見つけたら、そのハンドルを返す
 	for (std::unique_ptr<AudioData>& data : audioTable_)
 	{
 		if (filePath == data->filePath)
 			return data->handle;
 	}
 
+	// エンジンのインスタンスを取得する
 	auto engine = Engine::GetInstance();
 
 	if (!std::filesystem::exists(filePath))
 	{
 		if (engine) engine->Log(LogLevel::Error, "サウンドファイルが存在しません : " + filePath);
-		return 0; // 無効なハンドルを返す
+		return AudioHandle::Invalid(); // 無効なハンドルを返す
 	}
 
 	// ファイルのハッシュ値を計算する
@@ -153,80 +153,72 @@ uint32_t Detail::AudioStore::Load(const std::string& filePath)
 		if (engine) engine->Log(LogLevel::Info, "サウンドの中間データを作成しました : " + cookedFilePath);
 	}
 
-	// Media Foundation には中間データ（Cooked）のパスを渡して読み込む
+	// MFソースリーダーを作成する
 	const std::wstring kFilePathW = ConvertString(cookedFilePath);
-
-	// ソースリーダーを作成する
 	ComPtr<IMFSourceReader> pMFSourceReader{ nullptr };
 	HRESULT hr = MFCreateSourceReaderFromURL(kFilePathW.c_str(), NULL, &pMFSourceReader);
-	assert(SUCCEEDED(hr));
+
+	// アサーションを削除し、エラー時は早期リターン
+	if (FAILED(hr))
+	{
+		if (engine) engine->Log(LogLevel::Error, "ソースリーダーの作成に失敗しました : " + filePath);
+		return AudioHandle::Invalid();
+	}
 
 	ComPtr<IMFMediaType> pReader{ nullptr };
 	hr = MFCreateMediaType(&pReader);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) return AudioHandle::Invalid();
 
 	pReader->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 	pReader->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
 	hr = pMFSourceReader->SetCurrentMediaType((DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, pReader.Get());
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) return AudioHandle::Invalid();
 
-	// メディアタイプを解放し、再度作成する
 	ComPtr<IMFMediaType> pOutType;
 	hr = pMFSourceReader->GetCurrentMediaType(MF_SOURCE_READER_FIRST_AUDIO_STREAM, &pOutType);
-	assert(SUCCEEDED(hr));
+	if (FAILED(hr)) return AudioHandle::Invalid();
 
-
-	// オーディオデータを作成する
 	std::unique_ptr<AudioData> audioDatum = std::make_unique<AudioData>();
-
-	// 内部の参照用パスには元の Assets のパスを保持しておく
 	audioDatum->filePath = filePath;
 
-	// サウンドハンドルを取得する
-	uint32_t hAudio = static_cast<uint32_t>(audioTable_.size());
+	// 構造体ハンドルを生成 (generation に 1 を設定して有効化)
+	AudioHandle hAudio;
+	hAudio.index = static_cast<uint32_t>(audioTable_.size());
+	hAudio.generation = 1;
 	audioDatum->handle = hAudio;
 
-	// ウェーブフォーマットを作成する
 	MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &audioDatum->waveFormat, nullptr);
-
-	// PCM形式の場合、cbSizeを0に設定する
 	if (audioDatum->waveFormat && audioDatum->waveFormat->wFormatTag == WAVE_FORMAT_PCM)
 		audioDatum->waveFormat->cbSize = 0;
 
 	while (true)
 	{
 		ComPtr<IMFSample> pMFSample{ nullptr };
-
-		DWORD streamIndex = 0;
-		DWORD flags = 0;
+		DWORD streamIndex = 0, flags = 0;
 		LONGLONG llTimeStamp = 0;
 
 		hr = pMFSourceReader->ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, &streamIndex, &flags, &llTimeStamp, &pMFSample);
-		assert(SUCCEEDED(hr));
-
-		if (flags & MF_SOURCE_READERF_ENDOFSTREAM)break;
+		if (FAILED(hr)) break; // エラー時はそこまでのデータを残すか抜ける
+		if (flags & MF_SOURCE_READERF_ENDOFSTREAM) break;
 
 		if (pMFSample)
 		{
 			ComPtr<IMFMediaBuffer> pBuffer{ nullptr };
 			hr = pMFSample->ConvertToContiguousBuffer(&pBuffer);
-			assert(SUCCEEDED(hr));
+			if (FAILED(hr)) continue;
 
 			BYTE* pData{ nullptr };
 			DWORD currentLength = 0;
 			hr = pBuffer->Lock(&pData, nullptr, &currentLength);
-			assert(SUCCEEDED(hr));
+			if (FAILED(hr)) continue;
 
 			audioDatum->mediaData.resize(audioDatum->mediaData.size() + currentLength);
 			memcpy(audioDatum->mediaData.data() + audioDatum->mediaData.size() - currentLength, pData, currentLength);
-
 			pBuffer->Unlock();
 		}
 	}
 
-	// 配列に登録する
 	audioTable_.push_back(std::move(audioDatum));
-
 	return hAudio;
 }
 
@@ -236,46 +228,41 @@ uint32_t Detail::AudioStore::Load(const std::string& filePath)
 /// @param volume 
 /// @param isLoop 
 /// @return 
-uint32_t Detail::AudioStore::PlayAudio(uint32_t hAudio, float volume, bool isLoop)
+Detail::PlayHandle Detail::AudioStore::PlayAudio(AudioHandle hAudio, float volume, bool isLoop)
 {
-	if (!xAudio2_) return 0;
+	if (!xAudio2_ || !hAudio.IsValid()) return PlayHandle::Invalid();
 
 	const AudioData* audioData = FindAudioData(hAudio);
 	if (!audioData || !audioData->waveFormat || audioData->mediaData.empty())
-		return 0;
+		return PlayHandle::Invalid();
 
 	std::unique_ptr<PlayData> playDatum = std::make_unique<PlayData>();
-	uint32_t hPlay = GenerateUniquePlayHandle();
+	PlayHandle hPlay = GenerateUniquePlayHandle();
+	if (!hPlay.IsValid()) return PlayHandle::Invalid(); // 生成失敗時
+
 	playDatum->handle = hPlay;
 
 	IXAudio2SourceVoice* rawVoice = nullptr;
 	HRESULT hr = xAudio2_->CreateSourceVoice(&rawVoice, audioData->waveFormat);
+	if (FAILED(hr) || !rawVoice) return PlayHandle::Invalid();
 
-	// assert(SUCCEEDED(hr)) だけでなく、実際の処理でも弾く（リリース対策）
-	if (FAILED(hr) || !rawVoice) return 0;
-
-	// スマートポインタに管理を委譲（これ以降は自動破棄される）
 	playDatum->pSourceVoice.reset(rawVoice);
 
 	XAUDIO2_BUFFER buffer{ 0 };
 	buffer.pAudioData = audioData->mediaData.data();
 	buffer.Flags = XAUDIO2_END_OF_STREAM;
 	buffer.AudioBytes = sizeof(BYTE) * static_cast<UINT32>(audioData->mediaData.size());
-
-	// ループ設定の追加
-	if (isLoop) {
-		buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
-	}
+	if (isLoop) buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
 
 	hr = playDatum->pSourceVoice->SubmitSourceBuffer(&buffer);
-	if (FAILED(hr)) return 0; // pSourceVoiceは自動で破棄されるため安全
+	if (FAILED(hr)) return PlayHandle::Invalid();
 
 	volume = ClampVolume(volume);
 	hr = playDatum->pSourceVoice->SetVolume(volume);
-	if (FAILED(hr)) return 0;
+	if (FAILED(hr)) return PlayHandle::Invalid();
 
 	hr = playDatum->pSourceVoice->Start(0);
-	if (FAILED(hr)) return 0;
+	if (FAILED(hr)) return PlayHandle::Invalid();
 
 	playTable_.push_back(std::move(playDatum));
 	return hPlay;
@@ -284,7 +271,7 @@ uint32_t Detail::AudioStore::PlayAudio(uint32_t hAudio, float volume, bool isLoo
 
 /// @brief オーディオを停止する
 /// @param handle 
-void Detail::AudioStore::StopAudio(uint32_t hPlay)
+void Detail::AudioStore::StopAudio(PlayHandle hPlay)
 {
 	for (auto it = playTable_.begin(); it != playTable_.end(); ++it)
 	{
@@ -300,7 +287,7 @@ void Detail::AudioStore::StopAudio(uint32_t hPlay)
 /// @brief オーディオを再生されているかどうか
 /// @param handle 
 /// @return 
-bool Detail::AudioStore::IsAudioPlay(uint32_t hPlay)
+bool Detail::AudioStore::IsAudioPlay(PlayHandle hPlay)
 {
 	PlayData* playData = FindPlayData(hPlay);
 	if (!playData || !playData->pSourceVoice)
@@ -318,7 +305,7 @@ bool Detail::AudioStore::IsAudioPlay(uint32_t hPlay)
 /// @brief ボリュームを設定する
 /// @param handle 
 /// @param volume 
-void Detail::AudioStore::SetVolume(uint32_t hPlay, float volume)
+void Detail::AudioStore::SetVolume(PlayHandle hPlay, float volume)
 {
 	// 規格外の音にならぬようにする
 	volume = ClampVolume(volume);
@@ -335,7 +322,7 @@ void Detail::AudioStore::SetVolume(uint32_t hPlay, float volume)
 /// @brief ピッチを設定する
 /// @param handle 
 /// @param pitch 
-void Detail::AudioStore::SetPitch(uint32_t hPlay, float pitch)
+void Detail::AudioStore::SetPitch(PlayHandle hPlay, float pitch)
 {
 	pitch = ClampPitch(pitch);
 
@@ -351,63 +338,40 @@ void Detail::AudioStore::SetPitch(uint32_t hPlay, float pitch)
 /// @brief ハンドルに対応するプレイデータを探す
 /// @param handle 
 /// @return 
-Detail::PlayData* Detail::AudioStore::FindPlayData(uint32_t hPlay)
+Detail::PlayData* Detail::AudioStore::FindPlayData(PlayHandle hPlay)
 {
-	for (std::unique_ptr<PlayData>& playDatum : playTable_)
+	if (!hPlay.IsValid()) return nullptr;
+	for (auto& playDatum : playTable_)
 	{
-		if (hPlay == playDatum->handle)
-		{
-			return playDatum.get();
-		}
+		if (hPlay == playDatum->handle) return playDatum.get();
 	}
-
 	return nullptr;
 }
 
 /// @brief ハンドルに対応するオーディオデータを探す
 /// @param handle 
 /// @return 
-const Detail::AudioData* Detail::AudioStore::FindAudioData(uint32_t hAudio) const
+const Detail::AudioData* Detail::AudioStore::FindAudioData(AudioHandle hAudio) const
 {
-	if (hAudio >= audioTable_.size())
-		return nullptr;
-
-	return audioTable_[hAudio].get();
+	if (!hAudio.IsValid() || hAudio.index >= audioTable_.size()) return nullptr;
+	return audioTable_[hAudio.index].get();
 }
 
 /// @brief ユニークなプレイハンドルを生成する
 /// @return 
-uint32_t Detail::AudioStore::GenerateUniquePlayHandle() const
+Detail::PlayHandle Detail::AudioStore::GenerateUniquePlayHandle() const
 {
 	constexpr uint32_t kMaxRetryCount = 64;
-
-	// ランダムでユニークなハンドルを生成する
 	for (uint32_t retry = 0; retry < kMaxRetryCount; ++retry)
 	{
-		const uint32_t kHPlay = GetRandomRange(1, 10000000);
-		const bool kIsDuplicate = std::any_of(playTable_.begin(), playTable_.end(), [kHPlay](const std::unique_ptr<PlayData>& data)
-			{
-				return kHPlay == data->handle;
+		const uint32_t index = GetRandomRange(1, 10000000);
+		const bool isDuplicate = std::any_of(playTable_.begin(), playTable_.end(), [index](const std::unique_ptr<PlayData>& data) {
+			return index == data->handle.index;
 			});
 
-		if (!kIsDuplicate)
-			return kHPlay;
+		if (!isDuplicate) return PlayHandle{ index, 1 };
 	}
-
-	// ランダムでユニークなハンドルが見つからなかった場合、連番でユニークなハンドルを生成する
-	for (uint32_t kHPlay = 1; kHPlay < std::numeric_limits<uint32_t>::max(); ++kHPlay)
-	{
-		const bool kIsDuplicate = std::any_of(playTable_.begin(), playTable_.end(), [kHPlay](const std::unique_ptr<PlayData>& data)
-			{
-				return kHPlay == data->handle;
-			}
-		);
-
-		if (!kIsDuplicate)
-			return kHPlay;
-	}
-
-	return 0;
+	return PlayHandle::Invalid();
 }
 
 /// @brief 音量を制御する

@@ -1,4 +1,5 @@
 #pragma once
+#include "Store/HandleData/HandleData.h"
 #include <vector>
 #include <string>
 #include <memory>
@@ -10,6 +11,14 @@
 
 namespace Detail
 {
+	// オーディオハンドル
+	struct AudioTag {};
+	using AudioHandle = Handle<AudioTag>;
+
+	// プレイハンドル
+	struct PlayTag {};
+	using PlayHandle = Handle<PlayTag>;
+
 	/// @brief 音声を破棄する関数オブジェクト
 	struct VoiceDelete
 	{
@@ -51,14 +60,14 @@ namespace Detail
 		std::vector<BYTE> mediaData;
 
 		// サウンドハンドル
-		uint32_t handle;
+		AudioHandle handle = AudioHandle::Invalid();
 	};
 
 	// プレイデータ
 	struct PlayData
 	{
 		// ハンドル
-		uint32_t handle;
+		PlayHandle handle = PlayHandle::Invalid();
 
 		// ソースボイス
 		std::unique_ptr<IXAudio2SourceVoice, VoiceDelete> pSourceVoice;

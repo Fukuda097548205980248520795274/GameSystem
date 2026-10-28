@@ -324,8 +324,22 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 				auto audio = registry_->GetComponent<AudioComponent>(entity);
 				if (audio)
 				{
-					// ハンドル表示
-					ImGui::Text("オーディオハンドル : %u", audio->audioHandle);
+					// 現在設定されているオーディオのハンドル番号を表示
+					ImGui::Text("ハンドル : Index(%u), Gen(%u)", audio->audioHandle.index, audio->audioHandle.generation);
+
+					// ドロップを受け付けるための専用エリアを作成
+					ImGui::Button("オーディオをドロップ", ImVec2(-1, 30));
+					if (ImGui::BeginDragDropTarget())
+					{
+						// ペイロード名 "AUDIO_HANDLE" を受け取る
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("AUDIO_HANDLE"))
+						{
+							IM_ASSERT(payload->DataSize == sizeof(Detail::AudioHandle));
+							Detail::AudioHandle droppedHandle = *(const Detail::AudioHandle*)payload->Data;
+							audio->audioHandle = droppedHandle;
+						}
+						ImGui::EndDragDropTarget();
+					}
 
 					// パラメータ設定
 					ImGui::DragFloat("音量##オーディオ", &audio->volume, 0.01f, 0.0f, 1.0f);
