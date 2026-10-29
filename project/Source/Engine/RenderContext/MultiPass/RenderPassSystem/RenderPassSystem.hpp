@@ -64,9 +64,6 @@ namespace Detail
 		/// @param renderTargetPool 
 		void Initialize(RenderTargetPool* renderTargetPool);
 
-		/// @brief ECSレジストリ
-		RegistryECS* registry_ = nullptr;
-
 		/// @brief レンダーターゲットプール
 		RenderTargetPool* renderTargetPool_ = nullptr;
 

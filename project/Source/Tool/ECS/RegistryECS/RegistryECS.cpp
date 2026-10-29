@@ -71,3 +71,26 @@ void Detail::RegistryECS::DestroyEntity(Entity entity)
 		availableEntities_.push(entity);
 	}
 }
+
+/// @brief ECSレジストリを複製する
+/// @return 
+std::unique_ptr<Detail::RegistryECS> Detail::RegistryECS::Clone() const
+{
+	auto cloned = std::make_unique<RegistryECS>();
+
+	// エンティティ管理用IDの複製
+	cloned->nextEntityId_ = nextEntityId_;
+	cloned->activeEntities_ = activeEntities_;
+	cloned->availableEntities_ = availableEntities_;
+
+	// コンポーネント配列の複製
+	for (const auto& [typeIndex, componentArray] : componentArrays_)
+	{
+		if (componentArray)
+		{
+			cloned->componentArrays_[typeIndex] = componentArray->Clone();
+		}
+	}
+
+	return cloned;
+}

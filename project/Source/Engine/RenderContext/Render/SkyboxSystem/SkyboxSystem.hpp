@@ -41,9 +41,6 @@ namespace Detail
 		/// @brief 初期化
 		void Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler);
 
-		/// @brief ECSレジストリ
-		RegistryECS* registry_ = nullptr;
-
 		/// @brief SkyboxPSO
 		std::unique_ptr<SkyboxPSO> pso_;
 

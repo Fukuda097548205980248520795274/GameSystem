@@ -37,6 +37,9 @@ namespace Detail
 		/// @param entity
 		void DrawEntityComponents(Entity entity);
 
+		/// @brief プレイコントロールの描画
+		void DrawPlayControls();
+
 
 	private:
 
@@ -45,5 +48,8 @@ namespace Detail
 
 		/// @brief レジストリ
 		RegistryECS* registry_ = nullptr;
+
+		// 状態保存用のレジストリ
+		std::unique_ptr<RegistryECS> backupRegistry_ = nullptr;
 	};
 }

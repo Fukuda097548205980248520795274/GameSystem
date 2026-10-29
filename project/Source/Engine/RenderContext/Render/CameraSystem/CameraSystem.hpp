@@ -48,9 +48,6 @@ namespace Detail
 		/// @brief 初期化
 		void Initialize();
 
-		/// @brief ECSレジストリ
-		RegistryECS* registry_ = nullptr;
-
 
 	private:
 

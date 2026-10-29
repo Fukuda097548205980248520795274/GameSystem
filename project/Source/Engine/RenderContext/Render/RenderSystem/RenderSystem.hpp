@@ -68,9 +68,6 @@ namespace Detail
 		/// @brief 深度のみのPSO
 		std::unique_ptr<DepthOnlyPSO> depthOnlyPso_ = nullptr;
 
-		/// @brief ECSレジストリ
-		RegistryECS* registry_ = nullptr;
-
 		/// @brief PSOエディタ
 		PSOEditor* psoEditor_ = nullptr;
 	};

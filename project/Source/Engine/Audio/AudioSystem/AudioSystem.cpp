@@ -7,9 +7,6 @@ void Detail::AudioSystem::Initialize()
 	auto engine = Engine::GetInstance();
 	assert(engine);
 
-	// ECSレジストリの取得
-	registry_ = engine->GetRegistryECS();
-
 	// オーディオストアの生成
 	audioStore_ = std::make_unique<AudioStore>();
 }
@@ -29,8 +26,12 @@ void Detail::AudioSystem::Update()
 /// @return 
 Entity Detail::AudioSystem::CreateAudioEntity(AudioHandle audioHandle, float volume, float pitch, bool isLoop)
 {
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
 	// ECSレジストリから新しいエンティティを作成
-	Entity entity = registry_->CreateEntity();
+	Entity entity = registry->CreateEntity();
 
 	// AudioComponentを追加
 	AudioComponent audioComponent;
@@ -38,7 +39,7 @@ Entity Detail::AudioSystem::CreateAudioEntity(AudioHandle audioHandle, float vol
 	audioComponent.volume = volume;
 	audioComponent.pitch = pitch;
 	audioComponent.isLoop = isLoop;
-	registry_->AddComponent<AudioComponent>(entity, audioComponent);
+	registry->AddComponent<AudioComponent>(entity, audioComponent);
 
 	return entity;
 }
@@ -48,7 +49,11 @@ Entity Detail::AudioSystem::CreateAudioEntity(AudioHandle audioHandle, float vol
 /// @return 
 Detail::PlayHandle Detail::AudioSystem::PlayAudio(Entity entity)
 {
-	auto audioComponent = registry_->GetComponent<AudioComponent>(entity);
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return PlayHandle();
+
+	auto audioComponent = registry->GetComponent<AudioComponent>(entity);
 	if (!audioComponent) return PlayHandle();
 
 	// 重複再生を許可しない場合は、現在鳴っている音をすべて停止する
@@ -89,7 +94,11 @@ Detail::PlayHandle Detail::AudioSystem::PlayAudio(Entity entity)
 /// @brief 停止
 void Detail::AudioSystem::StopAudio(Entity entity)
 {
-	auto audioComponent = registry_->GetComponent<AudioComponent>(entity);
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return;
+
+	auto audioComponent = registry->GetComponent<AudioComponent>(entity);
 	if (!audioComponent) return;
 
 	// 保持しているすべての音声を停止する

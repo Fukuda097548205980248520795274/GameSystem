@@ -11,14 +11,15 @@ void Detail::CameraSystem::Initialize()
 	// ECSレジストリを取得する
 	auto registry = engine->GetRegistryECS();
 	assert(registry);
-
-	// メンバ変数に代入する
-	registry_ = registry;
 }
 
 /// @brief 更新処理
 void Detail::CameraSystem::Update()
 {
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return;
+
 	// 現在のカメラが設定されていない場合は何もしない
 	if (currentEntity_ == kNullEntity)
 	{
@@ -29,7 +30,7 @@ void Detail::CameraSystem::Update()
 	}
 
 	// TransformComponentを取得する
-	auto transform = registry_->GetComponent<TransformComponent>(currentEntity_);
+	auto transform = registry->GetComponent<TransformComponent>(currentEntity_);
 	if (!transform) return;
 	
 	// 回転をクォータニオンに変換する
@@ -45,7 +46,7 @@ void Detail::CameraSystem::Update()
 	viewMatrix_ = cameraMatrix_.Inverse();
 
 	// CameraComponentを取得する
-	auto cameraComp = registry_->GetComponent<CameraComponent>(currentEntity_);
+	auto cameraComp = registry->GetComponent<CameraComponent>(currentEntity_);
 	if (!cameraComp) return;
 
 	// 射影行列を計算する
@@ -60,16 +61,21 @@ void Detail::CameraSystem::Update()
 /// @return 
 Entity Detail::CameraSystem::CreateCameraEntity()
 {
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
+
 	// エンティティを作成する
-	Entity entity = registry_->CreateEntity();
+	Entity entity = registry->CreateEntity();
 
 	// TransformComponentを追加する
 	TransformComponent transformComp;
-	registry_->AddComponent(entity, transformComp);
+	registry->AddComponent(entity, transformComp);
 
 	// CameraComponentを追加する
 	CameraComponent cameraComp;
-	registry_->AddComponent(entity, cameraComp);
+	registry->AddComponent(entity, cameraComp);
 
 	// もし現在のカメラが設定されていない場合は、このカメラを現在のカメラとして設定する
 	if (currentEntity_ == kNullEntity)

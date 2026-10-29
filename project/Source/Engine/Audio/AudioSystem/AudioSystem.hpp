@@ -49,8 +49,5 @@ namespace Detail
 
 		/// @brief オーディオストア
 		std::unique_ptr<AudioStore> audioStore_;
-
-		/// @brief ECSレジストリ
-		RegistryECS* registry_ = nullptr;
 	};
 }

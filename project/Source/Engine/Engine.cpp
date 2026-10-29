@@ -89,6 +89,13 @@ Engine* Engine::GetInstance()
 /// @brief 新フレーム処理
 void Engine::NewFrame()
 {
+	// 予約用レジストリが存在する場合、差し替えを行う
+	if (pendingRestoreRegistry_)
+	{
+		registry_ = std::move(pendingRestoreRegistry_);
+		pendingRestoreRegistry_ = nullptr;
+	}
+
 	// 全ての入力情報を取得する
 	input_->CheckInputInfo();
 
@@ -105,8 +112,12 @@ void Engine::NewFrame()
 /// @brief 描画後処理
 void Engine::PostDraw()
 {
-	// スクリプトシステムの更新
-	scriptSystem_->Update(registry_.get());
+	// ゲームプレイ中の処理
+	if (playState_ == PlayState::Playing)
+	{
+		// スクリプトシステムの更新
+		scriptSystem_->Update(registry_.get());
+	}
 
 	// 描画後処理
 	renderContext_->PostDraw();

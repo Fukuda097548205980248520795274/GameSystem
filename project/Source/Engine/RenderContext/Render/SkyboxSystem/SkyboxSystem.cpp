@@ -12,11 +12,6 @@ void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	auto  engine = Engine::GetInstance();
 	assert(engine);
 
-	// ECSレジストリを取得する
-	auto registry = engine->GetRegistryECS();
-	assert(registry);
-	registry_ = registry;
-
 	// SkyboxPSOを初期化する
 	pso_ = std::make_unique<SkyboxPSO>(device, shaderCompiler);
 
@@ -106,17 +101,20 @@ Entity Detail::SkyboxSystem::CreateSkyboxEntity()
 	int32_t maxBufferCount = engine->GetMaxBufferCount();
 	assert(maxBufferCount > 0);
 
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
 
 	// エンティティを作成する
-	Entity entity = registry_->CreateEntity();
+	Entity entity = registry->CreateEntity();
 
 	// SkyboxComponentを追加する
 	SkyboxComponent skyboxComp;
-	registry_->AddComponent(entity, skyboxComp);
+	registry->AddComponent(entity, skyboxComp);
 
 	// CubemapComponentを追加する
 	CubemapComponent cubemapComp(textureStore->GetDefaultCubemapHandle());
-	registry_->AddComponent(entity, cubemapComp);
+	registry->AddComponent(entity, cubemapComp);
 
 	return entity;
 }
@@ -137,9 +135,13 @@ void Detail::SkyboxSystem::Execute(ID3D12GraphicsCommandList* commandList)
 	auto cameraSystem = engine->GetRenderContext()->GetCameraSystem();
 	if (!cameraSystem) return;
 
+	// ECSレジストリを取得する
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return;
+
 
 	// SkyboxComponentの配列を取得する
-	auto* passArray = registry_->GetComponentArray<SkyboxComponent>();
+	auto* passArray = registry->GetComponentArray<SkyboxComponent>();
 	const auto& entities = passArray->GetEntities();
 
 	// 今のフレームインデックスを取得する
@@ -149,7 +151,7 @@ void Detail::SkyboxSystem::Execute(ID3D12GraphicsCommandList* commandList)
 	Entity selectedEntity = kNullEntity;
 	for (Entity entity : entities)
 	{
-		auto skybox = registry_->GetComponent<SkyboxComponent>(entity);
+		auto skybox = registry->GetComponent<SkyboxComponent>(entity);
 		
 		if (skybox && skybox->isEnabled)
 		{
@@ -182,7 +184,7 @@ void Detail::SkyboxSystem::Execute(ID3D12GraphicsCommandList* commandList)
 	colorBuffer_->RegisterGraphics(commandList, 1, frameIndex);
 
 	// CubemapComponentを取得する
-	auto cubemapComp = registry_->GetComponent<CubemapComponent>(selectedEntity);
+	auto cubemapComp = registry->GetComponent<CubemapComponent>(selectedEntity);
 	if (!cubemapComp) return;
 	commandList->SetGraphicsRootDescriptorTable(2, textureStore->GetSrvHandle(cubemapComp->handle).gpuHandle);
 

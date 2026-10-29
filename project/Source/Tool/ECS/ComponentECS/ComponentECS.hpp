@@ -41,6 +41,20 @@ struct ScriptComponent
 	asIScriptFunction* initFunc = nullptr;
 };
 
+/// @brief ScriptComponent用の特殊化
+template<>
+inline void ComponentArray<ScriptComponent>::PostCopyProcess()
+{
+	// バックアップ側は再生時のインスタンス情報を保持する必要がないため、単純にポインタ参照をクリアする
+	for (auto& scriptComp : dense_)
+	{
+		scriptComp.scriptObject = nullptr;
+		scriptComp.initFunc = nullptr;
+		scriptComp.updateFunc = nullptr;
+	}
+}
+
+
 /// @brief トランスフォームコンポーネント
 struct TransformComponent
 {

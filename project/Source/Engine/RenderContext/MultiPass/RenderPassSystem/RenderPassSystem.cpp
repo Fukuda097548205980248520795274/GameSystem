@@ -11,14 +11,11 @@ void Detail::RenderPassSystem::Initialize(RenderTargetPool* renderTargetPool)
 {
 	// Engineのインスタンスを取得
 	auto engine = Engine::GetInstance();
-	auto registry = engine->GetRegistryECS();
 
 	// nullptrチェック
-	assert(registry);
 	assert(renderTargetPool);
 
 	// メンバ変数に代入する
-	registry_ = registry;
 	renderTargetPool_ = renderTargetPool;
 }
 
@@ -29,17 +26,23 @@ void Detail::RenderPassSystem::Initialize(RenderTargetPool* renderTargetPool)
 /// @return 
 Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc)
 {
-	Entity entity = registry_->CreateEntity();
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
+
+	// エンティティを作成する
+	Entity entity = registry->CreateEntity();
 
 	// RenderPassComponentを追加する
 	RenderPassComponent passComp;
 	passComp.priority = priority;
-	registry_->AddComponent(entity, passComp);
+	registry->AddComponent(entity, passComp);
 
 	// BlendComponentを追加する
 	BlendComponent blendComp;
 	blendComp.blendMode = blendMode;
-	registry_->AddComponent(entity, blendComp);
+	registry->AddComponent(entity, blendComp);
 
 	return entity;
 }
@@ -52,7 +55,12 @@ Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode, s
 /// @param skyboxSystem 
 void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem)
 {
-    auto* passArray = registry_->GetComponentArray<RenderPassComponent>();
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return;
+
+
+    auto* passArray = registry->GetComponentArray<RenderPassComponent>();
     const auto& entities = passArray->GetEntities();
 	int32_t frameIndex = Engine::GetInstance()->GetFrameIndex();
 
@@ -61,7 +69,7 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
     for (Entity entity : entities)
     {
 		// RenderPassComponent を取得して、isEnabled が true の場合のみ追加
-        auto passComp = registry_->GetComponent<RenderPassComponent>(entity);
+        auto passComp = registry->GetComponent<RenderPassComponent>(entity);
         if (passComp && passComp->isEnabled)
         {
             sortedPasses.push_back({ entity, passComp->priority });
@@ -77,7 +85,7 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
     for (const auto& pair : sortedPasses)
     {
         Entity entity = pair.first;
-        auto blendComp = registry_->GetComponent<BlendComponent>(entity);
+        auto blendComp = registry->GetComponent<BlendComponent>(entity);
 		if (!blendComp) continue;
 
         // オフスクリーンリソースの貸出

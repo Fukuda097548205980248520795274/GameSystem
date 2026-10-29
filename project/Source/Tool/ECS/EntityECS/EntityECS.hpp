@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cassert>
 #include <functional>
+#include <memory>
 
 // @brief エンティティの型
 using Entity = uint32_t;
@@ -21,6 +22,10 @@ public:
 	/// @brief エンティティを削除する
 	/// @param entity 
 	virtual void RemoveEntity(Entity entity) = 0;
+
+	/// @brief コンポーネント配列を複製する
+	/// @return 
+	virtual std::unique_ptr<IComponentArray> Clone() const = 0;
 };
 
 /// @brief コンポーネント配列
@@ -105,6 +110,34 @@ public:
 	/// @brief エンティティが削除されたときに呼ばれるコールバックを設定する
 	/// @param callback 
 	void SetOnRemoveCallback(OnRemoveCallback callback) { onRemoveCallback_ = callback; }
+
+	/// @brief コンポーネント配列を複製する
+	/// @return 
+	std::unique_ptr<IComponentArray> Clone() const override
+	{
+		// 新しいコンポーネント配列を作成し、データをコピーする
+		auto cloned = std::make_unique<ComponentArray<T>>();
+		cloned->dense_ = dense_;
+		cloned->denseToEntity_ = denseToEntity_;
+		cloned->sparse_ = sparse_;
+
+		// コールバックは複製しない
+		cloned->onRemoveCallback_ = onRemoveCallback_;
+
+		// 複製後の個別処理
+		cloned->PostCopyProcess();
+
+		return cloned;
+	}
+
+
+private:
+
+	/// @brief 複製後の個別処理
+	void PostCopyProcess()
+	{
+		
+	}
 
 
 private:

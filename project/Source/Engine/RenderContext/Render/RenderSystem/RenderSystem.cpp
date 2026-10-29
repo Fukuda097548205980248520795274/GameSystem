@@ -24,11 +24,10 @@ void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	assert(psoEditor);
 
 	// メンバ変数に代入する
-	registry_ = registry;
 	psoEditor_ = psoEditor;
 
 	// TransformConstantBufferComponentが削除されたときのコールバックを設定する
-	registry_->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp)
+	registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp)
 		{
 			if (renderResourceStore_)
 			{
@@ -37,7 +36,7 @@ void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 		});
 
 	// MaterialConstantBufferComponentが削除されたときのコールバックを設定する
-	registry_->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp)
+	registry->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp)
 		{
 			if (renderResourceStore_)
 			{
@@ -68,45 +67,49 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	auto textureStore = renderContext->GetTextureStore();
 	assert(textureStore);
 
+	// ECSレジストリを取得する
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
 	int32_t maxBufferCount = engine->GetMaxBufferCount();
 	assert(maxBufferCount > 0);
 
 
 
 	// エンティティを作成する
-	Entity entity = registry_->CreateEntity();
+	Entity entity = registry->CreateEntity();
 
 	// RenderComponentを追加する
 	RenderComponent render3DComp;
-	registry_->AddComponent(entity, render3DComp);
+	registry->AddComponent(entity, render3DComp);
 
 	// MeshComponentを追加する
 	MeshComponent meshComp;
-	registry_->AddComponent(entity, meshComp);
+	registry->AddComponent(entity, meshComp);
 
 	// TransformComponentを追加する
 	TransformComponent transformComp;
-	registry_->AddComponent(entity, transformComp);
+	registry->AddComponent(entity, transformComp);
 
 	// MaterialComponentを追加する
 	MaterialComponent materialComp;
-	registry_->AddComponent(entity, materialComp);
+	registry->AddComponent(entity, materialComp);
 
 	// UVTransformComponentを追加する
 	UVTransformComponent uvTransformComp;
-	registry_->AddComponent(entity, uvTransformComp);
+	registry->AddComponent(entity, uvTransformComp);
 
 	// TextureComponentを追加する
 	TextureComponent textureComp(textureStore->GetDefaultTextureHandle());
-	registry_->AddComponent(entity, textureComp);
+	registry->AddComponent(entity, textureComp);
 
 	// TransformDataForGPU用のConstantBufferComponentを追加する
 	TransformConstantBufferComponent constantBufferComp(renderResourceStore_->CreateConstantBuffer<Detail::TransformDataForGPU>(device, maxBufferCount));
-	registry_->AddComponent(entity, constantBufferComp);
+	registry->AddComponent(entity, constantBufferComp);
 
 	// MaterialComponentを追加する
 	MaterialConstantBufferComponent materialConstantBufferComp(renderResourceStore_->CreateConstantBuffer<Detail::UnLightingMaterialDataForGPU>(device, maxBufferCount));
-	registry_->AddComponent(entity, materialConstantBufferComp);
+	registry->AddComponent(entity, materialConstantBufferComp);
 
 	return entity;
 }
@@ -123,15 +126,20 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 	auto modelStore = renderContext->GetModelStore();
 	int32_t maxBufferCount = engine->GetMaxBufferCount();
 
+
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
+
 	// 親エンティティ（ルート）の作成
-	Entity parentEntity = registry_->CreateEntity();
-	registry_->AddComponent(parentEntity, TransformComponent());
-	registry_->AddComponent(parentEntity, HierarchyComponent());
+	Entity parentEntity = registry->CreateEntity();
+	registry->AddComponent(parentEntity, TransformComponent());
+	registry->AddComponent(parentEntity, HierarchyComponent());
 
 	// 親エンティティにModelComponentを追加する
 	ModelComponent modelComp;
 	modelComp.handle = modelHandle;
-	registry_->AddComponent(parentEntity, modelComp);
+	registry->AddComponent(parentEntity, modelComp);
 
 	// モデルデータを取得する
 	auto modelData = modelStore->GetModelData(modelHandle);
@@ -143,31 +151,31 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 
 	for (int32_t i = 0; i < static_cast<int32_t>(modelData->meshes.size()); ++i)
 	{
-		Entity childEntity = registry_->CreateEntity();
+		Entity childEntity = registry->CreateEntity();
 
 		// HierarchyComponentを追加して親エンティティを設定する
 		HierarchyComponent childHierarchy;
 		childHierarchy.parent = parentEntity;
-		registry_->AddComponent(childEntity, childHierarchy);
+		registry->AddComponent(childEntity, childHierarchy);
 
 		// RenderComponentを追加する
-		registry_->AddComponent(childEntity, RenderComponent());
+		registry->AddComponent(childEntity, RenderComponent());
 
 		// MeshDrawComponentを追加する
 		MeshDrawComponent meshDrawComp(i);
 		meshDrawComp.handle = modelHandle;
-		registry_->AddComponent(childEntity, meshDrawComp);
+		registry->AddComponent(childEntity, meshDrawComp);
 
 		// TransformComponent、MaterialComponent、UVTransformComponent、TextureComponentを追加する
-		registry_->AddComponent(childEntity, TransformComponent());
-		registry_->AddComponent(childEntity, MaterialComponent());
-		registry_->AddComponent(childEntity, UVTransformComponent());
-		registry_->AddComponent(childEntity, TextureComponent(modelData->meshes[i].material.handle));
+		registry->AddComponent(childEntity, TransformComponent());
+		registry->AddComponent(childEntity, MaterialComponent());
+		registry->AddComponent(childEntity, UVTransformComponent());
+		registry->AddComponent(childEntity, TextureComponent(modelData->meshes[i].material.handle));
 
 		// TransformDataForGPU用のConstantBufferComponentを追加する
-		registry_->AddComponent(childEntity, TransformConstantBufferComponent(
+		registry->AddComponent(childEntity, TransformConstantBufferComponent(
 			renderResourceStore_->CreateConstantBuffer<Detail::TransformDataForGPU>(device, maxBufferCount)));
-		registry_->AddComponent(childEntity, MaterialConstantBufferComponent(
+		registry->AddComponent(childEntity, MaterialConstantBufferComponent(
 			renderResourceStore_->CreateConstantBuffer<Detail::UnLightingMaterialDataForGPU>(device, maxBufferCount)));
 
 		// 子エンティティを一時的なベクターに追加する
@@ -175,7 +183,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 	}
 
 	// 親エンティティのHierarchyComponentに子エンティティを設定する
-	if (auto safeParentHierarchy = registry_->GetComponent<HierarchyComponent>(parentEntity))
+	if (auto safeParentHierarchy = registry->GetComponent<HierarchyComponent>(parentEntity))
 	{
 		safeParentHierarchy->children = std::move(tempChildren);
 	}
@@ -203,15 +211,18 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 	auto modelStore = engine->GetRenderContext()->GetModelStore();
 	if (!modelStore) return;
 
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return;
+
 	// RenderComponentの配列を取得する
-	auto* passArray = registry_->GetComponentArray<RenderComponent>();
+	auto* passArray = registry->GetComponentArray<RenderComponent>();
 	const auto& entities = passArray->GetEntities();
 
 	// priority に基づいてソートするためのペアのベクターを作成
 	std::vector<Entity> sortedPasses;
 	for (Entity entity : entities)
 	{
-		auto pass = registry_->GetComponent<RenderComponent>(entity);
+		auto pass = registry->GetComponent<RenderComponent>(entity);
 		if (pass && pass->isEnabled)
 		{
 			sortedPasses.push_back(entity);
@@ -225,7 +236,7 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 	for (const auto& entity : sortedPasses)
 	{
 		// メッシュインデックスを設定
-		auto meshDrawComp = registry_->GetComponent<MeshDrawComponent>(entity);
+		auto meshDrawComp = registry->GetComponent<MeshDrawComponent>(entity);
 		if (meshDrawComp == nullptr) continue;
 
 		// モデルデータを取得する
@@ -236,8 +247,8 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 		depthOnlyPso_->Register(commandList);
 
 		// ループを削除
-		auto transform = registry_->GetComponent<TransformComponent>(entity);
-		auto transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
+		auto transform = registry->GetComponent<TransformComponent>(entity);
+		auto transformCB = registry->GetComponent<TransformConstantBufferComponent>(entity);
 
 		// コンポーネントが存在しない場合はスキップする
 		if (!transform || !transformCB)continue;
@@ -289,8 +300,12 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	auto modelStore = engine->GetRenderContext()->GetModelStore();
 	if (!modelStore) return;
 
+	// ECSレジストリを取得する
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return;
+
 	// RenderComponentの配列を取得する
-	auto* passArray = registry_->GetComponentArray<RenderComponent>();
+	auto* passArray = registry->GetComponentArray<RenderComponent>();
 	const auto& entities = passArray->GetEntities();
 
 	// 今のフレームインデックスを取得する
@@ -300,7 +315,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	std::vector<std::pair<Entity, int>> sortedPasses;
 	for (Entity entity : entities)
 	{
-		auto pass = registry_->GetComponent<RenderComponent>(entity);
+		auto pass = registry->GetComponent<RenderComponent>(entity);
 		if (pass && pass->isEnabled && pass->priority == priority)
 		{
 			sortedPasses.push_back({ entity, pass->priority });
@@ -317,7 +332,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	for (const auto& [entity, priority] : sortedPasses)
 	{
 		// 必要なコンポーネントを取得
-		auto meshDrawComp = registry_->GetComponent<MeshDrawComponent>(entity);
+		auto meshDrawComp = registry->GetComponent<MeshDrawComponent>(entity);
 		if (!meshDrawComp) continue;
 
 		// モデルデータを取得する
@@ -325,11 +340,11 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		if (!modelData || meshDrawComp->meshIndex < 0 || meshDrawComp->meshIndex >= modelData->meshes.size()) continue;
 
 		// ループを削除し、エンティティの components を直接取得
-		auto material = registry_->GetComponent<MaterialComponent>(entity);
-		auto uvTransform = registry_->GetComponent<UVTransformComponent>(entity);
-		auto texture = registry_->GetComponent<TextureComponent>(entity);
-		auto transformCB = registry_->GetComponent<TransformConstantBufferComponent>(entity);
-		auto materialCB = registry_->GetComponent<MaterialConstantBufferComponent>(entity);
+		auto material = registry->GetComponent<MaterialComponent>(entity);
+		auto uvTransform = registry->GetComponent<UVTransformComponent>(entity);
+		auto texture = registry->GetComponent<TextureComponent>(entity);
+		auto transformCB = registry->GetComponent<TransformConstantBufferComponent>(entity);
+		auto materialCB = registry->GetComponent<MaterialConstantBufferComponent>(entity);
 		if (!material || !uvTransform || !texture || !transformCB || !materialCB) continue;
 
 		// PSOを取得する
@@ -447,7 +462,10 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 /// @return 
 Matrix4x4 Detail::RenderSystem::CalculateGlobalWorldMatrix(Entity entity)
 {
-	auto transform = registry_->GetComponent<TransformComponent>(entity);
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return Matrix4x4();
+
+	auto transform = registry->GetComponent<TransformComponent>(entity);
 	if (!transform) return Matrix4x4(); // TransformComponentが存在しない場合は単位行列を返す
 
 	// 自身のローカル行列を計算
@@ -459,9 +477,9 @@ Matrix4x4 Detail::RenderSystem::CalculateGlobalWorldMatrix(Entity entity)
 	Matrix4x4 localWorld = Make3DAffineMatrix4x4(transform->scale, rotation, transform->position);
 
 	// 親子関係コンポーネントがあり、かつ親が設定されている場合は親の行列を掛ける
-	if (registry_->HasComponent<HierarchyComponent>(entity))
+	if (registry->HasComponent<HierarchyComponent>(entity))
 	{
-		auto hierarchy = registry_->GetComponent<HierarchyComponent>(entity);
+		auto hierarchy = registry->GetComponent<HierarchyComponent>(entity);
 		if (hierarchy && hierarchy->parent != kNullEntity)
 		{
 			Matrix4x4 parentWorld = CalculateGlobalWorldMatrix(hierarchy->parent);

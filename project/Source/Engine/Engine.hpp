@@ -11,6 +11,19 @@
 #include "Audio/AudioSystem/AudioSystem.hpp"
 #include "Input/Input.hpp"
 
+// ゲームの状態
+enum class PlayState
+{
+	// 編集中
+	Editor,
+
+	// ゲームプレイ中
+	Playing,
+
+	// 一時停止
+	Paused
+};
+
 /// @brief エンジン
 class Engine
 {
@@ -182,6 +195,23 @@ public:
 	Detail::AudioHandle LoadAudio(const std::string& filePath) { return audioSystem_->Load(filePath); }
 
 
+	/// @brief プレイ状態を取得
+	/// @return 
+	PlayState GetPlayState() const { return playState_; }
+
+	/// @brief プレイ状態を設定
+	/// @param state 
+	void SetPlayState(PlayState state) { playState_ = state; }
+
+	/// @brief ECSレジストリを設定する
+	/// @param registry 
+	void SetRegistryECS(std::unique_ptr<Detail::RegistryECS> registry) { registry_ = std::move(registry); }
+
+	/// @brief ECSレジストリの復元を予約する
+	/// @param registry 
+	void QueueRestoreRegistry(std::unique_ptr<Detail::RegistryECS> registry) { pendingRestoreRegistry_ = std::move(registry); }
+
+
 
 private:
 
@@ -230,5 +260,13 @@ private:
 
 	/// @brief レンダーコンテキスト
 	std::unique_ptr<Detail::RenderContext> renderContext_;
+
+
+
+	// ゲームの状態
+	PlayState playState_ = PlayState::Editor;
+
+	// 次のフレームで差し替えるための予約用レジストリ
+	std::unique_ptr<Detail::RegistryECS> pendingRestoreRegistry_ = nullptr;
 };
 

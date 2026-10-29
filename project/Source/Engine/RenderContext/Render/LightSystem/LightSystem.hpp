@@ -113,9 +113,6 @@ namespace Detail
 		/// @brief ライトカリングPSO
 		std::unique_ptr<LightCullingPSO> lightCullingPso_ = nullptr;
 
-		/// @brief レジストリ
-		RegistryECS* registry_;
-
 
 	private:
 

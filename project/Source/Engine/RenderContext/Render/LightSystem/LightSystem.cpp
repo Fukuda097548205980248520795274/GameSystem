@@ -11,9 +11,6 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 	auto engine = Engine::GetInstance();
 	assert(engine);
 
-	// レジストリを取得
-	registry_ = engine->GetRegistryECS();
-
 
 	// ライトカリングPSOを初期化
 	lightCullingPso_ = std::make_unique<LightCullingPSO>(device, compiler);
@@ -88,13 +85,17 @@ void Detail::LightSystem::Resize(ID3D12Device* device, ID3D12GraphicsCommandList
 /// @return 
 Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity)
 {
-	Entity entity = registry_->CreateEntity();
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
+	Entity entity = registry->CreateEntity();
 
 	DirectionalLightComponent directionalLight;
 	directionalLight.direction = direction.Normalize();
 	directionalLight.color = Vector3(color.x, color.y, color.z);
 	directionalLight.intensity = intensity;
-	registry_->AddComponent(entity, directionalLight);
+	registry->AddComponent(entity, directionalLight);
 
 	return entity;	
 }
@@ -108,7 +109,11 @@ Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& directio
 /// @return 
 Entity Detail::LightSystem::CreatePointLightEntity(const Vector3& position, const Vector4& color, float intensity, float radius, float decay)
 {
-	Entity entity = registry_->CreateEntity();
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
+	Entity entity = registry->CreateEntity();
 
 	PointLightComponent pointLight;
 	pointLight.position = position;
@@ -116,7 +121,7 @@ Entity Detail::LightSystem::CreatePointLightEntity(const Vector3& position, cons
 	pointLight.intensity = intensity;
 	pointLight.radius = radius;
 	pointLight.decay = decay;
-	registry_->AddComponent(entity, pointLight);
+	registry->AddComponent(entity, pointLight);
 
 	return entity;
 }
@@ -134,7 +139,13 @@ Entity Detail::LightSystem::CreatePointLightEntity(const Vector3& position, cons
 Entity Detail::LightSystem::CreateSpotLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color,
 	float intensity, float radius, float decay, float cosAngle, float cosFalloffStart)
 {
-	Entity entity = registry_->CreateEntity();
+	// ECSレジストリを取得する
+	auto  registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return kNullEntity;
+
+
+
+	Entity entity = registry->CreateEntity();
 
 	SpotLightComponent spotLight;
 	spotLight.position = position;
@@ -145,7 +156,7 @@ Entity Detail::LightSystem::CreateSpotLightEntity(const Vector3& position, const
 	spotLight.decay = decay;
 	spotLight.cosAngle = cosAngle;
 	spotLight.cosFalloffStart = cosFalloffStart;
-	registry_->AddComponent(entity, spotLight);
+	registry->AddComponent(entity, spotLight);
 
 	return entity;
 }
@@ -155,6 +166,11 @@ Entity Detail::LightSystem::CreateSpotLightEntity(const Vector3& position, const
 /// @param frameIndex 
 void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem)
 {
+	// ECSレジストリを取得する
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+	if (!registry) return;
+
+
 	tileLightIndexBuffer_->Barrier(commandList, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, frameIndex);
 
 	/*---------------------------
@@ -167,7 +183,7 @@ void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, u
 	int numSpotLights = 0;
 
 	// ライト数データを設定する
-	registry_->ForEachEntityWithAny<DirectionalLightComponent, PointLightComponent, SpotLightComponent>(
+	registry->ForEachEntityWithAny<DirectionalLightComponent, PointLightComponent, SpotLightComponent>(
 		[&](Entity entity, DirectionalLightComponent* directionalLight, PointLightComponent* pointLight, SpotLightComponent* spotLight)
 		{
 			// 平行光源

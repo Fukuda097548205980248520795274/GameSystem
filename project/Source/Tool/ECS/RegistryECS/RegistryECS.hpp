@@ -138,6 +138,10 @@ namespace Detail
 			GetComponentArray<T>()->RemoveEntity(entity);
 		}
 
+		/// @brief ECSレジストリを複製する
+		/// @return 
+		std::unique_ptr<RegistryECS> Clone() const;
+
 
 	private:
 
