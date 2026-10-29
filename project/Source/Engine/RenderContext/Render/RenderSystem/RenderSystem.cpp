@@ -1,7 +1,7 @@
-#include "RenderSystem.h"
-#include "Engine.h"
+#include "RenderSystem.hpp"
+#include "Engine.hpp"
 
-#include "ECS/ComponentECS/DataForGPU/DataForGPU.h"
+#include "ECS/ComponentECS/DataForGPU/DataForGPU.hpp"
 
 /// @brief 初期化
 void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler)

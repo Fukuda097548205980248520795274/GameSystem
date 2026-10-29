@@ -1,4 +1,4 @@
-#include "RenderResourceStore.h"
+#include "RenderResourceStore.hpp"
 
 /// @brief 定数バッファのGPU仮想アドレスを取得する
 /// @param cbHandle 

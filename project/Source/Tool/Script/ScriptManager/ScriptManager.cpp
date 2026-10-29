@@ -1,5 +1,5 @@
-#include "ScriptManager.h"
-#include "Engine.h"
+#include "ScriptManager.hpp"
+#include "Engine.hpp"
 #include <cassert>
 
 /// @brief 初期化

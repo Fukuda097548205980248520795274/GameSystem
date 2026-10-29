@@ -1,7 +1,7 @@
-#include "DXCommand.h"
+#include "DXCommand.hpp"
 #include <cassert>
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 /// @brief 初期化
 /// @param device 

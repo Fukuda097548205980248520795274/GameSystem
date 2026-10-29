@@ -1,4 +1,4 @@
-#include "Barrier.h"
+#include "Barrier.hpp"
 #include <cassert>
 
 /// @brief トランジションバリアを張る

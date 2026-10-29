@@ -1,5 +1,5 @@
-#include "ModelEditor.h"
-#include "Engine.h"
+#include "ModelEditor.hpp"
+#include "Engine.hpp"
 #include <filesystem>
 
 void Detail::ModelEditor::DrawUI(RenderContext* renderContext, ModelStore* modelStore)

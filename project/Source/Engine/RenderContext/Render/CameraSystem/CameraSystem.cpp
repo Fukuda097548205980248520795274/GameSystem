@@ -1,5 +1,5 @@
-#include "CameraSystem.h"
-#include "Engine.h"
+#include "CameraSystem.hpp"
+#include "Engine.hpp"
 
 /// @brief 初期化
 void Detail::CameraSystem::Initialize()

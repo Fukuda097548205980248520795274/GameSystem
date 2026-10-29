@@ -1,8 +1,8 @@
-#include "DXCore.h"
+#include "DXCore.hpp"
 #include <format>
 
-#include "Engine.h"
-#include "Func/ConvertString/ConvertString.h"
+#include "Engine.hpp"
+#include "Func/ConvertString/ConvertString.hpp"
 
 /// @brief コンストラクタ
 Detail::DXCore::DXCore()

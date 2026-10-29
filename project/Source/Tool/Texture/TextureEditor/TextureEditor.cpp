@@ -1,5 +1,5 @@
-#include "TextureEditor.h"
-#include "Engine.h"
+#include "TextureEditor.hpp"
+#include "Engine.hpp"
 #include <filesystem>
 
 void Detail::TextureEditor::DrawUI(RenderContext* renderContext, TextureStore* textureStore)

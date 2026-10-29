@@ -1,5 +1,5 @@
-#include "AudioSystem.h"
-#include "Engine.h"
+#include "AudioSystem.hpp"
+#include "Engine.hpp"
 
 /// @brief 初期化
 void Detail::AudioSystem::Initialize()

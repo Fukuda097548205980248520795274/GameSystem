@@ -1,11 +1,11 @@
-#include "WinApp.h"
+#include "WinApp.hpp"
 #include <format>
 #include <imgui.h>
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
 #include <shellapi.h>
 
-#include "Func/ConvertString/ConvertString.h"
+#include "Func/ConvertString/ConvertString.hpp"
 
 // ImGui_ImplWin32_WndProcHandlerの宣言
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);

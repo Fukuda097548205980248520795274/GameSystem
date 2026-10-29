@@ -1,5 +1,5 @@
-#include "RegistryECS.h"
-#include "../ComponentECS/ComponentECS.h"
+#include "RegistryECS.hpp"
+#include "../ComponentECS/ComponentECS.hpp"
 
 /// @brief エンティティを作成する
 /// @return 

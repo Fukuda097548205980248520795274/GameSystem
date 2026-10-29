@@ -1,7 +1,7 @@
-#include "ModelFunc.h"
+#include "ModelFunc.hpp"
 #include <cassert>
 #include <filesystem>
-#include "Store/TextureStore/TextureStore.h"
+#include "Store/TextureStore/TextureStore.hpp"
 
 /// @brief モデルを読み込む
 /// @param directory 

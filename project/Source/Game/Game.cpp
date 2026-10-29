@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "Game.hpp"
 
 /// @brief コンストラクタ
 /// @param screenWidth スクリーン横幅

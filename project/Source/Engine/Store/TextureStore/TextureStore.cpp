@@ -1,11 +1,11 @@
-#include "TextureStore.h"
+#include "TextureStore.hpp"
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
 #include <cassert>
-#include "Engine.h"
+#include "Engine.hpp"
 
-#include "Func/TextureFunc/TextureFunc.h"
+#include "Func/TextureFunc/TextureFunc.hpp"
 
 /// @brief 初期化
 /// @param device 

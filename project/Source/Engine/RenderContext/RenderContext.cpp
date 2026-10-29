@@ -1,10 +1,10 @@
-#include "RenderContext.h"
+#include "RenderContext.hpp"
 #include <cassert>
 
-#include "WinApp/WinApp.h"
-#include "Func/Barrier/Barrier.h"
+#include "WinApp/WinApp.hpp"
+#include "Func/Barrier/Barrier.hpp"
 
-#include "DXDebug/DXDebug.h"
+#include "DXDebug/DXDebug.hpp"
 
 /// @brief 初期化
 /// @param winApp 

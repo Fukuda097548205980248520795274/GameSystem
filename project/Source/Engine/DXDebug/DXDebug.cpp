@@ -1,8 +1,8 @@
-#include "DXDebug.h"
+#include "DXDebug.hpp"
 #include <cassert>
 #include <dxgidebug.h>
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 /// @brief 初期化
 /// @param log 

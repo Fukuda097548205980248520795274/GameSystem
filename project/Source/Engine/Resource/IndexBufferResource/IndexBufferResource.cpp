@@ -1,5 +1,5 @@
-#include "IndexBufferResource.h"
-#include "Func/ResourceFunc/ResourceFunc.h"
+#include "IndexBufferResource.hpp"
+#include "Func/ResourceFunc/ResourceFunc.hpp"
 #include <cassert>
 
 /// @brief 初期化

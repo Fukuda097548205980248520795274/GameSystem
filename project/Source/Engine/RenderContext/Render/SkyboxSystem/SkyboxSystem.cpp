@@ -1,5 +1,5 @@
-#include "SkyboxSystem.h"
-#include "Engine.h"
+#include "SkyboxSystem.hpp"
+#include "Engine.hpp"
 
 /// @brief 初期化
 void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler)

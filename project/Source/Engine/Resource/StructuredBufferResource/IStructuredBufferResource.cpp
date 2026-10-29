@@ -1,4 +1,4 @@
-#include "IStructuredBufferResource.h"
+#include "IStructuredBufferResource.hpp"
 
 /// @brief コマンドリストに登録する
 /// @param commandList 

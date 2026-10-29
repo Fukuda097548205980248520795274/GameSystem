@@ -1,8 +1,8 @@
-#include "ResourceFunc.h"
+#include "ResourceFunc.hpp"
 #include <cassert>
 #include <stdexcept>
 
-#include "../Barrier/Barrier.h"
+#include "../Barrier/Barrier.hpp"
 
 /// @brief バッファリソースを生成する
 /// @param device 

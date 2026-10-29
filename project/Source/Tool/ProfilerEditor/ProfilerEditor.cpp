@@ -1,5 +1,5 @@
-#include "ProfilerEditor.h"
-#include "Engine.h"
+#include "ProfilerEditor.hpp"
+#include "Engine.hpp"
 
 //// @brief UIを描画する
 void Detail::ProfilerEditor::DrawUI()

@@ -1,4 +1,4 @@
-#include "IConstantBufferResource.h"
+#include "IConstantBufferResource.hpp"
 
 /// @brief コマンドリストに登録する
 /// @param commandList 

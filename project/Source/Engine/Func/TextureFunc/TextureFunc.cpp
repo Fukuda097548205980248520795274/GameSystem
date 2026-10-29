@@ -1,6 +1,6 @@
-#include "TextureFunc.h"
+#include "TextureFunc.hpp"
 #include <format>
-#include "Func/ResourceFunc/ResourceFunc.h"
+#include "Func/ResourceFunc/ResourceFunc.hpp"
 
 /// @brief テクスチャを読み込みデータを取得する
 /// @param filePath 

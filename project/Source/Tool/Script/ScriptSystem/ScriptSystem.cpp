@@ -1,5 +1,5 @@
-#include "ScriptSystem.h"
-#include "Engine.h"
+#include "ScriptSystem.hpp"
+#include "Engine.hpp"
 
 /// @brief 初期化
 void Detail::ScriptSystem::Initialize()

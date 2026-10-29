@@ -1,8 +1,8 @@
-#include "DepthResource.h"
+#include "DepthResource.hpp"
 
-#include "Engine.h"
-#include "Func/Barrier/Barrier.h"
-#include "Func/ResourceFunc/ResourceFunc.h"
+#include "Engine.hpp"
+#include "Func/Barrier/Barrier.hpp"
+#include "Func/ResourceFunc/ResourceFunc.hpp"
 
 /// @brief デストラクタ
 Detail::DepthResource::~DepthResource()

@@ -1,4 +1,4 @@
-#include "IRWStructuredBufferResource.h"
+#include "IRWStructuredBufferResource.hpp"
 
 /// @brief コマンドリストに登録する
 /// @param commandList 

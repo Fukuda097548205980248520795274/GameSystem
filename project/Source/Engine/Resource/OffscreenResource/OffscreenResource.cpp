@@ -1,10 +1,10 @@
-#include "OffscreenResource.h"
+#include "OffscreenResource.hpp"
 #include <cassert>
-#include "Func/ResourceFunc/ResourceFunc.h"
-#include "Func/Barrier/Barrier.h"
-#include "Vector/Vector4/Vector4.h"
+#include "Func/ResourceFunc/ResourceFunc.hpp"
+#include "Func/Barrier/Barrier.hpp"
+#include "Vector/Vector4/Vector4.hpp"
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 /// @brief デストラクタ
 Detail::OffscreenResource::~OffscreenResource()

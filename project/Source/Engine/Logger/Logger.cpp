@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "Logger.hpp"
 #include <Windows.h>
 #include <chrono>
 #include <cassert>

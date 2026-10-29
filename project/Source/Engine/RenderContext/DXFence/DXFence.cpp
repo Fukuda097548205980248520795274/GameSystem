@@ -1,7 +1,7 @@
-#include "DXFence.h"
+#include "DXFence.hpp"
 #include <cassert>
 
-#include "Engine.h"
+#include "Engine.hpp"
 
 /// @brief デストラクタ
 Detail::DXFence::~DXFence()

@@ -1,5 +1,5 @@
-#include "ImGuiRender.h"
-#include "Engine.h"
+#include "ImGuiRender.hpp"
+#include "Engine.hpp"
 #include <cassert>
 #include <filesystem>
 

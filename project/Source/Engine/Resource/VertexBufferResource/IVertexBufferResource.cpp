@@ -1,4 +1,4 @@
-#include "IVertexBufferResource.h"
+#include "IVertexBufferResource.hpp"
 
 /// @brief コマンドリストに登録する
 /// @param commandList 

@@ -1,8 +1,8 @@
-#include "RWTexture2DBufferResource.h"
+#include "RWTexture2DBufferResource.hpp"
 #include <cassert>
 
-#include "Func/Barrier/Barrier.h"
-#include "Engine.h"
+#include "Func/Barrier/Barrier.hpp"
+#include "Engine.hpp"
 
 Detail::RWTexture2DBufferResource::~RWTexture2DBufferResource()
 {
