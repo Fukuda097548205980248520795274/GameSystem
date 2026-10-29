@@ -293,6 +293,9 @@
     <Filter Include="Source\Tool\Script\ScriptSystem">
       <UniqueIdentifier>{500f56ce-22b2-4bf6-ba07-31ca4f97e95d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Resource\QueryResource">
+      <UniqueIdentifier>{063f29c1-2cda-4123-a20a-1d6b102d4fac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -492,6 +495,9 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\Script\ScriptSystem\ScriptSystem.cpp">
       <Filter>Source\Tool\Script\ScriptSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\QueryResource\IQueryResource.cpp">
+      <Filter>Source\Engine\Resource\QueryResource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -722,6 +728,12 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\Script\ScriptSystem\ScriptSystem.hpp">
       <Filter>Source\Tool\Script\ScriptSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\QueryResource\IQueryResource.hpp">
+      <Filter>Source\Engine\Resource\QueryResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\QueryResource\QueryResource.hpp">
+      <Filter>Source\Engine\Resource\QueryResource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

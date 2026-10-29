@@ -49,9 +49,6 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// PSOEditorを作成
 	psoEditor_ = std::make_unique<PSOEditor>();
 
-	// ProfilerEditorを作成
-	profilerEditor_ = std::make_unique<ProfilerEditor>();
-
 
 
 	// テクスチャストアを作成
@@ -106,6 +103,17 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	imguiRender_ = std::make_unique<ImGuiRender>();
 	imguiRender_->Initialize(core_->GetDevice(), winApp, heap_.get(), swapChain_.get());
 
+
+	// ProfilerEditorを作成
+	profilerEditor_ = std::make_unique<ProfilerEditor>();
+
+	// GPUタイムスタンプ用クエリリソースの初期化
+	gpuTimeStartQuery_ = std::make_unique<QueryResource<uint64_t>>(core_->GetDevice(), heap_.get(), kBufferCount);
+	gpuTimeEndQuery_ = std::make_unique<QueryResource<uint64_t>>(core_->GetDevice(), heap_.get(), kBufferCount);
+
+	// コマンドキューからタイムスタンプ周波数を取得
+	command_->GetCommandQueue()->GetTimestampFrequency(&gpuTimestampFrequency_);
+
 #endif
 
 
@@ -147,8 +155,31 @@ Detail::RenderContext::~RenderContext()
 /// @brief シーン前処理
 void Detail::RenderContext::NewFrame()
 {
+#ifdef DEVELOPMENT
+
+	// CPU時間計測開始
+	cpuStartTime_ = std::chrono::high_resolution_clock::now();
+
+#endif
+
 	// GPUの処理が完了するまで待機する
 	fence_->WaitGPU(frameIndex_);
+
+#ifdef DEVELOPMENT
+
+	// 前回のフレームのGPU計測結果を取得して計算
+	if (!isFirstFrame_ && gpuTimestampFrequency_ > 0)
+	{
+		uint64_t startTime = gpuTimeStartQuery_->GetResult(frameIndex_);
+		uint64_t endTime = gpuTimeEndQuery_->GetResult(frameIndex_);
+		if (endTime >= startTime)
+		{
+			uint64_t delta = endTime - startTime;
+			gpuTimeMs_ = static_cast<float>(delta) / static_cast<float>(gpuTimestampFrequency_) * 1000.0f;
+		}
+	}
+
+#endif
 
 	// 初回フレームでなければコマンドリストをリセットする
 	if (!isFirstFrame_)
@@ -174,6 +205,10 @@ void Detail::RenderContext::NewFrame()
 
 
 #ifdef DEVELOPMENT
+
+	// GPU描画開始のタイムスタンプ記録
+	gpuTimeStartQuery_->Record(command_->GetCommandList());
+
 
 	// フレームの開始をImGuiに伝える
 	imguiRender_->FrameStart();
@@ -255,7 +290,13 @@ void Detail::RenderContext::PostDraw()
 	// ImGuiDockingに最終的なオフスクリーンを描画する
 	imguiRender_->DrawImGuiScreen(multiPass_->GetCurrentResource(), commandList, frameIndex_);
 
+	// GPU描画終了のタイムスタンプ記録
+	gpuTimeEndQuery_->Record(commandList);
+	gpuTimeStartQuery_->Resolve(commandList, frameIndex_);
+	gpuTimeEndQuery_->Resolve(commandList, frameIndex_);
+
 #endif
+
 
 	// バックバッファリソース RenderTarget -> Present
 	TransitionBarrier(backBufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, commandList);
@@ -266,6 +307,14 @@ void Detail::RenderContext::PostDraw()
 	// コマンドの内容を確定させる（閉じる）
 	HRESULT hr = commandList->Close();
 	assert(SUCCEEDED(hr));
+
+#ifdef DEVELOPMENT
+
+	// CPU時間計測終了
+	auto cpuEndTime = std::chrono::high_resolution_clock::now();
+	cpuTimeMs_ = std::chrono::duration<float, std::milli>(cpuEndTime - cpuStartTime_).count();
+
+#endif
 
 	// GPUにコマンドリストの実行を行わせる
 	ID3D12CommandList* commandLists[] = { commandList };

@@ -187,6 +187,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\QueryResource\IQueryResource.cpp" />
     <ClCompile Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -416,6 +417,8 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.hpp" />
     <ClInclude Include="Source\Engine\Resource\ConstantBufferResource\IConstantBufferResource.hpp" />
+    <ClInclude Include="Source\Engine\Resource\QueryResource\IQueryResource.hpp" />
+    <ClInclude Include="Source\Engine\Resource\QueryResource\QueryResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\RWStructuredBufferResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.hpp" />

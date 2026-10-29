@@ -35,6 +35,22 @@ void Detail::DXHeap::Initialize(ID3D12Device* device)
 	rtvDescriptorSize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	srvDescriptorSize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	dsvDescriptorSize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+
+	// タイムスタンプ用クエリヒープの生成
+	D3D12_QUERY_HEAP_DESC queryHeapDesc{};
+	queryHeapDesc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
+	queryHeapDesc.Count = queryNum_;
+	queryHeapDesc.NodeMask = 0;
+
+	// クエリヒープの生成
+	HRESULT hr = device_->CreateQueryHeap(&queryHeapDesc, IID_PPV_ARGS(&queryHeap_));
+	if (!SUCCEEDED(hr))
+	{
+		if (engine) engine->Log(LogLevel::Error, "クエリヒープの生成に失敗しました");
+		throw std::runtime_error("クエリヒープの生成に失敗しました");
+	}
+	if (engine) engine->Log(LogLevel::Info, std::format("クエリヒープ生成 , 最大数: {}", queryNum_));
 }
 
 /// @brief RTV用ハンドルを取得する
@@ -141,6 +157,34 @@ D3D12_CPU_DESCRIPTOR_HANDLE Detail::DXHeap::GetDsvDescriptorHandle()
 	return cpuHandle;
 }
 
+
+/// @brief クエリのインデックスを取得する
+/// @return 
+uint32_t Detail::DXHeap::GetQueryIndex()
+{
+	uint32_t index = 0;
+
+	// フリーリストに空きがあれば優先的に再利用
+	if (!freeQueryIndices_.empty())
+	{
+		index = freeQueryIndices_.back();
+		freeQueryIndices_.pop_back();
+	}
+	else
+	{
+		// 空きがなければ新規インデックスを発行
+		assert(useQueryIndex_ < static_cast<int>(queryNum_) && "クエリの最大数を超過しています");
+		index = static_cast<uint32_t>(useQueryIndex_++);
+	}
+
+	// エンジンのインスタンスを取得
+	auto engine = Engine::GetInstance();
+	if(engine)engine->Log(LogLevel::Info, std::format("クエリ : インデックス : {}", index));
+
+	return index;
+}
+
+
 /// @brief RTV用ディスクリプタハンドルを解放する
 /// @param handle 
 void Detail::DXHeap::FreeRtvDescriptorHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle)
@@ -208,6 +252,19 @@ void Detail::DXHeap::FreeDsvDescriptorHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle)
 	}
 
 	freeDsvIndices_.push_back(index);
+}
+
+/// @brief クエリのインデックスを解放する
+/// @param index 
+void Detail::DXHeap::FreeQueryIndex(uint32_t index)
+{
+	if (index >= queryNum_)
+	{
+		throw std::runtime_error("範囲外のクエリインデックスです");
+	}
+
+	// 使い終わったインデックスをフリーリストに戻す
+	freeQueryIndices_.push_back(index);
 }
 
 

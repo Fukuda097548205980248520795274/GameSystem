@@ -36,6 +36,10 @@ namespace Detail
 		/// @return 
 		ID3D12DescriptorHeap* GetDsvDescriptorHeap()const { return dsvDescriptorHeap_.Get(); }
 
+		/// @brief タイムスタンプ用クエリヒープを取得する
+		/// @return 
+		ID3D12QueryHeap* GetQueryHeap() const { return queryHeap_.Get(); }
+
 
 
 		/// @brief RTV用ハンドルを取得する
@@ -50,6 +54,10 @@ namespace Detail
 		/// @return 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetDsvDescriptorHandle();
 
+		/// @brief クエリのインデックスを取得する
+		/// @return 
+		uint32_t GetQueryIndex();
+
 
 
 		/// @brief RTV用ディスクリプタハンドルを解放する
@@ -63,6 +71,10 @@ namespace Detail
 		/// @brief DSV用ディスクリプタハンドルを解放する
 		/// @param handle 
 		void FreeDsvDescriptorHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle);
+
+		/// @brief クエリのインデックスを解放する
+		/// @param index 
+		void FreeQueryIndex(uint32_t index);
 
 
 		// Microsoft::WRL 省略
@@ -133,5 +145,20 @@ namespace Detail
 
 		/// @brief DSV用ディスクリプタの空きインデックス
 		std::vector<uint32_t> freeDsvIndices_;
+
+
+	private:
+
+		// タイムスタンプ用クエリヒープ
+		ComPtr<ID3D12QueryHeap> queryHeap_ = nullptr;
+
+		// クエリの最大数
+		UINT queryNum_ = 512;
+
+		// クエリの使用数
+		int32_t useQueryIndex_ = 0;
+
+		/// @brief クエリの空きインデックス
+		std::vector<uint32_t> freeQueryIndices_;
 	};
 }

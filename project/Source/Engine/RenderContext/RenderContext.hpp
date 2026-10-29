@@ -23,6 +23,8 @@
 #include "Texture/TextureEditor/TextureEditor.hpp"
 #include "Model/ModelEditor/ModelEditor.hpp"
 
+#include "Resource/QueryResource/QueryResource.hpp"
+
 #include <memory>
 
 namespace Detail
@@ -172,6 +174,16 @@ namespace Detail
 		/// @param filePath 
 		void OnTextureDropped(const std::string& filePath);
 
+#ifdef DEVELOPMENT
+
+		/// @brief CPU時間（ミリ秒）を取得
+		float GetCpuTimeMs() const { return cpuTimeMs_; }
+
+		/// @brief GPU時間（ミリ秒）を取得
+		float GetGpuTimeMs() const { return gpuTimeMs_; }
+
+#endif
+
 
 	private:
 
@@ -281,5 +293,22 @@ namespace Detail
 
 		/// @brief モデルエディタ
 		std::unique_ptr<ModelEditor> modelEditor_ = nullptr;
+
+
+#ifdef DEVELOPMENT
+
+		// GPUタイムスタンプ計測用のクエリリソース
+		std::unique_ptr<QueryResource<uint64_t>> gpuTimeStartQuery_;
+		std::unique_ptr<QueryResource<uint64_t>> gpuTimeEndQuery_;
+		UINT64 gpuTimestampFrequency_ = 0;
+
+		// 計測結果
+		float cpuTimeMs_ = 0.0f;
+		float gpuTimeMs_ = 0.0f;
+
+		// CPU時間計測用タイムスタンプ
+		std::chrono::high_resolution_clock::time_point cpuStartTime_;
+
+#endif
 	};
 }
