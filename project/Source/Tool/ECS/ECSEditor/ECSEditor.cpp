@@ -103,6 +103,25 @@ void Detail::ECSEditor::DrawPlayControls()
         ImGui::PopStyleColor(3);
     }
 
+
+
+    ImGui::SameLine();
+
+    // Saveボタンの追加
+    if (ImGui::Button("Save Scene", ImVec2(80.0f, buttonHeight)))
+    {
+        if (engine->SaveScene("MainScene"))
+        {
+            engine->Log(LogLevel::Info, "ECSデータを保存しました。");
+        }
+        else
+        {
+            engine->Log(LogLevel::Error, "ECSデータの保存に失敗しました。");
+        }
+    }
+
+
+
     ImGui::End();
 
     // Pushした背景色のPop

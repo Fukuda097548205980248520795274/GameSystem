@@ -296,6 +296,9 @@
     <Filter Include="Source\Engine\Resource\QueryResource">
       <UniqueIdentifier>{063f29c1-2cda-4123-a20a-1d6b102d4fac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\ECS\ECSSerializer">
+      <UniqueIdentifier>{771c310a-5446-4286-8616-c05feb3cc9b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -498,6 +501,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\QueryResource\IQueryResource.cpp">
       <Filter>Source\Engine\Resource\QueryResource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ECSSerializer\ECSSerializer.cpp">
+      <Filter>Source\Tool\ECS\ECSSerializer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -734,6 +740,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Resource\QueryResource\QueryResource.hpp">
       <Filter>Source\Engine\Resource\QueryResource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\ECS\ECSSerializer\ECSSerializer.hpp">
+      <Filter>Source\Tool\ECS\ECSSerializer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -223,6 +223,10 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ECSSerializer\ECSSerializer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Source\Tool\ECS\RegistryECS\RegistryECS.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -434,6 +438,7 @@
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.hpp" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.hpp" />
     <ClInclude Include="Source\Tool\ECS\ECSEditor\ECSEditor.hpp" />
+    <ClInclude Include="Source\Tool\ECS\ECSSerializer\ECSSerializer.hpp" />
     <ClInclude Include="Source\Tool\ECS\EntityECS\EntityECS.hpp" />
     <ClInclude Include="Source\Tool\ECS\RegistryECS\RegistryECS.hpp" />
     <ClInclude Include="Source\Engine\Engine.hpp" />

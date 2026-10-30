@@ -7,6 +7,7 @@
 #include "DXDebug/DXDebug.hpp"
 #include "Script/ScriptSystem/ScriptSystem.hpp"
 #include "ECS/RegistryECS/RegistryECS.hpp"
+#include "ECS/ECSSerializer/ECSSerializer.hpp"
 #include "RenderContext/RenderContext.hpp"
 #include "Audio/AudioSystem/AudioSystem.hpp"
 #include "Input/Input.hpp"
@@ -210,6 +211,32 @@ public:
 	/// @brief ECSレジストリの復元を予約する
 	/// @param registry 
 	void QueueRestoreRegistry(std::unique_ptr<Detail::RegistryECS> registry) { pendingRestoreRegistry_ = std::move(registry); }
+
+
+
+	/// @brief 現在のECS状態をファイル（JSON / BIN）に保存する
+	/// @param sceneName 
+	/// @return 
+	bool SaveScene(const std::string& sceneName = "Scene")
+	{
+		return Detail::ToJson(registry_.get(), sceneName);
+	}
+
+	/// @brief JSONからECS状態を読み込む
+	/// @param sceneName 
+	/// @return 
+	bool LoadSceneFromJSON(const std::string& sceneName = "Scene")
+	{
+		return Detail::LoadJson(registry_.get(), sceneName);
+	}
+
+	/// @brief バイナリからECS状態を読み込む（Cookedデータ用）
+	/// @param sceneName 
+	/// @return 
+	bool LoadSceneFromBinary(const std::string& sceneName = "Scene")
+	{
+		return Detail::LoadBin(registry_.get(), sceneName);
+	}
 
 
 

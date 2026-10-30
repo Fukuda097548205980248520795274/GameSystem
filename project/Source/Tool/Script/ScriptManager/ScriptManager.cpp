@@ -68,6 +68,11 @@ void Detail::ScriptManager::RegisterEngineAPI()
     scriptEngine_->RegisterObjectProperty("Vector3", "float y", asOFFSET(Vector3, y));
     scriptEngine_->RegisterObjectProperty("Vector3", "float z", asOFFSET(Vector3, z));
 
+	// Vector2 の登録
+	scriptEngine_->RegisterObjectType("Vector2", sizeof(Vector2), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector2>());
+    scriptEngine_->RegisterObjectProperty("Vector2", "float x", asOFFSET(Vector2, x));
+    scriptEngine_->RegisterObjectProperty("Vector2", "float y", asOFFSET(Vector2, y));
+
 	// TransformComponent の登録
     scriptEngine_->RegisterObjectType("TransformComponent", sizeof(TransformComponent), asOBJ_VALUE | asGetTypeTraits<TransformComponent>());
     scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 position", asOFFSET(TransformComponent, position));
