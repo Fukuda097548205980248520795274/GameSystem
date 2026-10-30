@@ -20,6 +20,12 @@ namespace Detail
 		/// @param registry 
 		void Update(RegistryECS* registry);
 
+		/// @brief スクリプトエンジンを登録する
+		/// @param moduleName 
+		/// @param scriptPath 
+		/// @return 
+		bool BuildScriptModule(const std::string& moduleName, const std::string& scriptPath) { return scriptManager_->BuildScriptModule(moduleName, scriptPath); }
+
 
 	private:
 

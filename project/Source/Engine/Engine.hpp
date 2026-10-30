@@ -96,6 +96,10 @@ public:
 	/// @return 
 	Detail::RegistryECS* GetRegistryECS() { return registry_.get(); }
 
+	/// @brief Entity
+	/// @return 
+	Entity CreateEntity() { return registry_->CreateEntity(); }
+
 	/// @brief レンダーパスを作成する
 	/// @param priority 
 	/// @param blendMode 
@@ -236,6 +240,15 @@ public:
 	bool LoadSceneFromBinary(const std::string& sceneName = "Scene")
 	{
 		return Detail::LoadBin(registry_.get(), sceneName);
+	}
+
+	/// @brief スクリプトエンジンを登録する
+	/// @param moduleName 
+	/// @param scriptPath 
+	/// @return 
+	bool BuildScriptModule(const std::string& moduleName, const std::string& scriptPath)
+	{
+		return scriptSystem_->BuildScriptModule(moduleName, scriptPath);
 	}
 
 

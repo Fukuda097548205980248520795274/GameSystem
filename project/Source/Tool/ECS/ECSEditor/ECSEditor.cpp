@@ -41,7 +41,7 @@ void Detail::ECSEditor::DrawPlayControls()
     // ツールバー風にするため、タイトルバーやスクロールバーなどの装飾を消す
     ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar;
 
-    // 再生中はツールバー全体の背景色を少し暗くする（UnityのPlaymode tint風）
+    // 再生中はツールバー全体の背景色を少し暗くする
     if (currentState == PlayState::Playing)
     {
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
@@ -69,23 +69,25 @@ void Detail::ECSEditor::DrawPlayControls()
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.5f, 0.15f, 1.0f));
 
-        if (ImGui::Button("Play", ImVec2(buttonWidth, buttonHeight)))
+        if (ImGui::Button("実行", ImVec2(buttonWidth, buttonHeight)))
         {
             // 現在の編集状態をバックアップ
             backupRegistry_ = registry_->Clone();
+
             // 再生モードへ移行
             engine->SetPlayState(PlayState::Playing);
         }
+
         ImGui::PopStyleColor(3);
     }
     else if (currentState == PlayState::Playing)
     {
-        // 再生モード：Stopボタン（赤や目立つ色にして停止を促す）
+        // 再生モード：停止ボタン（赤や目立つ色にして停止を促す）
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.2f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.7f, 0.1f, 0.1f, 1.0f));
 
-        if (ImGui::Button("Stop", ImVec2(buttonWidth, buttonHeight)))
+        if (ImGui::Button("停止", ImVec2(buttonWidth, buttonHeight)))
         {
             // エディタモードへ戻す
             engine->SetPlayState(PlayState::Editor);
@@ -100,6 +102,7 @@ void Detail::ECSEditor::DrawPlayControls()
                 selectedEntity_ = kNullEntity;
             }
         }
+
         ImGui::PopStyleColor(3);
     }
 
@@ -107,8 +110,8 @@ void Detail::ECSEditor::DrawPlayControls()
 
     ImGui::SameLine();
 
-    // Saveボタンの追加
-    if (ImGui::Button("Save Scene", ImVec2(80.0f, buttonHeight)))
+    // 保存ボタン
+    if (ImGui::Button("保存", ImVec2(80.0f, buttonHeight)))
     {
         if (engine->SaveScene("MainScene"))
         {

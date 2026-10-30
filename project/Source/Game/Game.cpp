@@ -13,7 +13,14 @@ Game::Game(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 /// @brief 初期化
 void Game::Initialize()
 {
+	auto engine = Engine::GetInstance();
 
+	engine->BuildScriptModule("Test", "./Assets/Script/Test.as");
+	Entity entity = engine->CreateEntity();
+
+	auto registry = engine->GetRegistryECS();
+	ScriptComponent scriptComp("Test", "Test");
+	registry->AddComponent(entity, scriptComp);
 }
 
 /// @brief 更新処理

@@ -41,13 +41,14 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             ctx->Prepare(factory);
             ctx->Execute();
 
-            scriptComp->scriptObject = *static_cast<asIScriptObject**>(ctx->GetAddressOfReturnValue());
-            scriptComp->scriptObject->AddRef(); // 参照カウント増加
+			// スクリプトオブジェクトの取得と参照カウントの増加
+            scriptComp->scriptObject = static_cast<asIScriptObject*>(ctx->GetReturnObject());
+            if (scriptComp->scriptObject)scriptComp->scriptObject->AddRef(); // C++側で保持するために参照カウントを増やす
             ctx->Release();
 
             // メソッドの取得
             scriptComp->initFunc = type->GetMethodByDecl("void Initialize()");
-            scriptComp->updateFunc = type->GetMethodByDecl("void Update(float)");
+            scriptComp->updateFunc = type->GetMethodByDecl("void Update()");
 
             // Initialize の実行
             if (scriptComp->initFunc)
@@ -66,7 +67,6 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             asIScriptContext* ctx = scriptEngine->CreateContext();
             ctx->Prepare(scriptComp->updateFunc);
             ctx->SetObject(scriptComp->scriptObject);
-            ctx->SetArgFloat(0, 0.016f); // デルタタイム等を渡す
             ctx->Execute();
             ctx->Release();
         }

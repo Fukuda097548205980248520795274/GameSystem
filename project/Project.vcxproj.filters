@@ -299,6 +299,9 @@
     <Filter Include="Source\Tool\ECS\ECSSerializer">
       <UniqueIdentifier>{771c310a-5446-4286-8616-c05feb3cc9b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\Script\ScriptEditor">
+      <UniqueIdentifier>{5049aa3f-2a5c-4614-8ce0-120523741f0d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -504,6 +507,12 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\ECS\ECSSerializer\ECSSerializer.cpp">
       <Filter>Source\Tool\ECS\ECSSerializer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ComponentECS\ComponentECS.cpp">
+      <Filter>Source\Tool\ECS\ComponentECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Script\ScriptEditor\ScriptEditor.cpp">
+      <Filter>Source\Tool\Script\ScriptEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -743,6 +752,9 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\ECS\ECSSerializer\ECSSerializer.hpp">
       <Filter>Source\Tool\ECS\ECSSerializer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Script\ScriptEditor\ScriptEditor.hpp">
+      <Filter>Source\Tool\Script\ScriptEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

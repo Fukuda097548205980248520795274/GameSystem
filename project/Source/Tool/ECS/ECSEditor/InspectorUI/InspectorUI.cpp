@@ -15,7 +15,7 @@ void Detail::ECSEditor::DrawInspector()
 		return;
 	}
 
-	ImGui::Text("Selected Entity ID: %u", selectedEntity_);
+	ImGui::Text("選択中 Entity ID: %u", selectedEntity_);
 	ImGui::Separator();
 
 	// 選択中のエンティティをルートとして再帰的にコンポーネントを描画
@@ -51,13 +51,13 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 					strcpy_s(classBuf, script->scriptClass.c_str());
 
 					// モジュール名の入力テキストボックス
-					if (ImGui::InputText("Module", moduleBuf, sizeof(moduleBuf)))
+					if (ImGui::InputText("スクリプト名", moduleBuf, sizeof(moduleBuf)))
 					{
 						script->moduleName = moduleBuf;
 					}
 
 					// クラス名の入力テキストボックス
-					if (ImGui::InputText("Class", classBuf, sizeof(classBuf)))
+					if (ImGui::InputText("クラス名", classBuf, sizeof(classBuf)))
 					{
 						script->scriptClass = classBuf;
 					}
@@ -67,8 +67,14 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 					{
 						if (!script->moduleName.empty() && !script->scriptClass.empty())
 						{
-							// モジュール名をベースに .as ファイルを作成（プロジェクトのルート等に保存されます）
-							std::string fileName = script->moduleName + ".as";
+							const std::string kAssetsDir = "./Assets/Script/";
+
+							// Assets/Script ディレクトリが存在しない場合は作成
+							if (!std::filesystem::exists(kAssetsDir))
+								std::filesystem::create_directories(kAssetsDir);
+
+							// 指定されたモジュール名とクラス名でasファイルを生成
+							std::string fileName = kAssetsDir + script->moduleName + ".as";
 							std::ofstream ofs(fileName);
 							if (ofs.is_open())
 							{
@@ -83,7 +89,7 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 								ofs << "\t{\n";
 								ofs << "\t\t// 初期化処理\n";
 								ofs << "\t}\n\n";
-								ofs << "\tvoid Update(float deltaTime)\n";
+								ofs << "\tvoid Update()\n";
 								ofs << "\t{\n";
 								ofs << "\t\t// 更新処理\n";
 								ofs << "\t}\n";
@@ -417,7 +423,7 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 					{
 						if (engine)
 						{
-							// エンジンからAudioSystemを取得して再生（メソッド名は実装に合わせて調整してください）
+							// エンジンからAudioSystemを取得して再生
 							if (auto audioSystem = engine->GetAudioSystem())
 							{
 								audioSystem->PlayAudio(entity);
@@ -450,7 +456,7 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 				auto input = registry_->GetComponent<InputComponent>(entity);
 				if (input)
 				{
-					// 1. デバイスの切り替え
+					// デバイスの切り替え
 					const char* deviceNames[] = { "キーボード＆マウス", "ゲームパッド" };
 					int currentDevice = static_cast<int>(input->deviceType);
 					if (ImGui::Combo("入力デバイス##入力", &currentDevice, deviceNames, IM_ARRAYSIZE(deviceNames)))
@@ -460,7 +466,7 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 
 					ImGui::Separator();
 
-					// 2. 選択されたデバイスに応じた割り当て設定
+					// 選択されたデバイスに応じた割り当て設定
 					if (input->deviceType == InputDeviceType::KeyboardMouse)
 					{
 						ImGui::Text("【キーボード割り当て】");
@@ -550,7 +556,7 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 
 					ImGui::Separator();
 
-					// 3. 実際の入力状態の可視化（デバッグ・疑似操作用）
+					// 実際の入力状態の可視化（デバッグ・疑似操作用）
 					ImGui::Text("【現在の入力状態（デバッグ用）】");
 					ImGui::DragFloat2("移動入力##入力", &input->moveInput.x, 0.01f);
 					ImGui::DragFloat2("視点入力##入力", &input->cameraInput.x, 0.01f);
@@ -567,7 +573,7 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 			if (hierarchy && !hierarchy->children.empty())
 			{
 				ImGui::Separator();
-				ImGui::Text("Children");
+				ImGui::Text("子エンティティ");
 
 				// 子エンティティに対して再帰処理を行う
 				for (Entity child : hierarchy->children)
@@ -581,41 +587,14 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 		ImGui::Separator();
 		if (ImGui::Button("コンポーネントを追加", ImVec2(-1, 30)))
 		{
-			ImGui::OpenPopup("AddComponentPopup");
+			ImGui::OpenPopup("コンポーネント");
 		}
 
-		if (ImGui::BeginPopup("AddComponentPopup"))
+		if (ImGui::BeginPopup("コンポーネント"))
 		{
 			// 各コンポーネントを持っていなければメニューに表示する
-			if (!registry_->HasComponent<ScriptComponent>(entity) && ImGui::MenuItem("ScriptComponent"))
+			if (!registry_->HasComponent<ScriptComponent>(entity) && ImGui::MenuItem("スクリプト"))
 				registry_->AddComponent<ScriptComponent>(entity, ScriptComponent{});
-
-			if (!registry_->HasComponent<BlendComponent>(entity) && ImGui::MenuItem("BlendComponent"))
-				registry_->AddComponent<BlendComponent>(entity, BlendComponent{});
-
-			if (!registry_->HasComponent<RenderPassComponent>(entity) && ImGui::MenuItem("RenderPassComponent"))
-				registry_->AddComponent<RenderPassComponent>(entity, RenderPassComponent{});
-
-			if (!registry_->HasComponent<RenderComponent>(entity) && ImGui::MenuItem("RenderComponent"))
-				registry_->AddComponent<RenderComponent>(entity, RenderComponent{});
-
-			if (!registry_->HasComponent<SkyboxComponent>(entity) && ImGui::MenuItem("SkyboxComponent"))
-				registry_->AddComponent<SkyboxComponent>(entity, SkyboxComponent{});
-
-			if (!registry_->HasComponent<TransformComponent>(entity) && ImGui::MenuItem("TransformComponent"))
-				registry_->AddComponent<TransformComponent>(entity, TransformComponent{});
-
-			if (!registry_->HasComponent<MaterialComponent>(entity) && ImGui::MenuItem("MaterialComponent"))
-				registry_->AddComponent<MaterialComponent>(entity, MaterialComponent{});
-
-			if (!registry_->HasComponent<DirectionalLightComponent>(entity) && ImGui::MenuItem("DirectionalLightComponent"))
-				registry_->AddComponent<DirectionalLightComponent>(entity, DirectionalLightComponent{});
-
-			if (!registry_->HasComponent<AudioComponent>(entity) && ImGui::MenuItem("AudioComponent"))
-				registry_->AddComponent<AudioComponent>(entity, AudioComponent{});
-
-			if (!registry_->HasComponent<InputComponent>(entity) && ImGui::MenuItem("InputComponent"))
-				registry_->AddComponent<InputComponent>(entity, InputComponent{});
 
 			ImGui::EndPopup();
 		}

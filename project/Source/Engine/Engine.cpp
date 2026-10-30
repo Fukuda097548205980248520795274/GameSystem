@@ -40,6 +40,10 @@ Engine::~Engine()
 	input_.reset();
 	input_ = nullptr;
 
+	// スクリプトシステムを破棄
+	scriptSystem_.reset();
+	scriptSystem_ = nullptr;
+
 	// ECSレジストリを破棄
 	registry_.reset();
 	registry_ = nullptr;
@@ -47,10 +51,6 @@ Engine::~Engine()
 	// ウィンドウアプリケーションを破棄
 	winApp_.reset();
 	winApp_ = nullptr;
-
-	// スクリプトシステムを破棄
-	scriptSystem_.reset();
-	scriptSystem_ = nullptr;
 
 	// ロガーを破棄
 	logger_.reset();
@@ -141,9 +141,6 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 	// ロガーを作成
 	logger_ = std::make_unique<Detail::Logger>();
 
-	// スクリプトシステムを作成
-	scriptSystem_ = std::make_unique<Detail::ScriptSystem>();
-
 	// ウィンドウアプリケーションを作成
 	winApp_ = std::make_unique<Detail::WinApp>();
 	winApp_->Initialize(screenWidth, screenHeight, title);
@@ -158,6 +155,9 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 
 	// ECSレジストリを作成
 	registry_ = std::make_unique<Detail::RegistryECS>();
+
+	// スクリプトシステムを作成
+	scriptSystem_ = std::make_unique<Detail::ScriptSystem>();
 
 	// 入力処理を作成
 	input_ = std::make_unique<Detail::Input>(winApp_.get());

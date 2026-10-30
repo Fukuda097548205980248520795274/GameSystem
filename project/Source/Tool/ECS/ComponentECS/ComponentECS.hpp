@@ -24,6 +24,16 @@ struct ScriptComponent
 	/// @param className 
 	ScriptComponent(const std::string& module, const std::string& className) : moduleName(module), scriptClass(className) {}
 
+	/// @brief デストラクタ
+	~ScriptComponent()
+	{
+		if (scriptObject)
+		{
+			scriptObject->Release();
+			scriptObject = nullptr;
+		}
+	}
+
 	// @brief スクリプトモジュール名
 	std::string moduleName;
 
@@ -223,6 +233,11 @@ struct RenderTargetComponent
 /// @brief テクスチャコンポーネント
 struct TextureComponent
 {
+	/// @brief コンストラクタ
+	TextureComponent();
+
+	/// @brief コンストラクタ
+	/// @param handle 
 	TextureComponent(Detail::TextureHandle handle) : handle(handle) {}
 
 	/// @brief テクスチャのハンドル（またはID/ポインタ）
@@ -232,6 +247,11 @@ struct TextureComponent
 /// @brief キューブマップコンポーネント
 struct CubemapComponent
 {
+	/// @brief コンストラクタ
+	CubemapComponent();
+
+	/// @brief コンストラクタ
+	/// @param handle 
 	CubemapComponent(Detail::TextureHandle handle) : handle(handle) {}
 
 	/// @brief キューブマップのハンドル（またはID/ポインタ）
