@@ -11,7 +11,7 @@ void Detail::AssetsWindow::DrawUI(RenderContext* renderContext, TextureStore* te
 #ifdef DEVELOPMENT
 	auto engine = Engine::GetInstance();
 
-	if (!ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar))
+	if (!ImGui::Begin("アセット", nullptr, ImGuiWindowFlags_MenuBar))
 	{
 		ImGui::End();
 		return;
@@ -32,13 +32,14 @@ void Detail::AssetsWindow::DrawUI(RenderContext* renderContext, TextureStore* te
 	// タブバーによるカテゴリの切り替え
 	if (ImGui::BeginTabBar("AssetsTabBar"))
 	{
-		if (ImGui::BeginTabItem("Textures"))
+		if (ImGui::BeginTabItem("テクスチャ"))
 		{
 			currentCategory_ = AssetCategory::Texture;
 			DrawTextureTab(renderContext, textureStore);
 			ImGui::EndTabItem();
 		}
-		if (ImGui::BeginTabItem("Models"))
+
+		if (ImGui::BeginTabItem("モデル"))
 		{
 			currentCategory_ = AssetCategory::Model;
 			DrawModelTab(renderContext, modelStore);
@@ -76,7 +77,7 @@ void Detail::AssetsWindow::ProcessDroppedFiles(RenderContext* renderContext)
 
 		try
 		{
-			// フォルダごとドロップされた場合（モデルなどを想定）
+			// ディレクトリがドロップされた場合は、ディレクトリごとコピーしてモデルファイルを探す
 			if (std::filesystem::is_directory(srcPath))
 			{
 				std::filesystem::path destPath = kModelDir + srcPath.filename().string();
@@ -119,9 +120,10 @@ void Detail::AssetsWindow::ProcessDroppedFiles(RenderContext* renderContext)
 					currentCategory_ = AssetCategory::Texture; // 自動的にタブを切り替える
 				}
 			}
-			// モデルの処理
 			else if (ext == ".obj" || ext == ".gltf" || ext == ".glb" || ext == ".fbx")
 			{
+				// モデルの処理
+
 				if (!std::filesystem::exists(kModelDir)) std::filesystem::create_directories(kModelDir);
 				std::filesystem::path destPath = kModelDir + srcPath.filename().string();
 				std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
@@ -132,11 +134,6 @@ void Detail::AssetsWindow::ProcessDroppedFiles(RenderContext* renderContext)
 					selectedModelHandle_ = handle;
 					currentCategory_ = AssetCategory::Model;
 				}
-			}
-			// 音声など将来用
-			else if (ext == ".wav" || ext == ".mp3" || ext == ".ogg")
-			{
-				// Audioの処理を将来ここに記述
 			}
 		}
 		catch (const std::filesystem::filesystem_error& e)
@@ -278,10 +275,12 @@ void Detail::AssetsWindow::DrawModelTab(RenderContext* renderContext, ModelStore
 			selectedModelHandle_ = handle;
 		}
 
-		// D&D ソース
+		// ドラッグアンドドロップのソースとして設定
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
 		{
+			// ドラッグ中のペイロードとしてモデルハンドルを設定
 			ImGui::SetDragDropPayload("MODEL_HANDLE", &handle, sizeof(ModelHandle));
+
 			ImGui::Text("モデル: %s", fileName.c_str());
 			ImGui::EndDragDropSource();
 		}

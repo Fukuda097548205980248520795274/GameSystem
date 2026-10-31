@@ -17,7 +17,7 @@ Collapsed=0
 
 [Window][View]
 Pos=284,39
-Size=716,480
+Size=716,449
 Collapsed=0
 DockId=0x00000002,0
 
@@ -38,19 +38,19 @@ Collapsed=0
 
 [Window][PSO動的エディタ]
 Pos=284,39
-Size=716,480
+Size=716,449
 Collapsed=0
 DockId=0x00000002,2
 
 [Window][シェーダエディタ]
 Pos=284,39
-Size=716,480
+Size=716,449
 Collapsed=0
 DockId=0x00000002,1
 
 [Window][テクスチャエディタ]
-Pos=0,521
-Size=1025,199
+Pos=0,498
+Size=1025,222
 Collapsed=0
 DockId=0x0000000B,0
 
@@ -67,25 +67,25 @@ DockId=0x00000004,0
 
 [Window][ヒエラルキー]
 Pos=0,39
-Size=282,480
+Size=282,449
 Collapsed=0
 DockId=0x00000007,0
 
 [Window][インスペクター]
 Pos=1002,39
-Size=278,480
+Size=278,449
 Collapsed=0
 DockId=0x0000000A,0
 
 [Window][プロファイルエディタ]
-Pos=1027,521
-Size=253,199
+Pos=1075,490
+Size=205,230
 Collapsed=0
-DockId=0x0000000C,0
+DockId=0x00000012,0
 
 [Window][モデルエディタ]
-Pos=0,521
-Size=1025,199
+Pos=0,498
+Size=1025,222
 Collapsed=0
 DockId=0x0000000B,1
 
@@ -95,11 +95,23 @@ Size=1280,37
 Collapsed=0
 DockId=0x0000000D,0
 
+[Window][Assets]
+Pos=0,490
+Size=1075,230
+Collapsed=0
+DockId=0x0000000F,0
+
+[Window][アセット]
+Pos=0,490
+Size=1073,230
+Collapsed=0
+DockId=0x00000011,0
+
 [Docking][Data]
 DockSpace             ID=0x14621557 Window=0x3DA2F1DE Pos=0,0 Size=1280,720 Split=Y Selected=0xCD8A0BD6
   DockNode            ID=0x0000000D Parent=0x14621557 SizeRef=1280,37 HiddenTabBar=1 Selected=0x43950083
   DockNode            ID=0x0000000E Parent=0x14621557 SizeRef=1280,681 Split=Y
-    DockNode          ID=0x00000005 Parent=0x0000000E SizeRef=1280,480 Split=X
+    DockNode          ID=0x00000005 Parent=0x0000000E SizeRef=1280,449 Split=X
       DockNode        ID=0x00000007 Parent=0x00000005 SizeRef=282,720 Selected=0x8B76ACBE
       DockNode        ID=0x00000008 Parent=0x00000005 SizeRef=996,720 Split=X
         DockNode      ID=0x00000009 Parent=0x00000008 SizeRef=716,720 Split=X
@@ -108,9 +120,13 @@ DockSpace             ID=0x14621557 Window=0x3DA2F1DE Pos=0,0 Size=1280,720 Spli
             DockNode  ID=0x00000002 Parent=0x00000003 SizeRef=777,720 CentralNode=1 Selected=0xCD8A0BD6
           DockNode    ID=0x00000004 Parent=0x00000009 SizeRef=262,720 Selected=0x36DC96AB
         DockNode      ID=0x0000000A Parent=0x00000008 SizeRef=278,720 Selected=0xC69B6219
-    DockNode          ID=0x00000006 Parent=0x0000000E SizeRef=1280,199 Split=X Selected=0x39E1C07C
+    DockNode          ID=0x00000006 Parent=0x0000000E SizeRef=1280,230 Split=X Selected=0x39E1C07C
       DockNode        ID=0x0000000B Parent=0x00000006 SizeRef=1025,270 Selected=0x39E1C07C
-      DockNode        ID=0x0000000C Parent=0x00000006 SizeRef=253,270 Selected=0x73FEE0DF
+      DockNode        ID=0x0000000C Parent=0x00000006 SizeRef=253,270 Split=X Selected=0x73FEE0DF
+        DockNode      ID=0x0000000F Parent=0x0000000C SizeRef=1075,222 Selected=0x42C24103
+        DockNode      ID=0x00000010 Parent=0x0000000C SizeRef=203,222 Split=X Selected=0x73FEE0DF
+          DockNode    ID=0x00000011 Parent=0x00000010 SizeRef=1073,230 Selected=0x161060C3
+          DockNode    ID=0x00000012 Parent=0x00000010 SizeRef=205,230 Selected=0x73FEE0DF
 
 )";
 
