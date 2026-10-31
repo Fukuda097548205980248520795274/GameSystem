@@ -66,19 +66,37 @@ void Detail::ScriptManager::MessageCallback(const asSMessageInfo* msg)
 /// @return 
 Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, const std::string& scriptPath)
 {
-	auto engine = Engine::GetInstance();
+    auto engine = Engine::GetInstance();
+
+    std::filesystem::path asFilePath(scriptPath);
+    if (!std::filesystem::exists(asFilePath))
+    {
+        if (engine) engine->Log(LogLevel::Error, "スクリプトファイルが存在しません : " + scriptPath);
+        return ScriptHandle::Invalid();
+    }
+
+    // ファイルの更新日時を取得
+    auto asTime = std::filesystem::last_write_time(asFilePath);
 
     // キャッシュチェック
     auto it = cache_.find(scriptPath);
     if (it != cache_.end())
     {
         // 既存のハンドルが有効か確認
-        if (GetHandleByIndex(it->second.index) != ScriptHandle::Invalid())
-            return it->second;
+        ScriptHandle cachedHandle = GetHandleByIndex(it->second.index);
+        if (cachedHandle != ScriptHandle::Invalid())
+        {
+            // キャッシュされている更新日時と比較
+            if (slots_[cachedHandle.index].lastWriteTime >= asTime)
+            {
+                // ファイルが更新されていなければキャッシュを返す
+                return cachedHandle;
+            }
+            // 更新されている場合はそのまま再ビルドへ進む
+        }
     }
 
-	// スクリプトファイルのパスを解析して中間データ（bin）のパスを生成
-    std::filesystem::path asFilePath(scriptPath);
+    // スクリプトファイルのパスを解析して中間データ（bin）のパスを生成
     std::string binPath = kCookedDir + asFilePath.stem().string() + ".bin";
 
     // 中間データ用ディレクトリが存在しない場合は作成
@@ -89,19 +107,9 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
     bool loadFromBin = false;
     if (std::filesystem::exists(binPath))
     {
-        if (std::filesystem::exists(asFilePath))
+        auto binTime = std::filesystem::last_write_time(binPath);
+        if (binTime >= asTime)
         {
-            // asファイルよりbinファイルの方が新しければbinから読み込む
-            auto asTime = std::filesystem::last_write_time(asFilePath);
-            auto binTime = std::filesystem::last_write_time(binPath);
-            if (binTime >= asTime)
-            {
-                loadFromBin = true;
-            }
-        }
-        else
-        {
-            // asファイルがなく、binだけある場合
             loadFromBin = true;
         }
     }
@@ -124,7 +132,11 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
                 }
                 else
                 {
-					if (engine)engine->Log(LogLevel::Error, "バイトコードの読み込みに失敗しました : " + binPath);
+                    if (engine)
+                    {
+                        engine->Log(LogLevel::Error, "バイトコードの読み込みに失敗しました : " + binPath);
+                        engine->StopExecution();
+                    }
                 }
             }
         }
@@ -140,10 +152,13 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
         std::ifstream file(scriptPath, std::ios::binary);
         if (!file.is_open())
         {
-			if (engine)engine->Log(LogLevel::Error, "スクリプトファイルが開けません : " + scriptPath);
+            if (engine)
+            {
+                engine->Log(LogLevel::Error, "スクリプトファイルが開けません : " + scriptPath);
+                engine->StopExecution();
+            }
             return ScriptHandle::Invalid();
         }
-		if (engine)engine->Log(LogLevel::Info, "スクリプトファイルを開きました : " + scriptPath);
 
 
         // ファイルの中身を文字列として読み込む
@@ -155,22 +170,34 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
         // スクリプトビルダーを使用してモジュールをビルド
         CScriptBuilder builder;
         int r = builder.StartNewModule(scriptEngine_, moduleName.c_str());
-        if (r < 0) return ScriptHandle::Invalid();
+        if (r < 0)
+        {
+            if (engine) engine->StopExecution();
+            return ScriptHandle::Invalid();
+        }
 
         // スクリプトコードをメモリから追加
         r = builder.AddSectionFromMemory(scriptPath.c_str(), scriptCode.c_str(), static_cast<uint32_t>(scriptCode.length()));
         if (r < 0)
         {
-            if (engine)engine->Log(LogLevel::Error, "AddSectionFromMemory 失敗。エラーコード: " + std::to_string(r));
+            if (engine)
+            {
+                engine->Log(LogLevel::Error, "AddSectionFromMemory 失敗。エラーコード: " + std::to_string(r));
+                engine->StopExecution();
+            }
             return ScriptHandle::Invalid();
         }
-		if (engine)engine->Log(LogLevel::Info, "スクリプトコードをメモリから追加 : " + scriptPath);
+        if (engine)engine->Log(LogLevel::Info, "スクリプトコードをメモリから追加 : " + scriptPath);
 
         // モジュールのビルド
         r = builder.BuildModule();
         if (r < 0)
         {
-            if (engine)engine->Log(LogLevel::Error, "BuildModule 失敗。エラーコード: " + std::to_string(r));
+            if (engine)
+            {
+                engine->Log(LogLevel::Error, "BuildModule 失敗。エラーコード: " + std::to_string(r));
+                engine->StopExecution();
+            }
             return ScriptHandle::Invalid();
         }
 		if (engine)engine->Log(LogLevel::Info, "スクリプトモジュールをビルド : " + moduleName);
@@ -189,7 +216,12 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
 
     // スロットの割り当て
     uint32_t slotIndex = 0;
-    if (!freeSlots_.empty())
+    if (it != cache_.end() && GetHandleByIndex(it->second.index) != ScriptHandle::Invalid())
+    {
+        // 既に有効なスロットがある場合は再利用する
+        slotIndex = it->second.index;
+    }
+    else if (!freeSlots_.empty())
     {
         // 空いているスロットを再利用
         slotIndex = freeSlots_.front();
@@ -202,10 +234,11 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
         slots_.emplace_back();
     }
 
-    // スロットにモデルデータを格納
+    // スロットにデータを格納
     Slot& slot = slots_[slotIndex];
     slot.inUse = true;
     slot.moduleName = moduleName;
+    slot.lastWriteTime = asTime; // ★更新日時を記録
 
     // キャッシュに登録
     ScriptHandle handle{ slotIndex, slot.generation };
@@ -223,8 +256,7 @@ Detail::ScriptHandle Detail::ScriptManager::GetHandleByIndex(uint32_t index) con
     if (index >= slots_.size() || !slots_[index].inUse)
         return ScriptHandle::Invalid();
 
-	// スロットが使用中であれば、世代番号とともにハンドルを返す
-    return ScriptHandle(index);
+	return ScriptHandle{ index, slots_[index].generation };
 }
 
 /// @brief スクリプトを削除する
@@ -260,6 +292,55 @@ void Detail::ScriptManager::Remove(ScriptHandle handle)
 			++it;
 		}
 	}
+}
+
+/// @brief スクリプトハンドルからスクリプトパスを取得する
+/// @param handle 
+/// @return 
+std::string Detail::ScriptManager::GetFilePath(ScriptHandle handle) const
+{
+    if (!handle.IsValid()) return "";
+
+	// キャッシュを検索して、ハンドルに対応するスクリプトパスを返す
+    for (const auto& pair : cache_)
+    {
+        if (pair.second.index == handle.index && pair.second.generation == handle.generation)
+        {
+            return pair.first;
+        }
+    }
+
+    return "";
+}
+
+/// @brief 変更されたスクリプトをリロードする
+void Detail::ScriptManager::ReloadModifiedScripts()
+{
+    auto engine = Engine::GetInstance();
+    for (auto& pair : cache_)
+    {
+        const std::string& scriptPath = pair.first;
+        ScriptHandle handle = pair.second;
+
+        if (!handle.IsValid() || handle.index >= slots_.size()) continue;
+
+        Slot& slot = slots_[handle.index];
+        if (!slot.inUse) continue;
+
+        if (std::filesystem::exists(scriptPath))
+        {
+            auto currentWriteTime = std::filesystem::last_write_time(scriptPath);
+
+            // キャッシュした時点の時刻より新しければ再ビルド
+            if (currentWriteTime > slot.lastWriteTime)
+            {
+                if (engine) engine->Log(LogLevel::Info, "スクリプトの更新を検知しました。再ビルドします : " + scriptPath);
+
+                // 再ビルド処理を呼び出す (内部でキャッシュスロットが上書き更新される)
+                BuildScriptModule(slot.moduleName, scriptPath);
+            }
+        }
+    }
 }
 
 /// @brief C++ エンジンAPIのバインド

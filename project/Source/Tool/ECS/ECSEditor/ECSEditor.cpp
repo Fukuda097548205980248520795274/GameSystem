@@ -27,6 +27,9 @@ void Detail::ECSEditor::Update()
 
 #ifdef DEVELOPMENT
 
+	// 変更されたスクリプトをリロードする
+    Engine::GetInstance()->GetScriptSystem()->GetScriptManager()->ReloadModifiedScripts();
+
 	// UIウィンドウの描画
     DrawPlayControls();
 	DrawHierarchy();
@@ -43,9 +46,10 @@ void Detail::ECSEditor::DrawAssetsWindow()
     auto renderContext = engine->GetRenderContext();
     auto textureStore = renderContext->GetTextureStore();
     auto modelStore = renderContext->GetModelStore();
+	auto scriptManager = engine->GetScriptSystem()->GetScriptManager();
 
     // 統合されたAssetsWindowを描画
-    assetsWindow_->DrawUI(renderContext, textureStore, modelStore);
+    assetsWindow_->DrawUI(renderContext, textureStore, modelStore, scriptManager);
 }
 
 /// @brief プレイコントロールの描画

@@ -1,12 +1,14 @@
 #include "AssetsWindow.hpp"
 #include "Engine.hpp"
 #include <algorithm>
+#include <cstdlib>
 
 /// @brief UI描画
 /// @param renderContext 
 /// @param textureStore 
 /// @param modelStore 
-void Detail::AssetsWindow::DrawUI(RenderContext* renderContext, TextureStore* textureStore, ModelStore* modelStore)
+/// @param scriptManager 
+void Detail::AssetsWindow::DrawUI(RenderContext* renderContext, TextureStore* textureStore, ModelStore* modelStore, ScriptManager* scriptManager)
 {
 #ifdef DEVELOPMENT
 	auto engine = Engine::GetInstance();
@@ -20,7 +22,7 @@ void Detail::AssetsWindow::DrawUI(RenderContext* renderContext, TextureStore* te
 	// ドロップされたファイルの処理（ウィンドウ上にドロップされた場合のみ）
 	if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows))
 	{
-		ProcessDroppedFiles(renderContext);
+		ProcessDroppedFiles(renderContext, scriptManager);
 	}
 	else
 	{
@@ -46,6 +48,12 @@ void Detail::AssetsWindow::DrawUI(RenderContext* renderContext, TextureStore* te
 			ImGui::EndTabItem();
 		}
 
+		if (ImGui::BeginTabItem("スクリプト"))
+		{
+			currentCategory_ = AssetCategory::Script;
+			DrawScriptTab(scriptManager);
+			ImGui::EndTabItem();
+		}
 
 		ImGui::EndTabBar();
 	}
@@ -64,7 +72,8 @@ void Detail::AssetsWindow::OnFileDropped(const std::string& filePath)
 
 /// @brief ドロップされたファイルの処理
 /// @param renderContext 
-void Detail::AssetsWindow::ProcessDroppedFiles(RenderContext* renderContext)
+/// @param scriptManager 
+void Detail::AssetsWindow::ProcessDroppedFiles(RenderContext* renderContext, ScriptManager* scriptManager)
 {
 	std::lock_guard<std::mutex> lock(dropMutex_);
 	if (droppedFilesQueue_.empty()) return;
@@ -133,6 +142,21 @@ void Detail::AssetsWindow::ProcessDroppedFiles(RenderContext* renderContext)
 				{
 					selectedModelHandle_ = handle;
 					currentCategory_ = AssetCategory::Model;
+				}
+			}
+			else if (ext == ".as")
+			{
+				if (!std::filesystem::exists(kScriptDir)) std::filesystem::create_directories(kScriptDir);
+				std::filesystem::path destPath = kScriptDir + srcPath.filename().string();
+				std::filesystem::copy_file(srcPath, destPath, std::filesystem::copy_options::overwrite_existing);
+
+				// ファイル名（拡張子なし）をモジュール名としてビルド
+				std::string moduleName = srcPath.stem().string();
+				ScriptHandle handle = scriptManager->BuildScriptModule(moduleName, destPath.string());
+				if (handle.IsValid())
+				{
+					selectedScriptHandle_ = handle;
+					currentCategory_ = AssetCategory::Script; // 自動的にタブを切り替える
 				}
 			}
 		}
@@ -332,5 +356,85 @@ void Detail::AssetsWindow::DrawModelTab(RenderContext* renderContext, ModelStore
 	{
 		// 未選択時のプレースホルダー
 		ImGui::TextDisabled("モデルを選択すると削除ボタンが表示されます");
+	}
+}
+
+/// @brief スクリプトタブの描画
+/// @param scriptManager 
+void Detail::AssetsWindow::DrawScriptTab(ScriptManager* scriptManager)
+{
+	ImGui::BeginChild("ScriptList", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() - 5.0f), true);
+
+	size_t scriptCount = scriptManager->GetScriptCount();
+	for (uint32_t i = 0; i < scriptCount; ++i)
+	{
+		ScriptHandle handle = scriptManager->GetHandleByIndex(i);
+		if (!handle.IsValid()) continue;
+
+		std::string filePath = scriptManager->GetFilePath(handle);
+		if (filePath.empty()) continue;
+
+		size_t slashPos = filePath.find_last_of("/\\");
+		std::string fileName = (slashPos != std::string::npos) ? filePath.substr(slashPos + 1) : filePath;
+
+		bool isSelected = (selectedScriptHandle_ == handle);
+		if (ImGui::Selectable((fileName + "##" + std::to_string(i)).c_str(), isSelected))
+		{
+			selectedScriptHandle_ = handle;
+		}
+
+		// ダブルクリックでVSCodeを開く処理
+		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+		{
+			std::string command = "code \"" + filePath + "\"";
+			std::system(command.c_str());
+		}
+
+		// ドラッグアンドドロップのソースとして設定
+		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+		{
+			ImGui::SetDragDropPayload("SCRIPT_HANDLE", &handle, sizeof(ScriptHandle));
+			ImGui::Text("スクリプト: %s", fileName.c_str());
+			ImGui::EndDragDropSource();
+		}
+
+		// ツールチップ表示
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::Text("ファイルパス : %s", filePath.c_str());
+			ImGui::TextDisabled("ダブルクリックでVSCodeを開きます");
+			ImGui::EndTooltip();
+		}
+	}
+
+	ImGui::EndChild();
+
+	// 選択されたスクリプトが有効な場合に削除ボタンを表示
+	if (selectedScriptHandle_.IsValid())
+	{
+		if (ImGui::Button("選択したスクリプトを削除", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+		{
+			auto engine = Engine::GetInstance();
+			try
+			{
+				std::string path = scriptManager->GetFilePath(selectedScriptHandle_);
+				if (std::filesystem::exists(path))
+				{
+					std::filesystem::remove(path);
+				}
+
+				scriptManager->Remove(selectedScriptHandle_);
+				selectedScriptHandle_ = ScriptHandle::Invalid();
+			}
+			catch (const std::filesystem::filesystem_error& e)
+			{
+				if (engine) engine->Log(LogLevel::Error, "スクリプトファイルの削除に失敗しました : " + std::string(e.what()));
+			}
+		}
+	}
+	else
+	{
+		ImGui::TextDisabled("スクリプトを選択すると削除ボタンが表示されます");
 	}
 }

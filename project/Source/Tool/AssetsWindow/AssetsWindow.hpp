@@ -6,6 +6,7 @@
 #include <filesystem>
 #include "Store/TextureStore/TextureData.hpp"
 #include "Store/ModelStore/ModelData.hpp"
+#include "Script/ScriptManager/ScriptManager.hpp"
 
 namespace Detail
 {
@@ -17,6 +18,9 @@ namespace Detail
 
 	// モデルストア
 	class ModelStore;
+
+	// スクリプトマネージャ
+	class ScriptManager;
 
 	// 将来的なアセット追加を見据えたカテゴリ
 	enum class AssetCategory
@@ -42,7 +46,8 @@ namespace Detail
 		/// @param renderContext 
 		/// @param textureStore 
 		/// @param modelStore 
-		void DrawUI(RenderContext* renderContext, TextureStore* textureStore, ModelStore* modelStore);
+		/// @param scriptManager 
+		void DrawUI(RenderContext* renderContext, TextureStore* textureStore, ModelStore* modelStore, ScriptManager* scriptManager);
 
 		/// @brief ドロップされたファイルの処理
 		/// @param filePath 
@@ -52,7 +57,8 @@ namespace Detail
 
 		/// @brief ドロップされたファイルの処理
 		/// @param renderContext 
-		void ProcessDroppedFiles(RenderContext* renderContext);
+		/// @param scriptManager 
+		void ProcessDroppedFiles(RenderContext* renderContext, ScriptManager* scriptManager);
 
 		/// @brief テクスチャタブの描画
 		/// @param renderContext 
@@ -63,6 +69,10 @@ namespace Detail
 		/// @param renderContext 
 		/// @param modelStore 
 		void DrawModelTab(RenderContext* renderContext, ModelStore* modelStore);
+
+		/// @brief スクリプトタブの描画
+		/// @param scriptManager 
+		void DrawScriptTab(ScriptManager* scriptManager);
 
 	private:
 
@@ -78,9 +88,11 @@ namespace Detail
 		// 選択中のハンドル
 		TextureHandle selectedTextureHandle_ = TextureHandle::Invalid();
 		ModelHandle selectedModelHandle_ = ModelHandle::Invalid();
+		ScriptHandle selectedScriptHandle_ = ScriptHandle::Invalid();
 
 		// 各アセットの保存ディレクトリ
 		const std::string kTextureDir = "./Cooked/Texture/";
 		const std::string kModelDir = "./Assets/Model/";
+		const std::string kScriptDir = "./Assets/Script/";
 	};
 }

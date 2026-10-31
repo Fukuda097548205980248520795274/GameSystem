@@ -48,6 +48,19 @@ namespace Detail
 		/// @param handle 
 		void Remove(ScriptHandle handle);
 
+		/// @brief スクリプトの数を取得する
+        /// @return 
+        size_t GetScriptCount() const { return slots_.size(); }
+
+		/// @brief スクリプトハンドルからスクリプトパスを取得する
+        /// @param handle 
+        /// @return 
+        std::string GetFilePath(ScriptHandle handle) const;
+
+		/// @brief 変更されたスクリプトをリロードする
+        void ReloadModifiedScripts();
+
+
     private:
 
         /// @brief 初期化
@@ -80,6 +93,9 @@ namespace Detail
 
 			// モジュール名
 			std::string moduleName = "";
+
+			// スクリプトファイルの最終更新時刻
+            std::filesystem::file_time_type lastWriteTime;
 		};
 
 		// データテーブル

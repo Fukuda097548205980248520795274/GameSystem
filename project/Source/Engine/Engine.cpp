@@ -126,12 +126,34 @@ void Engine::PostDraw()
 	input_->CopyInputInfo();
 }
 
+/// @brief ゲームを停止する
+void Engine::StopExecution()
+{
+#ifdef DEVELOPMENT
+
+	// 開発時はエディタ状態に戻して実行を停止する
+	playState_ = PlayState::Editor;
+	if (logger_) logger_->Logging(LogLevel::Warning, "スクリプトエラーにより実行を停止し、エディタモードに戻りました。");
+#else
+
+	// リリース版ではウィンドウを閉じる
+	if (logger_) logger_->Logging(LogLevel::Error, "致命的なエラーが発生したため、アプリケーションを終了します。");
+	CloseWindow(); // ウィンドウアプリケーションに終了要求を送る
+
+#endif
+}
+
 /// @brief 初期化
 /// @param screenWidth 
 /// @param screenHeight 
 /// @param title
 void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 {
+	// エンジンの状態を初期化
+#ifdef DEVELOPMENT
+	playState_ = PlayState::Editor;
+#endif
+
 	// 例外が発生したときに起動する
 	Detail::InitializeCrashHandler();
 

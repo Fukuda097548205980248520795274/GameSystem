@@ -56,7 +56,14 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                 asIScriptContext* initCtx = scriptEngine->CreateContext();
                 initCtx->Prepare(scriptComp->initFunc);
                 initCtx->SetObject(scriptComp->scriptObject);
-                initCtx->Execute();
+                
+                int r = initCtx->Execute();
+                if (r != asEXECUTION_FINISHED)
+                {
+                    Engine::GetInstance()->Log(LogLevel::Error, "スクリプトの Initialize 実行時にエラーが発生しました");
+                    Engine::GetInstance()->StopExecution();
+                }
+
                 initCtx->Release();
             }
         }
@@ -67,7 +74,14 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             asIScriptContext* ctx = scriptEngine->CreateContext();
             ctx->Prepare(scriptComp->updateFunc);
             ctx->SetObject(scriptComp->scriptObject);
-            ctx->Execute();
+            
+            int r = ctx->Execute();
+            if (r != asEXECUTION_FINISHED)
+            {
+                Engine::GetInstance()->Log(LogLevel::Error, "スクリプトの Update 実行時にエラーが発生しました");
+                Engine::GetInstance()->StopExecution();
+            }
+
             ctx->Release();
         }
     }

@@ -92,6 +92,12 @@ public:
 	/// @param log 
 	void Log(LogLevel level, const std::string& log) { logger_->Logging(level, log); }
 
+	/// @brief ウィンドウを閉じる
+	void CloseWindow() { winApp_->Close(); }
+
+	/// @brief ゲームを停止する
+	void StopExecution();
+
 	/// @brief ECSレジストリを取得する
 	/// @return 
 	Detail::RegistryECS* GetRegistryECS() { return registry_.get(); }
@@ -189,6 +195,10 @@ public:
 	/// @brief オーディオシステムを取得する
 	/// @return 
 	Detail::AudioSystem* GetAudioSystem() { return audioSystem_.get(); }
+
+	/// @brief スクリプトシステムを取得する
+	/// @return 
+	Detail::ScriptSystem* GetScriptSystem() { return scriptSystem_.get(); }
 
 	/// @brief テクスチャファイルがドロップされたときの処理
 	/// @param filePath 
@@ -292,7 +302,7 @@ private:
 
 
 	// ゲームの状態
-	PlayState playState_ = PlayState::Editor;
+	PlayState playState_ = PlayState::Playing;
 
 	// 次のフレームで差し替えるための予約用レジストリ
 	std::unique_ptr<Detail::RegistryECS> pendingRestoreRegistry_ = nullptr;

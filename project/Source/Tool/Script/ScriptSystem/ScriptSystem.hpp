@@ -26,6 +26,10 @@ namespace Detail
 		/// @return 
 		ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptPath) { return scriptManager_->BuildScriptModule(moduleName, scriptPath); }
 
+		/// @brief スクリプトマネージャを取得する
+		/// @return 
+		ScriptManager* GetScriptManager() const { return scriptManager_.get(); }
+
 
 	private:
 
