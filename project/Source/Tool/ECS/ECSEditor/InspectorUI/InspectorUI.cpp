@@ -93,61 +93,6 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 					{
 						ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "※スクリプトが見つかりません");
 					}
-
-					ImGui::Separator();
-					ImGui::Text("新規作成 / 手動設定");
-
-					// 従来の手動入力と生成機能（新規作成用として残す）
-					char moduleBuf[128];
-					char classBuf[128];
-					strcpy_s(moduleBuf, script->moduleName.c_str());
-					strcpy_s(classBuf, script->scriptClass.c_str());
-
-					if (ImGui::InputText("モジュール名", moduleBuf, sizeof(moduleBuf)))
-					{
-						script->moduleName = moduleBuf;
-					}
-
-					if (ImGui::InputText("クラス名", classBuf, sizeof(classBuf)))
-					{
-						script->scriptClass = classBuf;
-					}
-
-					if (ImGui::Button("asファイルを生成"))
-					{
-						if (!script->moduleName.empty() && !script->scriptClass.empty())
-						{
-							if (!std::filesystem::exists(kAssetsDir))
-								std::filesystem::create_directories(kAssetsDir);
-
-							std::string fileName = kAssetsDir + script->moduleName + ".as";
-
-							// 既に同名ファイルが存在するかチェックして上書きを防ぐ
-							if (!std::filesystem::exists(fileName))
-							{
-								std::ofstream ofs(fileName);
-								if (ofs.is_open())
-								{
-									ofs << "class " << script->scriptClass << "\n";
-									ofs << "{\n";
-									ofs << "\t" << script->scriptClass << "()\n";
-									ofs << "\t{\n";
-									ofs << "\t\t// コンストラクタ\n";
-									ofs << "\t}\n\n";
-									ofs << "\tvoid Initialize()\n";
-									ofs << "\t{\n";
-									ofs << "\t\t// 初期化処理\n";
-									ofs << "\t}\n\n";
-									ofs << "\tvoid Update()\n";
-									ofs << "\t{\n";
-									ofs << "\t\t// 更新処理\n";
-									ofs << "\t}\n";
-									ofs << "}\n";
-									ofs.close();
-								}
-							}
-						}
-					}
 				}
 			}
 		}

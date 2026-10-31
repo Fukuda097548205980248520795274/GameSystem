@@ -363,6 +363,81 @@ void Detail::AssetsWindow::DrawModelTab(RenderContext* renderContext, ModelStore
 /// @param scriptManager 
 void Detail::AssetsWindow::DrawScriptTab(ScriptManager* scriptManager)
 {
+	// 新規スクリプト作成ボタン
+	if (ImGui::Button("新規スクリプト作成"))
+	{
+		ImGui::OpenPopup("CreateScriptPopup");
+	}
+
+	// 新規スクリプト作成のポップアップモーダル
+	if (ImGui::BeginPopupModal("CreateScriptPopup", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		// static変数で入力を保持する
+		static char scriptName[128] = "";
+
+		ImGui::Text("新しいスクリプトの名前を入力してください。");
+		ImGui::TextDisabled("※この名前が「ファイル名」および「クラス名」になります。");
+		ImGui::InputText("名前", scriptName, sizeof(scriptName));
+
+		ImGui::Separator();
+
+		if (ImGui::Button("作成", ImVec2(120, 0)))
+		{
+			if (strlen(scriptName) > 0)
+			{
+				const std::string kAssetsDir = "./Assets/Script/";
+				if (!std::filesystem::exists(kAssetsDir))
+				{
+					std::filesystem::create_directories(kAssetsDir);
+				}
+
+				std::string fileName = kAssetsDir + std::string(scriptName) + ".as";
+
+				// 同名ファイルが存在しない場合のみ作成
+				if (!std::filesystem::exists(fileName))
+				{
+					std::ofstream ofs(fileName);
+					if (ofs.is_open())
+					{
+						ofs << "class " << scriptName << "\n";
+						ofs << "{\n";
+						ofs << "\t" << scriptName << "()\n";
+						ofs << "\t{\n";
+						ofs << "\t\t// コンストラクタ\n";
+						ofs << "\t}\n\n";
+						ofs << "\tvoid Initialize()\n";
+						ofs << "\t{\n";
+						ofs << "\t\t// 初期化処理\n";
+						ofs << "\t}\n\n";
+						ofs << "\tvoid Update()\n";
+						ofs << "\t{\n";
+						ofs << "\t\t// 更新処理\n";
+						ofs << "\t}\n";
+						ofs << "}\n";
+						ofs.close();
+					}
+				}
+
+				// 入力をクリアしてポップアップを閉じる
+				memset(scriptName, 0, sizeof(scriptName));
+				ImGui::CloseCurrentPopup();
+			}
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("キャンセル", ImVec2(120, 0)))
+		{
+			// 入力をクリアしてポップアップを閉じる
+			memset(scriptName, 0, sizeof(scriptName));
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
+	}
+
+
+
 	ImGui::BeginChild("ScriptList", ImVec2(0, -ImGui::GetFrameHeightWithSpacing() - 5.0f), true);
 
 	size_t scriptCount = scriptManager->GetScriptCount();
