@@ -14,6 +14,9 @@ void Detail::ECSEditor::Initialize()
 
 	// 選択中のエンティティを初期化
 	selectedEntity_ = kNullEntity;
+
+	// アセットウィンドウの生成
+	assetsWindow_ = std::make_unique<AssetsWindow>();
 }
 
 /// @brief 更新
@@ -28,8 +31,21 @@ void Detail::ECSEditor::Update()
     DrawPlayControls();
 	DrawHierarchy();
 	DrawInspector();
+	DrawAssetsWindow();
 
 #endif
+}
+
+/// @brief アセットウィンドウの描画
+void Detail::ECSEditor::DrawAssetsWindow()
+{
+    auto engine = Engine::GetInstance();
+    auto renderContext = engine->GetRenderContext();
+    auto textureStore = renderContext->GetTextureStore();
+    auto modelStore = renderContext->GetModelStore();
+
+    // 統合されたAssetsWindowを描画
+    assetsWindow_->DrawUI(renderContext, textureStore, modelStore);
 }
 
 /// @brief プレイコントロールの描画

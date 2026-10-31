@@ -1,6 +1,7 @@
 #pragma once
 #include "ECS/RegistryECS/RegistryECS.hpp"
 #include "ECS/ComponentECS/ComponentECS.hpp"
+#include "AssetsWindow/AssetsWindow.hpp"
 
 namespace Detail
 {
@@ -19,6 +20,10 @@ namespace Detail
 		/// @param registry 
 		void Update();
 
+		/// @brief ファイルがドロップされたときの処理
+		/// @param filePath 
+		void OnTextureDropped(const std::string& filePath){ assetsWindow_->OnFileDropped(filePath); }
+
 
 	private:
 
@@ -32,6 +37,9 @@ namespace Detail
 		/// @brief インスペクターの描画
 		/// @param registry 
 		void DrawInspector();
+
+		/// @brief アセットウィンドウの描画
+		void DrawAssetsWindow();
 
 		/// @brief エンティティコンポーネントUIの描画
 		/// @param entity
@@ -51,5 +59,8 @@ namespace Detail
 
 		// 状態保存用のレジストリ
 		std::unique_ptr<RegistryECS> backupRegistry_ = nullptr;
+
+		// アセットウィンドウ
+		std::unique_ptr<AssetsWindow> assetsWindow_ = nullptr;
 	};
 }

@@ -211,6 +211,7 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\SkeletonStore\SkeletonStore.cpp" />
+    <ClCompile Include="Source\Tool\AssetsWindow\AssetsWindow.cpp" />
     <ClCompile Include="Source\Tool\ECS\ComponentECS\ComponentECS.cpp" />
     <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
@@ -273,7 +274,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Model\ModelEditor\ModelEditor.cpp" />
     <ClCompile Include="Source\Tool\ProfilerEditor\ProfilerEditor.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -396,10 +396,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Texture\TextureEditor\TextureEditor.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Externals\anglescript\anglescript.vcxproj">
@@ -437,6 +433,7 @@
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.hpp" />
     <ClInclude Include="Source\Engine\Store\SkeletonStore\SkeletonStore.hpp" />
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureData.hpp" />
+    <ClInclude Include="Source\Tool\AssetsWindow\AssetsWindow.hpp" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.hpp" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.hpp" />
     <ClInclude Include="Source\Tool\ECS\ECSEditor\ECSEditor.hpp" />
@@ -456,7 +453,6 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.hpp" />
     <ClInclude Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\VertexBufferResource.hpp" />
-    <ClInclude Include="Source\Tool\Model\ModelEditor\ModelEditor.hpp" />
     <ClInclude Include="Source\Tool\ProfilerEditor\ProfilerEditor.hpp" />
     <ClInclude Include="Source\Tool\PSO\DynamicPSOBuilder\DynamicPSOBuilder.hpp" />
     <ClInclude Include="Source\Tool\PSO\PSODescription\PSODescription.hpp" />
@@ -492,7 +488,6 @@
     <ClInclude Include="Source\Math\Vector\Vector4\Vector4.hpp" />
     <ClInclude Include="Source\Tool\PSO\PSOEditor\PSOEditor.hpp" />
     <ClInclude Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.hpp" />
-    <ClInclude Include="Source\Tool\Texture\TextureEditor\TextureEditor.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnly.VS.hlsl">

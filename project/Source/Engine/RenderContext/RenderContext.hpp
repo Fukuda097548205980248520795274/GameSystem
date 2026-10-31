@@ -20,8 +20,6 @@
 #include "ECS/ECSEditor/ECSEditor.hpp"
 #include "Shader/ShaderEditor/ShaderEditor.hpp"
 #include "PSO/PSOEditor/PSOEditor.hpp"
-#include "Texture/TextureEditor/TextureEditor.hpp"
-#include "Model/ModelEditor/ModelEditor.hpp"
 
 #include "Resource/QueryResource/QueryResource.hpp"
 
@@ -174,6 +172,7 @@ namespace Detail
 		/// @param filePath 
 		void OnTextureDropped(const std::string& filePath);
 
+
 #ifdef DEVELOPMENT
 
 		/// @brief CPU時間（ミリ秒）を取得
@@ -287,12 +286,6 @@ namespace Detail
 
 		/// @brief シェーダエディタ
 		std::unique_ptr<ShaderEditor> shaderEditor_;
-
-		/// @brief テクスチャエディタ
-		std::unique_ptr<TextureEditor> textureEditor_ = nullptr;
-
-		/// @brief モデルエディタ
-		std::unique_ptr<ModelEditor> modelEditor_ = nullptr;
 
 
 #ifdef DEVELOPMENT

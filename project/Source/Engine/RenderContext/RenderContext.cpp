@@ -57,12 +57,6 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// プロシージャルメッシュストアを作成
 	proceduralMeshStore_ = std::make_unique<ProceduralMeshStore>(core_->GetDevice());
 
-	// TextureEditorを作成
-	textureEditor_ = std::make_unique<TextureEditor>();
-
-	// ModelEditorを作成
-	modelEditor_ = std::make_unique<ModelEditor>();
-
 	// モデルストアを作成
 	modelStore_ = std::make_unique<ModelStore>();
 
@@ -231,12 +225,6 @@ void Detail::RenderContext::NewFrame()
 	// PSOエディタのUIを描画する
 	psoEditor_->DrawUI(core_->GetDevice(), shaderCompiler_.get());
 
-	// テクスチャエディタのUIを描画する
-	textureEditor_->DrawUI(this, textureStore_.get());
-
-	// モデルエディタのUIを描画する
-	modelEditor_->DrawUI(this, modelStore_.get());
-
 #endif
 }
 
@@ -383,9 +371,9 @@ void Detail::RenderContext::OnTextureDropped(const std::string& filePath)
 {
 #ifdef DEVELOPMENT
 	
-	if(textureEditor_)
+	if(ecsEditor_)
 	{
-		textureEditor_->OnFileDropped(filePath);
+		ecsEditor_->OnTextureDropped(filePath);
 	}
 	
 #endif

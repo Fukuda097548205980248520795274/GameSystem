@@ -185,12 +185,6 @@
     <Filter Include="Source\Engine\RenderContext\Render\RenderSystem">
       <UniqueIdentifier>{558f52e3-1dc7-4489-ad55-9e8dbcec9afb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Tool\Texture">
-      <UniqueIdentifier>{8e4a737c-4394-454b-8002-5db16867b3e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Tool\Texture\TextureEditor">
-      <UniqueIdentifier>{cafa9372-fcf7-453c-b50c-bbbae9cc23d5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Tool\ECS">
       <UniqueIdentifier>{a7942847-ec76-4196-a72f-736eba0c5f62}</UniqueIdentifier>
     </Filter>
@@ -266,12 +260,6 @@
     <Filter Include="Shader\Camera">
       <UniqueIdentifier>{94535a7a-f945-4e70-ba54-a66bc97761a4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Tool\Model">
-      <UniqueIdentifier>{4ace3346-ec21-49e7-9583-a23d26ab79bf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Tool\Model\ModelEditor">
-      <UniqueIdentifier>{c883a571-cf34-49ef-bf0d-6fc11dee87fb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\Store\HandleData">
       <UniqueIdentifier>{9c1be2d0-b066-4023-99af-0266b00f7f10}</UniqueIdentifier>
     </Filter>
@@ -301,6 +289,9 @@
     </Filter>
     <Filter Include="Source\Tool\Script\ScriptEditor">
       <UniqueIdentifier>{5049aa3f-2a5c-4614-8ce0-120523741f0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\AssetsWindow">
+      <UniqueIdentifier>{8616f81d-0fb3-4ebb-8108-273a0663ce38}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -430,9 +421,6 @@
     <ClCompile Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.cpp">
       <Filter>Source\Engine\RenderContext\Render\SkyboxSystem</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Texture\TextureEditor\TextureEditor.cpp">
-      <Filter>Source\Tool\Texture\TextureEditor</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
       <Filter>Source\Tool\ECS\ECSEditor</Filter>
     </ClCompile>
@@ -484,9 +472,6 @@
     <ClCompile Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.cpp">
       <Filter>Source\Engine\Resource\VertexBufferResource</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Model\ModelEditor\ModelEditor.cpp">
-      <Filter>Source\Tool\Model\ModelEditor</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Engine\Store\SkeletonStore\SkeletonStore.cpp">
       <Filter>Source\Engine\Store\SkeletonStore</Filter>
     </ClCompile>
@@ -513,6 +498,9 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\Script\ScriptEditor\ScriptEditor.cpp">
       <Filter>Source\Tool\Script\ScriptEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\AssetsWindow\AssetsWindow.cpp">
+      <Filter>Source\Tool\AssetsWindow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -660,9 +648,6 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\SkyboxSystem\SkyboxSystem.hpp">
       <Filter>Source\Engine\RenderContext\Render\SkyboxSystem</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Tool\Texture\TextureEditor\TextureEditor.hpp">
-      <Filter>Source\Tool\Texture\TextureEditor</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Tool\ECS\ECSEditor\ECSEditor.hpp">
       <Filter>Source\Tool\ECS\ECSEditor</Filter>
     </ClInclude>
@@ -720,9 +705,6 @@
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureData.hpp">
       <Filter>Source\Engine\Store\TextureStore</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Tool\Model\ModelEditor\ModelEditor.hpp">
-      <Filter>Source\Tool\Model\ModelEditor</Filter>
-    </ClInclude>
     <ClInclude Include="Source\Engine\Store\HandleData\HandleData.hpp">
       <Filter>Source\Engine\Store\HandleData</Filter>
     </ClInclude>
@@ -755,6 +737,9 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\Script\ScriptEditor\ScriptEditor.hpp">
       <Filter>Source\Tool\Script\ScriptEditor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\AssetsWindow\AssetsWindow.hpp">
+      <Filter>Source\Tool\AssetsWindow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
