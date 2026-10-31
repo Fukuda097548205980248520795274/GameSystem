@@ -221,35 +221,23 @@ public:
 	/// @brief 現在のECS状態をファイル（JSON / BIN）に保存する
 	/// @param sceneName 
 	/// @return 
-	bool SaveScene(const std::string& sceneName = "Scene")
-	{
-		return Detail::ToJson(registry_.get(), sceneName);
-	}
+	bool SaveScene(const std::string& sceneName = "Scene") { return Detail::ToJson(registry_.get(), sceneName); }
 
 	/// @brief JSONからECS状態を読み込む
 	/// @param sceneName 
 	/// @return 
-	bool LoadSceneFromJSON(const std::string& sceneName = "Scene")
-	{
-		return Detail::LoadJson(registry_.get(), sceneName);
-	}
+	bool LoadSceneFromJSON(const std::string& sceneName = "Scene") { return Detail::LoadJson(registry_.get(), sceneName); }
 
 	/// @brief バイナリからECS状態を読み込む（Cookedデータ用）
 	/// @param sceneName 
 	/// @return 
-	bool LoadSceneFromBinary(const std::string& sceneName = "Scene")
-	{
-		return Detail::LoadBin(registry_.get(), sceneName);
-	}
+	bool LoadSceneFromBinary(const std::string& sceneName = "Scene") { return Detail::LoadBin(registry_.get(), sceneName); }
 
 	/// @brief スクリプトエンジンを登録する
 	/// @param moduleName 
 	/// @param scriptPath 
 	/// @return 
-	bool BuildScriptModule(const std::string& moduleName, const std::string& scriptPath)
-	{
-		return scriptSystem_->BuildScriptModule(moduleName, scriptPath);
-	}
+	Detail::ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptPath) { return scriptSystem_->BuildScriptModule(moduleName, scriptPath); }
 
 
 

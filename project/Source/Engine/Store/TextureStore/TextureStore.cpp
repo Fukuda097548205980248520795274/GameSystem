@@ -79,12 +79,13 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 	assert(heap && device && commandList);
 	auto engine = Engine::GetInstance();
 
-	if (!std::filesystem::exists(filePath)) {
+	if (!std::filesystem::exists(filePath))
+	{
 		if (engine) engine->Log(LogLevel::Error, "ファイルが存在しません : " + filePath);
 		return TextureHandle::Invalid();
 	}
 
-	// 1. 正規化パスを用いた既存ロードの確認（※元のパスのまま判定）
+	// 正規化パスを用いた既存ロードの確認
 	std::string normPath = NormalizePath(filePath);
 	auto it = pathToHandleMap_.find(normPath);
 	if (it != pathToHandleMap_.end())
@@ -99,7 +100,7 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 
 	std::string cookedDdsPath;
 
-	// 2. DDSかそれ以外かで分岐
+	// DDSかそれ以外かで分岐
 	if (extLower == ".dds")
 	{
 		// DDSの場合は変換やハッシュ付与をスキップし、そのまま使う
@@ -123,7 +124,7 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 		}
 	}
 
-	// 3. 画像読み込みと例外・エラー対策
+	// 画像読み込みと例外・エラー対策
 	DirectX::ScratchImage image;
 	try
 	{
@@ -140,7 +141,7 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 		return TextureHandle::Invalid();
 	}
 
-	// 4. 画像ピクセルからのハッシュ（既存の仕組みを維持）
+	// 画像ピクセルからのハッシュ（既存の仕組みを維持）
 	uint64_t imageHash = ComputeImageHash(image);
 	auto hashIt = hashToHandleMap_.find(imageHash);
 	if (hashIt != hashToHandleMap_.end())
@@ -153,10 +154,10 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 		}
 	}
 
-	// 5. テクスチャリソースの作成
+	// テクスチャリソースの作成
 	auto textureData = std::make_unique<TextureData>();
 
-	// ★修正点: 参照パスは「変換後のDDS」ではなく「元のファイルパス」を保持する
+	// 参照パスは「変換後のDDS」ではなく「元のファイルパス」を保持する
 	textureData->name = filePath;
 
 	textureData->metadata = image.GetMetadata();

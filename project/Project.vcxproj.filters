@@ -287,9 +287,6 @@
     <Filter Include="Source\Tool\ECS\ECSSerializer">
       <UniqueIdentifier>{771c310a-5446-4286-8616-c05feb3cc9b5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Tool\Script\ScriptEditor">
-      <UniqueIdentifier>{5049aa3f-2a5c-4614-8ce0-120523741f0d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Tool\AssetsWindow">
       <UniqueIdentifier>{8616f81d-0fb3-4ebb-8108-273a0663ce38}</UniqueIdentifier>
     </Filter>
@@ -495,9 +492,6 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\ECS\ComponentECS\ComponentECS.cpp">
       <Filter>Source\Tool\ECS\ComponentECS</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Tool\Script\ScriptEditor\ScriptEditor.cpp">
-      <Filter>Source\Tool\Script\ScriptEditor</Filter>
     </ClCompile>
     <ClCompile Include="Source\Tool\AssetsWindow\AssetsWindow.cpp">
       <Filter>Source\Tool\AssetsWindow</Filter>
@@ -734,9 +728,6 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\ECS\ECSSerializer\ECSSerializer.hpp">
       <Filter>Source\Tool\ECS\ECSSerializer</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Tool\Script\ScriptEditor\ScriptEditor.hpp">
-      <Filter>Source\Tool\Script\ScriptEditor</Filter>
     </ClInclude>
     <ClInclude Include="Source\Tool\AssetsWindow\AssetsWindow.hpp">
       <Filter>Source\Tool\AssetsWindow</Filter>

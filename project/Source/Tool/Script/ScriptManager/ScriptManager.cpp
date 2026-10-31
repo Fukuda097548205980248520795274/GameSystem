@@ -64,14 +64,23 @@ void Detail::ScriptManager::MessageCallback(const asSMessageInfo* msg)
 /// @param moduleName 
 /// @param scriptPath 
 /// @return 
-bool Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, const std::string& scriptPath)
+Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, const std::string& scriptPath)
 {
+    // キャッシュチェック
+    auto it = cache_.find(scriptPath);
+    if (it != cache_.end())
+    {
+        // 既存のハンドルが有効か確認
+		if (GetHandleByIndex(it->second.index) != ScriptHandle::Invalid())
+            return it->second;
+    }
+
     // スクリプトファイルを開く
     std::ifstream file(scriptPath, std::ios::binary);
     if (!file.is_open())
     {
         std::cerr << "[Error] ファイルが開けません。パスを確認してください: " << scriptPath << std::endl;
-        return false;
+        return ScriptHandle::Invalid();
     }
 
     // ファイルの中身を文字列として読み込む
@@ -80,20 +89,101 @@ bool Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, con
     std::string scriptCode = buffer.str();
     file.close();
 
+	// スクリプトビルダーを使用してモジュールをビルド
     CScriptBuilder builder;
     int r = builder.StartNewModule(scriptEngine_, moduleName.c_str());
-    if (r < 0) return false;
+    if (r < 0) return ScriptHandle::Invalid();
 
-    // ファイルパスの代わりに、メモリ上の文字列としてスクリプトを渡す
+	// スクリプトコードをメモリから追加
     r = builder.AddSectionFromMemory(scriptPath.c_str(), scriptCode.c_str(), static_cast<uint32_t>(scriptCode.length()));
     if (r < 0)
     {
         std::cerr << "[Error] AddSectionFromMemory 失敗。エラーコード: " << r << std::endl;
-        return false;
+        return ScriptHandle::Invalid();
     }
 
+	// モジュールのビルド
     r = builder.BuildModule();
-    return r >= 0;
+	if (r < 0)
+	{
+		std::cerr << "[Error] BuildModule 失敗。エラーコード: " << r << std::endl;
+		return ScriptHandle::Invalid();
+	}
+
+
+    // スロットの割り当て
+    uint32_t slotIndex = 0;
+    if (!freeSlots_.empty())
+    {
+        // 空いているスロットを再利用
+        slotIndex = freeSlots_.front();
+        freeSlots_.pop();
+    }
+    else
+    {
+        // 新規スロット作成
+        slotIndex = static_cast<uint32_t>(slots_.size());
+        slots_.emplace_back();
+    }
+
+    // スロットにモデルデータを格納
+    Slot& slot = slots_[slotIndex];
+    slot.inUse = true;
+	slot.moduleName = moduleName;
+
+    // キャッシュに登録
+    ScriptHandle handle{ slotIndex, slot.generation };
+    cache_[scriptPath] = handle;
+
+	return handle;
+}
+
+/// @brief インデックスからハンドルを取得する
+/// @param index 
+/// @return 
+Detail::ScriptHandle Detail::ScriptManager::GetHandleByIndex(uint32_t index) const
+{
+	// インデックスが範囲外、またはスロットが使用中でない場合は無効なハンドルを返す
+    if (index >= slots_.size() || !slots_[index].inUse)
+        return ScriptHandle::Invalid();
+
+	// スロットが使用中であれば、世代番号とともにハンドルを返す
+    return ScriptHandle(index);
+}
+
+/// @brief スクリプトを削除する
+/// @param handle 
+void Detail::ScriptManager::Remove(ScriptHandle handle)
+{
+    if (!handle.IsValid() || handle.index >= slots_.size()) return;
+
+	Slot& slot = slots_[handle.index];
+
+	// スロットが使用中で、世代番号が一致する場合のみ削除処理を行う
+	if (slot.inUse && slot.generation == handle.generation)
+	{
+		// スクリプトモジュールを破棄
+        if (scriptEngine_ && !slot.moduleName.empty())
+        {
+            scriptEngine_->DiscardModule(slot.moduleName.c_str());
+        }
+
+		slot.inUse = false;
+		freeSlots_.push(handle.index);
+	}
+
+	// キャッシュから該当するスクリプトパスを削除
+	for (auto it = cache_.begin(); it != cache_.end(); )
+	{
+		if (it->second.index == handle.index)
+		{
+			it = cache_.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
 }
 
 /// @brief C++ エンジンAPIのバインド

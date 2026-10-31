@@ -44,57 +44,107 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 				auto script = registry_->GetComponent<ScriptComponent>(entity);
 				if (script)
 				{
-					// スクリプトモジュール名とクラス名を編集可能なテキストボックスとして表示
+					const std::string kAssetsDir = "./Assets/Script/";
+
+					// 既存スクリプトのプルダウン選択
+					std::vector<std::string> scriptFiles;
+					if (std::filesystem::exists(kAssetsDir))
+					{
+						for (const auto& entry : std::filesystem::directory_iterator(kAssetsDir))
+						{
+							// 拡張子が .as のファイルのみを抽出
+							if (entry.path().extension() == ".as")
+							{
+								// 拡張子を除いたファイル名（モジュール名）を取得
+								scriptFiles.push_back(entry.path().stem().string());
+							}
+						}
+					}
+
+					if (!scriptFiles.empty())
+					{
+						// 現在設定されているモジュール名のインデックスを探す
+						int currentItem = -1;
+						for (int i = 0; i < scriptFiles.size(); ++i)
+						{
+							if (scriptFiles[i] == script->moduleName)
+							{
+								currentItem = i;
+								break;
+							}
+						}
+
+						// ImGui::Combo 用に const char* の配列を作成
+						std::vector<const char*> items;
+						for (const auto& file : scriptFiles)
+						{
+							items.push_back(file.c_str());
+						}
+
+						// プルダウンメニューを表示
+						if (ImGui::Combo("スクリプト選択", &currentItem, items.data(), static_cast<int>(items.size())))
+						{
+							// 選択されたらモジュール名とクラス名を更新
+							script->moduleName = scriptFiles[currentItem];
+							script->scriptClass = scriptFiles[currentItem]; // 通常はファイル名＝クラス名として扱う
+						}
+					}
+					else
+					{
+						ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "※スクリプトが見つかりません");
+					}
+
+					ImGui::Separator();
+					ImGui::Text("新規作成 / 手動設定");
+
+					// 従来の手動入力と生成機能（新規作成用として残す）
 					char moduleBuf[128];
 					char classBuf[128];
 					strcpy_s(moduleBuf, script->moduleName.c_str());
 					strcpy_s(classBuf, script->scriptClass.c_str());
 
-					// モジュール名の入力テキストボックス
-					if (ImGui::InputText("スクリプト名", moduleBuf, sizeof(moduleBuf)))
+					if (ImGui::InputText("モジュール名", moduleBuf, sizeof(moduleBuf)))
 					{
 						script->moduleName = moduleBuf;
 					}
 
-					// クラス名の入力テキストボックス
 					if (ImGui::InputText("クラス名", classBuf, sizeof(classBuf)))
 					{
 						script->scriptClass = classBuf;
 					}
 
-					// asファイル生成ボタン
 					if (ImGui::Button("asファイルを生成"))
 					{
 						if (!script->moduleName.empty() && !script->scriptClass.empty())
 						{
-							const std::string kAssetsDir = "./Assets/Script/";
-
-							// Assets/Script ディレクトリが存在しない場合は作成
 							if (!std::filesystem::exists(kAssetsDir))
 								std::filesystem::create_directories(kAssetsDir);
 
-							// 指定されたモジュール名とクラス名でasファイルを生成
 							std::string fileName = kAssetsDir + script->moduleName + ".as";
-							std::ofstream ofs(fileName);
-							if (ofs.is_open())
+
+							// 既に同名ファイルが存在するかチェックして上書きを防ぐ
+							if (!std::filesystem::exists(fileName))
 							{
-								// AngelScriptのクラス雛形を出力
-								ofs << "class " << script->scriptClass << "\n";
-								ofs << "{\n";
-								ofs << "\t" << script->scriptClass << "()\n";
-								ofs << "\t{\n";
-								ofs << "\t\t// コンストラクタ\n";
-								ofs << "\t}\n\n";
-								ofs << "\tvoid Initialize()\n";
-								ofs << "\t{\n";
-								ofs << "\t\t// 初期化処理\n";
-								ofs << "\t}\n\n";
-								ofs << "\tvoid Update()\n";
-								ofs << "\t{\n";
-								ofs << "\t\t// 更新処理\n";
-								ofs << "\t}\n";
-								ofs << "}\n";
-								ofs.close();
+								std::ofstream ofs(fileName);
+								if (ofs.is_open())
+								{
+									ofs << "class " << script->scriptClass << "\n";
+									ofs << "{\n";
+									ofs << "\t" << script->scriptClass << "()\n";
+									ofs << "\t{\n";
+									ofs << "\t\t// コンストラクタ\n";
+									ofs << "\t}\n\n";
+									ofs << "\tvoid Initialize()\n";
+									ofs << "\t{\n";
+									ofs << "\t\t// 初期化処理\n";
+									ofs << "\t}\n\n";
+									ofs << "\tvoid Update()\n";
+									ofs << "\t{\n";
+									ofs << "\t\t// 更新処理\n";
+									ofs << "\t}\n";
+									ofs << "}\n";
+									ofs.close();
+								}
 							}
 						}
 					}

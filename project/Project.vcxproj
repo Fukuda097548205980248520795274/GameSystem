@@ -211,8 +211,14 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\SkeletonStore\SkeletonStore.cpp" />
-    <ClCompile Include="Source\Tool\AssetsWindow\AssetsWindow.cpp" />
-    <ClCompile Include="Source\Tool\ECS\ComponentECS\ComponentECS.cpp" />
+    <ClCompile Include="Source\Tool\AssetsWindow\AssetsWindow.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\ECS\ComponentECS\ComponentECS.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Source\Tool\ECS\ECSEditor\ECSEditor.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -338,7 +344,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Script\ScriptEditor\ScriptEditor.cpp" />
     <ClCompile Include="Source\Tool\Script\ScriptManager\ScriptManager.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -472,7 +477,6 @@
     <ClInclude Include="Source\Engine\Resource\DepthResource\DepthResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\OffscreenResource\OffscreenResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\StructuredBufferResource.hpp" />
-    <ClInclude Include="Source\Tool\Script\ScriptEditor\ScriptEditor.hpp" />
     <ClInclude Include="Source\Tool\Script\ScriptManager\ScriptManager.hpp" />
     <ClInclude Include="Source\Tool\Script\ScriptSystem\ScriptSystem.hpp" />
     <ClInclude Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.hpp" />
