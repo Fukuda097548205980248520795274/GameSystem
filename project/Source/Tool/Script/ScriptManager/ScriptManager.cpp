@@ -66,50 +66,126 @@ void Detail::ScriptManager::MessageCallback(const asSMessageInfo* msg)
 /// @return 
 Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, const std::string& scriptPath)
 {
+	auto engine = Engine::GetInstance();
+
     // キャッシュチェック
     auto it = cache_.find(scriptPath);
     if (it != cache_.end())
     {
         // 既存のハンドルが有効か確認
-		if (GetHandleByIndex(it->second.index) != ScriptHandle::Invalid())
+        if (GetHandleByIndex(it->second.index) != ScriptHandle::Invalid())
             return it->second;
     }
 
-    // スクリプトファイルを開く
-    std::ifstream file(scriptPath, std::ios::binary);
-    if (!file.is_open())
+	// スクリプトファイルのパスを解析して中間データ（bin）のパスを生成
+    std::filesystem::path asFilePath(scriptPath);
+    std::string binPath = kCookedDir + asFilePath.stem().string() + ".bin";
+
+    // 中間データ用ディレクトリが存在しない場合は作成
+    if (!std::filesystem::exists(kCookedDir))
+        std::filesystem::create_directories(kCookedDir);
+
+    // 中間データ（bin）を読み込むべきかのチェック
+    bool loadFromBin = false;
+    if (std::filesystem::exists(binPath))
     {
-        std::cerr << "[Error] ファイルが開けません。パスを確認してください: " << scriptPath << std::endl;
-        return ScriptHandle::Invalid();
+        if (std::filesystem::exists(asFilePath))
+        {
+            // asファイルよりbinファイルの方が新しければbinから読み込む
+            auto asTime = std::filesystem::last_write_time(asFilePath);
+            auto binTime = std::filesystem::last_write_time(binPath);
+            if (binTime >= asTime)
+            {
+                loadFromBin = true;
+            }
+        }
+        else
+        {
+            // asファイルがなく、binだけある場合
+            loadFromBin = true;
+        }
     }
 
-    // ファイルの中身を文字列として読み込む
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string scriptCode = buffer.str();
-    file.close();
+    bool isLoaded = false;
 
-	// スクリプトビルダーを使用してモジュールをビルド
-    CScriptBuilder builder;
-    int r = builder.StartNewModule(scriptEngine_, moduleName.c_str());
-    if (r < 0) return ScriptHandle::Invalid();
-
-	// スクリプトコードをメモリから追加
-    r = builder.AddSectionFromMemory(scriptPath.c_str(), scriptCode.c_str(), static_cast<uint32_t>(scriptCode.length()));
-    if (r < 0)
+    if (loadFromBin)
     {
-        std::cerr << "[Error] AddSectionFromMemory 失敗。エラーコード: " << r << std::endl;
-        return ScriptHandle::Invalid();
+        // バイナリからロード
+        asIScriptModule* mod = scriptEngine_->GetModule(moduleName.c_str(), asGM_ALWAYS_CREATE);
+        if (mod)
+        {
+            CBytecodeStream stream(binPath, false);
+            if (stream.IsOpen())
+            {
+                int r = mod->LoadByteCode(&stream);
+                if (r >= 0)
+                {
+                    isLoaded = true;
+                }
+                else
+                {
+					if (engine)engine->Log(LogLevel::Error, "バイトコードの読み込みに失敗しました : " + binPath);
+                }
+            }
+        }
     }
 
-	// モジュールのビルド
-    r = builder.BuildModule();
-	if (r < 0)
-	{
-		std::cerr << "[Error] BuildModule 失敗。エラーコード: " << r << std::endl;
-		return ScriptHandle::Invalid();
-	}
+	
+	if (engine)engine->Log(LogLevel::Info, "スクリプトモジュールのビルド : " + moduleName + (isLoaded ? " (バイトコードからロード)" : " (ソースからビルド)"));
 
+
+    if (!isLoaded)
+    {
+        // スクリプトファイルを開く
+        std::ifstream file(scriptPath, std::ios::binary);
+        if (!file.is_open())
+        {
+			if (engine)engine->Log(LogLevel::Error, "スクリプトファイルが開けません : " + scriptPath);
+            return ScriptHandle::Invalid();
+        }
+		if (engine)engine->Log(LogLevel::Info, "スクリプトファイルを開きました : " + scriptPath);
+
+
+        // ファイルの中身を文字列として読み込む
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string scriptCode = buffer.str();
+        file.close();
+
+        // スクリプトビルダーを使用してモジュールをビルド
+        CScriptBuilder builder;
+        int r = builder.StartNewModule(scriptEngine_, moduleName.c_str());
+        if (r < 0) return ScriptHandle::Invalid();
+
+        // スクリプトコードをメモリから追加
+        r = builder.AddSectionFromMemory(scriptPath.c_str(), scriptCode.c_str(), static_cast<uint32_t>(scriptCode.length()));
+        if (r < 0)
+        {
+            if (engine)engine->Log(LogLevel::Error, "AddSectionFromMemory 失敗。エラーコード: " + std::to_string(r));
+            return ScriptHandle::Invalid();
+        }
+		if (engine)engine->Log(LogLevel::Info, "スクリプトコードをメモリから追加 : " + scriptPath);
+
+        // モジュールのビルド
+        r = builder.BuildModule();
+        if (r < 0)
+        {
+            if (engine)engine->Log(LogLevel::Error, "BuildModule 失敗。エラーコード: " + std::to_string(r));
+            return ScriptHandle::Invalid();
+        }
+		if (engine)engine->Log(LogLevel::Info, "スクリプトモジュールをビルド : " + moduleName);
+
+        // ビルドに成功した場合、バイトコード（中間データ）として保存
+        asIScriptModule* mod = builder.GetModule();
+        if (mod)
+        {
+            CBytecodeStream stream(binPath, true);
+            if (stream.IsOpen())
+            {
+                mod->SaveByteCode(&stream);
+            }
+        }
+    }
 
     // スロットの割り当て
     uint32_t slotIndex = 0;
@@ -129,13 +205,13 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
     // スロットにモデルデータを格納
     Slot& slot = slots_[slotIndex];
     slot.inUse = true;
-	slot.moduleName = moduleName;
+    slot.moduleName = moduleName;
 
     // キャッシュに登録
     ScriptHandle handle{ slotIndex, slot.generation };
     cache_[scriptPath] = handle;
 
-	return handle;
+    return handle;
 }
 
 /// @brief インデックスからハンドルを取得する
@@ -189,54 +265,56 @@ void Detail::ScriptManager::Remove(ScriptHandle handle)
 /// @brief C++ エンジンAPIのバインド
 void Detail::ScriptManager::RegisterEngineAPI()
 {
+	auto engine = Engine::GetInstance();
+
 	// Vector3 の登録
 	if (scriptEngine_->RegisterObjectType("Vector3", sizeof(Vector3), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector3>()) < 0)
 	{
-		std::cerr << "[Error] Vector3 の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "Vector3 の登録に失敗しました");
 	}
     if(scriptEngine_->RegisterObjectProperty("Vector3", "float x", asOFFSET(Vector3, x)) < 0)
     {
-        std::cerr << "[Error] Vector3 のプロパティ x の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "Vector3 のプロパティ x の登録に失敗しました");
     }
     if(scriptEngine_->RegisterObjectProperty("Vector3", "float y", asOFFSET(Vector3, y)) < 0)
     {
-        std::cerr << "[Error] Vector3 のプロパティ y の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "Vector3 のプロパティ y の登録に失敗しました");
     }
     if(scriptEngine_->RegisterObjectProperty("Vector3", "float z", asOFFSET(Vector3, z)) < 0)
     {
-        std::cerr << "[Error] Vector3 のプロパティ z の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "Vector3 のプロパティ z の登録に失敗しました");
     }
 
 	// Vector2 の登録
 	if (scriptEngine_->RegisterObjectType("Vector2", sizeof(Vector2), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector2>()) < 0)
 	{
-		std::cerr << "[Error] Vector2 の登録に失敗しました。" << std::endl;
+		if (engine) engine->Log(LogLevel::Error, "Vector2 の登録に失敗しました");
 	}
     if(scriptEngine_->RegisterObjectProperty("Vector2", "float x", asOFFSET(Vector2, x)) < 0)
     {
-        std::cerr << "[Error] Vector2 のプロパティ x の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "Vector2 のプロパティ x の登録に失敗しました");
     }
     if(scriptEngine_->RegisterObjectProperty("Vector2", "float y", asOFFSET(Vector2, y)) < 0)
     {
-        std::cerr << "[Error] Vector2 のプロパティ y の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "Vector2 のプロパティ y の登録に失敗しました");
     }
 
 	// TransformComponent の登録
     if(scriptEngine_->RegisterObjectType("TransformComponent", sizeof(TransformComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<TransformComponent>()) < 0)
     {
-        std::cerr << "[Error] TransformComponent の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "TransformComponent の登録に失敗しました");
     }
     if(scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 position", asOFFSET(TransformComponent, position)) < 0)
     {
-        std::cerr << "[Error] TransformComponent のプロパティ position の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "TransformComponent のプロパティ position の登録に失敗しました");
     }
     if(scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 rotation", asOFFSET(TransformComponent, rotation)) < 0)
     {
-        std::cerr << "[Error] TransformComponent のプロパティ rotation の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "TransformComponent のプロパティ rotation の登録に失敗しました");
     }
     if(scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 scale", asOFFSET(TransformComponent, scale)) < 0)
     {
-        std::cerr << "[Error] TransformComponent のプロパティ scale の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "TransformComponent のプロパティ scale の登録に失敗しました");
     }
 
 	// Log 関数の登録
@@ -247,6 +325,6 @@ void Detail::ScriptManager::RegisterEngineAPI()
             }, 
             (const std::string&), void), asCALL_CDECL) < 0)
     {
-        std::cerr << "[Error] Log 関数の登録に失敗しました。" << std::endl;
+        if(engine)engine->Log(LogLevel::Error, "Log 関数の登録に失敗しました");
     }
 }

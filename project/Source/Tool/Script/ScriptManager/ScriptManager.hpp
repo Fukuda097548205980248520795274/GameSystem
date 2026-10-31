@@ -6,6 +6,8 @@
 #include <scriptbuilder/scriptbuilder.h>
 #include <scriptstdstring/scriptstdstring.h>
 #include <string>
+#include <filesystem>
+#include <fstream>
 
 namespace Detail
 {
@@ -88,5 +90,68 @@ namespace Detail
 
 		// キャッシュ
 		std::unordered_map<std::string, ScriptHandle> cache_;
+
+
+	private:
+
+		// 中間データ用ディレクトリ
+		const std::string kCookedDir = "./Cooked/Script/";
 	};
+
+
+
+    // バイトコードのストリームクラス
+    class CBytecodeStream : public asIBinaryStream
+    {
+    public:
+
+        /// @brief コンストラクタ
+        /// @param path 
+        /// @param write 
+        CBytecodeStream(const std::string& path, bool write)
+        {
+            if (write)
+            {
+                file_.open(path, std::ios::binary | std::ios::out);
+            }
+            else
+            {
+                file_.open(path, std::ios::binary | std::ios::in);
+            }
+        }
+
+        /// @brief デストラクタ
+        ~CBytecodeStream() { if (file_.is_open()) file_.close(); }
+
+		/// @brief 読み込み
+        /// @param ptr 
+        /// @param size 
+        /// @return 
+        int Read(void* ptr, asUINT size) override
+        {
+            if (!file_.is_open()) return -1;
+            file_.read(static_cast<char*>(ptr), size);
+            return 0;
+        }
+
+		/// @brief 書き込み
+        /// @param ptr 
+        /// @param size 
+        /// @return 
+        int Write(const void* ptr, asUINT size) override
+        {
+            if (!file_.is_open()) return -1;
+            file_.write(static_cast<const char*>(ptr), size);
+            return 0;
+        }
+
+		/// @brief ファイルが開いているかどうかを確認する
+        /// @return 
+        bool IsOpen() const { return file_.is_open(); }
+
+    private:
+
+		/// @brief ファイルストリーム
+        std::fstream file_;
+    };
 }
