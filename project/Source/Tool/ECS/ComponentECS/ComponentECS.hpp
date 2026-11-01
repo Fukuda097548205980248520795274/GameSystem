@@ -12,6 +12,7 @@
 #include "Vector/Vector2/Vector2.hpp"
 #include "Vector/Vector4/Vector4.hpp"
 #include "Store/ProceduralMeshStore/ProceduralMeshStore.hpp"
+#include "Script/ScriptManager/ScriptManager.hpp"
 
 /// @brief スクリプトコンポーネント
 struct ScriptComponent
@@ -20,9 +21,8 @@ struct ScriptComponent
 	ScriptComponent() = default;
 
 	/// @brief コンストラクタ
-	/// @param module 
-	/// @param className 
-	ScriptComponent(const std::string& module, const std::string& className) : moduleName(module), scriptClass(className) {}
+	/// @param handle 
+	ScriptComponent(Detail::ScriptHandle handle) : handle(handle) {}
 
 	/// @brief デストラクタ
 	~ScriptComponent()
@@ -34,11 +34,9 @@ struct ScriptComponent
 		}
 	}
 
-	// @brief スクリプトモジュール名
-	std::string moduleName;
 
-	// @brief スクリプトクラス名
-	std::string scriptClass;
+	// @brief スクリプトハンドル
+	Detail::ScriptHandle handle;
 
 
 	// スクリプトオブジェクトのインスタンスを保持するためのメンバ変数

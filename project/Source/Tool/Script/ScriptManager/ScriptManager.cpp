@@ -62,9 +62,10 @@ void Detail::ScriptManager::MessageCallback(const asSMessageInfo* msg)
 
 /// @brief スクリプトエンジンを登録する
 /// @param moduleName 
+/// @param scriptClass 
 /// @param scriptPath 
 /// @return 
-Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, const std::string& scriptPath)
+Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath)
 {
     auto engine = Engine::GetInstance();
 
@@ -238,7 +239,8 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
     Slot& slot = slots_[slotIndex];
     slot.inUse = true;
     slot.moduleName = moduleName;
-    slot.lastWriteTime = asTime; // ★更新日時を記録
+	slot.scriptClass = scriptClass;
+    slot.lastWriteTime = asTime;
 
     // キャッシュに登録
     ScriptHandle handle{ slotIndex, slot.generation };
@@ -313,10 +315,40 @@ std::string Detail::ScriptManager::GetFilePath(ScriptHandle handle) const
     return "";
 }
 
+/// @brief スクリプトハンドルからモジュール名を取得する
+/// @param handle 
+/// @return 
+std::string Detail::ScriptManager::GetModuleName(ScriptHandle handle) const
+{
+    if (!handle.IsValid()) return "";
+
+	// インデックスが範囲外、またはスロットが使用中でない場合は空文字を返す
+	if (handle.index >= slots_.size() || !slots_[handle.index].inUse)
+		return "";
+
+	return slots_[handle.index].moduleName;
+}
+
+/// @brief スクリプトハンドルからスクリプトクラス名を取得する
+/// @param handle 
+/// @return 
+std::string Detail::ScriptManager::GetScriptClass(ScriptHandle handle) const
+{
+    if (!handle.IsValid()) return "";
+
+	// インデックスが範囲外、またはスロットが使用中でない場合は空文字を返す
+	if (handle.index >= slots_.size() || !slots_[handle.index].inUse)
+		return "";
+
+	return slots_[handle.index].scriptClass;
+}
+
 /// @brief 変更されたスクリプトをリロードする
 void Detail::ScriptManager::ReloadModifiedScripts()
 {
     auto engine = Engine::GetInstance();
+	auto registry = engine->GetRegistryECS();
+
     for (auto& pair : cache_)
     {
         const std::string& scriptPath = pair.first;
@@ -336,8 +368,36 @@ void Detail::ScriptManager::ReloadModifiedScripts()
             {
                 if (engine) engine->Log(LogLevel::Info, "スクリプトの更新を検知しました。再ビルドします : " + scriptPath);
 
+                // 再ビルド前に、このスクリプトを参照している全エンティティの既存インスタンスを破棄する
+                if (registry)
+                {
+                    auto activeEntities = registry->GetActiveEntities();
+                    for (Entity entity : activeEntities)
+                    {
+                        if (registry->HasComponent<ScriptComponent>(entity))
+                        {
+                            auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
+
+                            // 同じスクリプトハンドルを使っているかチェック
+                            if (scriptComp->handle.index == handle.index)
+                            {
+                                if (scriptComp->scriptObject)
+                                {
+                                    // C++ 側で保持している参照カウントを解放
+                                    scriptComp->scriptObject->Release();
+                                    scriptComp->scriptObject = nullptr;
+                                }
+
+                                // 関数のポインタもリセット
+                                scriptComp->initFunc = nullptr;
+                                scriptComp->updateFunc = nullptr;
+                            }
+                        }
+                    }
+                }
+
                 // 再ビルド処理を呼び出す (内部でキャッシュスロットが上書き更新される)
-                BuildScriptModule(slot.moduleName, scriptPath);
+                BuildScriptModule(slot.moduleName, slot.scriptClass, scriptPath);
             }
         }
     }

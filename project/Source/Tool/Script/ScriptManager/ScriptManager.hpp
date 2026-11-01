@@ -31,9 +31,10 @@ namespace Detail
 
 		/// @brief スクリプトモジュールをビルドする
         /// @param moduleName 
+        /// @param scriptClass 
         /// @param scriptPath 
         /// @return 
-        ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptPath);
+        ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath);
 
         /// @brief スクリプトエンジンを取得する
         /// @return 
@@ -56,6 +57,16 @@ namespace Detail
         /// @param handle 
         /// @return 
         std::string GetFilePath(ScriptHandle handle) const;
+
+		/// @brief スクリプトハンドルからモジュール名を取得する
+        /// @param handle 
+        /// @return 
+        std::string GetModuleName(ScriptHandle handle) const;
+
+		/// @brief スクリプトハンドルからスクリプトクラス名を取得する
+        /// @param handle 
+        /// @return 
+        std::string GetScriptClass(ScriptHandle handle) const;
 
 		/// @brief 変更されたスクリプトをリロードする
         void ReloadModifiedScripts();
@@ -93,6 +104,9 @@ namespace Detail
 
 			// モジュール名
 			std::string moduleName = "";
+
+			// スクリプトクラス名
+			std::string scriptClass = "";
 
 			// スクリプトファイルの最終更新時刻
             std::filesystem::file_time_type lastWriteTime;

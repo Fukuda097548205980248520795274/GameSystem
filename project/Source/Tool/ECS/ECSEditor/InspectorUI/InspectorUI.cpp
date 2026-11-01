@@ -44,54 +44,30 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 				auto script = registry_->GetComponent<ScriptComponent>(entity);
 				if (script)
 				{
-					const std::string kAssetsDir = "./Assets/Script/";
+					// 現在設定されているテクスチャのハンドル番号を表示
+					ImGui::Text("ハンドル : Index(%u), Gen(%u)", script->handle.index, script->handle.generation);
 
-					// 既存スクリプトのプルダウン選択
-					std::vector<std::string> scriptFiles;
-					if (std::filesystem::exists(kAssetsDir))
+					// ドロップを受け付けるための専用エリアを作成
+					ImGui::Button("テクスチャをドロップ", ImVec2(-1, 30));
+
+					if (ImGui::BeginDragDropTarget())
 					{
-						for (const auto& entry : std::filesystem::directory_iterator(kAssetsDir))
+						// ペイロード名 "SCRIPT_HANDLE" を受け取る
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCRIPT_HANDLE"))
 						{
-							// 拡張子が .as のファイルのみを抽出
-							if (entry.path().extension() == ".as")
+							IM_ASSERT(payload->DataSize == sizeof(Detail::ScriptHandle));
+							Detail::ScriptHandle droppedHandle = *(const Detail::ScriptHandle*)payload->Data;
+
+							if (engine)
 							{
-								// 拡張子を除いたファイル名（モジュール名）を取得
-								scriptFiles.push_back(entry.path().stem().string());
+								if (auto textureStore = engine->GetRenderContext()->GetTextureStore())
+								{
+									script->handle = droppedHandle;
+								}
+
 							}
 						}
-					}
-
-					if (!scriptFiles.empty())
-					{
-						// 現在設定されているモジュール名のインデックスを探す
-						int currentItem = -1;
-						for (int i = 0; i < scriptFiles.size(); ++i)
-						{
-							if (scriptFiles[i] == script->moduleName)
-							{
-								currentItem = i;
-								break;
-							}
-						}
-
-						// ImGui::Combo 用に const char* の配列を作成
-						std::vector<const char*> items;
-						for (const auto& file : scriptFiles)
-						{
-							items.push_back(file.c_str());
-						}
-
-						// プルダウンメニューを表示
-						if (ImGui::Combo("スクリプト選択", &currentItem, items.data(), static_cast<int>(items.size())))
-						{
-							// 選択されたらモジュール名とクラス名を更新
-							script->moduleName = scriptFiles[currentItem];
-							script->scriptClass = scriptFiles[currentItem]; // 通常はファイル名＝クラス名として扱う
-						}
-					}
-					else
-					{
-						ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "※スクリプトが見つかりません");
+						ImGui::EndDragDropTarget();
 					}
 				}
 			}

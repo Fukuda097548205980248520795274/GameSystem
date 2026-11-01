@@ -35,16 +35,6 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
             };
         }
 
-        // ScriptComponent
-        if (registry->HasComponent<ScriptComponent>(entity))
-        {
-            auto* c = registry->GetComponent<ScriptComponent>(entity);
-            entityJson["components"]["ScriptComponent"] = {
-                {"moduleName", c->moduleName},
-                {"scriptClass", c->scriptClass}
-            };
-        }
-
         // MeshComponent
         if (registry->HasComponent<MeshComponent>(entity))
         {
@@ -178,15 +168,6 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
             comp.rotation = Vector3(cJson["rotation"][0], cJson["rotation"][1], cJson["rotation"][2]);
             comp.scale = Vector3(cJson["scale"][0], cJson["scale"][1], cJson["scale"][2]);
             registry->AddComponent<TransformComponent>(newId, comp);
-        }
-
-        // ScriptComponent の復元
-        if (componentsJson.contains("ScriptComponent"))
-        {
-            ScriptComponent comp;
-            comp.moduleName = componentsJson["ScriptComponent"]["moduleName"];
-            comp.scriptClass = componentsJson["ScriptComponent"]["scriptClass"];
-            registry->AddComponent<ScriptComponent>(newId, comp);
         }
 
         // MaterialComponent の復元

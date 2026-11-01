@@ -14,12 +14,13 @@ Game::Game(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 void Game::Initialize()
 {
 	auto engine = Engine::GetInstance();
+	auto registry = engine->GetRegistryECS();
 
-	engine->BuildScriptModule("Test", "./Assets/Script/Test.as");
+	// エンティティを作成
 	Entity entity = engine->CreateEntity();
 
-	auto registry = engine->GetRegistryECS();
-	ScriptComponent scriptComp("Test", "Test");
+	// スクリプトモジュールをビルドして、スクリプトコンポーネントをエンティティに追加
+	ScriptComponent scriptComp = engine->BuildScriptModule("Test", "Test", "./Assets/Script/Test.as");
 	registry->AddComponent(entity, scriptComp);
 }
 

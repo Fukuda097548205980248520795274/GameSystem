@@ -152,7 +152,8 @@ void Detail::AssetsWindow::ProcessDroppedFiles(RenderContext* renderContext, Scr
 
 				// ファイル名（拡張子なし）をモジュール名としてビルド
 				std::string moduleName = srcPath.stem().string();
-				ScriptHandle handle = scriptManager->BuildScriptModule(moduleName, destPath.string());
+				std::string scriptClass = moduleName;
+				ScriptHandle handle = scriptManager->BuildScriptModule(moduleName, scriptClass, destPath.string());
 				if (handle.IsValid())
 				{
 					selectedScriptHandle_ = handle;

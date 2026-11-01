@@ -22,9 +22,10 @@ namespace Detail
 
 		/// @brief スクリプトエンジンを登録する
 		/// @param moduleName 
+		/// @param scriptClass 
 		/// @param scriptPath 
 		/// @return 
-		ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptPath) { return scriptManager_->BuildScriptModule(moduleName, scriptPath); }
+		ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath) { return scriptManager_->BuildScriptModule(moduleName, scriptClass, scriptPath); }
 
 		/// @brief スクリプトマネージャを取得する
 		/// @return 

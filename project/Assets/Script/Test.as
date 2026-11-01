@@ -9,7 +9,7 @@ class Test
 	{
 		// 初期化処理
 
-		Log("Hello, world!");
+		Log("Miss, yes!!!!!");
 	}
 
 	void Update()

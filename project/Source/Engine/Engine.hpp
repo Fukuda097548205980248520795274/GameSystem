@@ -245,9 +245,10 @@ public:
 
 	/// @brief スクリプトエンジンを登録する
 	/// @param moduleName 
+	/// @param scriptClass 
 	/// @param scriptPath 
 	/// @return 
-	Detail::ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptPath) { return scriptSystem_->BuildScriptModule(moduleName, scriptPath); }
+	Detail::ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath) { return scriptSystem_->BuildScriptModule(moduleName, scriptClass, scriptPath); }
 
 
 

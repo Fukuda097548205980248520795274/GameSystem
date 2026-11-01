@@ -22,21 +22,27 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
     {
         if (!registry->HasComponent<ScriptComponent>(entity)) continue;
 
+		// スクリプトコンポーネントを取得
         auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
+
+		// スクリプトハンドルが無効な場合はスキップ
+		if (scriptComp->handle == Detail::ScriptHandle::Invalid()) continue;
 
         // スクリプトインスタンスの生成（初回のみ）
         if (!scriptComp->scriptObject)
         {
 			// スクリプトモジュールを取得
-            asIScriptModule* mod = scriptEngine->GetModule(scriptComp->moduleName.c_str());
+			std::string moduleName = scriptManager_->GetModuleName(scriptComp->handle);
+            asIScriptModule* mod = scriptEngine->GetModule(moduleName.c_str());
             if (!mod) continue;
 
 			// スクリプトクラスの型情報を取得
-            asITypeInfo* type = mod->GetTypeInfoByName(scriptComp->scriptClass.c_str());
+			std::string className = scriptManager_->GetScriptClass(scriptComp->handle);
+            asITypeInfo* type = mod->GetTypeInfoByName(className.c_str());
             if (!type) continue;
 
             // コンストラクタ呼び出し
-            asIScriptFunction* factory = type->GetFactoryByDecl((scriptComp->scriptClass + "@ " + scriptComp->scriptClass + "()").c_str());
+            asIScriptFunction* factory = type->GetFactoryByDecl((className + "@ " + className + "()").c_str());
             asIScriptContext* ctx = scriptEngine->CreateContext();
             ctx->Prepare(factory);
             ctx->Execute();
