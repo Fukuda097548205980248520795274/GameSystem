@@ -1,6 +1,7 @@
 #include "ECSSerializer.hpp"
 #include <filesystem>
 #include <fstream>
+#include "Engine.hpp"
 #include "ECS/RegistryECS/RegistryECS.hpp"
 #include "ECS/ComponentECS/ComponentECS.hpp"
 
@@ -62,6 +63,42 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
                 {"parent", c->parent},
                 {"children", c->children}
             };
+        }
+
+		// ScriptComponent
+		if (registry->HasComponent<ScriptComponent>(entity))
+		{
+			auto* c = registry->GetComponent<ScriptComponent>(entity);
+			entityJson["components"]["ScriptComponent"]["filePath"] = c->filePath;
+			entityJson["components"]["ScriptComponent"]["moduleName"] = c->moduleName;
+			entityJson["components"]["ScriptComponent"]["className"] = c->className;
+		}
+
+		// TextureComponent
+        if (registry->HasComponent<TextureComponent>(entity))
+        {
+			auto* c = registry->GetComponent<TextureComponent>(entity);
+			entityJson["components"]["TextureComponent"] = {
+				{"filePath", c->filePath}
+			};
+        }
+
+		// CubemapComponent
+        if (registry->HasComponent<CubemapComponent>(entity))
+        {
+			auto* c = registry->GetComponent<CubemapComponent>(entity);
+			entityJson["components"]["CubemapComponent"]["filePath"] = c->filePath;
+        }
+
+		// AudioComponent
+        if (registry->HasComponent<AudioComponent>(entity))
+        {
+			auto* c = registry->GetComponent<AudioComponent>(entity);
+			entityJson["components"]["AudioComponent"]["filePath"] = c->filePath;
+			entityJson["components"]["AudioComponent"]["volume"] = c->volume;
+			entityJson["components"]["AudioComponent"]["pitch"] = c->pitch;
+			entityJson["components"]["AudioComponent"]["isLoop"] = c->isLoop;
+			entityJson["components"]["AudioComponent"]["allowOverlap"] = c->allowOverlap;
         }
 
         rootJson["entities"].push_back(entityJson);
@@ -142,6 +179,8 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
 {
     if (!rootJson.contains("entities")) return false;
 
+	auto engine = Engine::GetInstance();
+
     // 古いエンティティIDから新しいエンティティIDへの対応表
     std::unordered_map<Entity, Entity> idMap;
 
@@ -178,6 +217,56 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
             auto color = componentsJson["MaterialComponent"]["color"];
             comp.color = Vector4(color[0], color[1], color[2], color[3]);
             registry->AddComponent<MaterialComponent>(newId, comp);
+        }
+
+		// MeshComponent の復元
+		if (componentsJson.contains("MeshComponent"))
+		{
+			MeshComponent comp;
+			comp.meshType = static_cast<Detail::ProceduralMeshType>(componentsJson["MeshComponent"]["meshType"]);
+			registry->AddComponent<MeshComponent>(newId, comp);
+		}
+
+		// ScriptComponent の復元
+        if (componentsJson.contains("ScriptComponent"))
+        {
+			ScriptComponent comp(Detail::ScriptHandle::Invalid());
+			comp.filePath = componentsJson["ScriptComponent"]["filePath"];
+			comp.moduleName = componentsJson["ScriptComponent"]["moduleName"];
+			comp.className = componentsJson["ScriptComponent"]["className"];
+			comp.handle = engine ? engine->BuildScriptModule(comp.moduleName, comp.className, comp.filePath) : Detail::ScriptHandle::Invalid();
+			registry->AddComponent<ScriptComponent>(newId, comp);
+        }
+
+		// TextureComponent の復元
+        if (componentsJson.contains("TextureComponent"))
+        {
+			TextureComponent comp(Detail::TextureHandle::Invalid());
+			comp.filePath = componentsJson["TextureComponent"]["filePath"];
+			comp.handle = engine ? engine->LoadTexture(comp.filePath) : Detail::TextureHandle::Invalid();
+			registry->AddComponent<TextureComponent>(newId, comp);
+        }
+
+		// CubemapComponent の復元
+        if (componentsJson.contains("CubemapComponent"))
+        {
+			CubemapComponent comp(Detail::TextureHandle::Invalid());
+			comp.filePath = componentsJson["CubemapComponent"]["filePath"];
+			comp.handle = engine ? engine->LoadTexture(comp.filePath) : Detail::TextureHandle::Invalid();
+			registry->AddComponent<CubemapComponent>(newId, comp);
+        }
+
+		// AudioComponent の復元
+        if (componentsJson.contains("AudioComponent"))
+        {
+			AudioComponent comp;
+			comp.filePath = componentsJson["AudioComponent"]["filePath"];
+			comp.volume = componentsJson["AudioComponent"]["volume"];
+			comp.pitch = componentsJson["AudioComponent"]["pitch"];
+			comp.isLoop = componentsJson["AudioComponent"]["isLoop"];
+			comp.allowOverlap = componentsJson["AudioComponent"]["allowOverlap"];
+			comp.audioHandle = engine ? engine->LoadAudio(comp.filePath) : Detail::AudioHandle::Invalid();
+			registry->AddComponent<AudioComponent>(newId, comp);
         }
 
         // HierarchyComponent の復元（IDの再マッピングが必須）

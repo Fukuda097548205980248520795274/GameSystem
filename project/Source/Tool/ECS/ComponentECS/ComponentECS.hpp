@@ -22,7 +22,7 @@ struct ScriptComponent
 
 	/// @brief コンストラクタ
 	/// @param handle 
-	ScriptComponent(Detail::ScriptHandle handle) : handle(handle) {}
+	ScriptComponent(Detail::ScriptHandle handle) : handle(handle), filePath("") {}
 
 	/// @brief デストラクタ
 	~ScriptComponent()
@@ -33,6 +33,15 @@ struct ScriptComponent
 			scriptObject = nullptr;
 		}
 	}
+
+	// @brief スクリプトのファイルパス
+	std::string filePath;
+
+	// スクリプトのモジュール名
+	std::string moduleName;
+
+	// スクリプトのクラス名
+	std::string className;
 
 
 	// @brief スクリプトハンドル
@@ -236,7 +245,10 @@ struct TextureComponent
 
 	/// @brief コンストラクタ
 	/// @param handle 
-	TextureComponent(Detail::TextureHandle handle) : handle(handle) {}
+	TextureComponent(Detail::TextureHandle handle) : handle(handle), filePath("") {}
+
+	// @brief テクスチャのファイルパス
+	std::string filePath;
 
 	/// @brief テクスチャのハンドル（またはID/ポインタ）
 	Detail::TextureHandle handle;
@@ -250,7 +262,10 @@ struct CubemapComponent
 
 	/// @brief コンストラクタ
 	/// @param handle 
-	CubemapComponent(Detail::TextureHandle handle) : handle(handle) {}
+	CubemapComponent(Detail::TextureHandle handle) : handle(handle), filePath("") {}
+
+	// @brief キューブマップのファイルパス
+	std::string filePath;
 
 	/// @brief キューブマップのハンドル（またはID/ポインタ）
 	Detail::TextureHandle handle;
@@ -364,12 +379,16 @@ struct SpotLightComponent
 struct AudioComponent
 {
 	AudioComponent() :
+		filePath(""),
 		audioHandle(Detail::AudioHandle::Invalid()),
 		volume(1.0f),
 		pitch(1.0f),
 		isLoop(false),
 		allowOverlap(false){
 	}
+
+	// @brief 再生するオーディオファイルのパス
+	std::string filePath;
 
 	/// @brief 再生するオーディオデータのハンドル（AudioStore::Loadの戻り値）
 	Detail::AudioHandle audioHandle;

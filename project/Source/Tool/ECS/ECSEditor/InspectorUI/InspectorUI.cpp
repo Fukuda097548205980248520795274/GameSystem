@@ -60,13 +60,17 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 
 							if (engine)
 							{
-								if (auto textureStore = engine->GetRenderContext()->GetTextureStore())
+								if (auto scriptManager = engine->GetScriptSystem()->GetScriptManager())
 								{
 									script->handle = droppedHandle;
+									script->filePath = scriptManager->GetFilePath(droppedHandle);
+									script->moduleName = scriptManager->GetModuleName(droppedHandle);
+									script->className = scriptManager->GetScriptClass(droppedHandle);
 								}
 
 							}
 						}
+
 						ImGui::EndDragDropTarget();
 					}
 				}
