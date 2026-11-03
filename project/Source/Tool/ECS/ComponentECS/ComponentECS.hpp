@@ -13,6 +13,8 @@
 #include "Vector/Vector4/Vector4.hpp"
 #include "Store/ProceduralMeshStore/ProceduralMeshStore.hpp"
 #include "Script/ScriptManager/ScriptManager.hpp"
+#include "Store/SkeletonStore/SkeletonData.hpp"
+#include "Store/AnimationStore/AnimationData.hpp"
 
 /// @brief スクリプトコンポーネント
 struct ScriptComponent
@@ -164,6 +166,47 @@ struct MeshDrawComponent
 	// メッシュのインデックス（モデル内のメッシュを指定するために使用される）
 	int32_t meshIndex;
 };
+
+/// @brief スケルトンコンポーネント
+struct SkeletonComponent
+{
+	SkeletonComponent() : handle(Detail::SkeletonHandle::Invalid()){}
+
+	// スケルトンハンドル
+	Detail::SkeletonHandle handle;
+
+	// キャラクター固有の姿勢
+	Detail::SkeletonPose pose{};
+};
+
+/// @brief アニメーションコンポーネント
+struct AnimationComponent
+{
+	AnimationComponent() : handle(Detail::AnimationHandle::Invalid()), currentTime(0.0f), playbackSpeed(1.0f), isPlaying(true), isLoop(true) {}
+
+	// 再生するアニメーション
+	Detail::AnimationHandle handle;
+
+	// 再生時間
+	float currentTime;
+
+	// 再生速度
+	float playbackSpeed;
+
+	// 再生中かどうか
+	bool isPlaying;
+
+	// ループ再生するか
+	bool isLoop;
+};
+
+/// @brief スキニングコンポーネント
+struct SkinningComponent
+{
+	// メッシュごとのスキニングインスタンス
+	std::vector<Detail::SkinningMeshInstance> instances;
+};
+
 
 /// @brief カメラコンポーネント
 struct CameraComponent

@@ -290,6 +290,15 @@
     <Filter Include="Source\Tool\AssetsWindow">
       <UniqueIdentifier>{8616f81d-0fb3-4ebb-8108-273a0663ce38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Func\AnimationFunc">
+      <UniqueIdentifier>{e6482ab6-753b-48f8-9bd5-bb0f6517b0fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Resource\SkinCluster">
+      <UniqueIdentifier>{be595cbf-dcb1-4f25-a696-d9a82ab81c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Func\SkeletonFunc">
+      <UniqueIdentifier>{f2b6bc03-041f-4d3c-ac35-1ae492781878}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -495,6 +504,15 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\AssetsWindow\AssetsWindow.cpp">
       <Filter>Source\Tool\AssetsWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Func\AnimationFunc\AnimationFunc.cpp">
+      <Filter>Source\Engine\Func\AnimationFunc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\SkinCluster\SkinCluster.cpp">
+      <Filter>Source\Engine\Resource\SkinCluster</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Func\SkeletonFunc\SkeletonFunc.cpp">
+      <Filter>Source\Engine\Func\SkeletonFunc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -731,6 +749,21 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\AssetsWindow\AssetsWindow.hpp">
       <Filter>Source\Tool\AssetsWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\AnimationStore\AnimationData.hpp">
+      <Filter>Source\Engine\Store\AnimationStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\AnimationFunc\AnimationFunc.hpp">
+      <Filter>Source\Engine\Func\AnimationFunc</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\SkinCluster\SkinCluster.hpp">
+      <Filter>Source\Engine\Resource\SkinCluster</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Func\SkeletonFunc\SkeletonFunc.hpp">
+      <Filter>Source\Engine\Func\SkeletonFunc</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\SkeletonStore\SkeletonData.hpp">
+      <Filter>Source\Engine\Store\SkeletonStore</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

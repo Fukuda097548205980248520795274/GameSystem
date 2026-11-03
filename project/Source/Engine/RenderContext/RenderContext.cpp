@@ -57,8 +57,14 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// プロシージャルメッシュストアを作成
 	proceduralMeshStore_ = std::make_unique<ProceduralMeshStore>(core_->GetDevice());
 
+	// アニメーションストアを作成
+	animationStore_ = std::make_unique<AnimationStore>();
+
 	// モデルストアを作成
 	modelStore_ = std::make_unique<ModelStore>();
+
+	// スケルトンストアを作成
+	skeletonStore_ = std::make_unique<SkeletonStore>();
 
 	// マルチパスを作成
 	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
@@ -193,6 +199,12 @@ void Detail::RenderContext::NewFrame()
 
 	// テクスチャストアを更新する
 	textureStore_->Update(kBufferCount, frameIndex_);
+
+	// アニメーションストアを更新する
+	animationStore_->Update(kBufferCount, frameIndex_);
+
+	// スケルトンストアを更新する
+	skeletonStore_->Update(kBufferCount, frameIndex_);
 
 	// モデルストアを更新する
 	modelStore_->Update(kBufferCount, frameIndex_);

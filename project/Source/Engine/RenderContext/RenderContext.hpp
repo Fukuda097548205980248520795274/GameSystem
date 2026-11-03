@@ -9,6 +9,8 @@
 #include "Store/TextureStore/TextureStore.hpp"
 #include "Store/ModelStore/ModelStore.hpp"
 #include "Store/ProceduralMeshStore/ProceduralMeshStore.hpp"
+#include "Store/AnimationStore/AnimationStore.hpp"
+#include "Store/SkeletonStore/SkeletonStore.hpp"
 #include "ImGuiRender/ImGuiRender.hpp"
 
 #include "Render/CameraSystem/CameraSystem.hpp"
@@ -152,6 +154,14 @@ namespace Detail
 		/// @return 
 		ModelStore* GetModelStore() const { return modelStore_.get(); }
 
+		/// @brief スケルトンストアを取得する
+		/// @return 
+		SkeletonStore* GetSkeletonStore() const { return skeletonStore_.get(); }
+
+		/// @brief アニメーションストアを取得する
+		/// @return 
+		AnimationStore* GetAnimationStore()const { return animationStore_.get(); }
+
 		/// @brief プロシージャルメッシュストアを取得する
 		/// @return 
 		ProceduralMeshStore* GetProceduralMeshStore() const { return proceduralMeshStore_.get(); }
@@ -220,6 +230,12 @@ namespace Detail
 
 		/// @brief モデルストア
 		std::unique_ptr<ModelStore> modelStore_ = nullptr;
+
+		/// @brief アニメーションストア
+		std::unique_ptr<AnimationStore> animationStore_ = nullptr;
+
+		/// @brief スケルトンストア
+		std::unique_ptr<SkeletonStore> skeletonStore_ = nullptr;
 
 		/// @brief プロシージャルメッシュストア
 		std::unique_ptr<ProceduralMeshStore> proceduralMeshStore_ = nullptr;

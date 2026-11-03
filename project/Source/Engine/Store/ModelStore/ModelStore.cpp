@@ -1,5 +1,6 @@
 #include "ModelStore.hpp"
 #include "Func/ModelFunc/ModelFunc.hpp"
+#include "Func/SkeletonFunc/SkeletonFunc.hpp"
 
 /// @brief 更新処理
 /// @param maxBufferCount 
@@ -34,6 +35,7 @@ Detail::ModelHandle Detail::ModelStore::Load(const std::string& filePath, Textur
 	{
 		return ModelHandle::Invalid();
 	}
+
 
 	// スロットの割り当て
 	uint32_t slotIndex = 0;
