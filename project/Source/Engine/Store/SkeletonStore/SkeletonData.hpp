@@ -15,10 +15,6 @@ namespace Detail
     struct SkeletonTag {};
     using SkeletonHandle = Handle<SkeletonTag>;
 
-	// スキニングインスタンス用のハンドル
-	struct SkinningInstanceTag {};
-	using SkinningInstanceHandle = Handle<SkinningInstanceTag>;
-
     // ジョイントのトランスフォーム情報
     struct JointTransform
     {
@@ -142,17 +138,6 @@ namespace Detail
 
         // メッシュボーンインデックス
         std::unordered_map<std::string, int32_t> meshIndices;
-    };
-
-
-    /// @brief スキニング対象メッシュ
-    struct SkinningMeshInstance
-    {
-        // モデル内のメッシュインデックス
-        int32_t meshIndex = -1;
-
-        // スキニングインスタンスハンドル
-        Detail::SkinningInstanceHandle handle = Detail::SkinningInstanceHandle::Invalid();
     };
 
     // 静的なスケルトンデータ（モデル共有リソース）

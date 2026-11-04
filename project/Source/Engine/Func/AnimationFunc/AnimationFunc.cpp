@@ -1,4 +1,6 @@
 #include "AnimationFunc.hpp"
+#include "Func/MathFunc.hpp"
+#include <cassert>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -91,4 +93,70 @@ Detail::AnimationData Detail::LoadAnimation(const std::string& filePath)
 	animation.filePath = filePath;
 
 	return animation;
+}
+
+/// @brief 任意の時刻の値を取得する
+/// @param keyframe 
+/// @param time 
+/// @return 
+Vector3 Detail::CalculateValue(const std::vector<KeyFrameVector3>& keyframe, float time)
+{
+	// キーがないと返す値が内のでアウト
+	assert(!keyframe.empty());
+
+	// キーが一つか、時刻がキーフレーム前なら最初の値とする
+	if (keyframe.size() == 1 || time <= keyframe[0].time)
+	{
+		return keyframe[0].value;
+	}
+
+	for (size_t index = 0; index < keyframe.size() - 1; ++index)
+	{
+		size_t nextIndex = index + 1;
+
+		// index と nextIndex
+		if (keyframe[index].time <= time && time <= keyframe[nextIndex].time)
+		{
+			// 範囲内を補完する
+			float t = (time - keyframe[index].time) / (keyframe[nextIndex].time - keyframe[index].time);
+			return Lerp<Vector3>(keyframe[index].value, keyframe[nextIndex].value, t);
+		}
+	}
+
+	// ここまで来たら、時刻より後ろなので、最後の値を返す
+	return (*keyframe.rbegin()).value;
+}
+
+/// @brief 任意の時刻の値を取得する
+/// @param keyframe 
+/// @param time 
+/// @return 
+Quaternion Detail::CalculateValue(const std::vector<KeyFrameQuaternion>& keyframe, float time)
+{
+	// キーがないと返す値が内のでアウト
+	assert(!keyframe.empty());
+
+	// キーが一つか、時刻がキーフレーム前なら最初の値とする
+	if (keyframe.size() == 1 || time <= keyframe[0].time)
+	{
+		return keyframe[0].value;
+	}
+
+	for (size_t index = 0; index < keyframe.size() - 1; ++index)
+	{
+		size_t nextIndex = index + 1;
+
+		// index と nextIndex
+		if (keyframe[index].time <= time && time <= keyframe[nextIndex].time)
+		{
+			// 範囲内を補完する
+			float t = (time - keyframe[index].time) / (keyframe[nextIndex].time - keyframe[index].time);
+			return Slerp(keyframe[index].value, keyframe[nextIndex].value, t);
+		}
+
+		int a = 0;
+	}
+
+	// ここまで来たら、時刻より後ろなので、最後の値を返す
+	return (*keyframe.rbegin()).value;
 }

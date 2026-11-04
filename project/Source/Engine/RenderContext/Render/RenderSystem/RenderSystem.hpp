@@ -57,6 +57,8 @@ namespace Detail
 
 		/// @brief グローバルなワールド行列を計算する
 		/// @param entity 
+		/// @param isAnimation 
+		/// @param meshIndex 
 		/// @return 
 		Matrix4x4 CalculateGlobalWorldMatrix(Entity entity);
 

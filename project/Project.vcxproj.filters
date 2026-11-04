@@ -293,11 +293,26 @@
     <Filter Include="Source\Engine\Func\AnimationFunc">
       <UniqueIdentifier>{e6482ab6-753b-48f8-9bd5-bb0f6517b0fc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\Resource\SkinCluster">
-      <UniqueIdentifier>{be595cbf-dcb1-4f25-a696-d9a82ab81c54}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\Func\SkeletonFunc">
       <UniqueIdentifier>{f2b6bc03-041f-4d3c-ac35-1ae492781878}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Skinning">
+      <UniqueIdentifier>{fa1f8295-6b91-4444-a1ce-36055ec35988}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\SkinningInstanceStore">
+      <UniqueIdentifier>{53b7e492-da8c-4ee6-88be-d7525f57fb21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\SkinClusterStore">
+      <UniqueIdentifier>{8d61e81b-f936-46b5-836d-0ca4bb9a0111}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\SkinClusterStore\SkinCluster">
+      <UniqueIdentifier>{be595cbf-dcb1-4f25-a696-d9a82ab81c54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstance">
+      <UniqueIdentifier>{27b5ccb6-99f9-4abe-85c7-fddf31718fb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Math\Func">
+      <UniqueIdentifier>{c4c11096-af62-4f40-bf37-0b0950d47d42}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -508,11 +523,23 @@
     <ClCompile Include="Source\Engine\Func\AnimationFunc\AnimationFunc.cpp">
       <Filter>Source\Engine\Func\AnimationFunc</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Resource\SkinCluster\SkinCluster.cpp">
-      <Filter>Source\Engine\Resource\SkinCluster</Filter>
+    <ClCompile Include="Source\Engine\Store\SkinClusterStore\SkinCluster\SkinCluster.cpp">
+      <Filter>Source\Engine\Store\SkinClusterStore\SkinCluster</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\Func\SkeletonFunc\SkeletonFunc.cpp">
       <Filter>Source\Engine\Func\SkeletonFunc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstance\SkinningInstance.cpp">
+      <Filter>Source\Engine\Store\SkinningInstanceStore\SkinningInstance</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\SkinClusterStore\SkinClusterStore.cpp">
+      <Filter>Source\Engine\Store\SkinClusterStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstanceStore.cpp">
+      <Filter>Source\Engine\Store\SkinningInstanceStore</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Math\Func\MathFunc.cpp">
+      <Filter>Source\Math\Func</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -756,14 +783,26 @@
     <ClInclude Include="Source\Engine\Func\AnimationFunc\AnimationFunc.hpp">
       <Filter>Source\Engine\Func\AnimationFunc</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\Resource\SkinCluster\SkinCluster.hpp">
-      <Filter>Source\Engine\Resource\SkinCluster</Filter>
+    <ClInclude Include="Source\Engine\Store\SkinClusterStore\SkinCluster\SkinCluster.hpp">
+      <Filter>Source\Engine\Store\SkinClusterStore\SkinCluster</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\Func\SkeletonFunc\SkeletonFunc.hpp">
       <Filter>Source\Engine\Func\SkeletonFunc</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\Store\SkeletonStore\SkeletonData.hpp">
       <Filter>Source\Engine\Store\SkeletonStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstance\SkinningInstance.hpp">
+      <Filter>Source\Engine\Store\SkinningInstanceStore\SkinningInstance</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\SkinClusterStore\SkinClusterStore.hpp">
+      <Filter>Source\Engine\Store\SkinClusterStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstanceStore.hpp">
+      <Filter>Source\Engine\Store\SkinningInstanceStore</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Math\Func\MathFunc.hpp">
+      <Filter>Source\Math\Func</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -796,6 +835,9 @@
     </FxCompile>
     <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnly.VS.hlsl">
       <Filter>Shader\DetphOnly</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\Skinning\Skinning.CS.hlsl">
+      <Filter>Shader\Skinning</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

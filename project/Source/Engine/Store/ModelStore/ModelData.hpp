@@ -106,6 +106,12 @@ namespace Detail
 
 		// ノード
 		std::vector<ModelNode> nodes;
+
+		// アニメーションを持つかどうか
+		bool hasAnimations = false;
+
+		// スケルトンを持つかどうか
+		bool hasSkeleton = false;
 	};
 
 

@@ -66,6 +66,12 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// スケルトンストアを作成
 	skeletonStore_ = std::make_unique<SkeletonStore>();
 
+	// スキニングインスタンスストアを作成
+	skinningInstanceStore_ = std::make_unique<SkinningInstanceStore>();
+
+	// スキンクラスターストアを作成
+	skinClusterStore_ = std::make_unique<SkinClusterStore>();
+
 	// マルチパスを作成
 	multiPass_ = std::make_unique<MultiPass>(core_->GetDevice(), heap_.get(), swapChain_.get(), command_->GetCommandList(), shaderCompiler_.get());
 
@@ -205,6 +211,12 @@ void Detail::RenderContext::NewFrame()
 
 	// スケルトンストアを更新する
 	skeletonStore_->Update(kBufferCount, frameIndex_);
+
+	// スキニングインスタンスストアを更新する
+	skinningInstanceStore_->Update(kBufferCount, frameIndex_);
+
+	// スキンクラスターストアを更新する
+	skinClusterStore_->Update(kBufferCount, frameIndex_);
 
 	// モデルストアを更新する
 	modelStore_->Update(kBufferCount, frameIndex_);

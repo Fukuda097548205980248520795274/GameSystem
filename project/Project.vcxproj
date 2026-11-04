@@ -198,7 +198,8 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Resource\SkinCluster\SkinCluster.cpp" />
+    <ClCompile Include="Source\Engine\Store\SkinClusterStore\SkinCluster\SkinCluster.cpp" />
+    <ClCompile Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstance\SkinningInstance.cpp" />
     <ClCompile Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -214,6 +215,9 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\SkeletonStore\SkeletonStore.cpp" />
+    <ClCompile Include="Source\Engine\Store\SkinClusterStore\SkinClusterStore.cpp" />
+    <ClCompile Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstanceStore.cpp" />
+    <ClCompile Include="Source\Math\Func\MathFunc.cpp" />
     <ClCompile Include="Source\Tool\AssetsWindow\AssetsWindow.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -434,7 +438,8 @@
     <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\IRWStructuredBufferResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\RWStructuredBufferResource\RWStructuredBufferResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\RWTexture2DBufferResource\RWTexture2DBufferResource.hpp" />
-    <ClInclude Include="Source\Engine\Resource\SkinCluster\SkinCluster.hpp" />
+    <ClInclude Include="Source\Engine\Store\SkinClusterStore\SkinCluster\SkinCluster.hpp" />
+    <ClInclude Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstance\SkinningInstance.hpp" />
     <ClInclude Include="Source\Engine\Resource\StructuredBufferResource\IStructuredBufferResource.hpp" />
     <ClInclude Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.hpp" />
     <ClInclude Include="Source\Engine\Store\AnimationStore\AnimationData.hpp" />
@@ -445,7 +450,10 @@
     <ClInclude Include="Source\Engine\Store\SkeletonStore\SkeletonData.hpp" />
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.hpp" />
     <ClInclude Include="Source\Engine\Store\SkeletonStore\SkeletonStore.hpp" />
+    <ClInclude Include="Source\Engine\Store\SkinClusterStore\SkinClusterStore.hpp" />
+    <ClInclude Include="Source\Engine\Store\SkinningInstanceStore\SkinningInstanceStore.hpp" />
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureData.hpp" />
+    <ClInclude Include="Source\Math\Func\MathFunc.hpp" />
     <ClInclude Include="Source\Tool\AssetsWindow\AssetsWindow.hpp" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.hpp" />
     <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.hpp" />
@@ -557,6 +565,17 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\Skinning\Skinning.CS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Development|x64'">4.0</ShaderModel>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

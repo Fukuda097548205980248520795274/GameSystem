@@ -15,6 +15,8 @@
 #include "Script/ScriptManager/ScriptManager.hpp"
 #include "Store/SkeletonStore/SkeletonData.hpp"
 #include "Store/AnimationStore/AnimationData.hpp"
+#include "Store/SkinningInstanceStore/SkinningInstance/SkinningInstance.hpp"
+#include "Store/SkinClusterStore/SkinCluster/SkinCluster.hpp"
 
 /// @brief スクリプトコンポーネント
 struct ScriptComponent
@@ -200,13 +202,23 @@ struct AnimationComponent
 	bool isLoop;
 };
 
-/// @brief スキニングコンポーネント
-struct SkinningComponent
+/// @brief スキニングクラスターコンポーネント（各エンティティ固有の動的データ）
+struct SkinClusterComponent
 {
-	// メッシュごとのスキニングインスタンス
-	std::vector<Detail::SkinningMeshInstance> instances;
+	SkinClusterComponent() : handle(Detail::SkinClusterHandle::Invalid()) {}
+
+	// 動的なボーン行列パレットやスキニング後頂点バッファを保持するハンドル
+	Detail::SkinClusterHandle handle;
 };
 
+// @brief スキニングインスタンスコンポーネント（各エンティティ固有の動的データ）
+struct SkinningInstanceComponent
+{
+	SkinningInstanceComponent() : handle(Detail::SkinningInstanceHandle::Invalid()) {}
+
+	// スキニングインスタンスハンドル
+	Detail::SkinningInstanceHandle handle;
+};
 
 /// @brief カメラコンポーネント
 struct CameraComponent

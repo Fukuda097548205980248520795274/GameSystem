@@ -176,6 +176,11 @@ public:
 	/// @return 
 	Detail::ModelHandle LoadModel(const std::string& filePath) { return renderContext_->LoadModel(filePath); }
 
+	/// @brief スケルトンを読み込む
+	/// @param filePath 
+	/// @return 
+	Detail::SkeletonHandle LoadSkeleton(const std::string& filePath) { return renderContext_->LoadSkeleton(filePath); }
+
 	/// @brief レンダーコンテキストを取得する
 	/// @return 
 	Detail::RenderContext* GetRenderContext() { return renderContext_.get(); }

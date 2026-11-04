@@ -1,64 +1,52 @@
-#include "SkinCluster.hpp"
-#include "Func/ResourceFunc/ResourceFunc.hpp"
-#include <algorithm>
-#include <cassert>
+#include "SkinningInstance.hpp"
+#include "Engine.hpp"
 
 /// @brief デストラクタ
-Detail::SkinCluster::~SkinCluster()
+Detail::SkinningInstance::~SkinningInstance()
 {
 	if (heap_)
 	{
 		// ヒープからSRVハンドルを解放する
-		heap_->FreeSrvDescriptorHandle(paletteSrvHandle_);
 		heap_->FreeSrvDescriptorHandle(influenceSrvHandle_);
 	}
 }
 
-/// @brief 初期化
-/// @param heap 
-/// @param device 
-/// @param meshData 
-/// @param meshBoneData 
-/// @param skeleton 
-void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, const MeshData& meshData, const MeshBoneData& meshBoneData, const Skeleton& skeleton)
+void Detail::SkinningInstance::Initialize(DXHeap* heap, ID3D12Device* device, const Skeleton& skeleton, const MeshData& meshData, const MeshBoneData& meshBoneData)
 {
-	// nullptr チェック
+	// エンジンのインスタンスを取得する
+	auto engine = Engine::GetInstance();
+	assert(engine);
+
 	assert(heap);
 	heap_ = heap;
 
+	// SkeletonStoreを取得する
+	auto skeletonStore = engine->GetRenderContext()->GetSkeletonStore();
+	assert(skeletonStore);
 
-	/*------------------------------
-		Palette用のリソースを確保
-	------------------------------*/
 
-	paletteResource_ = CreateBufferResource(device, sizeof(WellForGPU) * skeleton.joints.size());
-	WellForGPU* mappedPaletteData = nullptr;
-	paletteResource_->Map(0, nullptr, reinterpret_cast<void**>(&mappedPaletteData));
+	// 頂点数を取得する
+	uint32_t numVertices = static_cast<uint32_t>(meshData.vertexBufferResource->GetNumVertex());
 
-	// spanを使ってアクセスするようにする
-	mappedPalette_ = { mappedPaletteData, skeleton.joints.size() };
-	paletteSrvHandle_ = heap->GetSrvDescriptorHandle();
+	// メッシュデータの頂点データを取得する
+	auto vertexData = meshData.vertexBufferResource->GetData(0);
 
-	// SRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
-	paletteSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	paletteSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	paletteSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	paletteSrvDesc.Buffer.FirstElement = 0;
-	paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	paletteSrvDesc.Buffer.NumElements = UINT(skeleton.joints.size());
-	paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
 
-	// ビューの生成
-	device->CreateShaderResourceView(paletteResource_.Get(), &paletteSrvDesc, paletteSrvHandle_.cpuHandle);
+	// 入力頂点リソースを作成する
+	inputVertexResource_ = std::make_unique<StructuredBufferResource<ModelVertexData>>(device, heap_, meshData.vertexBufferResource->GetNumVertex(), 1);
+	auto inputData = inputVertexResource_->GetData(0);
+	std::memcpy(inputData, vertexData, sizeof(ModelVertexData) * meshData.vertexBufferResource->GetNumVertex());
+
+	// 入力頂点数リソースを作成する
+	numVertexResource_ = std::make_unique<ConstantBufferResource<uint32_t>>(device, 1);
+	auto numVertexData = numVertexResource_->GetData(0);
+	*numVertexData = numVertices;
+
 
 
 	/*-------------------------------
 		Influence用のリソースを確保
 	-------------------------------*/
-
-	// 頂点数を取得する
-	uint32_t numVertices = static_cast<uint32_t>(meshData.vertexBufferResource->GetNumVertex());
 
 	// Influence用のリソースを作成する
 	influenceResource_ = CreateBufferResource(device, sizeof(VertexInfluence) * numVertices);
@@ -86,6 +74,7 @@ void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, const M
 	device->CreateShaderResourceView(influenceResource_.Get(), &influenceSrvDesc, influenceSrvHandle_.cpuHandle);
 
 
+
 	/*----------------------------------------------
 		SkinClusterの情報を解析してInfluenceを格納する
 	----------------------------------------------*/
@@ -97,7 +86,7 @@ void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, const M
 	// jointWeightの情報を解析して、各頂点に対するInfluenceを設定する
 	for (const auto& jointWeight : meshBoneData.jointWeights)
 	{
-		// skeletonに対象となるjointが含まれているか判断する
+		// skeletonに対象となるjointが含まれているか判断するs
 		auto it = skeleton.jointMap.find(jointWeight.first);
 
 		// 存在しない名前のJointは後回し
@@ -126,29 +115,9 @@ void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, const M
 	}
 }
 
-/// @brief 更新処理
-/// @param skeleton 
-void Detail::SkinCluster::Update(const SkeletonPose& pose)
-{
-	for (size_t jointIndex = 0; jointIndex < pose.skeletonSpaceMatrices.size(); ++jointIndex)
-	{
-		assert(jointIndex < inverseBindPoseMatrices_.size());
-
-		// バインドポーズ逆行列 × 現在のスケルトン空間行列
-		mappedPalette_[jointIndex].skeletonSpaceMatrix =
-			inverseBindPoseMatrices_[jointIndex] * pose.skeletonSpaceMatrices[jointIndex];
-
-		mappedPalette_[jointIndex].skeletonSpaceInverseTransposeMatrix =
-			mappedPalette_[jointIndex].skeletonSpaceMatrix.Inverse().Transpose();
-	}
-}
-
 /// @brief コマンドリストに登録する
 /// @param commandList 
-/// @param wellRootParameterIndex 
-/// @param influenceRootParameterIndex 
-void Detail::SkinCluster::Register(ID3D12GraphicsCommandList* commandList, UINT wellRootParameterIndex, UINT influenceRootParameterIndex)
+void Detail::SkinningInstance::Register(ID3D12GraphicsCommandList* commandList)
 {
-	commandList->SetComputeRootDescriptorTable(wellRootParameterIndex, paletteSrvHandle_.gpuHandle);
-	commandList->SetComputeRootDescriptorTable(influenceRootParameterIndex, influenceSrvHandle_.gpuHandle);
+
 }

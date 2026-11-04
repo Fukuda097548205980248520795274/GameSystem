@@ -166,6 +166,51 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 			}
 		}
 
+		// AnimationComponent
+		if (registry_->HasComponent<AnimationComponent>(entity))
+		{
+			if (ImGui::CollapsingHeader("アニメーション", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				auto animation = registry_->GetComponent<AnimationComponent>(entity);
+				if (animation)
+				{
+					ImGui::Text("ハンドル : Index(%u), Gen(%u)", animation->handle.index, animation->handle.generation);
+
+					// アニメーションストアを取得
+					auto animationStore = engine->GetRenderContext()->GetAnimationStore();
+					if (!animationStore)
+					{
+						ImGui::Text("アニメーションストアが見つかりません");
+						return;
+					}
+
+					// アニメーションデータを取得
+					auto animationData = animationStore->GetAnimationData(animation->handle);
+					if (!animationStore->GetAnimationData(animation->handle))
+					{
+						ImGui::Text("アニメーションデータが見つかりません");
+						return;
+					}
+
+					ImGui::DragFloat("再生時間", &animation->currentTime, 0.01f, 0.0f, animationData->duration);
+					ImGui::DragFloat("再生速度", &animation->playbackSpeed, 0.01f);
+
+					// 再生・停止ボタンの実装
+					if (ImGui::Button("再生", ImVec2(80, 0)))
+					{
+						
+					}
+
+					ImGui::SameLine();
+
+					if (ImGui::Button("停止", ImVec2(80, 0)))
+					{
+						
+					}
+				}
+			}
+		}
+
 		// TextureComponent
 		if (registry_->HasComponent<TextureComponent>(entity))
 		{

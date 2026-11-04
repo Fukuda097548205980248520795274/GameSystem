@@ -13,7 +13,15 @@ Game::Game(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 /// @brief 初期化
 void Game::Initialize()
 {
+	auto  engine = Engine::GetInstance();
 
+	Entity renderPassEntity = engine->CreatePass(0, BlendMode::None, std::function<void()>{});
+
+	Entity cameraEntity = engine->CreateCameraEntity();
+
+	Entity skybox = engine->CreateSkyboxEntity();
+
+	Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/AnimatedCube/AnimatedCube.gltf"));
 }
 
 /// @brief 更新処理

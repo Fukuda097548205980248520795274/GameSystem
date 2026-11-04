@@ -47,6 +47,12 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 	modelData.meshes.resize(scene->mNumMeshes);
 	modelData.meshNames.resize(scene->mNumMeshes);
 
+	// アニメーションを持つかどうかを判定する
+	modelData.hasAnimations = scene->HasAnimations() && scene->mNumAnimations > 0;
+
+	// スケルトンを持つかどうかを判定する
+	modelData.hasSkeleton = scene->HasMeshes() && scene->mNumMeshes > 0 && scene->mMeshes[0]->HasBones();
+
 	// メッシュ
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{

@@ -11,6 +11,8 @@
 #include "Store/ProceduralMeshStore/ProceduralMeshStore.hpp"
 #include "Store/AnimationStore/AnimationStore.hpp"
 #include "Store/SkeletonStore/SkeletonStore.hpp"
+#include "Store/SkinningInstanceStore/SkinningInstanceStore.hpp"
+#include "Store/SkinClusterStore/SkinClusterStore.hpp"
 #include "ImGuiRender/ImGuiRender.hpp"
 
 #include "Render/CameraSystem/CameraSystem.hpp"
@@ -130,6 +132,11 @@ namespace Detail
 		/// @return 
 		ModelHandle LoadModel(const std::string& filePath) { return modelStore_->Load(filePath, textureStore_.get(), heap_.get(), core_->GetDevice(), command_->GetCommandList()); }
 
+		/// @brief スケルトンを読み込む
+		/// @param filePath 
+		/// @return 
+		SkeletonHandle LoadSkeleton(const std::string& filePath) { return skeletonStore_->Load(filePath); }
+
 		/// @brief PSOエディタを取得する
 		/// @return 
 		PSOEditor* GetPSOEditor() { return psoEditor_.get(); }
@@ -141,6 +148,10 @@ namespace Detail
 		/// @brief デバイスを取得する
 		/// @return 
 		DXCore* GetCore() const { return core_.get(); }
+
+		/// @brief コマンドを取得する
+		/// @return 
+		DXCommand* GetCommand() const { return command_.get(); }
 
 		/// @brief コマンドを取得する
 		/// @return 
@@ -161,6 +172,14 @@ namespace Detail
 		/// @brief アニメーションストアを取得する
 		/// @return 
 		AnimationStore* GetAnimationStore()const { return animationStore_.get(); }
+
+		/// @brief スキンクラスターストアを取得する
+		/// @return 
+		SkinClusterStore* GetSkinClusterStore() const { return skinClusterStore_.get(); }
+
+		/// @brief スキニングインスタンスストアを取得する
+		/// @return 
+		SkinningInstanceStore* GetSkinningInstanceStore() const { return skinningInstanceStore_.get(); }
 
 		/// @brief プロシージャルメッシュストアを取得する
 		/// @return 
@@ -236,6 +255,12 @@ namespace Detail
 
 		/// @brief スケルトンストア
 		std::unique_ptr<SkeletonStore> skeletonStore_ = nullptr;
+
+		/// @brief スキニングインスタンスストア
+		std::unique_ptr<SkinningInstanceStore> skinningInstanceStore_ = nullptr;
+
+		/// @brief スキンクラスターストア
+		std::unique_ptr<SkinClusterStore> skinClusterStore_ = nullptr;
 
 		/// @brief プロシージャルメッシュストア
 		std::unique_ptr<ProceduralMeshStore> proceduralMeshStore_ = nullptr;

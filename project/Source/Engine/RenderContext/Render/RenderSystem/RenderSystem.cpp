@@ -1,6 +1,7 @@
 #include "RenderSystem.hpp"
 #include "Engine.hpp"
 
+#include "Func/AnimationFunc/AnimationFunc.hpp"
 #include "ECS/ComponentECS/DataForGPU/DataForGPU.hpp"
 
 /// @brief 初期化
@@ -122,6 +123,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 	auto engine = Engine::GetInstance();
 	auto renderContext = engine->GetRenderContext();
 	auto device = renderContext->GetCore()->GetDevice();
+	auto commandList = renderContext->GetCommand()->GetCommandList();
 	auto textureStore = renderContext->GetTextureStore();
 	auto modelStore = renderContext->GetModelStore();
 	int32_t maxBufferCount = engine->GetMaxBufferCount();
@@ -145,6 +147,31 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 	auto modelData = modelStore->GetModelData(modelHandle);
 	if (!modelData) return parentEntity;
 
+	// アニメーションを持つかどうかを判定する
+	if (modelData->hasAnimations)
+	{
+		auto animationStore = renderContext->GetAnimationStore();
+
+		// アニメーションコンポーネントを追加する
+		AnimationComponent animationComp;
+		animationComp.handle = animationStore->Load(modelData->filePath);
+		registry->AddComponent(parentEntity, animationComp);
+	}
+
+	// スケルトンを持つかどうかを判定する
+	SkeletonData* skeletonData = nullptr;
+	if (modelData->hasSkeleton)
+	{
+		auto skeletonStore = renderContext->GetSkeletonStore();
+
+		// スケルトンコンポーネントを追加する
+		SkeletonComponent skeletonComp;
+		skeletonComp.handle = skeletonStore->Load(modelData->filePath);
+		skeletonData = skeletonStore->GetSkeletonData(skeletonComp.handle);
+		skeletonComp.pose.Initialize(skeletonStore->GetSkeletonData(skeletonComp.handle)->skeleton);
+		registry->AddComponent(parentEntity, skeletonComp);
+	}
+
 	// 子エンティティの作成
 	std::vector<Entity> tempChildren;
 	tempChildren.reserve(modelData->meshes.size());
@@ -165,6 +192,24 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 		MeshDrawComponent meshDrawComp(i);
 		meshDrawComp.handle = modelHandle;
 		registry->AddComponent(childEntity, meshDrawComp);
+
+		// スケルトンデータが存在する場合はスキニングインスタンスとスキンクラスターを追加する
+		if (skeletonData)
+		{
+			// スキニングクラスターコンポーネントを追加する
+			auto skinClusterStore = renderContext->GetSkinClusterStore();
+			auto skinInstanceStore = renderContext->GetSkinningInstanceStore();
+			
+			// スキニングインスタンスをロードしてハンドルを取得する
+			SkinningInstanceComponent skinningInstanceComp;
+			skinningInstanceComp.handle = skinInstanceStore->Load(renderContext->GetHeap(), device, skeletonData->skeleton, modelData->meshes[i], skeletonData->boneData.meshes[i]);
+			registry->AddComponent(childEntity, skinningInstanceComp);
+
+			// スキンクラスターをロードしてハンドルを取得する
+			SkinClusterComponent skinClusterComp;
+			skinClusterComp.handle = skinClusterStore->Load(renderContext->GetHeap(), device, commandList, modelData->meshes[i], skeletonData->skeleton);
+			registry->AddComponent(childEntity, skinClusterComp);
+		}
 
 		// TransformComponent、MaterialComponent、UVTransformComponent、TextureComponentを追加する
 		registry->AddComponent(childEntity, TransformComponent());
@@ -247,11 +292,10 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 		depthOnlyPso_->Register(commandList);
 
 		// ループを削除
-		auto transform = registry->GetComponent<TransformComponent>(entity);
 		auto transformCB = registry->GetComponent<TransformConstantBufferComponent>(entity);
 
 		// コンポーネントが存在しない場合はスキップする
-		if (!transform || !transformCB)continue;
+		if (!registry->GetComponent<TransformComponent>(entity) || !transformCB)continue;
 
 		// meshIndex を使用
 		modelStore->Register(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
@@ -459,6 +503,8 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 
 /// @brief グローバルなワールド行列を計算する
 /// @param entity 
+/// @param isAnimation 
+/// @param meshIndex 
 /// @return 
 Matrix4x4 Detail::RenderSystem::CalculateGlobalWorldMatrix(Entity entity)
 {
@@ -475,6 +521,41 @@ Matrix4x4 Detail::RenderSystem::CalculateGlobalWorldMatrix(Entity entity)
 		ToQuaternion(transform->rotation.x, Vector3(1.0f, 0.0f, 0.0f));
 
 	Matrix4x4 localWorld = Make3DAffineMatrix4x4(transform->scale, rotation, transform->position);
+
+	
+	auto meshDrawComp = registry->GetComponent<MeshDrawComponent>(entity);
+
+	if (meshDrawComp)
+	{
+		auto hierarchyComp = registry->GetComponent<HierarchyComponent>(entity);
+
+		if (hierarchyComp)
+		{
+			auto animationComp = registry->GetComponent<AnimationComponent>(hierarchyComp->parent);
+			auto skeletonComp = registry->GetComponent<SkeletonComponent>(hierarchyComp->parent);
+
+			if (animationComp && skeletonComp)
+			{
+				// アニメーションコンポーネントとスケルトンコンポーネントの両方が存在する場合
+			}
+			else if (animationComp)
+			{
+				// アニメーションコンポーネントはあるがスケルトンコンポーネントがない場合
+				auto animationStore = Engine::GetInstance()->GetRenderContext()->GetAnimationStore();
+				auto animationData = animationStore->GetAnimationData(animationComp->handle);
+
+				// アニメーションデータが存在する場合、アニメーションの変換を計算する
+				Vector3 animationTranslate = CalculateValue(animationData->nodes[meshDrawComp->meshIndex].translate, animationComp->currentTime);
+				Quaternion animationRotate = CalculateValue(animationData->nodes[meshDrawComp->meshIndex].rotate, animationComp->currentTime);
+				Vector3 animationScale = CalculateValue(animationData->nodes[meshDrawComp->meshIndex].scale, animationComp->currentTime);
+
+				// アニメーションの変換をローカル行列に適用する
+				Matrix4x4 animationMatrix = Make3DAffineMatrix4x4(animationScale, animationRotate, animationTranslate);
+				localWorld = animationMatrix * localWorld;
+			}
+		}
+	}
+
 
 	// 親子関係コンポーネントがあり、かつ親が設定されている場合は親の行列を掛ける
 	if (registry->HasComponent<HierarchyComponent>(entity))
