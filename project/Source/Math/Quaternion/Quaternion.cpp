@@ -40,6 +40,19 @@ Quaternion Quaternion::Inverse() const
 	return this->Conjugate() / std::powf(this->Norm(), 2.0f);
 }
 
+/// @brief オイラー角に変換する
+/// @return 
+Vector3 Quaternion::ToEulerAngles() const
+{
+	// オイラー角を計算する
+	Vector3 eulerAngles;
+	eulerAngles.x = std::atan2(2.0f * (w * x + y * z), 1.0f - 2.0f * (x * x + y * y));
+	eulerAngles.y = std::asin(2.0f * (w * y - z * x));
+	eulerAngles.z = std::atan2(2.0f * (w * z + x * y), 1.0f - 2.0f * (y * y + z * z));
+
+	return eulerAngles;
+}
+
 /// @brief 乗法単位元
 /// @return 
 Quaternion MakeIdentityQuaternion()

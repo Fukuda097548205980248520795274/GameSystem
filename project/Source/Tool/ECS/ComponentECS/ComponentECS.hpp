@@ -115,6 +115,16 @@ struct HierarchyComponent
 	std::vector<Entity> children;
 };
 
+// @brief ノードコンポーネント（モデルのノード情報を保持する）
+struct NodeComponent
+{
+	// @brief ノードの名前
+	std::string name;
+
+	// @brief モデル内のノードインデックス
+	int32_t index;
+};
+
 /// @brief パスの基本的な制御と実行順序
 struct RenderPassComponent
 {
@@ -167,6 +177,9 @@ struct MeshDrawComponent
 
 	// メッシュのインデックス（モデル内のメッシュを指定するために使用される）
 	int32_t meshIndex;
+
+	// ルートエンティティの参照
+	Entity rootMeshEntity;
 };
 
 /// @brief スケルトンコンポーネント

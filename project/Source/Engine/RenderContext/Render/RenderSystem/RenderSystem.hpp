@@ -60,7 +60,7 @@ namespace Detail
 		/// @param isAnimation 
 		/// @param meshIndex 
 		/// @return 
-		Matrix4x4 CalculateGlobalWorldMatrix(Entity entity);
+		Matrix4x4 CalculateGlobalWorldMatrix(Entity entity, Entity rootEntity);
 
 	private:
 

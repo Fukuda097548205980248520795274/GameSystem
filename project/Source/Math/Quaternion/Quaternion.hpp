@@ -25,6 +25,10 @@ struct Quaternion
 	/// @brief 逆
 	/// @return 
 	Quaternion Inverse() const;
+
+	/// @brief オイラー角に変換する
+	/// @return 
+	Vector3 ToEulerAngles() const;
 };
 
 namespace
