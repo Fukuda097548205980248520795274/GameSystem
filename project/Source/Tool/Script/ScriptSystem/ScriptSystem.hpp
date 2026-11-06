@@ -37,6 +37,16 @@ namespace Detail
 		/// @brief 初期化
 		void Initialize();
 
+		/// @brief デバッグ用コールバック
+		/// @param ctx 
+		/// @param timeOut 
+		static void LineCallback(asIScriptContext* ctx, void* timeOut);
+
+		/// @brief 例外コールバック
+		/// @param ctx 
+		/// @param param 
+		static void ExceptionCallback(asIScriptContext* ctx, void* param);
+
 		// @brief スクリプトマネージャ
 		std::unique_ptr<ScriptManager> scriptManager_;
 

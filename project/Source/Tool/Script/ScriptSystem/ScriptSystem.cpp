@@ -62,6 +62,12 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                 asIScriptContext* initCtx = scriptEngine->CreateContext();
                 initCtx->Prepare(scriptComp->initFunc);
                 initCtx->SetObject(scriptComp->scriptObject);
+
+#ifdef DEVELOPMENT
+				// デバッグ用のラインコールバックを設定
+				initCtx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), nullptr, asCALL_CDECL);
+				initCtx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
+#endif
                 
                 int r = initCtx->Execute();
                 if (r != asEXECUTION_FINISHED)
@@ -80,6 +86,12 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             asIScriptContext* ctx = scriptEngine->CreateContext();
             ctx->Prepare(scriptComp->updateFunc);
             ctx->SetObject(scriptComp->scriptObject);
+
+#ifdef DEVELOPMENT
+			// デバッグ用のラインコールバックを設定
+            ctx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), nullptr, asCALL_CDECL);
+            ctx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
+#endif
             
             int r = ctx->Execute();
             if (r != asEXECUTION_FINISHED)
@@ -90,5 +102,41 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
 
             ctx->Release();
         }
+    }
+}
+
+/// @brief デバッグ用コールバック
+/// @param ctx 
+/// @param timeOut 
+void Detail::ScriptSystem::LineCallback(asIScriptContext* ctx, void* timeOut)
+{
+    auto engine = Engine::GetInstance();
+    if (engine)
+    {
+        // 現在実行中のファイル名と行番号を取得
+        const char* scriptSection;
+        int line = ctx->GetLineNumber(0, nullptr, &scriptSection);
+
+        engine->Log(LogLevel::Error, "スクリプト実行中, ファイル : " + std::string(scriptSection) + ", 行番号: " + std::to_string(line));
+    }
+}
+
+/// @brief 例外コールバック
+/// @param ctx 
+/// @param param 
+void Detail::ScriptSystem::ExceptionCallback(asIScriptContext* ctx, void* param)
+{
+    auto engine = Engine::GetInstance();
+    if (engine)
+    {
+        const char* section;
+
+        // 例外が発生した行番号とファイル名を取得
+        int line = ctx->GetExceptionLineNumber(nullptr, &section);
+
+        // 例外の理由（エラーメッセージ）を取得
+        std::string err = ctx->GetExceptionString();
+
+        engine->Log(LogLevel::Error, "スクリプト例外発生: " + err + " (ファイル: " + std::string(section) + ", 行: " + std::to_string(line) + ")");
     }
 }

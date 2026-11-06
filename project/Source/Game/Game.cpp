@@ -22,6 +22,11 @@ void Game::Initialize()
 	Entity skybox = engine->CreateSkyboxEntity();
 
 	Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/walk/walk.gltf"));
+
+	ScriptComponent scriptComp(engine->BuildScriptModule("Test", "Test", "./Assets/Script/Test.as"));
+	auto registry = engine->GetRegistryECS();
+	Entity scriptEntity = registry->CreateEntity();
+	registry->AddComponent(scriptEntity, scriptComp);
 }
 
 /// @brief 更新処理
