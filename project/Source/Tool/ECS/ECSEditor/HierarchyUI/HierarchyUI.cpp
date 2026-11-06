@@ -27,6 +27,10 @@ void Detail::ECSEditor::DrawHierarchy()
 		{
 			isChild = hierarchyComp->parent != kNullEntity;
 		}
+		if (auto jointHierarchyComp = registry_->GetComponent<JointHierarchyComponent>(entity))
+		{
+			isChild = jointHierarchyComp->parent != kNullEntity;
+		}
 
 		// 子エンティティの場合はスキップ
 		if (isChild)continue;

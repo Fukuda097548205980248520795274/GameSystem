@@ -115,6 +115,18 @@ struct HierarchyComponent
 	std::vector<Entity> children;
 };
 
+/// @brief ジョイント用親子関係コンポーネント
+struct JointHierarchyComponent
+{
+	JointHierarchyComponent() : parent(kNullEntity) {}
+
+	/// @brief 親エンティティ
+	Entity parent;
+
+	/// @brief 子エンティティのリスト
+	std::vector<Entity> children;
+};
+
 // @brief ノードコンポーネント（モデルのノード情報を保持する）
 struct NodeComponent
 {

@@ -168,7 +168,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 		// アニメーションコンポーネントを追加する
 		AnimationComponent animationComp;
 		animationComp.handle = animationStore->Load(modelData->filePath);
-		registry->AddComponent(rootEntity, animationComp); // 修正: parentEntity -> rootEntity
+		registry->AddComponent(rootEntity, animationComp);
 	}
 
 	// スケルトンを持つかどうかを判定する
@@ -182,7 +182,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 		skeletonComp.handle = skeletonStore->Load(modelData->filePath);
 		skeletonData = skeletonStore->GetSkeletonData(skeletonComp.handle);
 		skeletonComp.pose.Initialize(skeletonStore->GetSkeletonData(skeletonComp.handle)->skeleton);
-		registry->AddComponent(rootEntity, skeletonComp); // 修正: parentEntity -> rootEntity
+		registry->AddComponent(rootEntity, skeletonComp);
 	}
 
 	// ノードを再帰的に構築するためのラムダ関数
@@ -191,10 +191,29 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 			const auto& node = modelData->nodes[nodeIndex];
 			Entity entity = registry->CreateEntity();
 
-			// 親子関係を設定
-			HierarchyComponent hierarchy;
-			hierarchy.parent = parentEntity;
-			registry->AddComponent(entity, hierarchy);
+			// スケルトンのジョイントかどうかを判定する
+			bool isJoint = false;
+			if (skeletonData)
+			{
+				if (skeletonData->skeleton.jointMap.find(node.name) != skeletonData->skeleton.jointMap.end())
+				{
+					isJoint = true;
+				}
+			}
+
+			// 判定結果をもとに親子関係コンポーネントを設定
+			if (isJoint)
+			{
+				JointHierarchyComponent hierarchy;
+				hierarchy.parent = parentEntity;
+				registry->AddComponent(entity, hierarchy);
+			}
+			else
+			{
+				HierarchyComponent hierarchy;
+				hierarchy.parent = parentEntity;
+				registry->AddComponent(entity, hierarchy);
+			}
 
 			// TransformComponentにノードの初期トランスフォームを設定
 			TransformComponent transform;
@@ -250,17 +269,27 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 				}
 			}
 
-			// 子ノードを再帰的に作成して HierarchyComponent に登録
+			// 子ノードを再帰的に作成
 			std::vector<Entity> childEntities;
 			for (int32_t childIndex : node.children)
 			{
 				childEntities.push_back(CreateNodeEntity(childIndex, entity));
 			}
 
-			// HierarchyComponent に子エンティティを設定
-			if (auto currentHierarchy = registry->GetComponent<HierarchyComponent>(entity))
+			// 追加したコンポーネントに合わせて子エンティティを登録
+			if (isJoint)
 			{
-				currentHierarchy->children = std::move(childEntities);
+				if (auto currentHierarchy = registry->GetComponent<JointHierarchyComponent>(entity))
+				{
+					currentHierarchy->children = std::move(childEntities);
+				}
+			}
+			else
+			{
+				if (auto currentHierarchy = registry->GetComponent<HierarchyComponent>(entity))
+				{
+					currentHierarchy->children = std::move(childEntities);
+				}
 			}
 
 			return entity;
@@ -809,15 +838,23 @@ Matrix4x4 Detail::RenderSystem::CalculateGlobalWorldMatrix(Entity entity, Entity
 
 
 	// 親子関係コンポーネントがあり、かつ親が設定されている場合は親の行列を掛ける
+	Entity parentEntity = kNullEntity;
+
 	if (registry->HasComponent<HierarchyComponent>(entity))
 	{
 		auto hierarchy = registry->GetComponent<HierarchyComponent>(entity);
-		if (hierarchy && hierarchy->parent != kNullEntity)
-		{
-			Matrix4x4 parentWorld = CalculateGlobalWorldMatrix(hierarchy->parent, rootEntity);
+		if (hierarchy) parentEntity = hierarchy->parent;
+	}
+	else if (registry->HasComponent<JointHierarchyComponent>(entity))
+	{
+		auto hierarchy = registry->GetComponent<JointHierarchyComponent>(entity);
+		if (hierarchy) parentEntity = hierarchy->parent;
+	}
 
-			return localWorld * parentWorld;
-		}
+	if (parentEntity != kNullEntity)
+	{
+		Matrix4x4 parentWorld = CalculateGlobalWorldMatrix(parentEntity, rootEntity);
+		return localWorld * parentWorld;
 	}
 
 	return localWorld;

@@ -603,6 +603,23 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 			}
 		}
 
+		// JointHierarchyComponent
+		if (registry_->HasComponent<JointHierarchyComponent>(entity))
+		{
+			auto hierarchy = registry_->GetComponent<JointHierarchyComponent>(entity);
+			if (hierarchy && !hierarchy->children.empty())
+			{
+				ImGui::Separator();
+				ImGui::Text("子エンティティ (ジョイント)");
+
+				// 子エンティティに対して再帰処理を行う
+				for (Entity child : hierarchy->children)
+				{
+					DrawEntityComponents(child);
+				}
+			}
+		}
+
 
 		ImGui::Separator();
 		if (ImGui::Button("コンポーネントを追加", ImVec2(-1, 30)))
