@@ -1,9 +1,17 @@
+# このファイルがプロジェクトのルートであることを明示
+root = true
+
 [*.{cpp,h,hpp,hlsl,hlsli}]
 charset = utf-8
 
-# インデント設定（スペース4文字を強制する場合）
+# インデント設定
 indent_style = space
 indent_size = 4
+
+# 改行・空白設定
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
 
 # スペルミスをIntellisense上での「エラー」として扱う
 spelling_error_severity = error
