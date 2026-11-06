@@ -1,6 +1,10 @@
 [*.{cpp,h,hpp,hlsl,hlsli}]
 charset = utf-8
 
+# インデント設定（スペース4文字を強制する場合）
+indent_style = space
+indent_size = 4
+
 # スペルミスをIntellisense上での「エラー」として扱う
 spelling_error_severity = error
 

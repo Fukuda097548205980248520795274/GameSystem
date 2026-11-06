@@ -12,7 +12,7 @@
 namespace Detail
 {
 	// @brief スクリプトタグ
-    struct ScriptTag {};
+	struct ScriptTag {};
 
 	// @brief スクリプトハンドル
 	using ScriptHandle = Handle<ScriptTag>;
@@ -21,76 +21,76 @@ namespace Detail
 	/// @brief スクリプトマネージャ
 	class ScriptManager
 	{
-    public:
+	public:
 
-        /// @brief コンストラクタ
+		/// @brief コンストラクタ
 		ScriptManager() {Initialize();}
 
-        /// @brief デストラクタ
+		/// @brief デストラクタ
 		~ScriptManager() { Shutdown(); }
 
 		/// @brief スクリプトモジュールをビルドする
-        /// @param moduleName 
-        /// @param scriptClass 
-        /// @param scriptPath 
-        /// @return 
-        ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath);
+		/// @param moduleName 
+		/// @param scriptClass 
+		/// @param scriptPath 
+		/// @return 
+		ScriptHandle BuildScriptModule(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath);
 
-        /// @brief スクリプトエンジンを取得する
-        /// @return 
-        asIScriptEngine* GetScriptEngine() const { return scriptEngine_; }
+		/// @brief スクリプトエンジンを取得する
+		/// @return 
+		asIScriptEngine* GetScriptEngine() const { return scriptEngine_; }
 
 		/// @brief インデックスからハンドルを取得する
-        /// @param index 
-        /// @return 
-        ScriptHandle GetHandleByIndex(uint32_t index) const;
+		/// @param index 
+		/// @return 
+		ScriptHandle GetHandleByIndex(uint32_t index) const;
 
 		/// @brief スクリプトを削除する
 		/// @param handle 
 		void Remove(ScriptHandle handle);
 
 		/// @brief スクリプトの数を取得する
-        /// @return 
-        size_t GetScriptCount() const { return slots_.size(); }
+		/// @return 
+		size_t GetScriptCount() const { return slots_.size(); }
 
 		/// @brief スクリプトハンドルからスクリプトパスを取得する
-        /// @param handle 
-        /// @return 
-        std::string GetFilePath(ScriptHandle handle) const;
+		/// @param handle 
+		/// @return 
+		std::string GetFilePath(ScriptHandle handle) const;
 
 		/// @brief スクリプトハンドルからモジュール名を取得する
-        /// @param handle 
-        /// @return 
-        std::string GetModuleName(ScriptHandle handle) const;
+		/// @param handle 
+		/// @return 
+		std::string GetModuleName(ScriptHandle handle) const;
 
 		/// @brief スクリプトハンドルからスクリプトクラス名を取得する
-        /// @param handle 
-        /// @return 
-        std::string GetScriptClass(ScriptHandle handle) const;
+		/// @param handle 
+		/// @return 
+		std::string GetScriptClass(ScriptHandle handle) const;
 
 		/// @brief 変更されたスクリプトをリロードする
-        void ReloadModifiedScripts();
+		void ReloadModifiedScripts();
 
 
-    private:
+	private:
 
-        /// @brief 初期化
-        void Initialize();
+		/// @brief 初期化
+		void Initialize();
 
-        /// @brief シャットダウン
-        void Shutdown();
+		/// @brief シャットダウン
+		void Shutdown();
 
 		/// @brief メッセージコールバック
-        /// @param msg 
-        void MessageCallback(const asSMessageInfo* msg);
+		/// @param msg 
+		void MessageCallback(const asSMessageInfo* msg);
 
 		/// @brief スクリプトエンジンを登録する
-        void RegisterEngineAPI();
+		void RegisterEngineAPI();
 
-    private:
+	private:
 
-        /// @brief スクリプトエンジン
-        asIScriptEngine* scriptEngine_ = nullptr;
+		/// @brief スクリプトエンジン
+		asIScriptEngine* scriptEngine_ = nullptr;
 
 
 		// スロット内部情報
@@ -109,7 +109,7 @@ namespace Detail
 			std::string scriptClass = "";
 
 			// スクリプトファイルの最終更新時刻
-            std::filesystem::file_time_type lastWriteTime;
+			std::filesystem::file_time_type lastWriteTime;
 		};
 
 		// データテーブル
@@ -130,58 +130,58 @@ namespace Detail
 
 
 
-    // バイトコードのストリームクラス
-    class CBytecodeStream : public asIBinaryStream
-    {
-    public:
+	// バイトコードのストリームクラス
+	class CBytecodeStream : public asIBinaryStream
+	{
+	public:
 
-        /// @brief コンストラクタ
-        /// @param path 
-        /// @param write 
-        CBytecodeStream(const std::string& path, bool write)
-        {
-            if (write)
-            {
-                file_.open(path, std::ios::binary | std::ios::out);
-            }
-            else
-            {
-                file_.open(path, std::ios::binary | std::ios::in);
-            }
-        }
+		/// @brief コンストラクタ
+		/// @param path 
+		/// @param write 
+		CBytecodeStream(const std::string& path, bool write)
+		{
+			if (write)
+			{
+				file_.open(path, std::ios::binary | std::ios::out);
+			}
+			else
+			{
+				file_.open(path, std::ios::binary | std::ios::in);
+			}
+		}
 
-        /// @brief デストラクタ
-        ~CBytecodeStream() { if (file_.is_open()) file_.close(); }
+		/// @brief デストラクタ
+		~CBytecodeStream() { if (file_.is_open()) file_.close(); }
 
 		/// @brief 読み込み
-        /// @param ptr 
-        /// @param size 
-        /// @return 
-        int Read(void* ptr, asUINT size) override
-        {
-            if (!file_.is_open()) return -1;
-            file_.read(static_cast<char*>(ptr), size);
-            return 0;
-        }
+		/// @param ptr 
+		/// @param size 
+		/// @return 
+		int Read(void* ptr, asUINT size) override
+		{
+			if (!file_.is_open()) return -1;
+			file_.read(static_cast<char*>(ptr), size);
+			return 0;
+		}
 
 		/// @brief 書き込み
-        /// @param ptr 
-        /// @param size 
-        /// @return 
-        int Write(const void* ptr, asUINT size) override
-        {
-            if (!file_.is_open()) return -1;
-            file_.write(static_cast<const char*>(ptr), size);
-            return 0;
-        }
+		/// @param ptr 
+		/// @param size 
+		/// @return 
+		int Write(const void* ptr, asUINT size) override
+		{
+			if (!file_.is_open()) return -1;
+			file_.write(static_cast<const char*>(ptr), size);
+			return 0;
+		}
 
 		/// @brief ファイルが開いているかどうかを確認する
-        /// @return 
-        bool IsOpen() const { return file_.is_open(); }
+		/// @return 
+		bool IsOpen() const { return file_.is_open(); }
 
-    private:
+	private:
 
 		/// @brief ファイルストリーム
-        std::fstream file_;
-    };
+		std::fstream file_;
+	};
 }
