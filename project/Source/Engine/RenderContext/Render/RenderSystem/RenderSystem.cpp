@@ -57,6 +57,17 @@ void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	skinningPso_ = std::make_unique<SkinningPSO>(device, shaderCompiler);
 }
 
+/// @brief 更新処理
+/// @param frameIndex 
+void Detail::RenderSystem::Update(ID3D12GraphicsCommandList* commandList, int32_t frameIndex)
+{
+	// トランスフォームの更新
+	UpdateTransform(frameIndex);
+
+	// スキニング処理を行う
+	SkinningExecuteAll(commandList, frameIndex);
+}
+
 /// @brief エンティティを作成する
 /// @return 
 Entity Detail::RenderSystem::CreateRender3DEntity()
@@ -335,18 +346,9 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 		// meshIndex を使用
 		modelStore->Register(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
 
-		{
-			// データをGPU用に渡す
-			TransformDataForGPU data;
-			data.world = CalculateGlobalWorldMatrix(entity, meshDrawComp->rootMeshEntity);
-			data.worldViewProjection = data.world * cameraSystem->GetViewMatrix() * cameraSystem->GetProjectionMatrix();
-			data.worldInverseTranspose = data.world.Inverse().Transpose();
-
-			// Transform用のリソースをバインド
-			renderResourceStore_->UpdateConstantBuffer(transformCB->handle, data, frameIndex);
-			auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB->handle);
-			if (cbResource)cbResource->RegisterGraphics(commandList, 0, frameIndex);
-		}
+		// Transform用のリソースをバインド
+		auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB->handle);
+		if (cbResource)cbResource->RegisterGraphics(commandList, 0, frameIndex);
 
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		commandList->DrawIndexedInstanced(modelData->meshes[meshDrawComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
@@ -471,16 +473,10 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			{
 			case RenderBinding::Transform:
 			{
-				// Transform用のデータをGPU用に渡す
-				TransformDataForGPU data;
-				data.world = CalculateGlobalWorldMatrix(entity, meshDrawComp->rootMeshEntity);
-				data.worldViewProjection = data.world * cameraSystem->GetViewMatrix() * cameraSystem->GetProjectionMatrix();
-				data.worldInverseTranspose = data.world.Inverse().Transpose();
-
 				// Transform用のリソースをバインド
-				renderResourceStore_->UpdateConstantBuffer(transformCB->handle, data, frameIndex);
 				auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB->handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::Material:
@@ -496,6 +492,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				renderResourceStore_->UpdateConstantBuffer(materialCB->handle, data, frameIndex);
 				auto cbResource = renderResourceStore_->GetConstantBuffer(materialCB->handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::Camera:
@@ -503,6 +500,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				// Camera用のリソースをバインド
 				auto cbResource = lightSystem->GetCameraDataBuffer();
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::NumLights:
@@ -510,6 +508,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				// NumLights用のリソースをバインド
 				auto cbResource = lightSystem->GetNumLightDataBuffer();
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::DirectionalLight:
@@ -517,6 +516,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				// DirectionalLight用のリソースをバインド
 				auto cbResource = lightSystem->GetDirectionalLightDataBuffer();
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::PointLight:
@@ -524,6 +524,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				// PointLight用のリソースをバインド
 				auto cbResource = lightSystem->GetPointLightDataBuffer();
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::SpotLight:
@@ -531,6 +532,7 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				// SpotLight用のリソースをバインド
 				auto cbResource = lightSystem->GetSpotLightDataBuffer();
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::LightCullingTitle:
@@ -538,12 +540,14 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				// LightCullingTitle用のリソースをバインド
 				auto cbResource = lightSystem->GetTileLightIndexBuffer();
 				if (cbResource)cbResource->RegisterGraphicsSRV(commandList, i, frameIndex);
+
 				break;
 			}
 			case RenderBinding::Texture:
 			{
 				// Texture用のリソースをバインド
 				commandList->SetGraphicsRootDescriptorTable(i, textureStore->GetSrvHandle(texture->handle).gpuHandle);
+
 				break;
 			}
 
@@ -704,6 +708,38 @@ void Detail::RenderSystem::SkinningExecuteAll(ID3D12GraphicsCommandList* command
 
 		// スキンクラスターの頂点リソースの状態を元に戻す
 		skinClusterData->BarrierOutputVertexResource(commandList, frameIndex, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+	}
+}
+
+
+/// @brief トランスフォームの更新
+/// @param frameIndex 
+void Detail::RenderSystem::UpdateTransform(int32_t frameIndex)
+{
+	auto  engine = Engine::GetInstance();
+	if (!engine) return;
+
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return;
+
+	for (auto entity : registry->GetComponentArray<TransformComponent>()->GetEntities())
+	{
+		// TransformComponentを取得する
+		auto meshDrawComp = registry->GetComponent<MeshDrawComponent>(entity);
+		if (!meshDrawComp) continue;
+
+		// TransformConstantBufferComponentを取得する
+		auto transformCB = Engine::GetInstance()->GetRegistryECS()->GetComponent<TransformConstantBufferComponent>(entity);
+		if (!transformCB) continue;
+
+		// TransformDataForGPUを計算して更新する
+		TransformDataForGPU data;
+		data.world = CalculateGlobalWorldMatrix(entity, meshDrawComp->rootMeshEntity);
+		data.worldViewProjection = data.world * Engine::GetInstance()->GetRenderContext()->GetCameraSystem()->GetViewMatrix() * Engine::GetInstance()->GetRenderContext()->GetCameraSystem()->GetProjectionMatrix();
+		data.worldInverseTranspose = data.world.Inverse().Transpose();
+
+		// Transform用のリソースを更新する
+		renderResourceStore_->UpdateConstantBuffer(transformCB->handle, data, frameIndex);
 	}
 }
 

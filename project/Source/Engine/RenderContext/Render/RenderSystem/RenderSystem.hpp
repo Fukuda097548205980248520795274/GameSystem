@@ -29,6 +29,11 @@ namespace Detail
 		/// @param shaderCompiler 
 		RenderSystem(ID3D12Device* device, ShaderCompiler* shaderCompiler) { Initialize(device, shaderCompiler); }
 
+		/// @brief 更新処理
+		/// @param commandList 
+		/// @param frameIndex 
+		void Update(ID3D12GraphicsCommandList* commandList, int32_t frameIndex);
+
 		/// @brief エンティティを作成する
 		/// @return 
 		Entity CreateRender3DEntity();
@@ -48,12 +53,6 @@ namespace Detail
 		/// @param priority 
 		void ExecuteAll(ID3D12GraphicsCommandList* commandList, int priority);
 
-		/// @brief スキニング処理を行う
-		/// @param commandList 
-		/// @param priority 
-		/// @param frameIndex 
-		void SkinningExecuteAll(ID3D12GraphicsCommandList* commandList, int32_t frameIndex = 0);
-
 
 	private:
 
@@ -61,6 +60,16 @@ namespace Detail
 		/// @param device 
 		/// @param shaderCompiler 
 		void Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler);
+
+		/// @brief スキニング処理を行う
+		/// @param commandList 
+		/// @param priority 
+		/// @param frameIndex 
+		void SkinningExecuteAll(ID3D12GraphicsCommandList* commandList, int32_t frameIndex = 0);
+
+		/// @brief トランスフォームの更新
+		/// @param frameIndex 
+		void UpdateTransform(int32_t frameIndex);
 
 		/// @brief グローバルなワールド行列を計算する
 		/// @param entity 

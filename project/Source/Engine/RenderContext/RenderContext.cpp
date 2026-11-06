@@ -277,7 +277,7 @@ void Detail::RenderContext::PostDraw()
 	multiPass_->Clear(commandList, frameIndex_);
 
 	// スキニング処理を実行する
-	renderSystem_->SkinningExecuteAll(commandList, frameIndex_);
+	renderSystem_->Update(commandList, frameIndex_);
 
 	// ライトカリングを実行する
 	multiPass_->Execute(commandList, renderSystem_.get(), skyboxSystem_.get(), lightSystem_.get(), frameIndex_);
