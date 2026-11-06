@@ -32,6 +32,7 @@ Matrix4x4 Matrix4x4::Inverse() const
 		m[0][1] * m[1][2] * m[2][3] * m[3][0] - m[0][2] * m[1][3] * m[2][1] * m[3][0] - m[0][3] * m[1][1] * m[2][2] * m[3][0] +
 		m[0][3] * m[1][2] * m[2][1] * m[3][0] + m[0][2] * m[1][1] * m[2][3] * m[3][0] + m[0][1] * m[1][3] * m[2][2] * m[3][0];
 
+	if (determinant == 0.0f)return Matrix4x4();
 
 	Matrix4x4 adjugateMatrix;
 
@@ -154,7 +155,8 @@ Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix)
 	transform.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
 	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
 
-	assert(w != 0.0f);
+	if (w == 0.0f) return Vector3();
+
 	transform /= w;
 
 	return transform;
@@ -174,7 +176,8 @@ Vector4 Transform(const Vector4& vector, const Matrix4x4& matrix)
 	transform.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + vector.w * matrix.m[3][2];
 	transform.w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + vector.w * matrix.m[3][3];
 
-	assert(transform.w != 0.0f);
+	if (transform.w == 0.0f) return Vector4();
+
 	transform.x /= transform.w;
 	transform.y /= transform.w;
 	transform.z /= transform.w;
