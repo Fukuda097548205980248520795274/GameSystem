@@ -136,6 +136,7 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
                     if (engine)
                     {
                         engine->Log(LogLevel::Error, "バイトコードの読み込みに失敗しました : " + binPath);
+
                         engine->StopExecution();
                     }
                 }

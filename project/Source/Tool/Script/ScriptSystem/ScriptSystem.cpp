@@ -45,7 +45,16 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             asIScriptFunction* factory = type->GetFactoryByDecl((className + "@ " + className + "()").c_str());
             asIScriptContext* ctx = scriptEngine->CreateContext();
             ctx->Prepare(factory);
+
+#ifdef DEVELOPMENT
+            // デバッグ用のラインコールバックと例外コールバックを設定
+			auto startTime = std::chrono::steady_clock::now();
+            ctx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), &startTime, asCALL_CDECL);
+            ctx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
+#endif
+
             ctx->Execute();
+
 
 			// スクリプトオブジェクトの取得と参照カウントの増加
             scriptComp->scriptObject = static_cast<asIScriptObject*>(ctx->GetReturnObject());
@@ -65,7 +74,8 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
 
 #ifdef DEVELOPMENT
 				// デバッグ用のラインコールバックを設定
-				initCtx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), nullptr, asCALL_CDECL);
+                auto initStartTime = std::chrono::steady_clock::now();
+				initCtx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), &initStartTime, asCALL_CDECL);
 				initCtx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
 #endif
                 
@@ -88,8 +98,9 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             ctx->SetObject(scriptComp->scriptObject);
 
 #ifdef DEVELOPMENT
-			// デバッグ用のラインコールバックを設定
-            ctx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), nullptr, asCALL_CDECL);
+			// デバッグ用のラインコールバックと例外コールバックを設定
+            auto startTime = std::chrono::steady_clock::now();
+            ctx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), &startTime, asCALL_CDECL);
             ctx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
 #endif
             
@@ -110,14 +121,28 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
 /// @param timeOut 
 void Detail::ScriptSystem::LineCallback(asIScriptContext* ctx, void* timeOut)
 {
-    auto engine = Engine::GetInstance();
-    if (engine)
+    // timeOutポインタに開始時間を渡して、一定時間経過したら実行を中断する例
+    if (timeOut)
     {
-        // 現在実行中のファイル名と行番号を取得
-        const char* scriptSection;
-        int line = ctx->GetLineNumber(0, nullptr, &scriptSection);
+        auto startTime = *static_cast<std::chrono::steady_clock::time_point*>(timeOut);
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
 
-        engine->Log(LogLevel::Error, "スクリプト実行中, ファイル : " + std::string(scriptSection) + ", 行番号: " + std::to_string(line));
+
+		// 3秒以上経過した場合にスクリプトの実行を中断
+        if (elapsed > 3000)
+        {
+            ctx->Suspend(); // スクリプトの実行を中断させる
+
+            auto engine = Engine::GetInstance();
+            if (engine)
+            {
+                const char* scriptSection;
+                int line = ctx->GetLineNumber(0, nullptr, &scriptSection);
+                engine->Log(LogLevel::Error, "スクリプトの実行がタイムアウトしました (無限ループの可能性)。ファイル : "
+                    + std::string(scriptSection) + ", 行番号: " + std::to_string(line));
+            }
+        }
     }
 }
 
@@ -129,14 +154,27 @@ void Detail::ScriptSystem::ExceptionCallback(asIScriptContext* ctx, void* param)
     auto engine = Engine::GetInstance();
     if (engine)
     {
-        const char* section;
-
-        // 例外が発生した行番号とファイル名を取得
-        int line = ctx->GetExceptionLineNumber(nullptr, &section);
-
-        // 例外の理由（エラーメッセージ）を取得
         std::string err = ctx->GetExceptionString();
+        engine->Log(LogLevel::Error, "スクリプト例外発生: " + err);
 
-        engine->Log(LogLevel::Error, "スクリプト例外発生: " + err + " (ファイル: " + std::string(section) + ", 行: " + std::to_string(line) + ")");
+        // コールスタック（呼び出し履歴）を取得してログに出力
+        engine->Log(LogLevel::Error, "--- コールスタック ---");
+        asUINT stackSize = ctx->GetCallstackSize();
+        for (asUINT i = 0; i < stackSize; i++)
+        {
+            asIScriptFunction* func = ctx->GetFunction(i);
+            if (func)
+            {
+                const char* section;
+                int line = ctx->GetLineNumber(i, nullptr, &section);
+
+                std::string funcName = func->GetDeclaration();
+                std::string sectionName = section ? section : "Unknown";
+
+                engine->Log(LogLevel::Error, "  [" + std::to_string(i) + "] " + funcName
+                    + " (ファイル: " + sectionName + ", 行: " + std::to_string(line) + ")");
+            }
+        }
+        engine->Log(LogLevel::Error, "----------------------");
     }
 }
