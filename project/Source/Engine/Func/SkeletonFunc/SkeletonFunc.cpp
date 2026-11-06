@@ -135,9 +135,10 @@ int32_t Detail::CreateJoint(const std::vector<ModelNode>& nodes, const ModelNode
 /// @param animationTime 
 Detail::Skeleton Detail::ApplyBoneAnimation(const Skeleton& skeleton, const AnimationData& animation, float animationTime)
 {
-	Skeleton skeleton1 = skeleton;
+	// 計算後のスケルトン
+	Skeleton skeletonAfter = skeleton;
 
-	for (JointNode& joint : skeleton1.joints)
+	for (JointNode& joint : skeletonAfter.joints)
 	{
 		// 対象のjointのアニメーションがあれば、値の適用を行う
 		if (auto it = animation.indices.find(joint.name); it != animation.indices.end())
@@ -149,7 +150,7 @@ Detail::Skeleton Detail::ApplyBoneAnimation(const Skeleton& skeleton, const Anim
 		}
 	}
 
-	return skeleton1;
+	return skeletonAfter;
 }
 
 /// @brief スケルトンのフォワードキネマティクスを行う
