@@ -462,8 +462,8 @@ void Detail::AssetsWindow::DrawScriptTab(ScriptManager* scriptManager)
 		// ダブルクリックでVSCodeを開く処理
 		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		{
-			std::string command = "code \"" + filePath + "\"";
-			std::system(command.c_str());
+			// VSCodeを開く
+			ShellExecuteA(nullptr, "open", "code", ("\"" + filePath + "\"").c_str(), nullptr, SW_HIDE);
 		}
 
 		// ドラッグアンドドロップのソースとして設定

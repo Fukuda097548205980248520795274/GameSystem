@@ -482,14 +482,46 @@ bool Detail::TextureStore::ConvertToDDS(const std::string& sourcePath, const std
 		destStr.pop_back();
 	}
 
-	// コマンド構築（destStrを使う）
-	std::string command = "\"\"" + texconvPath.string() + "\" " + kTexConvArgs + " -o \"" + destStr + "\" \"" + src.string() + "\"\"";
+	// CreateProcess用のコマンド構築（std::system用の外側の余分な引用符を外す）
+	std::string command = "\"" + texconvPath.string() + "\" " + kTexConvArgs + " -o \"" + destStr + "\" \"" + src.string() + "\"";
 
 	if (engine) engine->Log(LogLevel::Info, "実行コマンド: " + command);
 
-	int result = std::system(command.c_str());
-	if (result != 0) {
-		if (engine) engine->Log(LogLevel::Error, "DDS変換コマンドが失敗しました。終了コード: " + std::to_string(result));
+	// CreateProcessは引数文字列を書き換える可能性があるため、変更可能なバッファを用意
+	std::vector<char> cmdBuffer(command.begin(), command.end());
+	cmdBuffer.push_back('\0');
+
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si, sizeof(si));
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE; // ウィンドウを非表示
+	ZeroMemory(&pi, sizeof(pi));
+
+	// CreateProcessで外部プロセスを起動
+	if (CreateProcessA(nullptr, cmdBuffer.data(), nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi))
+	{
+		// プロセスの終了を待機
+		WaitForSingleObject(pi.hProcess, INFINITE);
+
+		// 終了コードを取得
+		DWORD exitCode;
+		GetExitCodeProcess(pi.hProcess, &exitCode);
+
+		// ハンドルを閉じる
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+
+		if (exitCode != 0)
+		{
+			if (engine) engine->Log(LogLevel::Error, "DDS変換コマンドが失敗しました。終了コード: " + std::to_string(exitCode));
+			return false;
+		}
+	}
+	else
+	{
+		if (engine) engine->Log(LogLevel::Error, "DDS変換プロセスの起動に失敗しました。");
 		return false;
 	}
 
