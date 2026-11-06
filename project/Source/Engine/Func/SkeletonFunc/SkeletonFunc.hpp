@@ -1,6 +1,7 @@
 #pragma once
 #include "Store/ModelStore/ModelData.hpp"
 #include "Store/SkeletonStore/SkeletonData.hpp"
+#include "Store/AnimationStore/AnimationData.hpp"
 
 namespace Detail
 {
@@ -21,6 +22,12 @@ namespace Detail
 	/// @param joints 
 	/// @return 
 	int32_t CreateJoint(const std::vector<ModelNode>& nodes, const ModelNode& node, const std::optional<int32_t>& parent, std::vector<JointNode>& joints);
+
+	/// @brief ボーンアニメーションを再生する
+	/// @param skeleton 
+	/// @param animation 
+	/// @param animationTime 
+	Skeleton ApplyBoneAnimation(const Skeleton& skeleton, const AnimationData& animation, float animationTime);
 
 	/// @brief スケルトンのフォワードキネマティクス
 	/// @param skeleton 

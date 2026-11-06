@@ -47,6 +47,12 @@ namespace Detail
 		void Register(ID3D12GraphicsCommandList* commandList, ModelHandle handle, int32_t meshIndex);
 
 		/// @brief モデルデータを取得する
+		/// @param commandList 
+		/// @param handle 
+		/// @param meshIndex 
+		void RegisterIndexBuffer(ID3D12GraphicsCommandList* commandList, ModelHandle handle, int32_t meshIndex);
+
+		/// @brief モデルデータを取得する
 		/// @param handle 
 		/// @return 
 		ModelData* GetModelData(ModelHandle handle);

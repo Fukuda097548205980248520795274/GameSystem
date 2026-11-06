@@ -5,6 +5,7 @@
 #include "RenderResourceStore/RenderResourceStore.hpp"
 #include "ECS/EntityECS/EntityECS.hpp"
 #include "DepthOnlyPSO/DepthOnlyPSO.hpp"
+#include "SkinningPSO/SkinningPSO.hpp"
 #include "Store/ModelStore/ModelData.hpp"
 
 namespace Detail
@@ -40,12 +41,18 @@ namespace Detail
 		/// @brief 描画前の深度パスを実行する
 		/// @param commandList 
 		/// @param priority 
-		void ExecuteDepthPrePass(ID3D12GraphicsCommandList* commandList, int32_t frameIndex = 1);
+		void ExecuteDepthPrePass(ID3D12GraphicsCommandList* commandList, int32_t frameIndex = 0);
 
 		/// @brief すべての3D描画を実行する
 		/// @param commandList 
 		/// @param priority 
 		void ExecuteAll(ID3D12GraphicsCommandList* commandList, int priority);
+
+		/// @brief スキニング処理を行う
+		/// @param commandList 
+		/// @param priority 
+		/// @param frameIndex 
+		void SkinningExecuteAll(ID3D12GraphicsCommandList* commandList, int32_t frameIndex = 0);
 
 
 	private:
@@ -69,6 +76,9 @@ namespace Detail
 
 		/// @brief 深度のみのPSO
 		std::unique_ptr<DepthOnlyPSO> depthOnlyPso_ = nullptr;
+
+		/// @brief スキニング用PSO
+		std::unique_ptr<SkinningPSO> skinningPso_ = nullptr;
 
 		/// @brief PSOエディタ
 		PSOEditor* psoEditor_ = nullptr;

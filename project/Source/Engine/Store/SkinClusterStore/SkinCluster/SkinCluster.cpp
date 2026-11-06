@@ -40,6 +40,9 @@ void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, ID3D12G
 	// 出力頂点リソースを作成する
 	outputVertexResource_ = std::make_unique<RWStructuredBufferResource<ModelVertexData>>(device, commandList, heap_, meshData.vertexBufferResource->GetNumVertex(), maxBufferCount_);
 
+	// 出力頂点リソースの状態を UAV から VERTEX_AND_CONSTANT_BUFFER に変更する
+	outputVertexResource_->AllBarrier(commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+
 
 	/*------------------------------
 		Palette用のリソースを確保
@@ -48,9 +51,17 @@ void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, ID3D12G
 	paletteResource_.resize(maxBufferCount_);
 	mappedPalette_.resize(maxBufferCount_);
 	paletteSrvHandle_.resize(maxBufferCount_);
+	outputVertexBufferViews_.resize(maxBufferCount_);
 
 	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
+		// 出力頂点バッファビューを設定する
+		outputVertexBufferViews_[i].BufferLocation = outputVertexResource_->GetResource(i)->GetGPUVirtualAddress();
+		outputVertexBufferViews_[i].SizeInBytes = UINT(meshData.vertexBufferResource->GetNumVertex()) * sizeof(ModelVertexData);
+		outputVertexBufferViews_[i].StrideInBytes = sizeof(ModelVertexData);
+
+
+		// Palette用のリソースを作成する
 		paletteResource_[i] = CreateBufferResource(device, sizeof(WellForGPU) * skeleton.joints.size());
 		WellForGPU* mappedPaletteData = nullptr;
 		paletteResource_[i]->Map(0, nullptr, reinterpret_cast<void**>(&mappedPaletteData));
@@ -100,4 +111,16 @@ void Detail::SkinCluster::Register(ID3D12GraphicsCommandList* commandList, uint3
 {
 	// パレットSRVハンドルを設定する
 	commandList->SetComputeRootDescriptorTable(0, paletteSrvHandle_[frameIndex].gpuHandle);
+
+	// 出力用の頂点リソースをUAVとして登録する
+	outputVertexResource_->RegisterComputeUAV(commandList, 3, frameIndex);
+}
+
+/// @brief コマンドリストに登録する（頂点用）
+/// @param commandList 
+/// @param frameIndex 
+void Detail::SkinCluster::RegisterVertex(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex)
+{
+	// 出力頂点リソースを頂点バッファとして登録する
+	commandList->IASetVertexBuffers(0, 1, &outputVertexBufferViews_[frameIndex]);
 }

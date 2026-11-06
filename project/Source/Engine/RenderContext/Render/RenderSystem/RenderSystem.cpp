@@ -4,6 +4,8 @@
 #include "Func/AnimationFunc/AnimationFunc.hpp"
 #include "ECS/ComponentECS/DataForGPU/DataForGPU.hpp"
 
+#include "Func/SkeletonFunc/SkeletonFunc.hpp"
+
 /// @brief 初期化
 void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shaderCompiler)
 {
@@ -50,6 +52,9 @@ void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 
 	// 深度のみのPSOを生成する
 	depthOnlyPso_ = std::make_unique<DepthOnlyPSO>(device, shaderCompiler);
+
+	// スキニング用PSOを生成する
+	skinningPso_ = std::make_unique<SkinningPSO>(device, shaderCompiler);
 }
 
 /// @brief エンティティを作成する
@@ -429,8 +434,32 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		commandList->SetPipelineState(psoItem->pso.Get());
 		commandList->SetGraphicsRootSignature(psoItem->rootSig.Get());
 
-		//meshIndex を使用して登録
-		modelStore->Register(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
+
+		// スキニングコンポーネントを取得する
+		auto skeletonComp = registry->GetComponent<SkeletonComponent>(meshDrawComp->rootMeshEntity);
+		auto skinningComp = registry->GetComponent<SkinningInstanceComponent>(entity);
+		auto skinClusterComp = registry->GetComponent<SkinClusterComponent>(entity);
+
+		// スキニングコンポーネントとスキンクラスターが存在する場合
+		if (skeletonComp && skinningComp && skinClusterComp)
+		{
+			// スキニングインスタンスを取得する
+			auto skinClusterStore = engine->GetRenderContext()->GetSkinClusterStore();
+			if (!skinClusterStore) continue;
+
+			// スキンクラスターを取得する
+			auto skinClusterData = skinClusterStore->GetSkinCluster(skinClusterComp->handle);
+			if (!skinClusterData) continue;
+
+			// スキンクラスターの頂点データをGPUに登録する
+			skinClusterData->RegisterVertex(commandList, frameIndex);
+			modelStore->RegisterIndexBuffer(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
+		}
+		else
+		{
+			// スキニングコンポーネントが存在しない場合は、通常の描画処理を行う
+			modelStore->Register(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
+		}
 
 		// PSOの要求に従って動的にパラメータをバインドする
 		for (UINT i = 0;i < psoItem->desc.rootParameters.size(); ++i)
@@ -528,6 +557,153 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 
 		// meshIndex を使用してドローコール
 		commandList->DrawIndexedInstanced(modelData->meshes[meshDrawComp->meshIndex].indexBufferResource->GetNumIndex(), 1, 0, 0, 0);
+	}
+}
+
+/// @brief スキニング処理を行う
+/// @param commandList 
+/// @param priority 
+/// @param frameIndex 
+void Detail::RenderSystem::SkinningExecuteAll(ID3D12GraphicsCommandList* commandList, int32_t frameIndex)
+{
+	// エンジンのインスタンスを取得する
+	auto engine = Engine::GetInstance();
+	if (!engine) return;
+
+	// モデルストアを取得する
+	auto modelStore = engine->GetRenderContext()->GetModelStore();
+	if (!modelStore) return;
+
+	// アニメーションストアを取得する
+	auto animationStore = engine->GetRenderContext()->GetAnimationStore();
+	if (!animationStore) return;
+
+	// スケルトンストアを取得する
+	auto skeletonStore = engine->GetRenderContext()->GetSkeletonStore();
+	if (!skeletonStore) return;
+
+	// スキニングインスタンスのストアを取得する
+	auto skinningInstanceStore = engine->GetRenderContext()->GetSkinningInstanceStore();
+	if (!skinningInstanceStore) return;
+
+	// スキンクラスターのストアを取得する
+	auto skinClusterStore = engine->GetRenderContext()->GetSkinClusterStore();
+	if (!skinClusterStore) return;
+
+	// ECSレジストリを取得する
+	auto registry = engine->GetRegistryECS();
+	if (!registry) return;
+
+
+
+	// RenderComponentの配列を取得する
+	auto* passArray = registry->GetComponentArray<RenderComponent>();
+	const auto& entities = passArray->GetEntities();
+
+	// priority に基づいてソートするためのペアのベクターを作成
+	std::vector<Entity> sortedPasses;
+	for (Entity entity : entities)
+	{
+		// RenderComponentを取得する
+		auto pass = registry->GetComponent<RenderComponent>(entity);
+		if (!(pass && pass->isEnabled))continue;
+
+		// MeshDrawComponentを取得する
+		auto meshDrawComp = registry->GetComponent<MeshDrawComponent>(entity);
+		if (!meshDrawComp)continue;
+
+		// SkeletonComponentが存在しない場合はスキップする
+		if (!registry->GetComponent<SkeletonComponent>(meshDrawComp->rootMeshEntity))continue;
+
+		// メッシュ描画コンポーネントが存在しない場合はスキップする
+		if (!(registry->GetComponent<SkinClusterComponent>(entity) && registry->GetComponent<SkinningInstanceComponent>(entity)))continue;
+
+		// エンティティを追加する
+		sortedPasses.push_back(entity);
+	}
+
+	// ソートされたレンダーパスが空の場合は何もしない
+	if (sortedPasses.empty())return;
+
+
+	// スキニング用PSOを登録する
+	skinningPso_->Register(commandList);
+
+	// ソートされたレンダーパスを実行する
+	for (const auto& entity : sortedPasses)
+	{
+		// メッシュ描画コンポーネントを取得する
+		auto meshDrawComp = registry->GetComponent<MeshDrawComponent>(entity);
+		if (!meshDrawComp) continue;
+
+		// モデルデータを取得する
+		auto modelData = engine->GetRenderContext()->GetModelStore()->GetModelData(meshDrawComp->handle);
+		if (!modelData) continue;
+
+		// スキニングインスタンスコンポーネントを取得する
+		auto skinningInstanceComp = registry->GetComponent<SkinningInstanceComponent>(entity);
+		auto skinningInstanceData = skinningInstanceStore->GetSkinningInstance(skinningInstanceComp->handle);
+		if (!skinningInstanceData) continue;
+
+		// スキンクラスターコンポーネントを取得
+		auto skinClusterComp = registry->GetComponent<SkinClusterComponent>(entity);
+		auto skinClusterData = skinClusterStore->GetSkinCluster(skinClusterComp->handle);
+		if (!skinClusterData) continue;
+
+		// スケルトンコンポーネントを取得する
+		auto skeletonComp = registry->GetComponent<SkeletonComponent>(meshDrawComp->rootMeshEntity);
+		auto skeletonData = skeletonStore->GetSkeletonData(skeletonComp->handle);
+		if (!skeletonData) continue;
+
+		
+
+		auto animationComp = registry->GetComponent<AnimationComponent>(meshDrawComp->rootMeshEntity);
+
+		Skeleton skeleton{};
+		if (animationComp)
+		{
+			auto animationData = animationStore->GetAnimationData(animationComp->handle);
+			if (animationData)
+			{
+				skeleton = ApplyBoneAnimation(skeletonData->skeleton, *animationData, animationComp->currentTime);
+			}
+			else
+			{
+				skeleton = skeletonData->skeleton;
+			}
+		}
+		else
+		{
+			skeleton = skeletonData->skeleton;
+		}
+
+		// スケルトンの初期変換を設定する
+		for (size_t i = 0; i < skeleton.joints.size(); ++i)
+		{
+			skeletonComp->pose.localTransforms[i] = skeleton.joints[i].initialTransform;
+		}
+
+
+		// スケルトン空間行列を更新する
+		skeletonComp->pose.UpdateSkeletonSpaceMatrices(skeleton);
+
+		// スキンクラスターのデータを更新する
+		skinClusterData->Update(skeletonComp->pose, skinningInstanceData->GetInverseBindPoseMatrices(), frameIndex);
+
+		// スキンクラスターの頂点リソースの状態を変更する
+		skinClusterData->BarrierOutputVertexResource(commandList, frameIndex, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		// スキニングインスタンスのデータを設定する
+		skinningInstanceData->Register(commandList);
+
+		// スキンクラスターのデータを設定する
+		skinClusterData->Register(commandList, frameIndex);
+
+		// ディスパッチ
+		commandList->Dispatch(UINT(modelData->meshes[meshDrawComp->meshIndex].vertexBufferResource->GetNumVertex() + 1023) / 1024, 1, 1);
+
+		// スキンクラスターの頂点リソースの状態を元に戻す
+		skinClusterData->BarrierOutputVertexResource(commandList, frameIndex, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 	}
 }
 

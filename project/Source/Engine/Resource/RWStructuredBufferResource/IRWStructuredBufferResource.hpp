@@ -62,6 +62,11 @@ namespace Detail
 		/// @param commandList 
 		void AllBarrierUAV(ID3D12GraphicsCommandList* commandList);
 
+		/// @brief リソースを取得する
+		/// @param frameIndex 
+		/// @return 
+		ID3D12Resource* GetResource(uint32_t frameIndex) const { return resource_[frameIndex].Get(); }
+
 
 	protected:
 

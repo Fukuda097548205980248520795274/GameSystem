@@ -2,6 +2,7 @@
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include "Func/AnimationFunc/AnimationFunc.hpp"
 
 /// @brief ボーンを読み込む
 /// @param directory 
@@ -126,6 +127,29 @@ int32_t Detail::CreateJoint(const std::vector<ModelNode>& nodes, const ModelNode
 	}
 
 	return joint.index;
+}
+
+/// @brief ボーンアニメーションを再生する
+/// @param skeleton 
+/// @param animation 
+/// @param animationTime 
+Detail::Skeleton Detail::ApplyBoneAnimation(const Skeleton& skeleton, const AnimationData& animation, float animationTime)
+{
+	Skeleton skeleton1 = skeleton;
+
+	for (JointNode& joint : skeleton1.joints)
+	{
+		// 対象のjointのアニメーションがあれば、値の適用を行う
+		if (auto it = animation.indices.find(joint.name); it != animation.indices.end())
+		{
+			const NodeAnimation& rootNodeAnimation = animation.nodes[it->second];
+			joint.initialTransform.translate = CalculateValue(rootNodeAnimation.translate, animationTime);
+			joint.initialTransform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime);
+			joint.initialTransform.scale = CalculateValue(rootNodeAnimation.scale, animationTime);
+		}
+	}
+
+	return skeleton1;
 }
 
 /// @brief スケルトンのフォワードキネマティクスを行う

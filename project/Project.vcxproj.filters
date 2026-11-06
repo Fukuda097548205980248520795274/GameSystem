@@ -314,6 +314,9 @@
     <Filter Include="Source\Math\Func">
       <UniqueIdentifier>{c4c11096-af62-4f40-bf37-0b0950d47d42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO">
+      <UniqueIdentifier>{129c2b6e-9c65-4782-ad72-518b1b1450e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -540,6 +543,9 @@
     </ClCompile>
     <ClCompile Include="Source\Math\Func\MathFunc.cpp">
       <Filter>Source\Math\Func</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO\SkinningPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -803,6 +809,9 @@
     </ClInclude>
     <ClInclude Include="Source\Math\Func\MathFunc.hpp">
       <Filter>Source\Math\Func</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO\SkinningPSO.hpp">
+      <Filter>Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

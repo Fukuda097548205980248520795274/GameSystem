@@ -36,12 +36,24 @@ namespace Detail
 		/// @param frameIndex 
 		void Update(const SkeletonPose& pose, const std::vector<Matrix4x4>& inverseBindPoseMatrices, uint32_t frameIndex);
 
+		/// @brief 出力頂点リソースのバリアを設定する
+		/// @param commandList 
+		/// @param frameIndex 
+		/// @param beforeState 
+		/// @param afterState 
+		void BarrierOutputVertexResource(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState) {outputVertexResource_->Barrier(commandList, beforeState, afterState, frameIndex);}
+
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
 		/// @param wellRootParameterIndex 
 		/// @param influenceRootParameterIndex 
 		/// @param frameIndex 
 		void Register(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
+
+		/// @brief コマンドリストに登録する（頂点用）
+		/// @param commandList 
+		/// @param frameIndex 
+		void RegisterVertex(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
 
 
 
@@ -77,6 +89,9 @@ namespace Detail
 
 		// 出力頂点リソース（動的データのためマルチバッファ化）
 		std::unique_ptr<RWStructuredBufferResource<ModelVertexData>> outputVertexResource_;
+
+		// 出力用頂点バッファビュー
+		std::vector<D3D12_VERTEX_BUFFER_VIEW> outputVertexBufferViews_;
 
 
 	private:

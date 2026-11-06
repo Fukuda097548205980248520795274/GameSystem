@@ -107,6 +107,21 @@ void Detail::ModelStore::Register(ID3D12GraphicsCommandList* commandList, ModelH
 }
 
 /// @brief モデルデータを取得する
+/// @param commandList 
+/// @param handle 
+/// @param meshIndex 
+void Detail::ModelStore::RegisterIndexBuffer(ID3D12GraphicsCommandList* commandList, ModelHandle handle, int32_t meshIndex)
+{
+	// モデルデータを取得する
+	ModelData* data = GetModelData(handle);
+
+	// モデルデータが存在しない場合は処理を中止する
+	if (!data) return;
+
+	data->meshes[meshIndex].indexBufferResource->Register(commandList, 0);
+}
+
+/// @brief モデルデータを取得する
 /// @param handle 
 /// @return 
 Detail::ModelData* Detail::ModelStore::GetModelData(ModelHandle handle)

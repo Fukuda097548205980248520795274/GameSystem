@@ -119,5 +119,12 @@ void Detail::SkinningInstance::Initialize(DXHeap* heap, ID3D12Device* device, co
 /// @param commandList 
 void Detail::SkinningInstance::Register(ID3D12GraphicsCommandList* commandList)
 {
+	// 入力頂点リソースを登録する
+	inputVertexResource_->RegisterCompute(commandList, 1, 0);
 
+	// インフルエンスSRVを登録する
+	commandList->SetComputeRootDescriptorTable(2, influenceSrvHandle_.gpuHandle);
+
+	// 頂点数リソースを登録する
+	numVertexResource_->RegisterCompute(commandList, 4, 0);
 }

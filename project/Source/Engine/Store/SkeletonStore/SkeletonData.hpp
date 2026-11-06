@@ -55,6 +55,7 @@ namespace Detail
         // 計算済みの変換行列（SkinCluster更新用）
         std::vector<Matrix4x4> skeletonSpaceMatrices;
 
+		// @brief 初期化する
         void Initialize(const Skeleton& skeleton)
         {
             size_t count = skeleton.joints.size();
@@ -66,6 +67,25 @@ namespace Detail
                 skeletonSpaceMatrices[i] = MakeIdentityMatrix4x4();
             }
         }
+
+		// @brief スケルトン空間行列を更新する
+		void UpdateSkeletonSpaceMatrices(const Skeleton& skeleton)
+		{
+			for (size_t i = 0; i < skeleton.joints.size(); ++i)
+			{
+				const auto& joint = skeleton.joints[i];
+				Matrix4x4 localMatrix = Make3DAffineMatrix4x4(localTransforms[i].scale, localTransforms[i].rotate, localTransforms[i].translate);
+				if (joint.parent.has_value())
+				{
+					int32_t parentIndex = joint.parent.value();
+					skeletonSpaceMatrices[i] = localMatrix * skeletonSpaceMatrices[parentIndex];
+				}
+				else
+				{
+					skeletonSpaceMatrices[i] = localMatrix;
+				}
+			}
+		}
     };
 
     // 頂点ウェイトデータ

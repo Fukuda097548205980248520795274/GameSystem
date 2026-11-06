@@ -21,7 +21,7 @@ void Game::Initialize()
 
 	Entity skybox = engine->CreateSkyboxEntity();
 
-	Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/AnimatedCube/AnimatedCube.gltf"));
+	Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/walk/walk.gltf"));
 }
 
 /// @brief 更新処理
