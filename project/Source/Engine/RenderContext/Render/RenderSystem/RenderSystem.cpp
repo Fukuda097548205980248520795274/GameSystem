@@ -493,8 +493,8 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			case RenderBinding::Transform:
 			{
 				// Transform用のリソースをバインド
-                auto cbResource = resourceStore->Get<IConstantBufferResource>(transformCB->handle);
-                if (cbResource) cbResource->RegisterGraphics(commandList, 0, frameIndex);
+                auto cbResource = resourceStore->Get<ConstantBufferResource<TransformDataForGPU>>(transformCB->handle);
+                if (cbResource) cbResource->RegisterGraphics(commandList, i, frameIndex);
 
 				break;
 			}
@@ -512,10 +512,9 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 				{
 					if(auto mappedData = cb->GetData(frameIndex))
                         *mappedData = data;
-				}
 
-				auto cbResource = resourceStore->Get<IConstantBufferResource>(materialCB->handle);
-				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+                    cb->RegisterGraphics(commandList, i, frameIndex);
+				}
 
 				break;
 			}
