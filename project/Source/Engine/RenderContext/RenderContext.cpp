@@ -45,7 +45,7 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
     
 
     /// レンダーリソースストアを生成する
-    resourceStore_ = std::make_unique<ResourceStore>();
+    resourceStore_ = std::make_unique<ResourceStore>(core_->GetDevice());
 
     // TransformConstantBufferComponent と MaterialConstantBufferComponent の削除時にリソースを解放するコールバックを登録する
     registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});

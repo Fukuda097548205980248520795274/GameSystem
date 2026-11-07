@@ -7,6 +7,8 @@
 #include "RenderContext/DXHeap/DXHeap.hpp"
 #include "../IResource.hpp"
 
+#include "Store/ResourceStore/BufferAllocator/BufferAllocator.hpp"
+
 namespace Detail
 {
 	/// @brief 定数バッファリソース : インタフェース
@@ -24,18 +26,18 @@ namespace Detail
 		/// @param commandList 
 		/// @param rootParameterIndex 
 		/// @param frameIndex 
-		void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+		virtual void RegisterGraphics(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList 
 		/// @param rootParameterIndex 
 		/// @param frameIndex 
-		void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+		virtual void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
 
-		/// @brief GPU仮想アドレスを取得する
-		/// @param frameIndex 
-		/// @return 
-		D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress(uint32_t frameIndex) const { return resource_[frameIndex]->GetGPUVirtualAddress(); }
+        /// @brief GPU仮想アドレスを取得する
+        /// @param frameIndex 
+        /// @return 
+        D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress(uint32_t frameIndex) const { return regions_[frameIndex].gpuAddress; }
 
 		/// @brief 型情報を取得する
 		/// @return 
@@ -44,8 +46,11 @@ namespace Detail
 
 	protected:
 
-		/// @brief リソース配列
-		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> resource_;
+        // バッファアロケータ
+        BufferAllocator* allocator_ = nullptr;
+
+        // サブアロケーションされたバッファ領域の情報配列
+        std::vector<SubAllocatedRegion> regions_;
 
 		/// @brief 最大バッファ数
 		uint32_t maxBufferCount_ = 1;

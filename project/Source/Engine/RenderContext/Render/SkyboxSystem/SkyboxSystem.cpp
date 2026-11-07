@@ -12,6 +12,10 @@ void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	auto  engine = Engine::GetInstance();
 	assert(engine);
 
+    // レンダーリソースストアを取得する
+    auto resourceStore = engine->GetRenderContext()->GetResourceStore();
+    assert(resourceStore);
+
 	// SkyboxPSOを初期化する
 	pso_ = std::make_unique<SkyboxPSO>(device, shaderCompiler);
 
@@ -76,10 +80,10 @@ void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	assert(maxBufferCount > 0);
 
 	// カラーバッファの生成
-	colorBuffer_ = std::make_unique<ConstantBufferResource<Vector4>>(device, maxBufferCount);
+	colorBuffer_ = std::make_unique<ConstantBufferResource<Vector4>>(resourceStore->GetBufferAllocator(), maxBufferCount);
 
 	// 変換行列バッファの生成
-	transformBuffer_ = std::make_unique<ConstantBufferResource<Matrix4x4>>(device, maxBufferCount);
+	transformBuffer_ = std::make_unique<ConstantBufferResource<Matrix4x4>>(resourceStore->GetBufferAllocator(), maxBufferCount);
 }
 
 /// @brief エンティティを作成する

@@ -317,6 +317,15 @@
     <Filter Include="Source\Engine\Store\ResourceStore">
       <UniqueIdentifier>{1b606748-63fd-492e-95a5-cc2c764e47f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Store\ResourceStore\SubAllocator">
+      <UniqueIdentifier>{67822584-b5d2-46cb-812e-c2628c5caca0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\ResourceStore\SubAllocatedBuffer">
+      <UniqueIdentifier>{9bbef3f5-bca4-43f2-b0e9-df0bf07b9df9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\ResourceStore\BufferAllocator">
+      <UniqueIdentifier>{068a912b-ec79-437c-9df0-c3e048a8bd05}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -546,6 +555,15 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO\SkinningPSO.cpp">
       <Filter>Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\ResourceStore\SubAllocator\SubAllocator.cpp">
+      <Filter>Source\Engine\Store\ResourceStore\SubAllocator</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\ResourceStore\SubAllocatedBuffer\SubAllocatedBuffer.cpp">
+      <Filter>Source\Engine\Store\ResourceStore\SubAllocatedBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\Store\ResourceStore\BufferAllocator\BufferAllocator.cpp">
+      <Filter>Source\Engine\Store\ResourceStore\BufferAllocator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -815,6 +833,15 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Resource\IResource.hpp">
       <Filter>Source\Engine\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\ResourceStore\SubAllocator\SubAllocator.hpp">
+      <Filter>Source\Engine\Store\ResourceStore\SubAllocator</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\ResourceStore\SubAllocatedBuffer\SubAllocatedBuffer.hpp">
+      <Filter>Source\Engine\Store\ResourceStore\SubAllocatedBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Store\ResourceStore\BufferAllocator\BufferAllocator.hpp">
+      <Filter>Source\Engine\Store\ResourceStore\BufferAllocator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

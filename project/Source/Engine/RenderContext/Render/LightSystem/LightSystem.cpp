@@ -11,6 +11,8 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 	auto engine = Engine::GetInstance();
 	assert(engine);
 
+    auto resourceStore = engine->GetRenderContext()->GetResourceStore();
+    assert(resourceStore);
 
 	// ライトカリングPSOを初期化
 	lightCullingPso_ = std::make_unique<LightCullingPSO>(device, compiler);
@@ -20,10 +22,10 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 
 
 	// カメラデータ用の定数バッファを作成
-	cameraDataBuffer_ = std::make_unique<ConstantBufferResource<LightCullingCameraDataForGPU>>(device, engine->GetMaxBufferCount());
+	cameraDataBuffer_ = std::make_unique<ConstantBufferResource<LightCullingCameraDataForGPU>>(resourceStore->GetBufferAllocator(), engine->GetMaxBufferCount());
 
 	// ライト数データ用の構造化バッファを作成
-	numLightDataBuffer_ = std::make_unique<ConstantBufferResource<NumLightDataForGPU>>(device, engine->GetMaxBufferCount());
+	numLightDataBuffer_ = std::make_unique<ConstantBufferResource<NumLightDataForGPU>>(resourceStore->GetBufferAllocator(), engine->GetMaxBufferCount());
 
 	// 平行光源データ用の構造化バッファを作成
 	directionalLightDataBuffer_ = std::make_unique<StructuredBufferResource<DirectionalLightDataForGPU>>(device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());

@@ -9,3 +9,14 @@ void Detail::ResourceStore::Release(int32_t handle)
         freeHandles_[resources_[handle].type].push(handle);
     }
 }
+
+/// @brief 初期化
+/// @param device 
+void Detail::ResourceStore::Initialize(ID3D12Device* device)
+{
+    if (!bufferAllocator_)
+    {
+        // デフォルトで64MBのページサイズとして初期化
+        bufferAllocator_ = std::make_unique<BufferAllocator>(device, 1024 * 1024 * 64);
+    }
+}

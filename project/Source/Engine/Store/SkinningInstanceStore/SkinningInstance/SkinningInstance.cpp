@@ -17,6 +17,11 @@ void Detail::SkinningInstance::Initialize(DXHeap* heap, ID3D12Device* device, co
 	auto engine = Engine::GetInstance();
 	assert(engine);
 
+    // レンダーリソースストアを取得する
+    auto resourceStore = engine->GetRenderContext()->GetResourceStore();
+    assert(resourceStore);
+
+
 	assert(heap);
 	heap_ = heap;
 
@@ -38,7 +43,7 @@ void Detail::SkinningInstance::Initialize(DXHeap* heap, ID3D12Device* device, co
 	std::memcpy(inputData, vertexData, sizeof(ModelVertexData) * meshData.vertexBufferResource->GetNumVertex());
 
 	// 入力頂点数リソースを作成する
-	numVertexResource_ = std::make_unique<ConstantBufferResource<uint32_t>>(device, 1);
+	numVertexResource_ = std::make_unique<ConstantBufferResource<uint32_t>>(resourceStore->GetBufferAllocator(), 1);
 	auto numVertexData = numVertexResource_->GetData(0);
 	*numVertexData = numVertices;
 

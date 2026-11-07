@@ -99,11 +99,11 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	registry->AddComponent(entity, textureComp);
 
 	// TransformDataForGPU用のConstantBufferComponentを追加する
-	TransformConstantBufferComponent constantBufferComp(resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(device, maxBufferCount));
+	TransformConstantBufferComponent constantBufferComp(resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount));
 	registry->AddComponent(entity, constantBufferComp);
 
 	// MaterialComponentを追加する
-	MaterialConstantBufferComponent materialConstantBufferComp(resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(device, maxBufferCount));
+	MaterialConstantBufferComponent materialConstantBufferComp(resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount));
 	registry->AddComponent(entity, materialConstantBufferComp);
 
 	return entity;
@@ -225,8 +225,10 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 				registry->AddComponent(entity, TextureComponent(modelData->meshes[meshIdx].material.handle));
 
 				// GPUデータ用のコンスタントバッファ
-				registry->AddComponent(entity, TransformConstantBufferComponent(resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(device, maxBufferCount)));
-				registry->AddComponent(entity, MaterialConstantBufferComponent(resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(device, maxBufferCount)));
+				registry->AddComponent(entity, TransformConstantBufferComponent(
+                    resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount)));
+				registry->AddComponent(entity, MaterialConstantBufferComponent(
+                    resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount)));
 
 				// スケルトンデータが存在する場合はスキニングインスタンスとスキンクラスターを追加する
 				if (skeletonData)
