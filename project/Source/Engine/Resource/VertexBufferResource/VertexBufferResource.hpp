@@ -14,15 +14,15 @@ namespace Detail
 		/// @param device 
 		/// @param numVertex 
 		/// @param maxBufferCount 
-		VertexBufferResource(ID3D12Device* device, UINT numVertex, uint32_t maxBufferCount) { Initialize(device, numVertex, maxBufferCount); }
+		VertexBufferResource(BufferAllocator* allocator, ID3D12Device* device, UINT numVertex, uint32_t maxBufferCount) { Initialize(allocator, device, numVertex, maxBufferCount); }
 
 		/// @brief デストラクタ
-		~VertexBufferResource() = default;
+		~VertexBufferResource();
 
 		/// @brief データを取得する
 		/// @param frameIndex 
 		/// @return 
-		T* GetData(uint32_t frameIndex) { return data_[frameIndex]; }
+        T* GetData(uint32_t frameIndex) { return static_cast<T*>(regions_[frameIndex].cpuAddress); }
 
 
 	private:
@@ -31,11 +31,21 @@ namespace Detail
 		/// @param device 
 		/// @param numVertex 
 		/// @param log 
-		void Initialize(ID3D12Device* device, UINT numVertex, uint32_t maxBufferCount);
-
-		/// @brief データ
-		std::vector<T*> data_;
+		void Initialize(BufferAllocator* allocator, ID3D12Device* device, UINT numVertex, uint32_t maxBufferCount);
 	};
+}
+
+/// @brief デストラクタ
+template<typename T>
+Detail::VertexBufferResource<T>::~VertexBufferResource()
+{
+    if (allocator_)
+    {
+        for (auto& region : regions_)
+        {
+            if (region.IsValid()) allocator_->Free(region);
+        }
+    }
 }
 
 /// @brief 初期化
@@ -43,32 +53,29 @@ namespace Detail
 /// @param numVertex 
 /// @param maxBufferCount 
 template<typename T>
-void Detail::VertexBufferResource<T>::Initialize(ID3D12Device* device, UINT numVertex, uint32_t maxBufferCount)
+void Detail::VertexBufferResource<T>::Initialize(BufferAllocator* allocator, ID3D12Device* device, UINT numVertex, uint32_t maxBufferCount)
 {
-	// nullptrチェック
-	assert(device);
-	assert(numVertex > 0);
+    assert(allocator);
+    assert(device);
+    assert(numVertex > 0);
 
-	// 頂点数を設定する
-	numVertex_ = numVertex;
+    allocator_ = allocator;
+    numVertex_ = numVertex;
+    maxBufferCount_ = maxBufferCount > 1 ? maxBufferCount : 1;
 
-	// バッファ数を設定する
-	maxBufferCount_ = maxBufferCount > 1 ? maxBufferCount : 1;
+    regions_.resize(maxBufferCount_);
+    view_.resize(maxBufferCount_);
 
-	// データ、リソース、ビューの配列を確保する
-	data_.resize(maxBufferCount_);
-	resource_.resize(maxBufferCount_);
-	view_.resize(maxBufferCount_);
+    uint64_t size = sizeof(T) * numVertex;
 
-	for (uint32_t i = 0; i < maxBufferCount_; ++i)
-	{
-		// リソース生成
-		resource_[i] = CreateBufferResource(device, sizeof(T) * numVertex);
-		resource_[i]->Map(0, nullptr, reinterpret_cast<void**>(&data_[i]));
+    for (uint32_t i = 0; i < maxBufferCount_; ++i)
+    {
+        // メモリ確保 (アライメントは要素サイズ)
+        regions_[i] = allocator_->Allocate(size, sizeof(T));
 
-		// ビューの割り当て
-		view_[i].BufferLocation = resource_[i]->GetGPUVirtualAddress();
-		view_[i].SizeInBytes = sizeof(T) * numVertex;
-		view_[i].StrideInBytes = sizeof(T);
-	}
+        // ビューの割り当て（親バッファのGPUアドレスにオフセットを足す）
+        view_[i].BufferLocation = regions_[i].parentBuffer->GetResource()->GetGPUVirtualAddress() + regions_[i].allocation.offset;
+        view_[i].SizeInBytes = static_cast<UINT>(size);
+        view_[i].StrideInBytes = sizeof(T);
+    }
 }

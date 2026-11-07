@@ -8,8 +8,14 @@
 
 namespace Detail
 {
+    // テクスチャストア
 	class TextureStore;
+
+    // DXヒープ
 	class DXHeap;
+
+    // バッファアロケータ
+    class BufferAllocator;
 
 	/// @brief モデルを読み込む
 	/// @param filePath
@@ -17,8 +23,9 @@ namespace Detail
 	/// @param heap 
 	/// @param device 
 	/// @param commandList 
+	/// @param allocator
 	/// @return 
-	ModelData LoadModel(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList);
+	ModelData LoadModel(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList, BufferAllocator* allocator);
 
 	/// @brief ノードの再帰読み込み
 	/// @param aiNode 

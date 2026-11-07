@@ -2,6 +2,8 @@
 #include "Func/ModelFunc/ModelFunc.hpp"
 #include "Func/SkeletonFunc/SkeletonFunc.hpp"
 
+#include "Engine.hpp"
+
 /// @brief 更新処理
 /// @param maxBufferCount 
 /// @param frameIndex 
@@ -29,8 +31,18 @@ Detail::ModelHandle Detail::ModelStore::Load(const std::string& filePath, Textur
 		}
 	}
 
+
+    // エンジンのインスタンスを取得する
+    auto engine = Engine::GetInstance();
+    assert(engine);
+
+    // バッファアロケータを取得する
+    auto allocator = engine->GetRenderContext()->GetResourceStore()->GetBufferAllocator();
+    assert(allocator);
+
+
 	// モデルデータのロード
-	ModelData modelData = LoadModel(filePath, textureStore, heap, device, commandList);
+	ModelData modelData = LoadModel(filePath, textureStore, heap, device, commandList, allocator);
 	if (modelData.meshes.empty())
 	{
 		return ModelHandle::Invalid();

@@ -2,39 +2,47 @@
 #include "Func/ResourceFunc/ResourceFunc.hpp"
 #include <cassert>
 
+/// @brief デストラクタ
+Detail::IndexBufferResource::~IndexBufferResource()
+{
+    if (allocator_)
+    {
+        for (auto& region : regions_)
+        {
+            if (region.IsValid()) allocator_->Free(region);
+        }
+    }
+}
+
 /// @brief 初期化
 /// @param device 
 /// @param numIndex 
 /// @param maxBufferCount 
-void Detail::IndexBufferResource::Initialize(ID3D12Device* device, uint32_t numIndex, uint32_t maxBufferCount)
+void Detail::IndexBufferResource::Initialize(BufferAllocator* allocator, ID3D12Device* device, uint32_t numIndex, uint32_t maxBufferCount)
 {
-	assert(device);
-	assert(numIndex > 0);
+    assert(allocator);
+    assert(device);
+    assert(numIndex > 0);
 
-	// インデックス数を設定する
-	numIndex_ = numIndex;
+    allocator_ = allocator;
+    numIndex_ = numIndex;
+    maxBufferCount_ = maxBufferCount > 1 ? static_cast<int32_t>(maxBufferCount) : 1;
 
-	// バッファ数を設定する
-	maxBufferCount_ = maxBufferCount > 1 ? static_cast<int32_t>(maxBufferCount) : 1;
+    regions_.resize(maxBufferCount_);
+    view_.resize(maxBufferCount_);
 
-	// データ、リソース、ビューの配列を確保する
-	data_.resize(maxBufferCount_);
-	resource_.resize(maxBufferCount_);
-	view_.resize(maxBufferCount_);
+    uint64_t size = sizeof(uint32_t) * numIndex;
 
-	for (int i = 0; i < maxBufferCount_; ++i)
-	{
-		// リソースを生成する
-		resource_[i] = CreateBufferResource(device, sizeof(uint32_t) * numIndex);
+    for (int i = 0; i < maxBufferCount_; ++i)
+    {
+        // アロケータから領域を確保 (アライメントは4バイト)
+        regions_[i] = allocator_->Allocate(size, sizeof(uint32_t));
 
-		// ビューの設定
-		view_[i].BufferLocation = resource_[i]->GetGPUVirtualAddress();
-		view_[i].Format = DXGI_FORMAT_R32_UINT;
-		view_[i].SizeInBytes = sizeof(uint32_t) * numIndex;
-
-		// データを割り当てる
-		resource_[i]->Map(0, nullptr, reinterpret_cast<void**>(&data_[i]));
-	}
+        // ビューの設定
+        view_[i].BufferLocation = regions_[i].parentBuffer->GetResource()->GetGPUVirtualAddress() + regions_[i].allocation.offset;
+        view_[i].Format = DXGI_FORMAT_R32_UINT;
+        view_[i].SizeInBytes = static_cast<UINT>(size);
+    }
 }
 
 /// @brief コマンドリストに登録する

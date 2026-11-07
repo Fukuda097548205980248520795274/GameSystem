@@ -1,11 +1,20 @@
 #include "ProceduralMeshStore.hpp"
+#include "Engine.hpp"
 
 /// @brief 初期化
 /// @param device 
 void Detail::ProceduralMeshStore::Initialize(ID3D12Device* device)
 {
+    // エンジンのインスタンスを取得する
+    auto engine = Engine::GetInstance();
+    assert(engine);
+
+    // バッファアロケータを取得する
+    auto bufferAllocator = engine->GetRenderContext()->GetResourceStore()->GetBufferAllocator();
+    assert(bufferAllocator);
+
 	// キューブメッシュを作成する
-	CreateCubeMesh(device);
+	CreateCubeMesh(device, bufferAllocator);
 }
 
 /// @brief コマンドリストに登録する
@@ -50,13 +59,14 @@ UINT Detail::ProceduralMeshStore::GetNumIndex(ProceduralMeshType type) const
 
 /// @brief キューブメッシュを作成する
 /// @param device 
-void Detail::ProceduralMeshStore::CreateCubeMesh(ID3D12Device* device)
+/// @param allocator
+void Detail::ProceduralMeshStore::CreateCubeMesh(ID3D12Device* device, BufferAllocator* allocator)
 {
 	// キューブメッシュの頂点データとインデックスデータを作成する
 	meshDataMap_[ProceduralMeshType::Cube] = ProceduralMeshData
 	{
-		std::make_unique<VertexBufferResource<Detail::VertexMeshDataForGPU>>(device, 24, 1),
-		std::make_unique<IndexBufferResource>(device, 36, 1)
+		std::make_unique<VertexBufferResource<Detail::VertexMeshDataForGPU>>(allocator, device, 24, 1),
+		std::make_unique<IndexBufferResource>(allocator, device, 36, 1)
 	};
 
 	auto& meshData = meshDataMap_[ProceduralMeshType::Cube];

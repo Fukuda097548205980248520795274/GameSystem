@@ -8,6 +8,9 @@
 
 namespace Detail
 {
+    // バッファアロケータ
+    class BufferAllocator;
+
 	// プロシージャルメッシュの種類
 	enum class ProceduralMeshType
 	{
@@ -57,7 +60,7 @@ namespace Detail
 
 		/// @brief キューブメッシュを作成する
 		/// @param device 
-		void CreateCubeMesh(ID3D12Device* device);
+		void CreateCubeMesh(ID3D12Device* device, BufferAllocator* allocator);
 
 		// メッシュデータのマップ
 		std::unordered_map<ProceduralMeshType, ProceduralMeshData> meshDataMap_;

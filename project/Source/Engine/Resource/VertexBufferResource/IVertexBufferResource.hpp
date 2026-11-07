@@ -39,10 +39,13 @@ namespace Detail
 		/// @brief 頂点数
 		UINT numVertex_ = 0;
 
-		/// @brief リソース
-		std::vector<ComPtr<ID3D12Resource>> resource_;
-
 		/// @brief ビュー
 		std::vector<D3D12_VERTEX_BUFFER_VIEW> view_;
+
+        // @brief バッファアロケータ
+        BufferAllocator* allocator_ = nullptr;
+
+        // @brief サブアロケートされた領域
+        std::vector<SubAllocatedRegion> regions_;
 	};
 }

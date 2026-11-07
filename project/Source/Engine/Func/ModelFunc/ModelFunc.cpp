@@ -10,8 +10,9 @@
 /// @param heap 
 /// @param device 
 /// @param commandList 
+/// @param allocator 
 /// @return 
-Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList)
+Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList, BufferAllocator* allocator)
 {
 	// nullptrチェック
 	assert(textureStore);
@@ -159,12 +160,12 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 		modelData.meshIndices[meshName] = meshIndex;
 
 		// 頂点データを作成する
-		modelData.meshes[meshIndex].vertexBufferResource = std::make_unique<VertexBufferResource<ModelVertexData>>(device, mesh->mNumVertices, 0);
+		modelData.meshes[meshIndex].vertexBufferResource = std::make_unique<VertexBufferResource<ModelVertexData>>(allocator, device, mesh->mNumVertices, 0);
 		auto vertexData = modelData.meshes[meshIndex].vertexBufferResource->GetData(0);
 		std::memcpy(vertexData, vertices.data(), sizeof(ModelVertexData) * mesh->mNumVertices);
 
 		// インデックスデータを作成する
-		modelData.meshes[meshIndex].indexBufferResource = std::make_unique<IndexBufferResource>(device, mesh->mNumFaces * 3, 0);
+		modelData.meshes[meshIndex].indexBufferResource = std::make_unique<IndexBufferResource>(allocator, device, mesh->mNumFaces * 3, 0);
 		auto indexData = modelData.meshes[meshIndex].indexBufferResource->GetData(0);
 		std::memcpy(indexData, indices.data(), sizeof(uint32_t) * (mesh->mNumFaces * 3));
 	}
