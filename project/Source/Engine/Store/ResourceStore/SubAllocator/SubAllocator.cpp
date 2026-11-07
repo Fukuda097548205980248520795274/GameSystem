@@ -19,8 +19,15 @@ Detail::SubAllocation Detail::SubAllocator::Allocate(uint64_t size, uint64_t ali
 {
     for (auto it = freeBlocks_.begin(); it != freeBlocks_.end(); ++it)
     {
-        // アライメントを考慮したオフセットを計算
-        uint64_t alignedOffset = (it->offset + alignment - 1) & ~(alignment - 1);
+        // アライメントを考慮して、ブロックの開始位置を調整
+        uint64_t remainder = it->offset % alignment;
+        uint64_t alignedOffset = it->offset;
+        if (remainder != 0)
+        {
+            alignedOffset += (alignment - remainder);
+        }
+
+        // アライメント調整によって生じる前方パディングのサイズ
         uint64_t padding = alignedOffset - it->offset;
 
         // このブロックに十分な空き容量があるか
@@ -88,7 +95,7 @@ void Detail::SubAllocator::Free(const SubAllocation& allocation)
 /// @param it 
 void Detail::SubAllocator::MergeBlocks(std::list<FreeBlock>::iterator it)
 {
-    // 1. 次のブロックとマージ可能かチェック
+    // 次のブロックとマージ可能かチェック
     auto nextIt = std::next(it);
     if (nextIt != freeBlocks_.end() && it->offset + it->size == nextIt->offset)
     {
@@ -96,7 +103,7 @@ void Detail::SubAllocator::MergeBlocks(std::list<FreeBlock>::iterator it)
         freeBlocks_.erase(nextIt);
     }
 
-    // 2. 前のブロックとマージ可能かチェック
+    // 前のブロックとマージ可能かチェック
     if (it != freeBlocks_.begin())
     {
         auto prevIt = std::prev(it);

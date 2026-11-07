@@ -92,7 +92,7 @@ namespace Detail
             std::type_index type;
         };
 
-        // バッファアロケータ <- これはresourcesより先に初期化される必要がある
+        // バッファアロケータ <- これはresourcesより先に消す
         std::unique_ptr<BufferAllocator> bufferAllocator_;
 
         // リソースを一元管理

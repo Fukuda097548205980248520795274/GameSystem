@@ -38,7 +38,7 @@ void Detail::SkinningInstance::Initialize(DXHeap* heap, ID3D12Device* device, co
 
 
 	// 入力頂点リソースを作成する
-	inputVertexResource_ = std::make_unique<StructuredBufferResource<ModelVertexData>>(device, heap_, meshData.vertexBufferResource->GetNumVertex(), 1);
+	inputVertexResource_ = std::make_unique<StructuredBufferResource<ModelVertexData>>(resourceStore->GetBufferAllocator(), device, heap_, meshData.vertexBufferResource->GetNumVertex(), 1);
 	auto inputData = inputVertexResource_->GetData(0);
 	std::memcpy(inputData, vertexData, sizeof(ModelVertexData) * meshData.vertexBufferResource->GetNumVertex());
 

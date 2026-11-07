@@ -1,4 +1,5 @@
 #pragma once
+#include "Store/ResourceStore/BufferAllocator/BufferAllocator.hpp"
 
 namespace Detail
 {

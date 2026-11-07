@@ -7,8 +7,6 @@
 #include "RenderContext/DXHeap/DXHeap.hpp"
 #include "../IResource.hpp"
 
-#include "Store/ResourceStore/BufferAllocator/BufferAllocator.hpp"
-
 namespace Detail
 {
 	/// @brief 定数バッファリソース : インタフェース
