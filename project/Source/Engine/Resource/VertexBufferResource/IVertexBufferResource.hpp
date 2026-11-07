@@ -2,11 +2,12 @@
 #include <cassert>
 #include <vector>
 #include "Func/ResourceFunc/ResourceFunc.hpp"
+#include "../IResource.hpp"
 
 namespace Detail
 {
 	/// @brief 頂点バッファリソース : インタフェース
-	class IVertexBufferResource
+    class IVertexBufferResource : public IResource
 	{
 	public:
 

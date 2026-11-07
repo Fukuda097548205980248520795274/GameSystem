@@ -18,37 +18,12 @@ void Detail::RenderSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	auto  engine = Engine::GetInstance();
 	assert(engine);
 
-	// ECSレジストリを取得する
-	auto registry = engine->GetRegistryECS();
-	assert(registry);
-
 	// PSOエディタを取得する
 	auto psoEditor = engine->GetPSOEditor();
 	assert(psoEditor);
 
 	// メンバ変数に代入する
 	psoEditor_ = psoEditor;
-
-	// TransformConstantBufferComponentが削除されたときのコールバックを設定する
-	registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp)
-		{
-			if (renderResourceStore_)
-			{
-				renderResourceStore_->ReleaseConstantBuffer(comp.handle);
-			}
-		});
-
-	// MaterialConstantBufferComponentが削除されたときのコールバックを設定する
-	registry->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp)
-		{
-			if (renderResourceStore_)
-			{
-				renderResourceStore_->ReleaseConstantBuffer(comp.handle);
-			}
-		});
-
-	/// レンダーリソースストアを生成する
-	renderResourceStore_ = std::make_unique<RenderResourceStore>();
 
 	// 深度のみのPSOを生成する
 	depthOnlyPso_ = std::make_unique<DepthOnlyPSO>(device, shaderCompiler);
@@ -77,6 +52,9 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 
 	auto renderContext = engine->GetRenderContext();
 	assert(renderContext);
+
+    auto resourceStore = renderContext->GetResourceStore();
+    assert(!resourceStore);
 
 	auto device = renderContext->GetCore()->GetDevice();
 	assert(device);
@@ -121,11 +99,11 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	registry->AddComponent(entity, textureComp);
 
 	// TransformDataForGPU用のConstantBufferComponentを追加する
-	TransformConstantBufferComponent constantBufferComp(renderResourceStore_->CreateConstantBuffer<Detail::TransformDataForGPU>(device, maxBufferCount));
+	TransformConstantBufferComponent constantBufferComp(resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(device, maxBufferCount));
 	registry->AddComponent(entity, constantBufferComp);
 
 	// MaterialComponentを追加する
-	MaterialConstantBufferComponent materialConstantBufferComp(renderResourceStore_->CreateConstantBuffer<Detail::UnLightingMaterialDataForGPU>(device, maxBufferCount));
+	MaterialConstantBufferComponent materialConstantBufferComp(resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(device, maxBufferCount));
 	registry->AddComponent(entity, materialConstantBufferComp);
 
 	return entity;
@@ -140,6 +118,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 	auto renderContext = engine->GetRenderContext();
 	auto device = renderContext->GetCore()->GetDevice();
 	auto commandList = renderContext->GetCommand()->GetCommandList();
+    auto resourceStore = renderContext->GetResourceStore();
 	auto textureStore = renderContext->GetTextureStore();
 	auto modelStore = renderContext->GetModelStore();
 	int32_t maxBufferCount = engine->GetMaxBufferCount();
@@ -246,10 +225,8 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 				registry->AddComponent(entity, TextureComponent(modelData->meshes[meshIdx].material.handle));
 
 				// GPUデータ用のコンスタントバッファ
-				registry->AddComponent(entity, TransformConstantBufferComponent(
-					renderResourceStore_->CreateConstantBuffer<Detail::TransformDataForGPU>(device, maxBufferCount)));
-				registry->AddComponent(entity, MaterialConstantBufferComponent(
-					renderResourceStore_->CreateConstantBuffer<Detail::UnLightingMaterialDataForGPU>(device, maxBufferCount)));
+				registry->AddComponent(entity, TransformConstantBufferComponent(resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(device, maxBufferCount)));
+				registry->AddComponent(entity, MaterialConstantBufferComponent(resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(device, maxBufferCount)));
 
 				// スケルトンデータが存在する場合はスキニングインスタンスとスキンクラスターを追加する
 				if (skeletonData)
@@ -319,16 +296,22 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 	auto engine = Engine::GetInstance();
 	if (!engine) return;
 
-	auto textureStore = engine->GetRenderContext()->GetTextureStore();
+    auto renderContext = engine->GetRenderContext();
+    if (!renderContext) return;
+
+    auto resourceStore = renderContext->GetResourceStore();
+    if (!resourceStore) return;
+
+	auto textureStore = renderContext->GetTextureStore();
 	if (!textureStore) return;
 
-	auto proceduralMeshStore = engine->GetRenderContext()->GetProceduralMeshStore();
+	auto proceduralMeshStore = renderContext->GetProceduralMeshStore();
 	if (!proceduralMeshStore) return;
 
-	auto cameraSystem = engine->GetRenderContext()->GetCameraSystem();
+	auto cameraSystem = renderContext->GetCameraSystem();
 	if (!cameraSystem) return;
 
-	auto modelStore = engine->GetRenderContext()->GetModelStore();
+	auto modelStore = renderContext->GetModelStore();
 	if (!modelStore) return;
 
 	auto registry = engine->GetRegistryECS();
@@ -376,7 +359,7 @@ void Detail::RenderSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* comman
 		modelStore->Register(commandList, meshDrawComp->handle, meshDrawComp->meshIndex);
 
 		// Transform用のリソースをバインド
-		auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB->handle);
+		auto cbResource = resourceStore->Get<ConstantBufferResource<TransformDataForGPU>>(transformCB->handle);
 		if (cbResource)cbResource->RegisterGraphics(commandList, 0, frameIndex);
 
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -395,24 +378,31 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 	auto engine = Engine::GetInstance();
 	if (!engine) return;
 
-	auto textureStore = engine->GetRenderContext()->GetTextureStore();
+    auto renderContext = engine->GetRenderContext();
+    if (!renderContext) return;
+
+    auto resourceStore = renderContext->GetResourceStore();
+    if (!resourceStore) return;
+
+	auto textureStore = renderContext->GetTextureStore();
 	if (!textureStore) return;
 
-	auto proceduralMeshStore = engine->GetRenderContext()->GetProceduralMeshStore();
+	auto proceduralMeshStore = renderContext->GetProceduralMeshStore();
 	if (!proceduralMeshStore) return;
 
-	auto cameraSystem = engine->GetRenderContext()->GetCameraSystem();
+	auto cameraSystem = renderContext->GetCameraSystem();
 	if (!cameraSystem) return;
 
-	auto lightSystem = engine->GetRenderContext()->GetLightSystem();
+	auto lightSystem = renderContext->GetLightSystem();
 	if (!lightSystem) return;
 
-	auto modelStore = engine->GetRenderContext()->GetModelStore();
+	auto modelStore = renderContext->GetModelStore();
 	if (!modelStore) return;
 
 	// ECSレジストリを取得する
 	auto registry = engine->GetRegistryECS();
 	if (!registry) return;
+
 
 	// RenderComponentの配列を取得する
 	auto* passArray = registry->GetComponentArray<RenderComponent>();
@@ -503,8 +493,8 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 			case RenderBinding::Transform:
 			{
 				// Transform用のリソースをバインド
-				auto cbResource = renderResourceStore_->GetConstantBuffer(transformCB->handle);
-				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
+                auto cbResource = resourceStore->Get<IConstantBufferResource>(transformCB->handle);
+                if (cbResource) cbResource->RegisterGraphics(commandList, 0, frameIndex);
 
 				break;
 			}
@@ -518,8 +508,13 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 					Make3DTranslateMatrix4x4(Vector3(uvTransform->offset.x, uvTransform->offset.y, 0.0f));
 
 				// Material用のリソースをバインド
-				renderResourceStore_->UpdateConstantBuffer(materialCB->handle, data, frameIndex);
-				auto cbResource = renderResourceStore_->GetConstantBuffer(materialCB->handle);
+                if(auto cb = resourceStore->Get<ConstantBufferResource<UnLightingMaterialDataForGPU>>(materialCB->handle) )
+				{
+					if(auto mappedData = cb->GetData(frameIndex))
+                        *mappedData = data;
+				}
+
+				auto cbResource = resourceStore->Get<IConstantBufferResource>(materialCB->handle);
 				if (cbResource)cbResource->RegisterGraphics(commandList, i, frameIndex);
 
 				break;
@@ -748,6 +743,9 @@ void Detail::RenderSystem::UpdateTransform(int32_t frameIndex)
 	auto  engine = Engine::GetInstance();
 	if (!engine) return;
 
+    auto resourceStore = engine->GetRenderContext()->GetResourceStore();
+    if (!resourceStore) return;
+
 	auto registry = engine->GetRegistryECS();
 	if (!registry) return;
 
@@ -768,7 +766,11 @@ void Detail::RenderSystem::UpdateTransform(int32_t frameIndex)
 		data.worldInverseTranspose = data.world.Inverse().Transpose();
 
 		// Transform用のリソースを更新する
-		renderResourceStore_->UpdateConstantBuffer(transformCB->handle, data, frameIndex);
+        if (auto* cb = resourceStore->Get<ConstantBufferResource<TransformDataForGPU>>(transformCB->handle))
+        {
+            if (auto* mappedData = cb->GetData(frameIndex))
+                *mappedData = data;
+        }
 	}
 }
 

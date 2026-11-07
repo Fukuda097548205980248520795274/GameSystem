@@ -4,13 +4,15 @@
 #include <vector>
 #include <cstdint>
 
+#include "../IResource.hpp"
+
 namespace Detail
 {
 	/// @brief DXヒープ
 	class DXHeap;
 
 	/// @brief 基底クエリリソース
-	class IQueryResource
+    class IQueryResource : public IResource
 	{
 	public:
 

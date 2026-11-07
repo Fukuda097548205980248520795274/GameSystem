@@ -2,7 +2,6 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include "Matrix/Matrix4x4/Matrix4x4.hpp"
-#include "RenderResourceStore/RenderResourceStore.hpp"
 #include "ECS/EntityECS/EntityECS.hpp"
 #include "DepthOnlyPSO/DepthOnlyPSO.hpp"
 #include "SkinningPSO/SkinningPSO.hpp"
@@ -79,9 +78,6 @@ namespace Detail
 		Matrix4x4 CalculateGlobalWorldMatrix(Entity entity, Entity rootEntity);
 
 	private:
-
-		/// @brief レンダーリソースストア
-		std::unique_ptr<RenderResourceStore> renderResourceStore_;
 
 		/// @brief 深度のみのPSO
 		std::unique_ptr<DepthOnlyPSO> depthOnlyPso_ = nullptr;

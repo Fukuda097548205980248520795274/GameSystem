@@ -3,6 +3,7 @@
 #include <string>
 
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "../IResource.hpp"
 
 namespace Detail
 {
@@ -10,7 +11,7 @@ namespace Detail
 	class DXHeap;
 
 	/// @brief オフスクリーンリソース
-	class OffscreenResource
+    class OffscreenResource : public IResource
 	{
 	public:
 

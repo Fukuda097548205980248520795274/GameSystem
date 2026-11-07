@@ -5,6 +5,7 @@
 #include "DXHeap/DXHeap.hpp"
 #include "DXSwapChain/DXSwapChain.hpp"
 #include "Shader/ShaderCompiler/ShaderCompiler.hpp"
+#include "Store/ResourceStore/ResourceStore.hpp"
 #include "MultiPass/MultiPass.hpp"
 #include "Store/TextureStore/TextureStore.hpp"
 #include "Store/ModelStore/ModelStore.hpp"
@@ -37,6 +38,9 @@ namespace Detail
 	/// @brief DXデバッグ
 	class DXDebug;
 
+    /// @brief レジストリECS
+    class RegistryECS;
+
 	/// @brief レンダーコンテキスト
 	class RenderContext
 	{
@@ -50,7 +54,7 @@ namespace Detail
 
 		/// @brief 初期化
 		/// @param winApp 
-		void Initialize(WinApp* winApp, DXDebug* dxDebug);
+		void Initialize(WinApp* winApp, DXDebug* dxDebug, RegistryECS* registry);
 
 		/// @brief 最大バッファ数を取得する
 		/// @return 
@@ -157,6 +161,10 @@ namespace Detail
 		/// @return 
 		DXHeap* GetHeap() const { return heap_.get(); }
 
+        /// @brief リソースストアを取得する
+        /// @return 
+        ResourceStore* GetResourceStore() const { return resourceStore_.get(); }
+
 		/// @brief テクスチャストアを取得する
 		/// @return 
 		TextureStore* GetTextureStore() const { return textureStore_.get(); }
@@ -237,6 +245,9 @@ namespace Detail
 
 		/// @brief DXSwapChain
 		std::unique_ptr<DXSwapChain> swapChain_ = nullptr;
+
+        /// @brief レンダーリソースストア
+        std::unique_ptr<ResourceStore> resourceStore_ = nullptr;
 
 		/// @brief シェーダコンパイラ
 		std::unique_ptr<ShaderCompiler> shaderCompiler_ = nullptr;

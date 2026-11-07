@@ -4,11 +4,12 @@
 #include <cstdint>
 #include <vector>
 #include <wrl.h>
+#include "../IResource.hpp"
 
 namespace Detail
 {
 	/// @brief インデックスバッファリソース
-	class IndexBufferResource
+    class IndexBufferResource : public IResource
 	{
 	public:
 

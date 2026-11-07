@@ -5,11 +5,12 @@
 
 #include "Func/ResourceFunc/ResourceFunc.hpp"
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "../IResource.hpp"
 
 namespace Detail
 {
 	/// @brief 定数バッファリソース : インタフェース
-	class IConstantBufferResource
+    class IConstantBufferResource : public IResource
 	{
 	public:
 

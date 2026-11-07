@@ -218,9 +218,6 @@
     <Filter Include="Source\Tool\ECS\ComponentECS\DataForGPU">
       <UniqueIdentifier>{8cc2a4e1-0043-44a6-af1e-e0c97815bf44}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore">
-      <UniqueIdentifier>{1b606748-63fd-492e-95a5-cc2c764e47f8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\Store\ProceduralMeshStore">
       <UniqueIdentifier>{7aaafffe-0637-44bb-85c5-81884c0f3bce}</UniqueIdentifier>
     </Filter>
@@ -316,6 +313,9 @@
     </Filter>
     <Filter Include="Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO">
       <UniqueIdentifier>{129c2b6e-9c65-4782-ad72-518b1b1450e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\Store\ResourceStore">
+      <UniqueIdentifier>{1b606748-63fd-492e-95a5-cc2c764e47f8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -454,8 +454,8 @@
     <ClCompile Include="Source\Tool\ECS\ECSEditor\HierarchyUI\HierarchyUI.cpp">
       <Filter>Source\Tool\ECS\ECSEditor\HierarchyUI</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.cpp">
-      <Filter>Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore</Filter>
+    <ClCompile Include="Source\Engine\Store\ResourceStore\ResourceStore.cpp">
+      <Filter>Source\Engine\Store\ResourceStore</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.cpp">
       <Filter>Source\Engine\Store\ProceduralMeshStore</Filter>
@@ -699,8 +699,8 @@
     <ClInclude Include="Source\Tool\ECS\ComponentECS\DataForGPU\DataForGPU.hpp">
       <Filter>Source\Tool\ECS\ComponentECS\DataForGPU</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore\RenderResourceStore.hpp">
-      <Filter>Source\Engine\RenderContext\Render\RenderSystem\RenderResourceStore</Filter>
+    <ClInclude Include="Source\Engine\Store\ResourceStore\ResourceStore.hpp">
+      <Filter>Source\Engine\Store\ResourceStore</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\Store\ProceduralMeshStore\ProceduralMeshStore.hpp">
       <Filter>Source\Engine\Store\ProceduralMeshStore</Filter>
@@ -812,6 +812,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO\SkinningPSO.hpp">
       <Filter>Source\Engine\RenderContext\Render\RenderSystem\SkinningPSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Resource\IResource.hpp">
+      <Filter>Source\Engine\Resource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -5,11 +5,12 @@
 
 #include "Func/ResourceFunc/ResourceFunc.hpp"
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "../IResource.hpp"
 
 namespace Detail
 {
 	/// @brief ストラクチャードバッファリソース : インタフェーズ
-	class IStructuredBufferResource
+    class IStructuredBufferResource : public IResource
 	{
 	public:
 

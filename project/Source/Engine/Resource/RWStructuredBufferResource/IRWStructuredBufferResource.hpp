@@ -6,11 +6,12 @@
 #include "Func/ResourceFunc/ResourceFunc.hpp"
 #include "Func/Barrier/Barrier.hpp"
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "../IResource.hpp"
 
 namespace Detail
 {
 	/// @brief RWストラクチャードバッファリソース : インタフェース
-	class IRWStructuredBufferResource
+    class IRWStructuredBufferResource : public IResource
 	{
 	public:
 

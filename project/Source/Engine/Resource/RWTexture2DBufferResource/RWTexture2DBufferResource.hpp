@@ -1,11 +1,12 @@
 #pragma once
 #include <vector>
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "../IResource.hpp"
 
 namespace Detail
 {
 	/// @brief RW2Dテクスチャリソース
-	class RWTexture2DBufferResource
+    class RWTexture2DBufferResource : public IResource
 	{
 	public:
 

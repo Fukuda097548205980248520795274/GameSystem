@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "../IResource.hpp"
 
 namespace Detail
 {
@@ -10,7 +11,7 @@ namespace Detail
 	class DXHeap;
 
 	/// @brief 深度リソース
-	class DepthResource
+    class DepthResource : public IResource
 	{
 	public:
 

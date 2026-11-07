@@ -9,10 +9,12 @@
 /// @brief 初期化
 /// @param winApp 
 /// @param dxDebug 
-void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
+/// @param registry 
+void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, RegistryECS* registry)
 {
 	// nullptrチェック
 	assert(winApp);
+    assert(registry);
 
 	// 引数を受け取る
 	winApp_ = winApp;
@@ -39,6 +41,16 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug)
 	// シェーダコンパイラを作成
 	shaderCompiler_ = std::make_unique<ShaderCompiler>();
 	shaderCompiler_->Initialize();
+
+    
+
+    /// レンダーリソースストアを生成する
+    resourceStore_ = std::make_unique<ResourceStore>();
+
+    // TransformConstantBufferComponent と MaterialConstantBufferComponent の削除時にリソースを解放するコールバックを登録する
+    registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});
+    registry->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});
+
 
 	// ECSEditorを作成
 	ecsEditor_ = std::make_unique<ECSEditor>();
