@@ -4,7 +4,7 @@
 #include <typeindex>
 
 #include "Func/ResourceFunc/ResourceFunc.hpp"
-#include "Func/Barrier/Barrier.hpp"
+#include "RenderContext/BarrierBatcher/BarrierBatcher.hpp"
 #include "RenderContext/DXHeap/DXHeap.hpp"
 #include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "../IResource.hpp"

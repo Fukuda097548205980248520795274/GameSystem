@@ -329,6 +329,9 @@
     <Filter Include="Source\Engine\Store\ResourceStore\PlacedResourceAllocator">
       <UniqueIdentifier>{8b8c6f4b-7302-4390-a5f8-995aeae37c42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\BarrierBatcher">
+      <UniqueIdentifier>{780fb759-3ac9-4a96-84f7-fc8da16ade1d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -393,9 +396,6 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.cpp">
       <Filter>Source\Engine\RenderContext\DXSwapChain</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\Func\Barrier\Barrier.cpp">
-      <Filter>Source\Engine\Func\Barrier</Filter>
     </ClCompile>
     <ClCompile Include="Source\Tool\ECS\RegistryECS\RegistryECS.cpp">
       <Filter>Source\Tool\ECS\RegistryECS</Filter>
@@ -571,6 +571,9 @@
     <ClCompile Include="Source\Engine\Store\ResourceStore\PlacedResourceAllocator\PlacedResourceAllocator.cpp">
       <Filter>Source\Engine\Store\ResourceStore\PlacedResourceAllocator</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.cpp">
+      <Filter>Source\Engine\RenderContext\BarrierBatcher</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.hpp">
@@ -632,9 +635,6 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\DXSwapChain\DXSwapChain.hpp">
       <Filter>Source\Engine\RenderContext\DXSwapChain</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Engine\Func\Barrier\Barrier.hpp">
-      <Filter>Source\Engine\Func\Barrier</Filter>
     </ClInclude>
     <ClInclude Include="Source\Tool\ECS\ComponentECS\ComponentECS.hpp">
       <Filter>Source\Tool\ECS\ComponentECS</Filter>
@@ -851,6 +851,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Store\ResourceStore\PlacedResourceAllocator\PlacedResourceAllocator.hpp">
       <Filter>Source\Engine\Store\ResourceStore\PlacedResourceAllocator</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.hpp">
+      <Filter>Source\Engine\RenderContext\BarrierBatcher</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

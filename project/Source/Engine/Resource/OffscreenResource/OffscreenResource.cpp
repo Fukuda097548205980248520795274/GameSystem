@@ -1,7 +1,7 @@
 #include "OffscreenResource.hpp"
 #include <cassert>
 #include "Func/ResourceFunc/ResourceFunc.hpp"
-#include "Func/Barrier/Barrier.hpp"
+#include "RenderContext/BarrierBatcher/BarrierBatcher.hpp"
 #include "Vector/Vector4/Vector4.hpp"
 
 #include "Engine.hpp"

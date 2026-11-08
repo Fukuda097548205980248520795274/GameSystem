@@ -2,7 +2,7 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "../Barrier/Barrier.hpp"
+#include "RenderContext/BarrierBatcher/BarrierBatcher.hpp"
 
 /// @brief バッファリソースを生成する
 /// @param device 

@@ -2,7 +2,7 @@
 #include <cassert>
 
 #include "WinApp/WinApp.hpp"
-#include "Func/Barrier/Barrier.hpp"
+#include "BarrierBatcher/BarrierBatcher.hpp"
 
 #include "DXDebug/DXDebug.hpp"
 

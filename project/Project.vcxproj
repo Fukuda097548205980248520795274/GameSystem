@@ -180,6 +180,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -191,7 +192,10 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Store\ResourceStore\PlacedResourceAllocator\PlacedResourceAllocator.cpp" />
+    <ClCompile Include="Source\Engine\Store\ResourceStore\PlacedResourceAllocator\PlacedResourceAllocator.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Source\Engine\Store\ResourceStore\ResourceStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -236,7 +240,10 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.cpp" />
+    <ClCompile Include="Source\Engine\Resource\VertexBufferResource\IVertexBufferResource.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Source\Engine\Store\AnimationStore\AnimationStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -294,10 +301,6 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Source\Engine\Engine.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
-    </ClCompile>
-    <ClCompile Include="Source\Engine\Func\Barrier\Barrier.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
@@ -474,6 +477,7 @@
     <ClInclude Include="Source\Engine\Func\AnimationFunc\AnimationFunc.hpp" />
     <ClInclude Include="Source\Engine\Func\SkeletonFunc\SkeletonFunc.hpp" />
     <ClInclude Include="Source\Engine\Input\Input.hpp" />
+    <ClInclude Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.hpp" />
@@ -515,7 +519,6 @@
     <ClInclude Include="Source\Tool\ECS\EntityECS\EntityECS.hpp" />
     <ClInclude Include="Source\Tool\ECS\RegistryECS\RegistryECS.hpp" />
     <ClInclude Include="Source\Engine\Engine.hpp" />
-    <ClInclude Include="Source\Engine\Func\Barrier\Barrier.hpp" />
     <ClInclude Include="Source\Engine\Func\ConvertString\ConvertString.hpp" />
     <ClInclude Include="Source\Engine\Func\CrashHandler\CrashHandler.hpp" />
     <ClInclude Include="Source\Engine\Func\ModelFunc\ModelFunc.hpp" />

@@ -1,7 +1,6 @@
 #include "DepthResource.hpp"
-
+#include "RenderContext/BarrierBatcher/BarrierBatcher.hpp"
 #include "Engine.hpp"
-#include "Func/Barrier/Barrier.hpp"
 #include "Func/ResourceFunc/ResourceFunc.hpp"
 
 /// @brief デストラクタ
