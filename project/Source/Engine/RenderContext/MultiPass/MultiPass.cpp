@@ -23,11 +23,16 @@ void Detail::MultiPass::Initialize(ID3D12Device* device, DXHeap* heap, DXSwapCha
 	int width = static_cast<int32_t>(swapChain->GetSwapChainDesc().Width);
 	int height = static_cast<int32_t>(swapChain->GetSwapChainDesc().Height);
 
+    // 配置リソースアロケータを取得
+	auto placedResourceAllocator = Engine::GetInstance()->GetRenderContext()->GetPlacedResourceAllocator();
+	assert(placedResourceAllocator);
+
+
 	// デプスリソースを作成
-	depthResource_ = std::make_unique<DepthResource>(device, width, height, heap);
+	depthResource_ = std::make_unique<DepthResource>(device, width, height, heap, placedResourceAllocator);
 
 	// ダミーリソースを作成
-	dummyResource_ = std::make_unique<OffscreenResource>(device, heap, 1, 1);
+	dummyResource_ = std::make_unique<OffscreenResource>(device, heap, placedResourceAllocator, 1, 1);
 	dummyResource_->AllBarrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// スワップチェーンコピーPSOを作成

@@ -44,8 +44,11 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
 
     
 
-    /// レンダーリソースストアを生成する
+    // レンダーリソースストアを生成する
     resourceStore_ = std::make_unique<ResourceStore>(core_->GetDevice());
+
+    // 配置リソースアロケータ256MBのページサイズで初期化
+    placedResourceAllocator_ = std::make_unique<PlacedResourceAllocator>(core_->GetDevice(), 256 * 1024 * 1024);
 
     // TransformConstantBufferComponent と MaterialConstantBufferComponent の削除時にリソースを解放するコールバックを登録する
     registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});

@@ -92,8 +92,11 @@ void Detail::RenderTargetPool::CreateRenderTarget(int width, int height, ID3D12G
 {
 	auto engine = Engine::GetInstance();
 
+    auto  placedResourceAllocator = engine->GetRenderContext()->GetPlacedResourceAllocator();
+    assert(placedResourceAllocator);
+
 	// レンダーターゲットを作成
-	auto renderTarget = std::make_unique<OffscreenResource>(device_, heap_, width, height);
+	auto renderTarget = std::make_unique<OffscreenResource>(device_, heap_, placedResourceAllocator, width, height);
 	std::string name = "RenderTarget_" + std::to_string(resources_.size());
 	renderTarget->SetName(name);
 	renderTarget->AllBarrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);

@@ -35,10 +35,12 @@ void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, ID3D12G
 	// エンジンのインスタンスを取得する
 	auto engine = Engine::GetInstance();
 	assert(engine);
-
+    
+	auto  placedResourceAllocator = engine->GetRenderContext()->GetPlacedResourceAllocator();
+	assert(placedResourceAllocator);   
 
 	// 出力頂点リソースを作成する
-	outputVertexResource_ = std::make_unique<RWStructuredBufferResource<ModelVertexData>>(device, commandList, heap_, meshData.vertexBufferResource->GetNumVertex(), maxBufferCount_);
+	outputVertexResource_ = std::make_unique<RWStructuredBufferResource<ModelVertexData>>(device, commandList, heap_, placedResourceAllocator, meshData.vertexBufferResource->GetNumVertex(), maxBufferCount_);
 
 	// 出力頂点リソースの状態を UAV から VERTEX_AND_CONSTANT_BUFFER に変更する
 	outputVertexResource_->AllBarrier(commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);

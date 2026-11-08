@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "../IResource.hpp"
 
 namespace Detail
@@ -20,7 +21,8 @@ namespace Detail
 		/// @param width 
 		/// @param height 
 		/// @param heap 
-		DepthResource(ID3D12Device* device, int32_t width, int32_t height, DXHeap* heap) { Initialize(device, width, height, heap); }
+		/// @param allocator 
+		DepthResource(ID3D12Device* device, int32_t width, int32_t height, DXHeap* heap, PlacedResourceAllocator* allocator) { Initialize(device, width, height, heap, allocator); }
 
 		/// @brief デストラクタ
 		~DepthResource();
@@ -83,7 +85,8 @@ namespace Detail
 		/// @param width 
 		/// @param height 
 		/// @param heap 
-		void Initialize(ID3D12Device* device, int32_t width, int32_t height, DXHeap* heap);
+		/// @param allocator 
+		void Initialize(ID3D12Device* device, int32_t width, int32_t height, DXHeap* heap, PlacedResourceAllocator* allocator);
 
 		/// @brief ヒープ
 		DXHeap* heap_ = nullptr;
@@ -102,5 +105,11 @@ namespace Detail
 
 		/// @brief DSV用ハンドル（読み取り専用）
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> dsvReadOnlyHandle_;
+        
+        /// @brief 配置リソースアロケータ
+        PlacedResourceAllocator* allocator_ = nullptr;
+
+        // 配置リソースの割り当て情報
+        std::vector<PlacedAllocation> allocations_;
 	};
 }

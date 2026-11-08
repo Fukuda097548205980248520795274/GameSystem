@@ -6,6 +6,7 @@
 #include "Func/ResourceFunc/ResourceFunc.hpp"
 #include "Func/Barrier/Barrier.hpp"
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "../IResource.hpp"
 
 namespace Detail
@@ -85,5 +86,11 @@ namespace Detail
 
 		/// @brief SRVハンドル
 		std::vector<SRVDescriptorHandle> srvHandle_;
+
+        // 配置リソースアロケータ
+        PlacedResourceAllocator* allocator_ = nullptr;
+
+        // 配置リソースの割り当て情報
+        std::vector<PlacedAllocation> allocations_;
 	};
 }

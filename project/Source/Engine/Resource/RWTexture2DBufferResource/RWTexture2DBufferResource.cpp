@@ -6,17 +6,24 @@
 
 Detail::RWTexture2DBufferResource::~RWTexture2DBufferResource()
 {
-	if (heap_)
-	{
-		for (int i = 0; i < resource_.size(); ++i)
-		{
-			// SRVハンドルを解放する
-			heap_->FreeSrvDescriptorHandle(srvHandle_[i]);
+    // ヒープのハンドルを解放する
+    if (heap_)
+    {
+        for (size_t i = 0; i < resource_.size(); ++i)
+        {
+            heap_->FreeSrvDescriptorHandle(srvHandle_[i]);
+            heap_->FreeSrvDescriptorHandle(uavHandle_[i]);
+        }
+    }
 
-			// UAVハンドルを解放する
-			heap_->FreeSrvDescriptorHandle(uavHandle_[i]);
-		}
-	}
+    // PlacedResource用のメモリをアロケータに返却
+    if (allocator_)
+    {
+        for (auto& alloc : allocations_)
+        {
+            allocator_->Free(alloc);
+        }
+    }
 }
 
 /// @brief 初期化
@@ -26,57 +33,79 @@ Detail::RWTexture2DBufferResource::~RWTexture2DBufferResource()
 /// @param width 
 /// @param height 
 /// @param maxBufferCount 
-void Detail::RWTexture2DBufferResource::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DXHeap* heap,
-	uint32_t width, uint32_t height, uint32_t maxBufferCount)
+void Detail::RWTexture2DBufferResource::Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DXHeap* heap, PlacedResourceAllocator* allocator,
+    uint32_t width, uint32_t height, uint32_t maxBufferCount)
 {
-	// nullptrチェック
-	assert(device);
-	assert(heap);
+    assert(device);
+    assert(heap);
+    assert(allocator);
 
-	// 引数を受け取る
-	width_ = width;
-	height_ = height;
-	heap_ = heap;
+    width_ = width;
+    height_ = height;
+    heap_ = heap;
+    allocator_ = allocator;
 
-	// 最大バッファ数を取得する
-	if (maxBufferCount > 0) maxBufferCount_ = maxBufferCount;
+    if (maxBufferCount > 0) maxBufferCount_ = maxBufferCount;
 
-	// リソースとハンドルの配列をリサイズする
-	resource_.resize(maxBufferCount_);
-	srvHandle_.resize(maxBufferCount_);
-	uavHandle_.resize(maxBufferCount_);
+    // リソース、SRVハンドル、UAVハンドル、配置リソースの割り当て情報をリサイズ
+    resource_.resize(maxBufferCount_);
+    srvHandle_.resize(maxBufferCount_);
+    uavHandle_.resize(maxBufferCount_);
+    allocations_.resize(maxBufferCount_);
 
-	for (uint32_t i = 0; i < maxBufferCount_; ++i)
-	{
-		// リソース作成
-		resource_[i] = CreateUAVTextureResource(device, commandList, width_, height_);
+    // テクスチャのリソース設定を定義
+    D3D12_RESOURCE_DESC desc = {};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    desc.Alignment = 0; // デバイスに自動決定させる
+    desc.Width = width_;
+    desc.Height = height_;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN; // テクスチャ専用レイアウト
+    desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+    // 必要なメモリサイズとアライメントをGPUに問い合わせる
+    D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetResourceAllocationInfo(0, 1, &desc);
+
+    for (uint32_t i = 0; i < maxBufferCount_; ++i)
+    {
+        // アロケータからメモリを確保（取得したサイズとアライメントを使用）
+        allocations_[i] = allocator_->Allocate(allocInfo.SizeInBytes, allocInfo.Alignment);
+
+        // 指定したヒープ領域にテクスチャリソースを配置
+        HRESULT hr = device->CreatePlacedResource(allocator_->GetHeap(allocations_[i].heapIndex), allocations_[i].offset, &desc,
+            D3D12_RESOURCE_STATE_UNORDERED_ACCESS, nullptr, IID_PPV_ARGS(&resource_[i]));
+
+        if (FAILED(hr))
+        {
+            throw std::runtime_error("RWTexture2DBufferResource : CreatePlacedResource に失敗しました");
+        }
+
+        // UAVの生成
+        D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+        uavDesc.Format = desc.Format;
+        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+        uavDesc.Texture2D.MipSlice = 0;
+
+        // ビューの生成
+        uavHandle_[i] = heap->GetSrvDescriptorHandle();
+        device->CreateUnorderedAccessView(resource_[i].Get(), nullptr, &uavDesc, uavHandle_[i].cpuHandle);
 
 
-		// UAVの設定
-		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
-		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-		uavDesc.Texture2D.MipSlice = 0;
+        // SRVの生成
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Format = desc.Format;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
 
-		// ハンドルを取得する
-		uavHandle_[i] = heap->GetSrvDescriptorHandle();
-
-		// ビューの生成
-		device->CreateUnorderedAccessView(resource_[i].Get(), nullptr, &uavDesc, uavHandle_[i].cpuHandle);
-
-
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = 1;
-
-		// ハンドルを取得する
-		srvHandle_[i] = heap->GetSrvDescriptorHandle();
-
-		// ビューの生成
-		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
-	}
+        // ビューの生成
+        srvHandle_[i] = heap->GetSrvDescriptorHandle();
+        device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
+    }
 }
 
 /// @brief リサイズ
@@ -86,41 +115,56 @@ void Detail::RWTexture2DBufferResource::Initialize(ID3D12Device* device, ID3D12G
 /// @param height 
 void Detail::RWTexture2DBufferResource::Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, uint32_t width, uint32_t height)
 {
-	// nullptrチェック
-	assert(device);
+    assert(device);
+    width_ = width;
+    height_ = height;
 
-	// 引数を受け取る
-	width_ = width;
-	height_ = height;
+    // テクスチャのリソース設定
+    D3D12_RESOURCE_DESC desc = {};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    desc.Alignment = 0;
+    desc.Width = width_;
+    desc.Height = height_;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
-	for (uint32_t i = 0; i < maxBufferCount_; ++i)
-	{
-		// 既存のリソースを解放する
-		resource_[i].Reset();
+    D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetResourceAllocationInfo(0, 1, &desc);
 
-		// リソース作成
-		resource_[i] = CreateUAVTextureResource(device, commandList, width_, height_);
+    for (uint32_t i = 0; i < maxBufferCount_; ++i)
+    {
+        // 既存のリソースとメモリを解放
+        resource_[i].Reset();
+        if (allocator_) allocator_->Free(allocations_[i]);
 
+        // 新しいサイズでメモリ再確保
+        allocations_[i] = allocator_->Allocate(allocInfo.SizeInBytes, allocInfo.Alignment);
 
-		// UAVの設定
-		D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
-		uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-		uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-		uavDesc.Texture2D.MipSlice = 0;
+        // PlacedResource の作成
+        HRESULT hr = device->CreatePlacedResource(allocator_->GetHeap(allocations_[i].heapIndex), allocations_[i].offset, &desc,
+            D3D12_RESOURCE_STATE_UNORDERED_ACCESS, nullptr, IID_PPV_ARGS(&resource_[i]));
 
-		// ビューの生成
-		device->CreateUnorderedAccessView(resource_[i].Get(), nullptr, &uavDesc, uavHandle_[i].cpuHandle);
+        if (FAILED(hr)) throw std::runtime_error("RWTexture2DBufferResource: リサイズ時の CreatePlacedResource に失敗");
 
+        // UAVの再設定
+        D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+        uavDesc.Format = desc.Format;
+        uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+        uavDesc.Texture2D.MipSlice = 0;
+        device->CreateUnorderedAccessView(resource_[i].Get(), nullptr, &uavDesc, uavHandle_[i].cpuHandle);
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = 1;
-
-		// ビューの生成
-		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
-	}
+        // SRVの再設定
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Format = desc.Format;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
+    }
 }
 
 /// @brief コマンドリストに登録する

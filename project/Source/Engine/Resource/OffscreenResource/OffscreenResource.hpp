@@ -3,6 +3,7 @@
 #include <string>
 
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "../IResource.hpp"
 
 namespace Detail
@@ -18,9 +19,10 @@ namespace Detail
 		/// @brief コンストラクタ
 		/// @param device 
 		/// @param heap 
+		/// @param allocator 
 		/// @param width 
 		/// @param height 
-		OffscreenResource(ID3D12Device* device, DXHeap* heap, int32_t width, int32_t height) { Initialize(device, heap, width, height); }
+		OffscreenResource(ID3D12Device* device, DXHeap* heap, PlacedResourceAllocator* allocator, int32_t width, int32_t height) { Initialize(device, heap, allocator, width, height); }
 
 		/// @brief デストラクタ
 		~OffscreenResource();
@@ -98,9 +100,10 @@ namespace Detail
 		/// @brief 初期化
 		/// @param device 
 		/// @param heap 
+		/// @param allocator 
 		/// @param width
 		/// @param height
-		void Initialize(ID3D12Device* device, DXHeap* heap, int32_t width, int32_t height);
+		void Initialize(ID3D12Device* device, DXHeap* heap, PlacedResourceAllocator* allocator, int32_t width, int32_t height);
 
 		/// @brief ヒープ
 		DXHeap* heap_ = nullptr;
@@ -119,5 +122,11 @@ namespace Detail
 
 		/// @brief 名前
 		std::string name_{};
+
+        // 配置リソースアロケータ
+        PlacedResourceAllocator* allocator_ = nullptr;
+
+        // 配置リソースの割り当て情報
+        std::vector<PlacedAllocation> allocations_;
 	};
 }

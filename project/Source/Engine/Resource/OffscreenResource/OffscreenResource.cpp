@@ -20,75 +20,107 @@ Detail::OffscreenResource::~OffscreenResource()
 			heap_->FreeSrvDescriptorHandle(srvHandle_[i]);
 		}
 	}
+
+    // PlacedResource用のメモリをアロケータに返却
+    if (allocator_)
+    {
+        for (auto& alloc : allocations_)
+        {
+            allocator_->Free(alloc);
+        }
+    }
 }
 
 /// @brief 初期化
 /// @param device 
 /// @param heap 
+/// @param allocator 
 /// @param width
 /// @param height
-void Detail::OffscreenResource::Initialize(ID3D12Device* device, DXHeap* heap, int32_t width, int32_t height)
+void Detail::OffscreenResource::Initialize(ID3D12Device* device, DXHeap* heap, PlacedResourceAllocator* allocator, int32_t width, int32_t height)
 {
-	// nullptrチェック
-	assert(device);
-	assert(heap);
+    assert(device);
+    assert(heap);
+    assert(allocator);
+
+    auto engine = Engine::GetInstance();
+    heap_ = heap;
+    allocator_ = allocator;
+
+    int maxBufferCount = engine->GetMaxBufferCount();
+    if (maxBufferCount > 0) maxBufferCount_ = maxBufferCount;
+
+    // リソース、RTVハンドル、SRVハンドル、配置リソースの割り当て情報をリサイズ
+    resource_.resize(maxBufferCount_);
+    rtvHandle_.resize(maxBufferCount_);
+    srvHandle_.resize(maxBufferCount_);
+    allocations_.resize(maxBufferCount_);
+
+    // リソース設定
+    D3D12_RESOURCE_DESC desc = {};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    desc.Alignment = 0;
+    desc.Width = width;
+    desc.Height = height;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; // RTV/SRVと同じフォーマット
+    desc.SampleDesc.Count = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+    desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET; // RTVを許可
+
+    // クリアカラーの最適化設定
+    D3D12_CLEAR_VALUE clearValue = {};
+    clearValue.Format = desc.Format;
+    clearValue.Color[0] = 0.0f;
+    clearValue.Color[1] = 0.0f;
+    clearValue.Color[2] = 0.0f;
+    clearValue.Color[3] = 0.0f;
+
+    // サイズとアライメントの取得
+    D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetResourceAllocationInfo(0, 1, &desc);
+
+    for (uint32_t i = 0; i < maxBufferCount_; ++i)
+    {
+        // メモリ割り当てとリソース配置
+        allocations_[i] = allocator_->Allocate(allocInfo.SizeInBytes, allocInfo.Alignment);
+
+        // リソースの作成
+        HRESULT hr = device->CreatePlacedResource(allocator_->GetHeap(allocations_[i].heapIndex),allocations_[i].offset,&desc,
+            D3D12_RESOURCE_STATE_RENDER_TARGET,&clearValue, IID_PPV_ARGS(&resource_[i]));
+
+        if (FAILED(hr)) throw std::runtime_error("OffscreenResource: CreatePlacedResource に失敗しました");
 
 
-	// エンジンのインスタンスを取得する
-	auto engine = Engine::GetInstance();
-	heap_ = heap;
-	
-	// 最大バッファ数を取得する
-	int maxBufferCount = engine->GetMaxBufferCount();
-	if (maxBufferCount > 0) maxBufferCount_ = maxBufferCount;
+        // RTVの設定
+        D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+        rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+        rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+        rtvDesc.Texture2D.MipSlice = 0;
+        rtvDesc.Texture2D.PlaneSlice = 0;
 
-	// 配列のサイズを確保する
-	resource_.resize(maxBufferCount_);
-	rtvHandle_.resize(maxBufferCount_);
-	srvHandle_.resize(maxBufferCount_);
-
-	for (uint32_t i = 0; i < maxBufferCount_; ++i)
-	{
-		// 書き込み可能なリソーステクスチャを生成する
-		resource_[i] = CreateRenderTextureResource(device, width, height, Vector4(0.0f, 0.0f, 0.0f, 0.0f));
-
-		/*----------------
-			RTVの設定
-		----------------*/
-
-		// スワップチェーンのRTV設定を反映させる
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		rtvDesc.Texture2D.MipSlice = 0;
-		rtvDesc.Texture2D.PlaneSlice = 0;
-
-		// ディスクリプタハンドルを取得する
-		rtvHandle_[i] = heap->GetRtvDescriptorHandle();
-
-		device->CreateRenderTargetView(resource_[i].Get(), &rtvDesc, rtvHandle_[i]);
-		if(engine) engine->Log(LogLevel::Info, "RTV生成");
+        // ビューの生成
+        rtvHandle_[i] = heap->GetRtvDescriptorHandle();
+        device->CreateRenderTargetView(resource_[i].Get(), &rtvDesc, rtvHandle_[i]);
+        if (engine) engine->Log(LogLevel::Info, "RTV生成");
 
 
 
-		/*---------------
-			SRVの設定
-		---------------*/
+        // SRVの設定
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+        srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Texture2D.MostDetailedMip = 0;
+        srvDesc.Texture2D.MipLevels = 1;
+        srvDesc.Texture2D.PlaneSlice = 0;
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = 1;
-		srvDesc.Texture2D.PlaneSlice = 0;
-
-		// ディスクリプタハンドルを取得する
-		srvHandle_[i] = heap->GetSrvDescriptorHandle();
-
-		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
-		if (engine) engine->Log(LogLevel::Info, "SRV生成");
-	}
+        // ビューの生成
+        srvHandle_[i] = heap->GetSrvDescriptorHandle();
+        device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
+        if (engine) engine->Log(LogLevel::Info, "SRV生成");
+    }
 }
 
 /// @brief サイズを作り直す
@@ -97,38 +129,65 @@ void Detail::OffscreenResource::Initialize(ID3D12Device* device, DXHeap* heap, i
 /// @param height
 void Detail::OffscreenResource::Resize(ID3D12Device* device, int32_t width, int32_t height)
 {
-	assert(device);
+    if (width == 0 || height == 0) return;
 
-	for (uint32_t i = 0; i < maxBufferCount_; ++i)
-	{
-		// リソース開放
-		resource_[i].Reset();
+    // リソース設定を新しいサイズで構築
+    D3D12_RESOURCE_DESC desc = {};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+    desc.Width = width;
+    desc.Height = height;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+    desc.SampleDesc.Count = 1;
+    desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
-		// 新たなサイズで作り直す
-		resource_[i] = CreateRenderTextureResource(device, width, height, Vector4(0.0f, 0.0f, 0.0f, 0.0f));
+    // クリアカラーの最適化設定
+    D3D12_CLEAR_VALUE clearValue = {};
+    clearValue.Format = desc.Format;
+    clearValue.Color[0] = 0.0f;
+    clearValue.Color[1] = 0.0f;
+    clearValue.Color[2] = 0.0f;
+    clearValue.Color[3] = 0.0f;
 
-		// スワップチェーンのRTV設定を反映させる
-		D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
-		rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-		rtvDesc.Texture2D.MipSlice = 0;
-		rtvDesc.Texture2D.PlaneSlice = 0;
+    // サイズとアライメントの取得
+    D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetResourceAllocationInfo(0, 1, &desc);
 
-		// RTV再生成（既存のハンドルを再利用）
-		device->CreateRenderTargetView(resource_[i].Get(), &rtvDesc, rtvHandle_[i]);
+    for (uint32_t i = 0; i < maxBufferCount_; ++i)
+    {
+        // 古いリソースの破棄とメモリの返却
+        resource_[i].Reset();
+        if (allocator_)allocator_->Free(allocations_[i]);
 
-		// SRV設定
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-		srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Texture2D.MostDetailedMip = 0;
-		srvDesc.Texture2D.MipLevels = 1;
-		srvDesc.Texture2D.PlaneSlice = 0;
+        // 新しいサイズでメモリを再確保
+        allocations_[i] = allocator_->Allocate(allocInfo.SizeInBytes, allocInfo.Alignment);
 
-		// SRV再生成（既存のハンドルを再利用）
-		device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
-	}
+        // 新しいPlaced Resourceの作成
+        HRESULT hr = device->CreatePlacedResource(allocator_->GetHeap(allocations_[i].heapIndex), allocations_[i].offset, &desc,
+            D3D12_RESOURCE_STATE_RENDER_TARGET, &clearValue, IID_PPV_ARGS(&resource_[i]));
+
+        if (FAILED(hr)) throw std::runtime_error("OffscreenResource: リサイズ時の CreatePlacedResource に失敗");
+
+
+        // RTVの設定
+        D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+        rtvDesc.Format = desc.Format;
+        rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+        // ビューの生成
+        device->CreateRenderTargetView(resource_[i].Get(), &rtvDesc, rtvHandle_[i]);
+
+
+        // SRVの設定
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+        srvDesc.Format = desc.Format;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Texture2D.MipLevels = 1;
+
+        // ビューの生成
+        device->CreateShaderResourceView(resource_[i].Get(), &srvDesc, srvHandle_[i].cpuHandle);
+    }
 }
 
 /// @brief バリアを張る

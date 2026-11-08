@@ -6,6 +6,7 @@
 #include "DXSwapChain/DXSwapChain.hpp"
 #include "Shader/ShaderCompiler/ShaderCompiler.hpp"
 #include "Store/ResourceStore/ResourceStore.hpp"
+#include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "MultiPass/MultiPass.hpp"
 #include "Store/TextureStore/TextureStore.hpp"
 #include "Store/ModelStore/ModelStore.hpp"
@@ -165,6 +166,10 @@ namespace Detail
         /// @return 
         ResourceStore* GetResourceStore() const { return resourceStore_.get(); }
 
+        /// @brief 配置リソースアロケータを取得する
+        /// @return 
+        PlacedResourceAllocator* GetPlacedResourceAllocator() const { return placedResourceAllocator_.get(); }
+
 		/// @brief テクスチャストアを取得する
 		/// @return 
 		TextureStore* GetTextureStore() const { return textureStore_.get(); }
@@ -248,6 +253,9 @@ namespace Detail
 
         /// @brief レンダーリソースストア
         std::unique_ptr<ResourceStore> resourceStore_ = nullptr;
+
+        /// @brief 配置リソースアロケータ
+        std::unique_ptr<PlacedResourceAllocator> placedResourceAllocator_ = nullptr;
 
 		/// @brief シェーダコンパイラ
 		std::unique_ptr<ShaderCompiler> shaderCompiler_ = nullptr;

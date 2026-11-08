@@ -14,11 +14,14 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
     auto resourceStore = engine->GetRenderContext()->GetResourceStore();
     assert(resourceStore);
 
+    auto placedResourceAllocator = engine->GetRenderContext()->GetPlacedResourceAllocator();
+    assert(placedResourceAllocator);
+
 	// ライトカリングPSOを初期化
 	lightCullingPso_ = std::make_unique<LightCullingPSO>(device, compiler);
 
 	// ライトカリング用の深度リソースを作成
-	lightCullingDepthResource_ = std::make_unique<DepthResource>(device, engine->GetClientWidth(), engine->GetClientHeight(), engine->GetRenderContext()->GetHeap());
+	lightCullingDepthResource_ = std::make_unique<DepthResource>(device, engine->GetClientWidth(), engine->GetClientHeight(), engine->GetRenderContext()->GetHeap(), placedResourceAllocator);
 
 
 	// カメラデータ用の定数バッファを作成
@@ -51,7 +54,7 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 	const int elementsPerTile = kMaxLightPerTile * 2 + 2;
 
 	// RW構造化バッファを作成
-	tileLightIndexBuffer_ = std::make_unique<RWStructuredBufferResource<uint32_t>>(device, commandList, engine->GetRenderContext()->GetHeap(), tileCount * elementsPerTile, engine->GetMaxBufferCount());
+	tileLightIndexBuffer_ = std::make_unique<RWStructuredBufferResource<uint32_t>>(device, commandList, engine->GetRenderContext()->GetHeap(), placedResourceAllocator, tileCount * elementsPerTile, engine->GetMaxBufferCount());
 	tileLightIndexBuffer_->AllBarrier(commandList, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include "RenderContext/DXHeap/DXHeap.hpp"
+#include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "../IResource.hpp"
 
 namespace Detail
@@ -17,7 +18,8 @@ namespace Detail
 		/// @param width 
 		/// @param height 
 		/// @param maxBufferCount 
-		RWTexture2DBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DXHeap* heap, uint32_t width, uint32_t height, uint32_t maxBufferCount) { Initialize(device, commandList, heap, width, height, maxBufferCount); }
+		RWTexture2DBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DXHeap* heap, PlacedResourceAllocator* allocator,
+            uint32_t width, uint32_t height, uint32_t maxBufferCount) { Initialize(device, commandList, heap, allocator, width, height, maxBufferCount); }
 
 		/// @brief デストラクタ
 		~RWTexture2DBufferResource();
@@ -87,10 +89,14 @@ namespace Detail
 		/// @param width 
 		/// @param height 
 		/// @param maxBufferCount 
-		void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DXHeap* heap, uint32_t width, uint32_t height, uint32_t maxBufferCount);
+        void Initialize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, DXHeap* heap, PlacedResourceAllocator* allocator,
+            uint32_t width, uint32_t height, uint32_t maxBufferCount);
 
 		// @brief ヒープ
 		DXHeap* heap_ = nullptr;
+
+        /// @brief 配置リソースアロケータ
+        PlacedResourceAllocator* allocator_ = nullptr;
 
 		/// @brief 最大バッファ数
 		uint32_t maxBufferCount_ = 1;
@@ -103,6 +109,9 @@ namespace Detail
 
 		/// @brief UAVハンドル
 		std::vector<SRVDescriptorHandle> uavHandle_;
+
+        // @brief 配置リソースの割り当て情報
+        std::vector<PlacedAllocation> allocations_;
 
 		// @brief テクスチャの幅
 		int32_t width_ = 0;
