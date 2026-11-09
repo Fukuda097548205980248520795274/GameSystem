@@ -196,6 +196,10 @@ void Detail::RWStructuredBufferResource<T>::Resize(ID3D12Device* device, ID3D12G
 
     for (uint32_t i = 0; i < maxBufferCount_; ++i)
     {
+        // リソースステートを初期化する
+        SetState(i, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+
         // 既存のリソースとメモリを解放
         resource_[i].Reset();
         if (allocator_) allocator_->Free(allocations_[i]);

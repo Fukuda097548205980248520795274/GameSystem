@@ -133,6 +133,10 @@ void Detail::StructuredBufferResource<T>::Resize(BufferAllocator* allocator, ID3
 
     for (uint32_t i = 0; i < maxBufferCount_; ++i)
     {
+        // リソースステートを初期化する
+        SetState(i, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+
         // 新しいサイズでアロケータから領域を確保する（要素サイズでアライメント）
         SubAllocatedRegion newRegion = allocator->Allocate(newSize, sizeof(T));
 

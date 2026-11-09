@@ -158,6 +158,10 @@ void Detail::OffscreenResource::Resize(ID3D12Device* device, int32_t width, int3
 
     for (uint32_t i = 0; i < maxBufferCount_; ++i)
     {
+        // ステートを初期化する
+        SetState(i, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+
         // 古いリソースの破棄とメモリの返却
         resource_[i].Reset();
         if (allocator_)allocator_->Free(allocations_[i]);

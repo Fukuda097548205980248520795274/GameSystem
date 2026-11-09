@@ -155,6 +155,10 @@ void Detail::DepthResource::Resize(ID3D12Device* device, int32_t width, int32_t 
 
     for (uint32_t i = 0; i < maxBufferCount_; ++i)
     {
+        // リソースステートを初期化する
+        SetState(i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+
         // 既存のリソースとメモリを解放
         resource_[i].Reset();
         if (allocator_) allocator_->Free(allocations_[i]);
