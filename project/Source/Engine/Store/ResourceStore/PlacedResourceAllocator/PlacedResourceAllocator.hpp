@@ -34,7 +34,8 @@ namespace Detail
         /// @brief コンストラクタ
         /// @param device 
         /// @param pageSizeInBytes 
-        PlacedResourceAllocator(ID3D12Device* device, uint64_t pageSizeInBytes) { Initialize(device, pageSizeInBytes); }
+        /// @param heapFlags 
+        PlacedResourceAllocator(ID3D12Device* device, uint64_t pageSizeInBytes, D3D12_HEAP_FLAGS heapFlags = D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES) : heapFlags_(heapFlags) { Initialize(device, pageSizeInBytes); }
 
         /// @brief デストラクタ
         ~PlacedResourceAllocator() = default;
@@ -58,6 +59,7 @@ namespace Detail
         /// @brief 初期化
         /// @param device 
         /// @param pageSizeInBytes 
+        /// @param heapFlags 
         void Initialize(ID3D12Device* device, uint64_t pageSizeInBytes);
 
         /// @brief 新しいヒープページを追加する
@@ -98,5 +100,8 @@ namespace Detail
 
         // メモリの割り当てと解放のスレッドセーフを確保するためのミューテックス
         std::mutex mutex_;
+
+        // ヒープのフラグ（デフォルトはすべてのバッファとテクスチャを許可）
+        D3D12_HEAP_FLAGS heapFlags_ = D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES;
     };
 }

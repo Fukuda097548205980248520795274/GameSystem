@@ -13,6 +13,9 @@
 /// @param commandList 
 void Detail::TextureStore::Initialize(ID3D12Device* device, DXHeap* heap, ID3D12GraphicsCommandList* commandList)
 {
+    // アロケータの初期化（64MBのヒープを作成）
+    allocator_ = std::make_unique<PlacedResourceAllocator>(device, 64ull * 1024ull * 1024ull, D3D12_HEAP_FLAG_ALLOW_ONLY_NON_RT_DS_TEXTURES);
+
 	// 初期テクスチャを読み込む
 	defaultTextureHandle_ = Load("./Cooked/Texture/white2x2.dds", heap, device, commandList);
 	defaultCubemapHandle_ = Load("./Cooked/Texture/white_skybox.dds", heap, device, commandList);
@@ -166,13 +169,36 @@ Detail::TextureHandle Detail::TextureStore::Load(const std::string& filePath, DX
 	const DirectX::TexMetadata& metadata = image.GetMetadata();
 	textureData->type_ = metadata.IsCubemap() ? TextureType::Cubemap : TextureType::Texture2D;
 
-	textureData->resource = CreateTextureResource(device, metadata);
-	if (!textureData->resource)
-	{
-		if (engine) engine->Log(LogLevel::Error, "テクスチャリソースの生成に失敗 : " + filePath);
-		return TextureHandle::Invalid();
-	}
 
+    // メタデータからD3D12_RESOURCE_DESCを作成
+    D3D12_RESOURCE_DESC resourceDesc{};
+    resourceDesc.Width = UINT(metadata.width);
+    resourceDesc.Height = UINT(metadata.height);
+    resourceDesc.MipLevels = UINT16(metadata.mipLevels);
+    resourceDesc.DepthOrArraySize = UINT16(metadata.arraySize);
+    resourceDesc.Format = metadata.format;
+    resourceDesc.SampleDesc.Count = 1;
+    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION(metadata.dimension);
+
+    // リソースに必要なサイズとアライメントを取得
+    D3D12_RESOURCE_ALLOCATION_INFO allocInfo = device->GetResourceAllocationInfo(0, 1, &resourceDesc);
+
+    // アロケータからメモリを割り当て
+    textureData->allocation = allocator_->Allocate(allocInfo.SizeInBytes, allocInfo.Alignment);
+
+    // 割り当てられたヒープとオフセットを使用して CreatePlacedResource を呼び出す
+    HRESULT hr = device->CreatePlacedResource(allocator_->GetHeap(textureData->allocation.heapIndex), textureData->allocation.offset, &resourceDesc,
+        D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&textureData->resource));
+
+    // リソース作成に失敗した場合はエラーをログに出力して無効なハンドルを返す
+    if (FAILED(hr))
+    {
+        if (engine) engine->Log(LogLevel::Error, "テクスチャリソースの作成に失敗しました : " + cookedDdsPath);
+        return TextureHandle::Invalid();
+    }
+
+
+    // テクスチャデータをGPUにアップロードする
 	Microsoft::WRL::ComPtr<ID3D12Resource> subResource = UploadTextureData(textureData->resource.Get(), image, device, commandList);
 	if (subResource)
 	{
@@ -406,7 +432,16 @@ void Detail::TextureStore::ProcessDeferredDeletions(uint32_t maxBufferCount, uin
 			// SRVハンドルを解放
 			if (item.heap && item.data)
 			{
-				item.heap->FreeSrvDescriptorHandle(item.data->srvHandle);
+                item.heap->FreeSrvDescriptorHandle(item.data->srvHandle);
+
+                // ヒープ領域を解放する前に、確実にリソースオブジェクトを破棄する
+                item.data->resource.Reset();
+
+                // テクスチャの破棄時にアロケータのメモリを解放
+                if (item.data->allocation.IsValid())
+                {
+                    allocator_->Free(item.data->allocation);
+                }
 			}
 
 			// キューからポップすることでリソースが安全に解放される

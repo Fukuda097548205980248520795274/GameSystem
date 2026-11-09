@@ -2,7 +2,7 @@
 #include <DirectXTex.h>
 #include <d3dx12.h>
 
-
+#include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "Store/HandleData/HandleData.hpp"
 #include "RenderContext/DXHeap/DXHeap.hpp"
 
@@ -23,6 +23,9 @@ namespace Detail
 	{
 		/// @brief リソース
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+
+        // アロケータによる配置リソースの割り当て情報
+        PlacedAllocation allocation;
 
 		// ミップマップ付きテクスチャデータ
 		DirectX::TexMetadata metadata{};

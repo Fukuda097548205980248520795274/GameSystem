@@ -127,6 +127,9 @@ namespace Detail
 
 	private:
 
+        // アロケータ
+        std::unique_ptr<PlacedResourceAllocator> allocator_;
+
 		// データテーブル
 		std::vector<Slot> slots_;
 

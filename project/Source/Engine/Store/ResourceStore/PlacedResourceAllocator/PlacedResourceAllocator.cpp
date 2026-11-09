@@ -3,6 +3,7 @@
 /// @brief 初期化
 /// @param device 
 /// @param pageSizeInBytes 
+/// @param heapFlags 
 void Detail::PlacedResourceAllocator::Initialize(ID3D12Device* device, uint64_t pageSizeInBytes)
 {
     device_ = device;
@@ -150,7 +151,7 @@ void Detail::PlacedResourceAllocator::AddNewPage()
     heapDesc.SizeInBytes = pageSize_;
     heapDesc.Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
     heapDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-    heapDesc.Flags = D3D12_HEAP_FLAG_ALLOW_ALL_BUFFERS_AND_TEXTURES;
+    heapDesc.Flags = heapFlags_;
 
     // 新しいヒープを作成
     Microsoft::WRL::ComPtr<ID3D12Heap> newHeap;
