@@ -66,6 +66,9 @@ void Detail::VertexBufferResource<T>::Initialize(BufferAllocator* allocator, ID3
     regions_.resize(maxBufferCount_);
     view_.resize(maxBufferCount_);
 
+    // リソースステートの初期化
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_GENERIC_READ);
+
     uint64_t size = sizeof(T) * numVertex;
 
     for (uint32_t i = 0; i < maxBufferCount_; ++i)

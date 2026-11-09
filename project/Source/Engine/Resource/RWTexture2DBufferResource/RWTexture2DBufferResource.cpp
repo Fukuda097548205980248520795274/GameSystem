@@ -53,6 +53,9 @@ void Detail::RWTexture2DBufferResource::Initialize(ID3D12Device* device, ID3D12G
     uavHandle_.resize(maxBufferCount_);
     allocations_.resize(maxBufferCount_);
 
+    // リソースステートの初期化
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
     // テクスチャのリソース設定を定義
     D3D12_RESOURCE_DESC desc = {};
     desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -236,4 +239,16 @@ void Detail::RWTexture2DBufferResource::AllBarrierUAV(ID3D12GraphicsCommandList*
 	{
 		UAVBarrier(resource_[i].Get(), commandList);
 	}
+}
+
+/// @brief リソースを取得する
+/// @param bufferIndex 
+/// @return 
+ID3D12Resource* Detail::RWTexture2DBufferResource::Get(uint32_t bufferIndex) const
+{
+    // バッファインデックスが範囲内であることを確認する
+    assert(bufferIndex < resource_.size());
+
+    // リソースを返す
+    return resource_[bufferIndex].Get();
 }

@@ -87,6 +87,9 @@ void Detail::StructuredBufferResource<T>::Initialize(BufferAllocator* allocator,
     regions_.resize(maxBufferCount_);
     handle_.resize(maxBufferCount_);
 
+    // メモリ確保のサイズを計算する
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_GENERIC_READ);
+
     // リサイズ前の要素数を保持する
     oldSize_ = num;
 
@@ -163,4 +166,7 @@ void Detail::StructuredBufferResource<T>::Resize(BufferAllocator* allocator, ID3
         // 既存のハンドル（CPUディスクリプタ）に上書きでビューを生成
         device->CreateShaderResourceView(regions_[i].parentBuffer->GetResource(), &srvDesc, handle_[i].cpuHandle);
     }
+
+    // リサイズ前の要素数を更新する
+    oldSize_ = num;
 }

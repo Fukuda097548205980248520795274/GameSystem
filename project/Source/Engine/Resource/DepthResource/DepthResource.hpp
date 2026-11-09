@@ -55,10 +55,10 @@ namespace Detail
 		/// @return 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle(uint32_t frameIndex) { return dsvHandle_[frameIndex]; }
 
-		/// @brief リソースを取得する
-		/// @param frameIndex
-		/// @return 
-		ID3D12Resource* GetResource(uint32_t frameIndex) { return resource_[frameIndex].Get(); }
+        /// @brief リソースを取得する
+        /// @param bufferIndex 
+        /// @return 
+        ID3D12Resource* Get(uint32_t bufferIndex = 0) const override;
 
 		/// @brief コマンドリストに登録する
 		/// @param commandList

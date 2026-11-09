@@ -95,6 +95,10 @@ void Detail::RWStructuredBufferResource<T>::Initialize(ID3D12Device* device, ID3
 	srvHandle_.resize(maxBufferCount_);
     allocations_.resize(maxBufferCount_);
 
+    // リソースステートの初期化
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+
     // バッファサイズを計算する
     uint64_t bufferSize = sizeof(T) * num;
 

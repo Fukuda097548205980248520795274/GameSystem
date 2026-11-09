@@ -37,6 +37,11 @@ namespace Detail
 		/// @param frameIndex 
 		void RegisterCompute(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
 
+        /// @brief リソースを取得する
+        /// @param bufferIndex 
+        /// @return 
+        ID3D12Resource* Get(uint32_t bufferIndex = 0) const;
+
 
 	protected:
 

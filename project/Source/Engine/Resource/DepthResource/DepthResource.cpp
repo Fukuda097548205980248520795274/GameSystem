@@ -57,6 +57,9 @@ void Detail::DepthResource::Initialize(ID3D12Device* device, int32_t width, int3
     srvHandle_.resize(maxBufferCount_);
     allocations_.resize(maxBufferCount_);
 
+    // リソースステートの初期化
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
     // リソースの設定 (DSVとSRVで共有するためTYPELESSを指定)
     D3D12_RESOURCE_DESC desc = {};
     desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -230,4 +233,16 @@ void Detail::DepthResource::RegisterCompute(ID3D12GraphicsCommandList* commandLi
 {
 	assert(commandList);
 	commandList->SetComputeRootDescriptorTable(rootParameterIndex, srvHandle_[frameIndex].gpuHandle);
+}
+
+/// @brief リソースを取得する
+/// @param bufferIndex 
+/// @return 
+ID3D12Resource* Detail::DepthResource::Get(uint32_t bufferIndex) const
+{
+    // バッファインデックスが範囲内であることを確認する
+    assert(bufferIndex < resource_.size());
+
+    // リソースを返す
+    return resource_[bufferIndex].Get();
 }

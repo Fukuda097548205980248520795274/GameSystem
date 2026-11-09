@@ -41,6 +41,11 @@ namespace Detail
 		/// @return 
 		virtual std::type_index GetTypeIndex() const = 0;
 
+        /// @brief リソースを取得する
+        /// @param bufferIndex 
+        /// @return 
+        ID3D12Resource* Get(uint32_t bufferIndex = 0) const override;
+
 
 	protected:
 

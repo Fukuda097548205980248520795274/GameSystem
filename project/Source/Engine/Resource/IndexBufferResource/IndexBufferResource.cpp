@@ -28,8 +28,12 @@ void Detail::IndexBufferResource::Initialize(BufferAllocator* allocator, ID3D12D
     numIndex_ = numIndex;
     maxBufferCount_ = maxBufferCount > 1 ? static_cast<int32_t>(maxBufferCount) : 1;
 
+    // 最大バッファ数に応じてサブアロケーション領域を確保
     regions_.resize(maxBufferCount_);
     view_.resize(maxBufferCount_);
+
+    // リソースステートの初期化
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_GENERIC_READ);
 
     uint64_t size = sizeof(uint32_t) * numIndex;
 
@@ -57,4 +61,16 @@ void Detail::IndexBufferResource::Register(ID3D12GraphicsCommandList* commandLis
 
 	// インデックスバッファを設定する
 	commandList->IASetIndexBuffer(&view_[frameIndex]);
+}
+
+/// @brief リソースを取得する
+/// @param bufferIndex 
+/// @return 
+ID3D12Resource* Detail::IndexBufferResource::Get(uint32_t bufferIndex) const
+{
+    // バッファインデックスが範囲内であることを確認する
+    assert(bufferIndex < regions_.size());
+
+    // サブアロケーションされた領域の親バッファからリソースを取得する
+    return regions_[bufferIndex].parentBuffer->GetResource();
 }

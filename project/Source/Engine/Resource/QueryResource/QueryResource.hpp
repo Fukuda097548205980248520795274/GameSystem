@@ -97,6 +97,9 @@ void Detail::QueryResource<T>::Initialize(ID3D12Device* device, DXHeap* heap, ui
 	// リードバックバッファの配列をリサイズ
 	readbackBuffers_.resize(maxBufferCount_);
 
+    // リソースステートの初期化
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_COPY_DEST);
+
 	// ヒーププロパティの設定 (Readback用)
 	D3D12_HEAP_PROPERTIES heapProps{};
 	heapProps.Type = D3D12_HEAP_TYPE_READBACK;

@@ -58,7 +58,7 @@ void Detail::SkinCluster::Initialize(DXHeap* heap, ID3D12Device* device, ID3D12G
 	for (uint32_t i = 0; i < maxBufferCount_; ++i)
 	{
 		// 出力頂点バッファビューを設定する
-		outputVertexBufferViews_[i].BufferLocation = outputVertexResource_->GetResource(i)->GetGPUVirtualAddress();
+		outputVertexBufferViews_[i].BufferLocation = outputVertexResource_->Get(i)->GetGPUVirtualAddress();
 		outputVertexBufferViews_[i].SizeInBytes = UINT(meshData.vertexBufferResource->GetNumVertex()) * sizeof(ModelVertexData);
 		outputVertexBufferViews_[i].StrideInBytes = sizeof(ModelVertexData);
 

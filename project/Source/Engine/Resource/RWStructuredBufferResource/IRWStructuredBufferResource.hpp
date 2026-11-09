@@ -13,61 +13,61 @@ namespace Detail
 {
 	/// @brief RWストラクチャードバッファリソース : インタフェース
     class IRWStructuredBufferResource : public IResource
-	{
-	public:
+    {
+    public:
 
-		/// @brief コンストラクタ
-		IRWStructuredBufferResource() = default;
+        /// @brief コンストラクタ
+        IRWStructuredBufferResource() = default;
 
-		/// @brief 仮想デストラクタ
-		virtual ~IRWStructuredBufferResource() = default;
+        /// @brief 仮想デストラクタ
+        virtual ~IRWStructuredBufferResource() = default;
 
-		/// @brief リサイズ
-		/// @param device 
-		/// @param commandList 
-		/// @param num 
-		virtual void Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, UINT num) = 0;
+        /// @brief リサイズ
+        /// @param device 
+        /// @param commandList 
+        /// @param num 
+        virtual void Resize(ID3D12Device* device, ID3D12GraphicsCommandList* commandList, UINT num) = 0;
 
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param rootParameterIndex 
-		void RegisterComputeUAV(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+        /// @brief コマンドリストに登録する
+        /// @param commandList 
+        /// @param rootParameterIndex 
+        void RegisterComputeUAV(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
 
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param rootParameterIndex 
-		void RegisterComputeSRV(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+        /// @brief コマンドリストに登録する
+        /// @param commandList 
+        /// @param rootParameterIndex 
+        void RegisterComputeSRV(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
 
-		/// @brief コマンドリストに登録する
-		/// @param commandList 
-		/// @param rootParameterIndex 
-		void RegisterGraphicsSRV(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
+        /// @brief コマンドリストに登録する
+        /// @param commandList 
+        /// @param rootParameterIndex 
+        void RegisterGraphicsSRV(ID3D12GraphicsCommandList* commandList, UINT rootParameterIndex, uint32_t frameIndex);
 
-		/// @brief バリアを張る
-		/// @param commandList 
-		/// @param before 
-		/// @param after 
-		void Barrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after, uint32_t frameIndex);
+        /// @brief バリアを張る
+        /// @param commandList 
+        /// @param before 
+        /// @param after 
+        void Barrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after, uint32_t frameIndex);
 
-		/// @brief 全てのバリアを張る
-		/// @param commandList 
-		/// @param before 
-		/// @param after 
-		void AllBarrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
+        /// @brief 全てのバリアを張る
+        /// @param commandList 
+        /// @param before 
+        /// @param after 
+        void AllBarrier(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
 
-		/// @brief UAVバリアを張る
-		/// @param commandList 
-		/// @param frameIndex 
-		void BarrierUAV(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
+        /// @brief UAVバリアを張る
+        /// @param commandList 
+        /// @param frameIndex 
+        void BarrierUAV(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex);
 
-		/// @brief 全てのUAVバリアを張る
-		/// @param commandList 
-		void AllBarrierUAV(ID3D12GraphicsCommandList* commandList);
+        /// @brief 全てのUAVバリアを張る
+        /// @param commandList 
+        void AllBarrierUAV(ID3D12GraphicsCommandList* commandList);
 
-		/// @brief リソースを取得する
-		/// @param frameIndex 
-		/// @return 
-		ID3D12Resource* GetResource(uint32_t frameIndex) const { return resource_[frameIndex].Get(); }
+        /// @brief リソースを取得する
+        /// @param frameIndex 
+        /// @return 
+        ID3D12Resource* Get(uint32_t frameIndex = 0) const override;
 
 
 	protected:

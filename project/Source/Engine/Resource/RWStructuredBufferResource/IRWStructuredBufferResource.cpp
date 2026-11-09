@@ -62,3 +62,15 @@ void Detail::IRWStructuredBufferResource::AllBarrierUAV(ID3D12GraphicsCommandLis
 		UAVBarrier(resource_[i].Get(), commandList);
 	}
 }
+
+/// @brief リソースを取得する
+/// @param frameIndex 
+/// @return 
+ID3D12Resource* Detail::IRWStructuredBufferResource::Get(uint32_t frameIndex) const
+{
+    // バッファインデックスが範囲内であることを確認する
+    assert(frameIndex < resource_.size());
+
+    // サブアロケーションされた領域の親バッファからリソースを取得する
+    return resource_[frameIndex].Get();
+}

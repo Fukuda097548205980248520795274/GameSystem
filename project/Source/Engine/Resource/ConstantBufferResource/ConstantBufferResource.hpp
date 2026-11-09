@@ -48,7 +48,11 @@ void Detail::ConstantBufferResource<T>::Initialize(BufferAllocator* allocator, u
     allocator_ = allocator;
     maxBufferCount_ = maxBufferCount > 0 ? maxBufferCount : 1;
 
+    // 最大バッファ数に応じてサブアロケーション領域を確保
     regions_.resize(maxBufferCount_);
+
+    // リソースステートの初期化
+    InitializeStates(maxBufferCount_, D3D12_RESOURCE_STATE_GENERIC_READ);
 
     // 必要なバイト数を計算（256バイトアライメント）
     uint64_t size = (sizeof(T) + 255) & ~255;

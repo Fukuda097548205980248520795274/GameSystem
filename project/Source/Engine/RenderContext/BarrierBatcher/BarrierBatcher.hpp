@@ -5,6 +5,8 @@
 
 namespace Detail
 {
+    class IResource;
+
     class BarrierBatcher
     {
     public:
@@ -18,7 +20,7 @@ namespace Detail
         /// @param before 
         /// @param after 
         /// @param subresource 
-        void AddTransition(ID3D12Resource* resource, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after, UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
+        void AddTransition(IResource* resource, uint32_t bufferIndex, D3D12_RESOURCE_STATES newState, UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
 
         /// @brief UAVバリアを追加する
         /// @param resource 

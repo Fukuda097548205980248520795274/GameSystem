@@ -574,6 +574,9 @@
     <ClCompile Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.cpp">
       <Filter>Source\Engine\RenderContext\BarrierBatcher</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Resource\IResource.cpp">
+      <Filter>Source\Engine\Resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Engine\Engine.hpp">

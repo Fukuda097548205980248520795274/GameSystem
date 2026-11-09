@@ -90,6 +90,11 @@ namespace Detail
 		/// @param name 
 		void SetName(const std::string& name) { name_ = name; }
 
+        /// @brief リソースを取得する
+        /// @param bufferIndex 
+        /// @return 
+        ID3D12Resource* Get(uint32_t bufferIndex = 0) const override;
+
 
 		template<typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;

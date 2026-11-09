@@ -17,3 +17,15 @@ void Detail::IConstantBufferResource::RegisterCompute(ID3D12GraphicsCommandList*
 {
 	commandList->SetComputeRootConstantBufferView(rootParameterIndex, regions_[frameIndex].gpuAddress);
 }
+
+/// @brief リソースを取得する
+/// @param bufferIndex 
+/// @return 
+ID3D12Resource* Detail::IConstantBufferResource::Get(uint32_t bufferIndex) const
+{
+    // バッファインデックスが範囲内であることを確認する
+    assert(bufferIndex < regions_.size());
+
+    // リソースを返す
+    return regions_[bufferIndex].parentBuffer->GetResource();
+}

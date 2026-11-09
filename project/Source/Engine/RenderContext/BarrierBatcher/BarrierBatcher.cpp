@@ -1,29 +1,40 @@
 #include "BarrierBatcher.hpp"
 #include <cassert>
 
+#include "Resource/IResource.hpp"
+
 /// @brief トランジションバリアを追加する
 /// @param resource 
 /// @param before 
 /// @param after 
 /// @param subresource 
-void Detail::BarrierBatcher::AddTransition(ID3D12Resource* resource, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after, UINT subresource)
+void Detail::BarrierBatcher::AddTransition(Detail::IResource* resource, uint32_t bufferIndex, D3D12_RESOURCE_STATES newState, UINT subresource)
 {
     assert(resource);
 
-    // 状態が変化しない場合はバリアを張らない
-    if (before == after) return;
+    // 対象インデックスの生のID3D12Resourceを取得
+    ID3D12Resource* rawResource = resource->Get(bufferIndex);
+    assert(rawResource);
 
-    // バリアの設定
-    D3D12_RESOURCE_BARRIER barrier{};
-    barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-    barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-    barrier.Transition.pResource = resource;
-    barrier.Transition.StateBefore = before;
-    barrier.Transition.StateAfter = after;
-    barrier.Transition.Subresource = subresource;
+    // リソースの現在の状態を取得
+    D3D12_RESOURCE_STATES currentState = resource->GetState(bufferIndex);
 
-    // バリアを蓄積する
-    barriers_.push_back(barrier);
+    // 状態が異なる場合のみバリアを張る
+    if (currentState != newState)
+    {
+        D3D12_RESOURCE_BARRIER barrier{};
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+        barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+        barrier.Transition.pResource = rawResource;
+        barrier.Transition.StateBefore = currentState;
+        barrier.Transition.StateAfter = newState;
+        barrier.Transition.Subresource = subresource;
+
+        barriers_.push_back(barrier);
+
+        // リソース側の内部状態を新しい状態に更新
+        resource->SetState(bufferIndex, newState);
+    }
 }
 
 /// @brief UAVバリアを追加する

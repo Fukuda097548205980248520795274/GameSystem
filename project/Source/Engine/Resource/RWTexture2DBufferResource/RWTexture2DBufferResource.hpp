@@ -80,6 +80,12 @@ namespace Detail
 		/// @return 
 		int32_t GetHeight()const { return height_; }
 
+        /// @brief リソースを取得する
+        /// @param bufferIndex 
+        /// @return 
+        ID3D12Resource* Get(uint32_t bufferIndex = 0) const override;
+
+
 	private:
 
 		/// @brief 初期化

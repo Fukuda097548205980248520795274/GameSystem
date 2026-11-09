@@ -36,6 +36,11 @@ namespace Detail
 		/// @return 
 		UINT GetNumIndex() const { return numIndex_; }
 
+        /// @brief リソースを取得する
+        /// @param bufferIndex 
+        /// @return 
+        ID3D12Resource* Get(uint32_t bufferIndex = 0) const override;
+
 
 		template<typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;
