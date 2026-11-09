@@ -153,6 +153,40 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 			}
 		}
 
+        // CameraComponent
+        if (registry_->HasComponent<CameraComponent>(entity))
+        {
+            if (ImGui::CollapsingHeader("カメラ", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                auto camera = registry_->GetComponent<CameraComponent>(entity);
+                if (camera)
+                {
+                    // 投影モードの選択
+                    const char* projectionModes[] = { "平行投影（2D）", "透視投影（3D）" };
+                    int currentMode = static_cast<int>(camera->projectionMode);
+                    if (ImGui::Combo("投影モード", &currentMode, projectionModes, IM_ARRAYSIZE(projectionModes)))
+                    {
+                        camera->projectionMode = static_cast<ProjectionMode>(currentMode);
+                    }
+
+                    // 投影パラメータの表示
+                    if (camera->projectionMode == ProjectionMode::Perspective)
+                    {
+                        ImGui::DragFloat("垂直視野角 (fovY)", &camera->fovY, 0.01f);
+                        ImGui::DragFloat("アスペクト比", &camera->aspectRatio, 0.01f);
+                        ImGui::DragFloat("近平面距離", &camera->nearPlane, 0.01f);
+                        ImGui::DragFloat("遠平面距離", &camera->farPlane, 0.01f);
+                    }
+                    else if (camera->projectionMode == ProjectionMode::Orthographic)
+                    {
+                        ImGui::DragFloat("幅", &camera->width, 0.01f);
+                        ImGui::DragFloat("高さ", &camera->height, 0.01f);
+                        ImGui::DragFloat("遠平面距離", &camera->farPlane, 0.01f);
+                    }
+                }
+            }
+        }
+
 		// MaterialComponent
 		if (registry_->HasComponent<MaterialComponent>(entity))
 		{

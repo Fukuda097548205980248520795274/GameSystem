@@ -18,7 +18,7 @@ namespace Detail
 		/// @brief 更新処理
 		void Update();
 
-		/// @brief エンティティを作成する
+		/// @brief カメラ用のエンティティを作成する
 		/// @return 
 		Entity CreateCameraEntity();
 
@@ -41,6 +41,14 @@ namespace Detail
 		/// @brief 遠平面の距離を取得する
 		/// @return 
 		float GetFarZ()const { return farZ_; }
+
+        /// @brief 現在のカメラEntityを設定する
+        /// @param entity 
+        void SetCurrentCamera(Entity entity) { currentEntity_ = entity; }
+
+        /// @brief 現在のカメラEntityを取得する
+        /// @return 
+        Entity GetCurrentCamera() const { return currentEntity_; }
 
 
 	private:

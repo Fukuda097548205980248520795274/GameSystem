@@ -245,10 +245,27 @@ struct SkinningInstanceComponent
 	Detail::SkinningInstanceHandle handle;
 };
 
+// @brief カメラの投影モード
+enum class ProjectionMode
+{
+    // 平行投影 (2D用)
+    Orthographic,
+
+    // 透視投影 (3D用)
+    Perspective
+};
+
 /// @brief カメラコンポーネント
 struct CameraComponent
 {
-	CameraComponent() : fovY(0.35f), aspectRatio(16.0f / 9.0f), nearPlane(0.03f), farPlane(800.0f) {}
+    CameraComponent() : projectionMode(ProjectionMode::Perspective),
+        width(1.0f), height(1.0f), fovY(0.35f), aspectRatio(16.0f / 9.0f), nearPlane(0.03f), farPlane(800.0f) {
+    }
+
+
+    // @brief 投影モード（Perspective: 透視投影, Orthographic: 平行投影）
+    ProjectionMode projectionMode;
+
 
 	/// @brief 垂直方向の視野角（度）
 	float fovY;
@@ -261,6 +278,25 @@ struct CameraComponent
 
 	/// @brief ファークリップ平面
 	float farPlane;
+
+
+    // 平行投影の幅（Orthographicモード時に使用）
+    float width;
+
+    // 平行投影の高さ（Orthographicモード時に使用）
+    float height;
+};
+
+// @brief デバッグカメラコンポーネント
+struct DebugCameraComponent
+{
+    DebugCameraComponent() : moveSpeed(10.0f), lookSensitivity(0.005f) {}
+
+    // @brief カメラの移動速度
+    float moveSpeed;
+
+    // @brief マウスの感度（回転速度）
+    float lookSensitivity;
 };
 
 /// @brief 定数バッファコンポーネント

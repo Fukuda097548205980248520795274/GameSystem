@@ -185,6 +185,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.cpp" />
@@ -483,6 +484,7 @@
     <ClInclude Include="Source\Engine\Input\Input.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.hpp" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.hpp" />

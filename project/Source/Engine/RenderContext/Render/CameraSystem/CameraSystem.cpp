@@ -49,8 +49,16 @@ void Detail::CameraSystem::Update()
 	auto cameraComp = registry->GetComponent<CameraComponent>(currentEntity_);
 	if (!cameraComp) return;
 
-	// 射影行列を計算する
-	projectionMatrix_ = MakePerspectiveFovMatrix4x4(cameraComp->fovY, cameraComp->aspectRatio, cameraComp->nearPlane, cameraComp->farPlane);
+    if (cameraComp->projectionMode == ProjectionMode::Orthographic)
+    {
+        // 平行投影の場合は、幅と高さを使用して射影行列を計算する
+        projectionMatrix_ = MakeOrthographicMatrix4x4(-cameraComp->width, cameraComp->height, cameraComp->width, -cameraComp->height, 0.0f, cameraComp->farPlane);
+    }
+    else
+    {
+        // 透視投影の場合は、FOVとアスペクト比を使用して射影行列を計算する
+        projectionMatrix_ = MakePerspectiveFovMatrix4x4(cameraComp->fovY, cameraComp->aspectRatio, cameraComp->nearPlane, cameraComp->farPlane);
+    }
 
 	// 近平面と遠平面の距離を保存する
 	nearZ_ = cameraComp->nearPlane;
@@ -66,16 +74,10 @@ Entity Detail::CameraSystem::CreateCameraEntity()
 	if (!registry) return kNullEntity;
 
 
-	// エンティティを作成する
-	Entity entity = registry->CreateEntity();
+    Entity entity = registry->CreateEntity();
+    registry->AddComponent(entity, TransformComponent());
+    registry->AddComponent(entity, CameraComponent());
 
-	// TransformComponentを追加する
-	TransformComponent transformComp;
-	registry->AddComponent(entity, transformComp);
-
-	// CameraComponentを追加する
-	CameraComponent cameraComp;
-	registry->AddComponent(entity, cameraComp);
 
 	// もし現在のカメラが設定されていない場合は、このカメラを現在のカメラとして設定する
 	if (currentEntity_ == kNullEntity)

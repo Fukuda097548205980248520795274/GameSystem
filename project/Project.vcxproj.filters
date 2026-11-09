@@ -332,6 +332,9 @@
     <Filter Include="Source\Engine\RenderContext\BarrierBatcher">
       <UniqueIdentifier>{780fb759-3ac9-4a96-84f7-fc8da16ade1d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\DebugCameraSystem">
+      <UniqueIdentifier>{873525e2-a9fd-42e5-ab7b-27c51ccd3c13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -576,6 +579,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\IResource.cpp">
       <Filter>Source\Engine\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\DebugCameraSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -857,6 +863,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.hpp">
       <Filter>Source\Engine\RenderContext\BarrierBatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.hpp">
+      <Filter>Source\Engine\RenderContext\Render\DebugCameraSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
