@@ -335,6 +335,18 @@
     <Filter Include="Source\Engine\RenderContext\Render\DebugCameraSystem">
       <UniqueIdentifier>{873525e2-a9fd-42e5-ab7b-27c51ccd3c13}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\Scene">
+      <UniqueIdentifier>{9317cd62-d747-49b7-8344-b30cf6b583b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Scene\SceneManager">
+      <UniqueIdentifier>{b26bfa7d-5aad-456c-b672-fdcadb5d7da1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Scene\SceneSerializer">
+      <UniqueIdentifier>{d1061b19-b7e9-4c1a-b4cf-c59508e362af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Tool\Scene\SceneEditor">
+      <UniqueIdentifier>{95ff661d-86b1-48c2-913c-6d58fd314928}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -582,6 +594,15 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.cpp">
       <Filter>Source\Engine\RenderContext\Render\DebugCameraSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Scene\SceneManager\SceneManager.cpp">
+      <Filter>Source\Tool\Scene\SceneManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Scene\SceneSerializer\SceneSerializer.cpp">
+      <Filter>Source\Tool\Scene\SceneSerializer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Scene\SceneEditor\SceneEditor.cpp">
+      <Filter>Source\Tool\Scene\SceneEditor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -866,6 +887,15 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.hpp">
       <Filter>Source\Engine\RenderContext\Render\DebugCameraSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Scene\SceneManager\SceneManager.hpp">
+      <Filter>Source\Tool\Scene\SceneManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Scene\SceneSerializer\SceneSerializer.hpp">
+      <Filter>Source\Tool\Scene\SceneSerializer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Scene\SceneEditor\SceneEditor.hpp">
+      <Filter>Source\Tool\Scene\SceneEditor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

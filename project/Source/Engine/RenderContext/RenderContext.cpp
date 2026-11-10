@@ -55,6 +55,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
     registry->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});
 
 
+    // SceneEditorを作成
+    sceneEditor_ = std::make_unique<SceneEditor>();
+
 	// ECSEditorを作成
 	ecsEditor_ = std::make_unique<ECSEditor>();
 
@@ -218,6 +221,9 @@ void Detail::RenderContext::NewFrame()
 	}
 
 
+    // SceneEditorを更新する
+    sceneEditor_->Update();
+
 	// テクスチャストアを更新する
 	textureStore_->Update(kBufferCount, frameIndex_);
 
@@ -248,6 +254,9 @@ void Detail::RenderContext::NewFrame()
 
 	// Dockスペースを作成する
 	imguiRender_->CreateDockSpace();
+
+    // SceneEditorのUIを描画する
+    sceneEditor_->DrawUI();
 
 	// ECSEditorを更新する
 	ecsEditor_->Update();

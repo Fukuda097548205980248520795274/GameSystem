@@ -1,0 +1,8 @@
+{
+    "scenes": [
+        {
+            "filePath": "./Assets/Data/Scenes/NewScene.json",
+            "name": "NewScene"
+        }
+    ]
+}

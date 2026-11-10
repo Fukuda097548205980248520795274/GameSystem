@@ -22,6 +22,7 @@
 #include "Render/LightSystem/LightSystem.hpp"
 #include "Render/SkyboxSystem/SkyboxSystem.hpp"
 
+#include "Scene/SceneEditor/SceneEditor.hpp"
 #include "ProfilerEditor/ProfilerEditor.hpp"
 #include "ECS/ECSEditor/ECSEditor.hpp"
 #include "Shader/ShaderEditor/ShaderEditor.hpp"
@@ -334,6 +335,9 @@ namespace Detail
 
 
 	private:
+
+        /// @brief シーンエディタ
+        std::unique_ptr<Detail::SceneEditor> sceneEditor_ = nullptr;
 
 		/// @brief プロファイラエディタ
 		std::unique_ptr<ProfilerEditor> profilerEditor_ = nullptr;

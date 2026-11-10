@@ -94,3 +94,12 @@ std::unique_ptr<Detail::RegistryECS> Detail::RegistryECS::Clone() const
 
 	return cloned;
 }
+
+/// @brief クリア
+void Detail::RegistryECS::Clear()
+{
+    nextEntityId_ = 0;
+	activeEntities_.clear();
+    availableEntities_ = std::queue<Entity>();
+	componentArrays_.clear();
+}

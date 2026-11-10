@@ -142,6 +142,9 @@ namespace Detail
 		/// @return 
 		std::unique_ptr<RegistryECS> Clone() const;
 
+        /// @brief クリア
+        void Clear();
+
 
 	private:
 
