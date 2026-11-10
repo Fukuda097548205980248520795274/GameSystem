@@ -406,9 +406,18 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Scene\SceneEditor\SceneEditor.cpp" />
-    <ClCompile Include="Source\Tool\Scene\SceneManager\SceneManager.cpp" />
-    <ClCompile Include="Source\Tool\Scene\SceneSerializer\SceneSerializer.cpp" />
+    <ClCompile Include="Source\Tool\Scene\SceneEditor\SceneEditor.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Scene\SceneManager\SceneManager.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Scene\SceneSerializer\SceneSerializer.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="Source\Tool\Script\ScriptManager\ScriptManager.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>

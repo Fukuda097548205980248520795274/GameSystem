@@ -20,6 +20,10 @@ namespace Detail
         /// @param sceneName 作成するシーンの名前
         void CreateNewScene(const std::string& sceneName);
 
+        /// @brief シーンを削除する
+        /// @param sceneName 削除するシーンの名前
+        void DeleteScene(const std::string& sceneName);
+
         /// @brief 現在のシーンを保存する
         void SaveCurrentScene();
 
@@ -32,6 +36,7 @@ namespace Detail
 
         /// @brief エディタのUIを描画する (ImGui用)
         void DrawUI();
+
 
     private:
 
