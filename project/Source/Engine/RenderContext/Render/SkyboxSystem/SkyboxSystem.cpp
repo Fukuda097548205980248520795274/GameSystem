@@ -183,7 +183,7 @@ void Detail::SkyboxSystem::Execute(ID3D12GraphicsCommandList* commandList)
 
 	// 変換行列バッファを設定する
 	auto* transformData = transformBuffer_->GetData(frameIndex);
-	*transformData = cameraSystem->GetCameraMatrix() * cameraSystem->GetViewMatrix() * cameraSystem->GetProjectionMatrix();
+	*transformData = cameraSystem->GetCameraMatrix() * cameraSystem->GetViewMatrix() * cameraSystem->GetPerspectiveProjectionMatrix();
 	transformBuffer_->RegisterGraphics(commandList, 0, frameIndex);
 
 	// カラーバッファを設定する

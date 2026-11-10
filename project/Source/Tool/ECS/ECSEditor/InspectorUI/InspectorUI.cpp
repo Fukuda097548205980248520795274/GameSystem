@@ -179,8 +179,7 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
                     }
                     else if (camera->projectionMode == ProjectionMode::Orthographic)
                     {
-                        ImGui::DragFloat("幅", &camera->width, 0.01f);
-                        ImGui::DragFloat("高さ", &camera->height, 0.01f);
+                        ImGui::DragFloat("平行投影サイズ", &camera->orthographicSize, 0.01f);
                         ImGui::DragFloat("遠平面距離", &camera->farPlane, 0.01f);
                     }
                 }

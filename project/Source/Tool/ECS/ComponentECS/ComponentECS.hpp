@@ -259,7 +259,7 @@ enum class ProjectionMode
 struct CameraComponent
 {
     CameraComponent() : projectionMode(ProjectionMode::Perspective),
-        width(1.0f), height(1.0f), fovY(0.35f), aspectRatio(16.0f / 9.0f), nearPlane(0.03f), farPlane(800.0f) {
+        orthographicSize(1.0f), fovY(0.35f), aspectRatio(16.0f / 9.0f), nearPlane(0.03f), farPlane(800.0f) {
     }
 
 
@@ -279,12 +279,8 @@ struct CameraComponent
 	/// @brief ファークリップ平面
 	float farPlane;
 
-
-    // 平行投影の幅（Orthographicモード時に使用）
-    float width;
-
-    // 平行投影の高さ（Orthographicモード時に使用）
-    float height;
+    // 平行投影のサイズ（高さ）
+    float orthographicSize;
 };
 
 // @brief デバッグカメラコンポーネント

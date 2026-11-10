@@ -28,6 +28,11 @@ namespace Detail
 
 	private:
 
+        /// @brief デバッグ出力（UTF-8文字列）を出力する
+        /// @param utf8Str 
+        void DebugOutputUTF8(const std::string& utf8Str);
+
+
 		/// @brief 出力ファイルストリーム
 		std::ofstream os;
 	};

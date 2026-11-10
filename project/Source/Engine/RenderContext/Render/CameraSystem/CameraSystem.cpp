@@ -49,15 +49,26 @@ void Detail::CameraSystem::Update()
 	auto cameraComp = registry->GetComponent<CameraComponent>(currentEntity_);
 	if (!cameraComp) return;
 
-    if (cameraComp->projectionMode == ProjectionMode::Orthographic)
+    perspectiveProjectionMatrix_ = MakePerspectiveFovMatrix4x4(cameraComp->fovY, cameraComp->aspectRatio, cameraComp->nearPlane, cameraComp->farPlane);
+
+    // メインの射影行列を計算する
+    if (cameraComp->projectionMode == ProjectionMode::Perspective)
     {
-        // 平行投影の場合は、幅と高さを使用して射影行列を計算する
-        projectionMatrix_ = MakeOrthographicMatrix4x4(-cameraComp->width, cameraComp->height, cameraComp->width, -cameraComp->height, 0.0f, cameraComp->farPlane);
+        // 3Dカメラ（透視投影）
+        projectionMatrix_ = perspectiveProjectionMatrix_;
     }
-    else
+    else if (cameraComp->projectionMode == ProjectionMode::Orthographic)
     {
-        // 透視投影の場合は、FOVとアスペクト比を使用して射影行列を計算する
-        projectionMatrix_ = MakePerspectiveFovMatrix4x4(cameraComp->fovY, cameraComp->aspectRatio, cameraComp->nearPlane, cameraComp->farPlane);
+        // 2Dカメラ（平行投影）
+        float halfHeight = cameraComp->orthographicSize * 0.5f;
+        float halfWidth = halfHeight * cameraComp->aspectRatio;
+
+        float left = -halfWidth;
+        float right = halfWidth;
+        float top = halfHeight;
+        float bottom = -halfHeight;
+
+        projectionMatrix_ = MakeOrthographicMatrix4x4(left, top, right, bottom, 0.0f, cameraComp->farPlane);
     }
 
 	// 近平面と遠平面の距離を保存する

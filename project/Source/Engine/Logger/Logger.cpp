@@ -68,5 +68,25 @@ void Detail::Logger::Logging(LogLevel level, const std::string& log)
 	}
 
 	// デバッグ出力にも出力
-	OutputDebugStringA(formattedLog.c_str());
+    DebugOutputUTF8(formattedLog);
+}
+
+/// @brief デバッグ出力（UTF-8文字列）を出力する
+/// @param utf8Str
+void Detail::Logger::DebugOutputUTF8(const std::string& utf8Str)
+{
+    // 空文字列の場合は何もしない
+    if (utf8Str.empty()) return;
+
+    // UTF-8文字列をワイド文字列に変換する
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, &utf8Str[0], (int)utf8Str.size(), NULL, 0);
+
+    // ワイド文字列を格納するためのバッファを確保
+    std::wstring wstrTo(size_needed, 0);
+
+    // UTF-8文字列をワイド文字列に変換
+    MultiByteToWideChar(CP_UTF8, 0, &utf8Str[0], (int)utf8Str.size(), &wstrTo[0], size_needed);
+
+    // デバッグ出力にワイド文字列を出力
+    OutputDebugStringW(wstrTo.c_str());
 }
