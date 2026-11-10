@@ -89,6 +89,23 @@ Engine* Engine::GetInstance()
 /// @brief 新フレーム処理
 void Engine::NewFrame()
 {
+    // 現在の時間を取得
+    auto currentTime = std::chrono::steady_clock::now();
+
+    // 前回のフレームからの経過時間を計算
+    std::chrono::duration<float> elapsedTime = currentTime - lastTime_;
+
+    // デルタタイムを更新
+    deltaTime_ = elapsedTime.count();
+    lastTime_ = currentTime;
+
+    // ブレークポイントなどで長時間停止した場合のスパイクを防ぐ
+    if (deltaTime_ > maxDeltaTime_)
+    {
+        deltaTime_ = 1.0f / 60.0f;
+    }
+
+
 	// 予約用レジストリが存在する場合、差し替えを行う
 	if (pendingRestoreRegistry_)
 	{
@@ -141,6 +158,16 @@ void Engine::StopExecution()
 	CloseWindow(); // ウィンドウアプリケーションに終了要求を送る
 
 #endif
+}
+
+/// @brief デルタタイムをリセットする
+void Engine::ResetDeltaTime()
+{
+    // 前回のフレームの時間を現在の時間に更新
+    lastTime_ = std::chrono::steady_clock::now();
+
+    // デルタタイムを初期化（60FPS相当）
+    deltaTime_ = 1.0f / 60.0f;
 }
 
 /// @brief 初期化
@@ -199,4 +226,7 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 	// レンダーコンテキストを作成
 	renderContext_ = std::make_unique<Detail::RenderContext>();
 	renderContext_->Initialize(winApp_.get(), dxDebug, registry_.get());
+
+    // デルタタイムを初期化
+    ResetDeltaTime();
 }

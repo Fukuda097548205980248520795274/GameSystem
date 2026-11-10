@@ -98,6 +98,13 @@ public:
 	/// @brief ゲームを停止する
 	void StopExecution();
 
+    /// @brief デルタタイムを取得する
+    /// @return 
+    float GetDeltaTime() const { return deltaTime_; }
+
+    /// @brief デルタタイムをリセットする
+    void ResetDeltaTime();
+
 	/// @brief ECSレジストリを取得する
 	/// @return 
 	Detail::RegistryECS* GetRegistryECS() { return registry_.get(); }
@@ -312,5 +319,17 @@ private:
 
 	// 次のフレームで差し替えるための予約用レジストリ
 	std::unique_ptr<Detail::RegistryECS> pendingRestoreRegistry_ = nullptr;
+
+
+private:
+
+    // 前回のフレームの時間
+    std::chrono::steady_clock::time_point lastTime_;
+
+    // デルタタイム（秒）
+    float deltaTime_ = 0.0f;
+
+    // 最大デルタタイム（秒）
+    const float maxDeltaTime_ = 0.1f;
 };
 
