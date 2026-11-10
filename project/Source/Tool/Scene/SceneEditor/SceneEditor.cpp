@@ -7,10 +7,19 @@ void Detail::SceneEditor::Initialize()
 {
     sceneManager_ = std::make_unique<SceneManager>();
 
-    // 起動時にプロジェクトのシーンリストを復元する
-    if (sceneManager_)
+    // 起動時にプロジェクトのシーンリストとスタートアップシーン名を復元する
+    Detail::DeserializeSceneList(sceneManager_.get(), kProjectSettingsPath, kProjectSettingsBinPath);
+
+    // スタートアップシーンが設定されていれば、初期シーンとして読み込みを予約する
+    const std::string& startupScene = sceneManager_->GetStartupSceneName();
+    if (!startupScene.empty())
     {
-        Detail::DeserializeSceneList(sceneManager_.get(), kProjectSettingsPath, kProjectSettingsBinPath);
+        sceneManager_->LoadScene(startupScene);
+        Engine::GetInstance()->Log(LogLevel::Info, "スタートアップシーンを読み込みます : " + startupScene);
+    }
+    else
+    {
+        Engine::GetInstance()->Log(LogLevel::Warning, "スタートアップシーンが設定されていません。");
     }
 }
 
@@ -64,6 +73,35 @@ void Detail::SceneEditor::DrawUI()
     // 現在のシーン名を表示
     ImGui::Text("現在のシーン : %s", sceneManager_->GetCurrentSceneName().c_str());
     ImGui::Separator();
+
+
+    ImGui::Text("プロジェクト設定 :");
+
+    // 開始シーンを選択するプルダウン
+    std::string currentStartup = sceneManager_->GetStartupSceneName();
+    if (ImGui::BeginCombo("開始シーン", currentStartup.c_str()))
+    {
+        for (const auto& scene : sceneManager_->GetSceneList())
+        {
+            bool isSelected = (currentStartup == scene.name);
+            if (ImGui::Selectable(scene.name.c_str(), isSelected))
+            {
+                // 選択されたシーンを開始シーンに設定し、プロジェクト設定を保存する
+                sceneManager_->SetStartupSceneName(scene.name);
+                Detail::SerializeSceneList(sceneManager_.get(), kProjectSettingsPath, kProjectSettingsBinPath);
+            }
+
+            // プルダウンを開いた際に、現在設定されているアイテムにフォーカスを合わせる
+            if (isSelected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
+
+    ImGui::Separator();
+
 
     // 新規シーン作成UI
     static char newSceneName[128] = "NewScene";

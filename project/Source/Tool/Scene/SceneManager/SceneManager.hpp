@@ -56,6 +56,14 @@ namespace Detail
         /// @param name 
         void SetCurrentSceneName(const std::string& name) { currentSceneName_ = name; }
 
+        /// @brief 起動時のシーンの名前を取得する
+        /// @return 
+        const std::string& GetStartupSceneName() const { return startupSceneName_; }
+
+        /// @brief 起動時のシーンの名前を設定する
+        /// @param name 
+        void SetStartupSceneName(const std::string& name) { startupSceneName_ = name; }
+
 
     private:
 
@@ -75,5 +83,8 @@ namespace Detail
 
         // 次に読み込むシーンの名前
         std::string nextSceneName_;
+
+        // 起動時に読み込むシーンの名前
+        std::string startupSceneName_;
     };
 }

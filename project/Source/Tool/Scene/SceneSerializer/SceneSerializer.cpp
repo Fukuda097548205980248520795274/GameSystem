@@ -23,6 +23,9 @@ bool Detail::SerializeSceneList(const SceneManager* sceneManager, const std::str
         rootJson["scenes"].push_back(sceneJson);
     }
 
+    // スタートアップシーンの保存
+    rootJson["startupScene"] = sceneManager->GetStartupSceneName();
+
     // JSONファイルに書き出し
     std::ofstream jsonFile(jsonPath);
     if (jsonFile.is_open())
@@ -60,8 +63,7 @@ bool Detail::DeserializeSceneList(SceneManager* sceneManager, const std::string&
         std::vector<uint8_t> binaryData((std::istreambuf_iterator<char>(binFile)), std::istreambuf_iterator<char>());
         rootJson = nlohmann::json::from_msgpack(binaryData); // バイナリをJSONに変換
         isLoaded = true;
-    }
-    else
+    } else
     {
         // BINファイルがない場合、JSONファイルからそのまま読み込む
         std::ifstream jsonFile(jsonPath);
@@ -85,6 +87,12 @@ bool Detail::DeserializeSceneList(SceneManager* sceneManager, const std::string&
             // SceneManagerにシーンを復元登録
             sceneManager->AddScene(name, path);
         }
+    }
+
+    // スタートアップシーンの読み込み
+    if (rootJson.contains("startupScene"))
+    {
+        sceneManager->SetStartupSceneName(rootJson["startupScene"]);
     }
 
     return true;
