@@ -149,8 +149,9 @@ public:
 	/// @param direction 
 	/// @param color 
 	/// @param intensity 
+	/// @param isCastShadow 
 	/// @return 
-	Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity) { return renderContext_->CreateDirectionalLightEntity(direction, color, intensity); }
+	Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow) { return renderContext_->CreateDirectionalLightEntity(direction, color, intensity, isCastShadow); }
 
 	/// @brief ポイントライトエンティティを作成する
 	/// @param position 

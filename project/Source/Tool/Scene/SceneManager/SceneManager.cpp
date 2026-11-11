@@ -1,6 +1,43 @@
 #include "SceneManager.hpp"
 #include "Engine.hpp"
 
+/// @brief 初期化
+/// @param name 
+void Detail::SceneManager::Initialize(const std::string& name)
+{
+    if (!name.empty())
+    {
+        auto engine = Engine::GetInstance();
+        if (!engine) return;
+
+        auto registry = engine->GetRegistryECS();
+        if (!registry) return;
+
+        // 現在のエンティティを完全にクリア
+        registry->Clear();
+
+        // 基本は bin (バイナリ) ファイルからの高速な読み込みを試みる
+        bool isLoaded = Detail::LoadBin(registry, name);
+
+        // bin が無い、または読み込みに失敗した場合は json からの読み込みを試みる（フォールバック）
+        if (!isLoaded)
+        {
+            isLoaded = Detail::LoadJson(registry, name);
+        }
+
+        // 読み込みに成功したら現在のシーン名を更新
+        if (isLoaded)
+        {
+            currentSceneName_ = name;
+        }
+        else
+        {
+            // ログ出力などで読み込み失敗を通知すると親切です
+            engine->Log(LogLevel::Error, "シーンの読み込みに失敗しました : " + name);
+        }
+    }
+}
+
 /// @brief シーンをリストから削除する
 /// @param name 
 void Detail::SceneManager::RemoveScene(const std::string& name)

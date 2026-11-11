@@ -44,9 +44,10 @@ namespace Detail
 		/// @brief 平行光源のエンティティを作成する
 		/// @param direction 
 		/// @param color 
-		/// @param intensity 
+		/// @param intensity
+        /// @param isCastShadow
 		/// @return 
-		Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity);
+		Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow);
 
 		/// @brief ポイントライトのエンティティを作成する
 		/// @param position 
@@ -56,6 +57,19 @@ namespace Detail
 		/// @param decay 
 		/// @return 
 		Entity CreatePointLightEntity(const Vector3& position, const Vector4& color, float intensity, float radius, float decay);
+
+        /// @brief スポットライトのエンティティを作成する
+        /// @param position 
+        /// @param direction 
+        /// @param color 
+        /// @param intensity 
+        /// @param radius 
+        /// @param decay 
+        /// @param innerConeAngle 
+        /// @param outerConeAngle 
+        /// @return 
+        Entity CreateSpotLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color,
+            float intensity, float radius, float decay, float cosAngle, float cosFalloffStart);
 
 		/// @brief カリング用カメラデータを取得する
 		/// @return 
@@ -80,19 +94,6 @@ namespace Detail
 		/// @brief ライトカリング用タイルデータを取得する
 		/// @return 
 		RWStructuredBufferResource<uint32_t>* GetTileLightIndexBuffer()const { return tileLightIndexBuffer_.get(); }
-
-		/// @brief スポットライトのエンティティを作成する
-		/// @param position 
-		/// @param direction 
-		/// @param color 
-		/// @param intensity 
-		/// @param radius 
-		/// @param decay 
-		/// @param innerConeAngle 
-		/// @param outerConeAngle 
-		/// @return 
-		Entity CreateSpotLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color, 
-			float intensity, float radius, float decay, float cosAngle, float cosFalloffStart);
 
 		/// @brief ライトカリング
 		/// @param commandList 

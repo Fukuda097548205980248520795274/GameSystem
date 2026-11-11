@@ -87,8 +87,9 @@ void Detail::LightSystem::Resize(ID3D12Device* device, ID3D12GraphicsCommandList
 /// @param direction 
 /// @param color 
 /// @param intensity 
+/// @param isCastShadow
 /// @return 
-Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity)
+Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow)
 {
 	// ECSレジストリを取得する
 	auto registry = Engine::GetInstance()->GetRegistryECS();
@@ -96,11 +97,20 @@ Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& directio
 
 	Entity entity = registry->CreateEntity();
 
+    // DirectionalLightComponentを作成して設定する
 	DirectionalLightComponent directionalLight;
 	directionalLight.direction = direction.Normalize();
 	directionalLight.color = Vector3(color.x, color.y, color.z);
 	directionalLight.intensity = intensity;
 	registry->AddComponent(entity, directionalLight);
+
+    // isCastShadowがtrueの場合は、ShadowCasterComponentを作成して設定する
+    if (isCastShadow)
+    {
+        // ShadowCasterComponentを作成して設定する
+        ShadowCasterComponent shadowCaster;
+        registry->AddComponent(entity, shadowCaster);
+    }
 
 	return entity;	
 }

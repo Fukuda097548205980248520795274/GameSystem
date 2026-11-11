@@ -325,6 +325,25 @@ struct SkyboxComponent
 	bool isEnabled = true;
 };
 
+// @brief 影をキャストするライト用のコンポーネント
+struct ShadowCasterComponent
+{
+    ShadowCasterComponent() : lightViewProjectionMatrix(MakeIdentityMatrix4x4()), isEnabled(true) {}
+
+    // ライト視点のビュー射影行列
+    Matrix4x4 lightViewProjectionMatrix;
+
+    // シャドウの有効/無効フラグ
+    bool isEnabled = true;
+};
+
+// @brief 影を出すかどうかのフラグを持つコンポーネント
+struct CastShadowComponent
+{
+    // シャドウをキャストするかどうかのフラグ
+    bool isEnabled = true;
+};
+
 /// @brief 合成（ブレンド）のパラメータ
 struct BlendComponent
 {

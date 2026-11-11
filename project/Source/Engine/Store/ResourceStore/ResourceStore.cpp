@@ -19,4 +19,10 @@ void Detail::ResourceStore::Initialize(ID3D12Device* device)
         // デフォルトで64MBのページサイズとして初期化
         bufferAllocator_ = std::make_unique<BufferAllocator>(device, 1024 * 1024 * 64);
     }
+
+    if (!placedAllocator_)
+    {
+        // デフォルトで256MBのページサイズとして初期化
+        placedAllocator_ = std::make_unique<PlacedResourceAllocator>(device, 256 * 1024 * 1024);
+    }
 }

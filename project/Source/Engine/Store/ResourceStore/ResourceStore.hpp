@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "Resource/ConstantBufferResource/ConstantBufferResource.hpp"
 #include "BufferAllocator/BufferAllocator.hpp"
+#include "PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 
 namespace Detail
 {
@@ -23,6 +24,10 @@ namespace Detail
         /// @brief バッファアロケータを取得する
         /// @return 
         BufferAllocator* GetBufferAllocator() const { return bufferAllocator_.get(); }
+
+        /// @brief 配置済みアロケータを取得する
+        /// @return 
+        PlacedResourceAllocator* GetPlacedResourceAllocator() const { return placedAllocator_.get(); }
 
         /// @brief 任意のリソースを生成・登録する
         /// @tparam ResType 
@@ -94,6 +99,9 @@ namespace Detail
 
         // バッファアロケータ <- これはresourcesより先に消す
         std::unique_ptr<BufferAllocator> bufferAllocator_;
+
+        // 配置済みリソースアロケータ
+        std::unique_ptr<PlacedResourceAllocator> placedAllocator_;
 
         // リソースを一元管理
         std::vector<ResourceEntry> resources_;

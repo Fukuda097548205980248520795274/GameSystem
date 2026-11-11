@@ -25,6 +25,10 @@ namespace Detail
         // @brief デストラクタ
         ~SceneManager() = default;
 
+        /// @brief 初期化
+        /// @param name 
+        void Initialize(const std::string& name);
+
         /// @brief 新しい空のシーンをリストに追加する
         /// @param name 
         /// @param filePath 

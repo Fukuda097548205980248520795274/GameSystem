@@ -173,6 +173,11 @@ Quaternion MakeIdentityQuaternion();
 /// @return 
 Quaternion ToQuaternion(float angle, const Vector3& axis);
 
+/// @brief 方向ベクトルからクォータニオンを作成する
+/// @param direction 
+/// @return 
+Quaternion LookRotation(const Vector3& direction);
+
 /// @brief 内積
 /// @param q1 
 /// @param q2 

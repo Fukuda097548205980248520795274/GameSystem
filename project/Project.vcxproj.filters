@@ -347,6 +347,18 @@
     <Filter Include="Source\Tool\Scene\SceneEditor">
       <UniqueIdentifier>{95ff661d-86b1-48c2-913c-6d58fd314928}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\ShadowRenderSystem">
+      <UniqueIdentifier>{1895b79b-d4d4-4ccd-9b63-9292700996d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\ShadowMap">
+      <UniqueIdentifier>{eea792c8-9bd8-4163-957b-e0f8057b084f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPSO">
+      <UniqueIdentifier>{540a08ea-4b67-473f-a005-0ee421cb5928}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO">
+      <UniqueIdentifier>{f13d4bae-bb67-4659-81c0-ad85105fcf76}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -603,6 +615,15 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\Scene\SceneEditor\SceneEditor.cpp">
       <Filter>Source\Tool\Scene\SceneEditor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowRenderSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPSO\ShadowMapPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPSO</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO\ShadowMapPrefabPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -897,6 +918,15 @@
     <ClInclude Include="Source\Tool\Scene\SceneEditor\SceneEditor.hpp">
       <Filter>Source\Tool\Scene\SceneEditor</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowRenderSystem.hpp">
+      <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPSO\ShadowMapPSO.hpp">
+      <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO\ShadowMapPrefabPSO.hpp">
+      <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">
@@ -932,6 +962,12 @@
     <FxCompile Include="Assets\Internal\Shader\Skinning\Skinning.CS.hlsl">
       <Filter>Shader\Skinning</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\ShadowMap\ShadowMap.VS.hlsl">
+      <Filter>Shader\ShadowMap</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\ShadowMap\ShadowMapPrefab.VS.hlsl">
+      <Filter>Shader\ShadowMap</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Internal\Shader\Fullscreen\Fullscreen.hlsli">
@@ -951,6 +987,9 @@
     </None>
     <None Include="Assets\Internal\Shader\Camera\CameraData.hlsli">
       <Filter>Shader\Camera</Filter>
+    </None>
+    <None Include="Assets\Internal\Shader\ShadowMap\ShadowMap.hlsli">
+      <Filter>Shader\ShadowMap</Filter>
     </None>
   </ItemGroup>
 </Project>

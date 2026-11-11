@@ -47,9 +47,6 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
     // レンダーリソースストアを生成する
     resourceStore_ = std::make_unique<ResourceStore>(core_->GetDevice());
 
-    // 配置リソースアロケータ256MBのページサイズで初期化
-    placedResourceAllocator_ = std::make_unique<PlacedResourceAllocator>(core_->GetDevice(), 256 * 1024 * 1024);
-
     // TransformConstantBufferComponent と MaterialConstantBufferComponent の削除時にリソースを解放するコールバックを登録する
     registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});
     registry->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});
@@ -101,6 +98,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
 
 	// レンダーシステムを作成
 	renderSystem_ = std::make_unique<RenderSystem>(core_->GetDevice(), shaderCompiler_.get());
+
+    // シャドウレンダーシステムを作成
+    shadowRenderSystem_ = std::make_unique<ShadowRenderSystem>(core_->GetDevice(), shaderCompiler_.get());
 
 	// Skyboxシステムを作成
 	skyboxSystem_ = std::make_unique<SkyboxSystem>(core_->GetDevice(), shaderCompiler_.get());
@@ -302,6 +302,9 @@ void Detail::RenderContext::PostDraw()
 
 	// スキニング処理を実行する
 	renderSystem_->Update(commandList, frameIndex_);
+
+    // シャドウマップの描画を実行する
+    shadowRenderSystem_->Update(commandList, frameIndex_);
 
 	// ライトカリングを実行する
 	multiPass_->Execute(commandList, renderSystem_.get(), skyboxSystem_.get(), lightSystem_.get(), frameIndex_);

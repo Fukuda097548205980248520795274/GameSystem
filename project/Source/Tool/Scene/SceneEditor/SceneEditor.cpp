@@ -14,7 +14,7 @@ void Detail::SceneEditor::Initialize()
     const std::string& startupScene = sceneManager_->GetStartupSceneName();
     if (!startupScene.empty())
     {
-        sceneManager_->LoadScene(startupScene);
+        sceneManager_->Initialize(startupScene);
         Engine::GetInstance()->Log(LogLevel::Info, "スタートアップシーンを読み込みます : " + startupScene);
     }
     else

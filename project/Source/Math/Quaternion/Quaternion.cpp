@@ -1,5 +1,6 @@
 #include "Quaternion.hpp"
 #include <cmath>
+#include <numbers>
 
 /// @brief ノルム
 /// @return 
@@ -83,6 +84,53 @@ Quaternion ToQuaternion(float angle, const Vector3& axis)
 	q.y = n.y * std::sin(angle / 2.0f);
 	q.z = n.z * std::sin(angle / 2.0f);
 	return q;
+}
+
+/// @brief 方向ベクトルからクォータニオンを作成する
+/// @param direction 
+/// @return 
+Quaternion LookRotation(const Vector3& direction)
+{
+    // 方向ベクトルを正規化する
+    Vector3 f = direction.Normalize();
+
+    // 内積を計算する
+    float dot = Dot(f, Vector3(0.0f, 0.0f, 1.0f));
+
+    // 内積が1に近い場合は、単位クォータニオンを返す
+    if (dot >= 1.0f - 1e-6f)
+    {
+        return MakeIdentityQuaternion();
+    }
+
+    // 内積が-1に近い場合は、180度回転するクォータニオンを返す
+    if (dot <= -1.0f + 1e-6f)
+    {
+        // 180度回転する軸を計算する
+        Vector3 axis = Cross(Vector3(1.0f, 0.0f, 0.0f), f);
+
+        // 軸がゼロベクトルの場合は、別の軸を使用する
+        if (axis.LengthSq() < 1e-6f)
+        {
+            axis = Cross(Vector3(0.0f, 1.0f, 0.0f), f);
+        }
+
+        // 180度回転するクォータニオンを返す
+        return ToQuaternion(std::numbers::pi_v<float>, axis.Normalize());
+    }
+
+    // 回転軸を計算する
+    Vector3 axis = Cross(f, Vector3(0.0f, 0.0f, 1.0f));
+
+    // クォータニオンを計算する
+    Quaternion q;
+    q.x = axis.x;
+    q.y = axis.y;
+    q.z = axis.z;
+    q.w = 1.0f + dot;
+
+    // 正規化して返す
+    return q.Normalize();
 }
 
 /// @brief 球面線形補間

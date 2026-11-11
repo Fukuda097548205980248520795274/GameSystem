@@ -19,6 +19,7 @@
 
 #include "Render/CameraSystem/CameraSystem.hpp"
 #include "Render/RenderSystem/RenderSystem.hpp"
+#include "Render/ShadowRenderSystem/ShadowRenderSystem.hpp"
 #include "Render/LightSystem/LightSystem.hpp"
 #include "Render/SkyboxSystem/SkyboxSystem.hpp"
 
@@ -103,8 +104,9 @@ namespace Detail
 		/// @param direction 
 		/// @param color 
 		/// @param intensity 
+		/// @param isCastShadow 
 		/// @return 
-		Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity) { return lightSystem_->CreateDirectionalLightEntity(direction, color, intensity); }
+		Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow) { return lightSystem_->CreateDirectionalLightEntity(direction, color, intensity, isCastShadow); }
 
 		/// @brief ポイントライトエンティティを作成する
 		/// @param position 
@@ -169,7 +171,7 @@ namespace Detail
 
         /// @brief 配置リソースアロケータを取得する
         /// @return 
-        PlacedResourceAllocator* GetPlacedResourceAllocator() const { return placedResourceAllocator_.get(); }
+        PlacedResourceAllocator* GetPlacedResourceAllocator() const { return resourceStore_->GetPlacedResourceAllocator(); }
 
 		/// @brief テクスチャストアを取得する
 		/// @return 
@@ -255,9 +257,6 @@ namespace Detail
         /// @brief レンダーリソースストア
         std::unique_ptr<ResourceStore> resourceStore_ = nullptr;
 
-        /// @brief 配置リソースアロケータ
-        std::unique_ptr<PlacedResourceAllocator> placedResourceAllocator_ = nullptr;
-
 		/// @brief シェーダコンパイラ
 		std::unique_ptr<ShaderCompiler> shaderCompiler_ = nullptr;
 
@@ -307,6 +306,9 @@ namespace Detail
 
 		/// @brief レンダーシステム
 		std::unique_ptr<RenderSystem> renderSystem_ = nullptr;
+
+        // @brief シャドウレンダーシステム
+        std::unique_ptr<ShadowRenderSystem> shadowRenderSystem_ = nullptr;
 
 		/// @brief ライトシステム
 		std::unique_ptr<LightSystem> lightSystem_ = nullptr;
