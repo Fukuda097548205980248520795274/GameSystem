@@ -35,25 +35,26 @@ namespace Detail
         /// @param ...args 
         /// @return 
         template<class ResType, class... Args>
+        [[nodiscard]]
         int32_t Create(Args&&... args)
         {
-            // 型情報を取得
+            // リソースを生成
+            auto resource = std::make_unique<ResType>(std::forward<Args>(args)...);
             auto typeIdx = std::type_index(typeid(ResType));
-            auto& freeQueue = freeHandles_[typeIdx];
 
             // 空きハンドルが存在する場合は再利用
-            if (!freeQueue.empty())
+            if (!freeHandles_.empty())
             {
-                int32_t reusedHandle = freeQueue.front();
-                freeQueue.pop();
+                int32_t reusedHandle = freeHandles_.front();
+                freeHandles_.pop();
 
-                // リソースを再生成して登録
-                resources_[reusedHandle].resource = std::make_unique<ResType>(std::forward<Args>(args)...);
+                // リソースと型情報を上書き
+                resources_[reusedHandle] = { std::move(resource), typeIdx };
                 return reusedHandle;
             }
 
             // 新しいリソースを作成して登録
-            resources_.push_back({ std::make_unique<ResType>(std::forward<Args>(args)...), typeIdx });
+            resources_.push_back({ std::move(resource), typeIdx });
             return static_cast<int32_t>(resources_.size() - 1);
         }
 
@@ -66,24 +67,36 @@ namespace Detail
         /// @param handle 
         /// @return 
         template<class ResType>
-        ResType* Get(int32_t handle)
+        [[nodiscard]] ResType* Get(int32_t handle) const
         {
-            // ハンドルが有効で、リソースが存在する場合に取得
-            if (handle >= 0 && handle < resources_.size() && resources_[handle].resource)
-            {
-                // 型が一致しない場合は nullptr を返す
-                if (resources_[handle].type != std::type_index(typeid(ResType)))
-                    return nullptr;
+            // ハンドルが有効かチェック
+            if (!IsValid(handle))return nullptr;
 
-                // 型が一致する場合にキャストして返す
-                return static_cast<ResType*>(resources_[handle].resource.get());
-            }
+            // リソースエントリを取得
+            const auto& entry = resources_[handle];
+            if (entry.type != std::type_index(typeid(ResType)))return nullptr;
 
-            return nullptr;
+            // 型が一致する場合はリソースを返す
+            return static_cast<ResType*>(entry.resource.get());
         }
 
 
     private:
+
+        // コピー禁止
+        ResourceStore(const ResourceStore&) = delete;
+        ResourceStore& operator=(const ResourceStore&) = delete;
+        ResourceStore(ResourceStore&&) = delete;
+        ResourceStore& operator=(ResourceStore&&) = delete;
+
+        /// @brief ハンドルが有効かチェックする
+        /// @param handle 
+        /// @return 
+        [[nodiscard]]
+        bool IsValid(int32_t handle) const noexcept
+        {
+            return handle >= 0 && handle < resources_.size() && resources_[handle].resource != nullptr;
+        }
 
         /// @brief 初期化
         /// @param device 
@@ -107,6 +120,6 @@ namespace Detail
         std::vector<ResourceEntry> resources_;
 
         // 型情報に基づいて空きハンドルのキューを管理
-        std::unordered_map<std::type_index, std::queue<int32_t>> freeHandles_;
+        std::queue<int32_t> freeHandles_;
 	};
 }

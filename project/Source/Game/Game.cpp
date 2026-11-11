@@ -23,7 +23,7 @@ void Game::Initialize()
 
 	Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/walk/walk.gltf"));
 
-    Entity directionalLight = engine->CreateDirectionalLightEntity(Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, false);
+    Entity directionalLight = engine->CreateDirectionalLightEntity(Vector3(0.0f, 3.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, true);
 
 	ScriptComponent scriptComp(engine->BuildScriptModule("Test", "Test", "./Assets/Script/Test.as"));
 	auto registry = engine->GetRegistryECS();

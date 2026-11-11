@@ -295,26 +295,20 @@ struct DebugCameraComponent
     float lookSensitivity;
 };
 
-/// @brief 定数バッファコンポーネント
+// コンスタントバッファコンポーネント
 struct ConstantBufferComponent
 {
-	ConstantBufferComponent(uint32_t handle) : handle(handle) {}
+    ConstantBufferComponent(uint32_t handle) : handle(handle) {}
 
-	/// @brief 定数バッファのハンドル（またはID/ポインタ）
-	uint32_t handle;
+    // @brief 定数バッファのハンドル
+    uint32_t handle;
 };
 
 /// @brief トランスフォーム用定数バッファコンポーネント
-struct TransformConstantBufferComponent : public ConstantBufferComponent
-{
-	TransformConstantBufferComponent(uint32_t handle) : ConstantBufferComponent(handle) {}
-};
+struct TransformConstantBufferComponent : public ConstantBufferComponent { TransformConstantBufferComponent(uint32_t handle) : ConstantBufferComponent(handle) {} };
 
 /// @brief マテリアル用定数バッファコンポーネント
-struct MaterialConstantBufferComponent : public ConstantBufferComponent
-{
-	MaterialConstantBufferComponent(uint32_t handle) : ConstantBufferComponent(handle) {}
-};
+struct MaterialConstantBufferComponent : public ConstantBufferComponent { MaterialConstantBufferComponent(uint32_t handle) : ConstantBufferComponent(handle) {} };
 
 /// @brief スカイボックスコンポーネント
 struct SkyboxComponent
@@ -335,6 +329,9 @@ struct ShadowCasterComponent
 
     // シャドウの有効/無効フラグ
     bool isEnabled = true;
+
+    // シャドウマップのテクスチャハンド
+    uint32_t shadowMapTextureHandle = 0;
 };
 
 // @brief 影を出すかどうかのフラグを持つコンポーネント
@@ -432,10 +429,13 @@ struct UVTransformComponent
 /// @brief ディレクショナルライトコンポーネント
 struct DirectionalLightComponent
 {
-	DirectionalLightComponent() : direction(0.0f, -1.0f, 0.0f), color(1.0f, 1.0f, 1.0f), intensity(1.0f) {}
+    DirectionalLightComponent() : position(0.0f, 0.0f, 0.0f), direction(0.0f, -1.0f, 0.0f), color(1.0f, 1.0f, 1.0f), intensity(1.0f) {}
 
 	/// @brief 有効 / 無効フラグ
 	bool isEnabled = true;
+
+    /// @brief 位置
+    Vector3 position;
 
 	/// @brief 光の方向（正規化されたベクトル）
 	Vector3 direction;

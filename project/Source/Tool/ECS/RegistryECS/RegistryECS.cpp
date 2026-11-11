@@ -55,6 +55,34 @@ void Detail::RegistryECS::DestroyEntity(Entity entity)
 		}
 	}
 
+    // ジョイントの階層構造を持つエンティティの場合、子エンティティも再帰的に削除する
+    if (HasComponent<JointHierarchyComponent>(entity))
+    {
+        auto hierarchy = GetComponent<JointHierarchyComponent>(entity);
+        if (hierarchy)
+        {
+            // 子エンティティも再帰的に削除
+            for (Entity child : hierarchy->children)
+            {
+                DestroyEntity(child);
+            }
+
+            // 親エンティティの子リストから削除する
+            if (hierarchy->parent != kNullEntity && HasComponent<JointHierarchyComponent>(hierarchy->parent))
+            {
+                auto parentHierarchy = GetComponent<JointHierarchyComponent>(hierarchy->parent);
+                if (parentHierarchy)
+                {
+                    auto it = std::find(parentHierarchy->children.begin(), parentHierarchy->children.end(), entity);
+                    if (it != parentHierarchy->children.end())
+                    {
+                        parentHierarchy->children.erase(it);
+                    }
+                }
+            }
+        }
+    }
+
 	// すべてのコンポーネント配列からエンティティを削除する
 	for (auto& [type, array] : componentArrays_)
 	{
@@ -101,5 +129,13 @@ void Detail::RegistryECS::Clear()
     nextEntityId_ = 0;
 	activeEntities_.clear();
     availableEntities_ = std::queue<Entity>();
-	componentArrays_.clear();
+
+    // コンポーネント配列のデータのみをクリアする
+    for (auto& [type, array] : componentArrays_)
+    {
+        if (array)
+        {
+            array->Clear();
+        }
+    }
 }

@@ -19,6 +19,10 @@ public:
 	/// @brief 仮想デストラクタ
 	~IComponentArray() = default;
 
+    /// @brief エンティティが削除されたときに呼ばれるコールバック
+    /// @param entity 
+    virtual void RemoveCallback(Entity entity) = 0;
+
 	/// @brief エンティティを削除する
 	/// @param entity 
 	virtual void RemoveEntity(Entity entity) = 0;
@@ -26,6 +30,9 @@ public:
 	/// @brief コンポーネント配列を複製する
 	/// @return 
 	virtual std::unique_ptr<IComponentArray> Clone() const = 0;
+
+    /// @brief クリア
+    virtual void Clear() = 0;
 };
 
 /// @brief コンポーネント配列
@@ -65,7 +72,10 @@ public:
 		if (!Has(entity)) return;
 
 		// 削除前にコールバックを呼び出す
-		if (onRemoveCallback_)onRemoveCallback_(entity, Get(entity));
+        if (onRemoveCallback_)
+        {
+            onRemoveCallback_(entity, Get(entity));
+        }
 
 		uint32_t indexOfRemoved = sparse_[entity];
 		uint32_t indexOfLast = static_cast<uint32_t>(dense_.size() - 1);
@@ -111,24 +121,42 @@ public:
 	/// @param callback 
 	void SetOnRemoveCallback(OnRemoveCallback callback) { onRemoveCallback_ = callback; }
 
+    /// @brief エンティティが削除されたときに呼ばれるコールバック
+    /// @param entity 
+    void RemoveCallback(Entity entity) override
+    {
+        if (onRemoveCallback_)
+        {
+            onRemoveCallback_(entity, Get(entity));
+        }
+    }
+
 	/// @brief コンポーネント配列を複製する
 	/// @return 
 	std::unique_ptr<IComponentArray> Clone() const override
 	{
-		// 新しいコンポーネント配列を作成し、データをコピーする
-		auto cloned = std::make_unique<ComponentArray<T>>();
-		cloned->dense_ = dense_;
-		cloned->denseToEntity_ = denseToEntity_;
-		cloned->sparse_ = sparse_;
+        // 新しいコンポーネント配列を作成し、データをコピーする
+        auto cloned = std::make_unique<ComponentArray<T>>();
+        cloned->dense_ = dense_;
+        cloned->denseToEntity_ = denseToEntity_;
+        cloned->sparse_ = sparse_;
 
-		// コールバックは複製しない
-		cloned->onRemoveCallback_ = onRemoveCallback_;
+        // コールバックはコピー元と同じものを保持させる場合：
+        cloned->onRemoveCallback_ = onRemoveCallback_;
 
-		// 複製後の個別処理
-		cloned->PostCopyProcess();
+        // 複製後の個別処理
+        cloned->PostCopyProcess();
 
-		return cloned;
+        return cloned;
 	}
+
+    // @brief クリア
+    void Clear() override
+    {
+        dense_.clear();
+        denseToEntity_.clear();
+        sparse_.clear();
+    }
 
 
 private:

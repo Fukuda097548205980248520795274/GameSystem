@@ -48,8 +48,18 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
     resourceStore_ = std::make_unique<ResourceStore>(core_->GetDevice());
 
     // TransformConstantBufferComponent と MaterialConstantBufferComponent の削除時にリソースを解放するコールバックを登録する
-    registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});
-    registry->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp){if (resourceStore_)resourceStore_->Release(comp.handle);});
+    registry->SetOnRemoveComponentCallback<TransformConstantBufferComponent>([this](Entity entity, const TransformConstantBufferComponent& comp)
+        {
+            if (resourceStore_)resourceStore_->Release(comp.handle);
+        });
+    registry->SetOnRemoveComponentCallback<MaterialConstantBufferComponent>([this](Entity entity, const MaterialConstantBufferComponent& comp)
+        {
+            if (resourceStore_)resourceStore_->Release(comp.handle);
+        });
+    registry->SetOnRemoveComponentCallback<ShadowCasterComponent>([this](Entity entity, const ShadowCasterComponent& comp)
+        {
+            if (resourceStore_)resourceStore_->Release(comp.shadowMapTextureHandle);
+        });
 
 
     // SceneEditorを作成

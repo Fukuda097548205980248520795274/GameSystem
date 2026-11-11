@@ -89,11 +89,14 @@ void Detail::LightSystem::Resize(ID3D12Device* device, ID3D12GraphicsCommandList
 /// @param intensity 
 /// @param isCastShadow
 /// @return 
-Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow)
+Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow)
 {
 	// ECSレジストリを取得する
-	auto registry = Engine::GetInstance()->GetRegistryECS();
-	if (!registry) return kNullEntity;
+    auto engine = Engine::GetInstance();
+	auto registry = engine->GetRegistryECS();
+    auto renderContext = engine->GetRenderContext();
+    auto device = renderContext->GetCore()->GetDevice();
+    auto heap = renderContext->GetHeap();
 
 	Entity entity = registry->CreateEntity();
 
@@ -102,13 +105,21 @@ Entity Detail::LightSystem::CreateDirectionalLightEntity(const Vector3& directio
 	directionalLight.direction = direction.Normalize();
 	directionalLight.color = Vector3(color.x, color.y, color.z);
 	directionalLight.intensity = intensity;
+    directionalLight.position = position;
 	registry->AddComponent(entity, directionalLight);
 
     // isCastShadowがtrueの場合は、ShadowCasterComponentを作成して設定する
-    if (isCastShadow)
+    auto resourceStore = Engine::GetInstance()->GetRenderContext()->GetResourceStore();
+    if (isCastShadow && resourceStore)
     {
+        // ライトの方向のクォータニオン
+        Quaternion lightRotate = LookRotation(directionalLight.direction);
+
         // ShadowCasterComponentを作成して設定する
         ShadowCasterComponent shadowCaster;
+        shadowCaster.isEnabled = isCastShadow;
+        shadowCaster.lightViewProjectionMatrix = Make3DRotateMatrix4x4(lightRotate) * Make3DTranslateMatrix4x4(directionalLight.position);
+        shadowCaster.shadowMapTextureHandle = resourceStore->Create<DepthResource>(device, 20, 20, heap, resourceStore->GetPlacedResourceAllocator());
         registry->AddComponent(entity, shadowCaster);
     }
 

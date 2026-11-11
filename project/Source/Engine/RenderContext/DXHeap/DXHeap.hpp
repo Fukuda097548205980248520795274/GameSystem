@@ -138,7 +138,7 @@ namespace Detail
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap_ = nullptr;
 
 		// DSV用ディスクリプタ数
-		UINT dsvDescriptorNum_ = 8;
+		UINT dsvDescriptorNum_ = 128;
 
 		// DSV用ディスクリプタ使用数
 		int32_t useDsvDescriptor_ = 0;

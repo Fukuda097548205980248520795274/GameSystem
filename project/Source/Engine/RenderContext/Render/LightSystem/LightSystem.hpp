@@ -47,7 +47,7 @@ namespace Detail
 		/// @param intensity
         /// @param isCastShadow
 		/// @return 
-		Entity CreateDirectionalLightEntity(const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow);
+		Entity CreateDirectionalLightEntity(const Vector3& position, const Vector3& direction, const Vector4& color, float intensity, bool isCastShadow);
 
 		/// @brief ポイントライトのエンティティを作成する
 		/// @param position 

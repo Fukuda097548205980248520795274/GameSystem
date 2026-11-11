@@ -114,180 +114,225 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 /// @return 
 Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 {
-	auto engine = Engine::GetInstance();
-	auto renderContext = engine->GetRenderContext();
-	auto device = renderContext->GetCore()->GetDevice();
-	auto commandList = renderContext->GetCommand()->GetCommandList();
+    auto engine = Engine::GetInstance();
+    auto renderContext = engine->GetRenderContext();
+    auto device = renderContext->GetCore()->GetDevice();
+    auto commandList = renderContext->GetCommand()->GetCommandList();
     auto resourceStore = renderContext->GetResourceStore();
-	auto textureStore = renderContext->GetTextureStore();
-	auto modelStore = renderContext->GetModelStore();
-	int32_t maxBufferCount = engine->GetMaxBufferCount();
+    auto textureStore = renderContext->GetTextureStore();
+    auto modelStore = renderContext->GetModelStore();
+    int32_t maxBufferCount = engine->GetMaxBufferCount();
 
-	auto registry = engine->GetRegistryECS();
-	if (!registry) return kNullEntity;
+    auto registry = engine->GetRegistryECS();
+    if (!registry) return kNullEntity;
 
-	// モデルデータを取得する
-	auto modelData = modelStore->GetModelData(modelHandle);
-	if (!modelData || modelData->nodes.empty()) return kNullEntity;
+    // モデルデータを取得する
+    auto modelData = modelStore->GetModelData(modelHandle);
+    if (!modelData || modelData->nodes.empty()) return kNullEntity;
 
-	// 親エンティティ（ルートモデルエンティティ）の作成
-	Entity rootEntity = registry->CreateEntity();
-	registry->AddComponent(rootEntity, TransformComponent());
-	registry->AddComponent(rootEntity, HierarchyComponent());
+    // 親エンティティ（ルートモデルエンティティ）の作成
+    Entity rootEntity = registry->CreateEntity();
+    registry->AddComponent(rootEntity, TransformComponent());
+    registry->AddComponent(rootEntity, HierarchyComponent());
+    registry->AddComponent(rootEntity, JointHierarchyComponent()); // ルートにもJointHierarchyを追加
 
-	ModelComponent modelComp;
-	modelComp.handle = modelHandle;
-	registry->AddComponent(rootEntity, modelComp);
+    ModelComponent modelComp;
+    modelComp.handle = modelHandle;
+    registry->AddComponent(rootEntity, modelComp);
 
-	// アニメーションを持つかどうかを判定する
-	if (modelData->hasAnimations)
-	{
-		auto animationStore = renderContext->GetAnimationStore();
+    // アニメーションを持つかどうかを判定する
+    if (modelData->hasAnimations)
+    {
+        auto animationStore = renderContext->GetAnimationStore();
 
-		// アニメーションコンポーネントを追加する
-		AnimationComponent animationComp;
-		animationComp.handle = animationStore->Load(modelData->filePath);
-		registry->AddComponent(rootEntity, animationComp);
-	}
+        // アニメーションコンポーネントを追加する
+        AnimationComponent animationComp;
+        animationComp.handle = animationStore->Load(modelData->filePath);
+        registry->AddComponent(rootEntity, animationComp);
+    }
 
-	// スケルトンを持つかどうかを判定する
-	SkeletonData* skeletonData = nullptr;
-	if (modelData->hasSkeleton)
-	{
-		auto skeletonStore = renderContext->GetSkeletonStore();
+    // スケルトンを持つかどうかを判定する
+    SkeletonData* skeletonData = nullptr;
+    if (modelData->hasSkeleton)
+    {
+        auto skeletonStore = renderContext->GetSkeletonStore();
 
-		// スケルトンコンポーネントを追加する
-		SkeletonComponent skeletonComp;
-		skeletonComp.handle = skeletonStore->Load(modelData->filePath);
-		skeletonData = skeletonStore->GetSkeletonData(skeletonComp.handle);
-		skeletonComp.pose.Initialize(skeletonStore->GetSkeletonData(skeletonComp.handle)->skeleton);
-		registry->AddComponent(rootEntity, skeletonComp);
-	}
+        // スケルトンコンポーネントを追加する
+        SkeletonComponent skeletonComp;
+        skeletonComp.handle = skeletonStore->Load(modelData->filePath);
+        skeletonData = skeletonStore->GetSkeletonData(skeletonComp.handle);
+        skeletonComp.pose.Initialize(skeletonStore->GetSkeletonData(skeletonComp.handle)->skeleton);
+        registry->AddComponent(rootEntity, skeletonComp);
+    }
 
-	// ノードを再帰的に構築するためのラムダ関数
-	std::function<Entity(int32_t, Entity)> CreateNodeEntity = [&](int32_t nodeIndex, Entity parentEntity) -> Entity
-		{
-			const auto& node = modelData->nodes[nodeIndex];
-			Entity entity = registry->CreateEntity();
+    // ノードを再帰的に構築するためのラムダ関数
+    std::function<Entity(int32_t, Entity)> CreateNodeEntity = [&](int32_t nodeIndex, Entity parentEntity) -> Entity
+        {
+            const auto& node = modelData->nodes[nodeIndex];
+            Entity entity = registry->CreateEntity();
 
-			// スケルトンのジョイントかどうかを判定する
-			bool isJoint = false;
-			if (skeletonData)
-			{
-				if (skeletonData->skeleton.jointMap.find(node.name) != skeletonData->skeleton.jointMap.end())
-				{
-					isJoint = true;
-				}
-			}
+            // スケルトンのジョイントかどうかを判定する
+            bool isJoint = false;
+            if (skeletonData)
+            {
+                if (skeletonData->skeleton.jointMap.find(node.name) != skeletonData->skeleton.jointMap.end())
+                {
+                    isJoint = true;
+                }
+            }
 
-			// 判定結果をもとに親子関係コンポーネントを設定
-			if (isJoint)
-			{
-				JointHierarchyComponent hierarchy;
-				hierarchy.parent = parentEntity;
-				registry->AddComponent(entity, hierarchy);
-			}
-			else
-			{
-				HierarchyComponent hierarchy;
-				hierarchy.parent = parentEntity;
-				registry->AddComponent(entity, hierarchy);
-			}
+            // 判定結果をもとに親子関係コンポーネントを設定
+            if (isJoint)
+            {
+                JointHierarchyComponent hierarchy;
+                hierarchy.parent = parentEntity;
+                registry->AddComponent(entity, hierarchy);
+            }
+            else
+            {
+                HierarchyComponent hierarchy;
+                hierarchy.parent = parentEntity;
+                registry->AddComponent(entity, hierarchy);
+            }
 
-			// TransformComponentにノードの初期トランスフォームを設定
-			TransformComponent transform;
-			transform.scale = node.transform.scale;
-			transform.position = node.transform.translate;
-			transform.rotation = node.transform.rotate.ToEulerAngles();
+            // TransformComponentにノードの初期トランスフォームを設定
+            TransformComponent transform;
+            transform.scale = node.transform.scale;
+            transform.position = node.transform.translate;
+            transform.rotation = node.transform.rotate.ToEulerAngles();
 
-			// NodeComponentを追加してノード名とインデックスを保持
-			NodeComponent nodeComp;
-			nodeComp.name = node.name;
-			nodeComp.index = nodeIndex;
-			registry->AddComponent(entity, nodeComp);
+            // NodeComponentを追加してノード名とインデックスを保持
+            NodeComponent nodeComp;
+            nodeComp.name = node.name;
+            nodeComp.index = nodeIndex;
+            registry->AddComponent(entity, nodeComp);
 
-			registry->AddComponent(entity, transform);
+            registry->AddComponent(entity, transform);
 
-			// ノードがメッシュを持っている場合、描画コンポーネントを追加
-			if (node.meshIndex.has_value())
-			{
-				int32_t meshIdx = node.meshIndex.value();
+            // ノードがメッシュを持っている、かつ「ジョイントではない」場合のみ描画コンポーネントを追加
+            if (node.meshIndex.has_value())
+            {
+                int32_t meshIdx = node.meshIndex.value();
 
-				registry->AddComponent(entity, RenderComponent());
+                registry->AddComponent(entity, RenderComponent());
 
-				MeshDrawComponent meshDrawComp(meshIdx);
-				meshDrawComp.handle = modelHandle;
-				meshDrawComp.rootMeshEntity = rootEntity;
-				registry->AddComponent(entity, meshDrawComp);
+                MeshDrawComponent meshDrawComp(meshIdx);
+                meshDrawComp.handle = modelHandle;
+                meshDrawComp.rootMeshEntity = rootEntity;
+                registry->AddComponent(entity, meshDrawComp);
 
-				registry->AddComponent(entity, MaterialComponent());
-				registry->AddComponent(entity, UVTransformComponent());
-				registry->AddComponent(entity, TextureComponent(modelData->meshes[meshIdx].material.handle));
+                registry->AddComponent(entity, MaterialComponent());
+                registry->AddComponent(entity, UVTransformComponent());
+                registry->AddComponent(entity, TextureComponent(modelData->meshes[meshIdx].material.handle));
 
-				// GPUデータ用のコンスタントバッファ
-				registry->AddComponent(entity, TransformConstantBufferComponent(
+                // GPUデータ用のコンスタントバッファ
+                registry->AddComponent(entity, TransformConstantBufferComponent(
                     resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount)));
-				registry->AddComponent(entity, MaterialConstantBufferComponent(
+                registry->AddComponent(entity, MaterialConstantBufferComponent(
                     resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount)));
 
-				// スケルトンデータが存在する場合はスキニングインスタンスとスキンクラスターを追加する
-				if (skeletonData)
-				{
-					auto skinClusterStore = renderContext->GetSkinClusterStore();
-					auto skinInstanceStore = renderContext->GetSkinningInstanceStore();
+                // スケルトンデータが存在する場合はスキニングインスタンスとスキンクラスターを追加する
+                if (skeletonData)
+                {
+                    auto skinClusterStore = renderContext->GetSkinClusterStore();
+                    auto skinInstanceStore = renderContext->GetSkinningInstanceStore();
 
-					// スキニングインスタンスを追加する
-					SkinningInstanceComponent skinningInstanceComp;
-					skinningInstanceComp.handle = skinInstanceStore->Load(renderContext->GetHeap(), device, skeletonData->skeleton, modelData->meshes[meshIdx], skeletonData->boneData.meshes[meshIdx]);
-					registry->AddComponent(entity, skinningInstanceComp);
+                    // スキニングインスタンスを追加する
+                    SkinningInstanceComponent skinningInstanceComp;
+                    skinningInstanceComp.handle = skinInstanceStore->Load(renderContext->GetHeap(), device, skeletonData->skeleton, modelData->meshes[meshIdx], skeletonData->boneData.meshes[meshIdx]);
+                    registry->AddComponent(entity, skinningInstanceComp);
 
-					// スキンクラスターを追加する
-					SkinClusterComponent skinClusterComp;
-					skinClusterComp.handle = skinClusterStore->Load(renderContext->GetHeap(), device, commandList, modelData->meshes[meshIdx], skeletonData->skeleton);
-					registry->AddComponent(entity, skinClusterComp);
-				}
-			}
+                    // スキンクラスターを追加する
+                    SkinClusterComponent skinClusterComp;
+                    skinClusterComp.handle = skinClusterStore->Load(renderContext->GetHeap(), device, commandList, modelData->meshes[meshIdx], skeletonData->skeleton);
+                    registry->AddComponent(entity, skinClusterComp);
+                }
+            }
 
-			// 子ノードを再帰的に作成
-			std::vector<Entity> childEntities;
-			for (int32_t childIndex : node.children)
-			{
-				childEntities.push_back(CreateNodeEntity(childIndex, entity));
-			}
+            // 子ノードを再帰的に作成
+            std::vector<Entity> meshChildEntities;
+            std::vector<Entity> jointChildEntities;
 
-			// 追加したコンポーネントに合わせて子エンティティを登録
-			if (isJoint)
-			{
-				if (auto currentHierarchy = registry->GetComponent<JointHierarchyComponent>(entity))
-				{
-					currentHierarchy->children = std::move(childEntities);
-				}
-			}
-			else
-			{
-				if (auto currentHierarchy = registry->GetComponent<HierarchyComponent>(entity))
-				{
-					currentHierarchy->children = std::move(childEntities);
-				}
-			}
+            for (int32_t childIndex : node.children)
+            {
+                const auto& childNode = modelData->nodes[childIndex];
+                bool childIsJoint = false;
+                if (skeletonData && skeletonData->skeleton.jointMap.find(childNode.name) != skeletonData->skeleton.jointMap.end())
+                {
+                    childIsJoint = true;
+                }
 
-			return entity;
-		};
+                // 子ノードがジョイントであり、親(自分)がジョイントでない場合は、ルート配下のジョイントツリーとして接続
+                if (childIsJoint && !isJoint)
+                {
+                    Entity jointChild = CreateNodeEntity(childIndex, rootEntity);
+                    if (auto rootJointHierarchy = registry->GetComponent<JointHierarchyComponent>(rootEntity))
+                    {
+                        rootJointHierarchy->children.push_back(jointChild);
+                    }
+                }
+                else
+                {
+                    Entity childEntity = CreateNodeEntity(childIndex, entity);
+                    if (childIsJoint)
+                    {
+                        jointChildEntities.push_back(childEntity);
+                    }
+                    else
+                    {
+                        meshChildEntities.push_back(childEntity);
+                    }
+                }
+            }
 
-	// ルートノードの子エンティティを作成する
-	std::vector<Entity> rootChildren;
-	if (!modelData->nodes.empty())
-	{
-		rootChildren.push_back(CreateNodeEntity(0, rootEntity));
-	}
+            // 追加したコンポーネントに合わせて子エンティティを登録
+            if (isJoint)
+            {
+                if (auto currentHierarchy = registry->GetComponent<JointHierarchyComponent>(entity))
+                {
+                    currentHierarchy->children = std::move(jointChildEntities);
+                }
+            }
+            else
+            {
+                if (auto currentHierarchy = registry->GetComponent<HierarchyComponent>(entity))
+                {
+                    currentHierarchy->children = std::move(meshChildEntities);
+                }
+            }
 
-	// 親エンティティのHierarchyComponentに子エンティティを設定する
-	if (auto safeParentHierarchy = registry->GetComponent<HierarchyComponent>(rootEntity))
-	{
-		safeParentHierarchy->children = std::move(rootChildren);
-	}
+            return entity;
+        };
 
-	return rootEntity;
+    // ルートノードの子エンティティを作成する
+    if (!modelData->nodes.empty())
+    {
+        const auto& rootNode = modelData->nodes[0];
+        bool isRootJoint = false;
+        if (skeletonData && skeletonData->skeleton.jointMap.find(rootNode.name) != skeletonData->skeleton.jointMap.end())
+        {
+            isRootJoint = true;
+        }
+
+        if (isRootJoint)
+        {
+            Entity jointRoot = CreateNodeEntity(0, rootEntity);
+            if (auto rootJointHierarchy = registry->GetComponent<JointHierarchyComponent>(rootEntity))
+            {
+                rootJointHierarchy->children.push_back(jointRoot);
+            }
+        }
+        else
+        {
+            Entity meshRoot = CreateNodeEntity(0, rootEntity);
+            if (auto rootMeshHierarchy = registry->GetComponent<HierarchyComponent>(rootEntity))
+            {
+                rootMeshHierarchy->children.push_back(meshRoot);
+            }
+        }
+    }
+
+    return rootEntity;
 }
 
 /// @brief 描画前の深度パスを実行する
