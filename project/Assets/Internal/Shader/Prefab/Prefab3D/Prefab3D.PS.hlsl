@@ -1,0 +1,137 @@
+#include "Prefab3D.hlsli"
+#include "../../LightCulling/LightData.hlsli"
+#include "../../Camera/CameraData.hlsli"
+
+// 出力ピクセルシェーダ
+struct PixelShaderOutput
+{
+    float4 color : SV_TARGET0;
+};
+
+// カメラ情報
+ConstantBuffer<Camera> gCamera : register(b0);
+
+// ライトの数
+ConstantBuffer<NumLight> gNumLight : register(b1);
+
+// ライト情報のバッファ
+StructuredBuffer<DirectionalLight> gDirectionalLight : register(t1);
+StructuredBuffer<PointLight> gPointLight : register(t2);
+StructuredBuffer<SpotLight> gSpotLight : register(t3);
+
+StructuredBuffer<uint> gTileLightIndexBuffer : register(t4);
+
+// テクスチャ
+Texture2D<float4> gTexture[] : register(t0, space1);
+
+// サンプラー
+SamplerState gSampler : register(s0);
+
+PixelShaderOutput main(VertexShaderOutput input)
+{
+    PixelShaderOutput output;
+	
+	// UV座標を変換してテクスチャをサンプリング
+    float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), input.uvTransform);
+    float4 textureColor = gTexture[input.textureIndex].Sample(gSampler, transformedUV.xy);
+	
+	// アルファ値が0の場合は描画しない
+    if (input.color.a * textureColor.a == 0.0f)
+        discard;
+	
+	// アルベド色を計算
+    float3 albedo = (input.color * textureColor).rgb;
+	
+	// 法線を正規化
+    float3 normal = normalize(input.normal);
+	
+	// 最終的なライトの色
+    float3 finalLight = float3(0.0f, 0.0f, 0.0f);
+
+	// 現在のピクセル座標からタイルインデックスを計算
+    uint2 pixelPos = (uint2) input.position.xy;
+    uint2 tileID = pixelPos / TILE_SIZE;
+    uint numTilesX = (uint) ceil(gCamera.screenDimensions.x / (float) TILE_SIZE);
+    uint tileIndex = tileID.y * numTilesX + tileID.x;
+	
+	// バッファのオフセット計算
+    uint bufferOffset = tileIndex * (MAX_LIGHTS_PER_TILE * 2 + 2);
+    uint pointLightCount = gTileLightIndexBuffer[bufferOffset];
+    uint spotLightOffset = bufferOffset + MAX_LIGHTS_PER_TILE + 1;
+    uint spotLightCount = gTileLightIndexBuffer[spotLightOffset];
+	
+	// 平行光源の計算
+    for (uint k = 0; k < gNumLight.directionalLight; ++k)
+    {
+        DirectionalLight light = gDirectionalLight[k];
+		
+		// ライト方向と距離を計算
+        float3 lightDir = -light.direction;
+		
+		// 法線とライト方向の内積を計算
+        float nDotL = max(0.0f, dot(normal, lightDir));
+		
+		// ライトを加算
+        finalLight += albedo * light.color.rgb * light.intensity * nDotL;
+    }
+
+	// ポイントライトの計算
+    for (uint i = 0; i < pointLightCount; ++i)
+    {
+        uint lightIndex = gTileLightIndexBuffer[bufferOffset + 1 + i];
+        PointLight light = gPointLight[lightIndex];
+		
+		// ライト方向と距離を計算
+        float3 lightDir = light.position - input.worldPosition;
+        float dist = length(lightDir);
+        lightDir /= dist;
+		
+		// ライトの影響範囲内であれば計算
+        if (dist < light.radius)
+        {
+			// 減衰を計算
+            float attenuation = pow(max(0.0f, 1.0f - (dist / light.radius)), light.decay);
+			
+			// 法線とライト方向の内積を計算
+            float nDotL = max(0.0f, dot(normal, lightDir));
+			
+			// ライトを加算
+            finalLight += albedo * light.color.rgb * light.intensity * nDotL * attenuation;
+        }
+    }
+
+	// スポットライトの計算
+    for (uint j = 0; j < spotLightCount; ++j)
+    {
+        uint lightIndex = gTileLightIndexBuffer[spotLightOffset + 1 + j];
+        SpotLight light = gSpotLight[lightIndex];
+		
+		// ライト方向と距離を計算
+        float3 lightDir = light.position - input.worldPosition;
+        float dist = length(lightDir);
+        lightDir /= dist;
+		
+		// ライトの影響範囲内であれば計算
+        if (dist < light.distance)
+        {
+			// 減衰を計算
+            float attenuation = pow(max(0.0f, 1.0f - (dist / light.distance)), light.decay);
+			
+			// 法線とライト方向の内積を計算
+            float nDotL = max(0.0f, dot(normal, lightDir));
+			
+			// スポットライトの角度減衰
+            float cosDir = dot(-lightDir, normalize(light.direction));
+            float spotAttenuation = saturate((cosDir - light.cosAngle) / max(0.001f, (light.cosFalloffStart - light.cosAngle)));
+			
+			// ライトを加算
+            finalLight += albedo * light.color.rgb * light.intensity * nDotL * attenuation * spotAttenuation;
+        }
+    }
+
+	// アンビエント光を加算して出力
+    float3 ambient = albedo * 0.1f;
+    output.color = float4(ambient + finalLight, 1.0f);
+	
+    return output;
+}

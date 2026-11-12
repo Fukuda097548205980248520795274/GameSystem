@@ -89,6 +89,7 @@ namespace Detail
 	{
 		CustomRootParamType type = CustomRootParamType::CBV;
 		uint32_t shaderRegister = 0; // b0, t0, u0 などの 0 の部分
+        uint32_t registerSpace = 0;
 		ShaderVisibility visibility = ShaderVisibility::All;
 
 		// エディタで選択するレンダリングバインディングの種類
@@ -102,6 +103,7 @@ namespace Detail
 	struct CustomStaticSampler
 	{
 		uint32_t shaderRegister = 0; // s0 などの 0 の部分
+        uint32_t registerSpace = 0;
 		D3D12_FILTER filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 		D3D12_TEXTURE_ADDRESS_MODE addressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 		D3D12_TEXTURE_ADDRESS_MODE addressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -190,6 +192,7 @@ namespace Detail
 	{
 		j["type"] = static_cast<int>(param.type);
 		j["shaderRegister"] = param.shaderRegister;
+        j["registerSpace"] = param.registerSpace; 
 		j["visibility"] = static_cast<int>(param.visibility);
 		j["binding"] = static_cast<int>(param.binding);
 		
@@ -208,6 +211,7 @@ namespace Detail
 	inline void ToJson(json& j, const CustomStaticSampler& sampler)
 	{
 		j["shaderRegister"] = sampler.shaderRegister;
+        j["registerSpace"] = sampler.registerSpace; 
 		j["filter"] = static_cast<int>(sampler.filter);
 		j["addressU"] = static_cast<int>(sampler.addressU);
 		j["addressV"] = static_cast<int>(sampler.addressV);

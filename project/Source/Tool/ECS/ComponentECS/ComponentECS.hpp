@@ -161,6 +161,24 @@ struct RenderComponent
 	int priority;
 };
 
+/// @brief プレハブコンポーネント
+struct PrefabComponent
+{
+    PrefabComponent() : priority(0) {}
+
+    // 描画順序（数値が小さいほど先に描画）
+    int priority = 0;
+};
+
+// @brief プレハブのインスタンスを示すコンポーネント
+struct PrefabInstanceComponent
+{
+    PrefabInstanceComponent() : sourcePrefab(kNullEntity) {}
+
+    // 参照するPrefabのエンティティ
+    Entity sourcePrefab;
+};
+
 /// @brief メッシュコンポーネント
 struct MeshComponent
 {

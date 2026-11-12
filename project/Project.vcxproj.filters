@@ -359,6 +359,21 @@
     <Filter Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO">
       <UniqueIdentifier>{f13d4bae-bb67-4659-81c0-ad85105fcf76}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\GPUParticleSystem">
+      <UniqueIdentifier>{1705cc34-1e2c-43d8-a877-d4bd48eb7663}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\InstancingParticleSystem">
+      <UniqueIdentifier>{afcb6193-84e8-4c8c-86b8-13e87e0b6bb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\PrefabSystem">
+      <UniqueIdentifier>{b8e23744-b92f-4868-ab5c-5989385311b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Prefab">
+      <UniqueIdentifier>{c9d57990-4684-4c8e-9607-d685d862efb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Prefab\Prefab3D">
+      <UniqueIdentifier>{e19d8bd4-2d7e-4a83-bcae-d403762bbf28}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -624,6 +639,15 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO\ShadowMapPrefabPSO.cpp">
       <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\GPUParticleSystem\GPUParticleSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\GPUParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\InstancingParticleSystem\InstancingParticleSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\InstancingParticleSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.cpp">
+      <Filter>Source\Engine\RenderContext\Render\PrefabSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -927,6 +951,15 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO\ShadowMapPrefabPSO.hpp">
       <Filter>Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\GPUParticleSystem\GPUParticleSystem.hpp">
+      <Filter>Source\Engine\RenderContext\Render\GPUParticleSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\InstancingParticleSystem\InstancingParticleSystem.hpp">
+      <Filter>Source\Engine\RenderContext\Render\InstancingParticleSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.hpp">
+      <Filter>Source\Engine\RenderContext\Render\PrefabSystem</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">
@@ -968,6 +1001,12 @@
     <FxCompile Include="Assets\Internal\Shader\ShadowMap\ShadowMapPrefab.VS.hlsl">
       <Filter>Shader\ShadowMap</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.PS.hlsl">
+      <Filter>Shader\Prefab\Prefab3D</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.VS.hlsl">
+      <Filter>Shader\Prefab\Prefab3D</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Internal\Shader\Fullscreen\Fullscreen.hlsli">
@@ -990,6 +1029,9 @@
     </None>
     <None Include="Assets\Internal\Shader\ShadowMap\ShadowMap.hlsli">
       <Filter>Shader\ShadowMap</Filter>
+    </None>
+    <None Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.hlsli">
+      <Filter>Shader\Prefab\Prefab3D</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -186,8 +186,11 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\Render\InstancingParticleSystem\InstancingParticleSystem.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\Render\GPUParticleSystem\GPUParticleSystem.cpp" />
+    <ClCompile Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO\ShadowMapPrefabPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPSO\ShadowMapPSO.cpp" />
@@ -500,8 +503,11 @@
     <ClInclude Include="Source\Engine\RenderContext\BarrierBatcher\BarrierBatcher.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\CameraSystem\CameraSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\DebugCameraSystem\DebugCameraSystem.hpp" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\InstancingParticleSystem\InstancingParticleSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.hpp" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\GPUParticleSystem\GPUParticleSystem.hpp" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO\ShadowMapPrefabPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPSO\ShadowMapPSO.hpp" />
@@ -612,6 +618,22 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.PS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Assets\Internal\Shader\Render\Render2D\Render2D.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
@@ -711,6 +733,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
     <None Include="Assets\Internal\Shader\LightCulling\LightData.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

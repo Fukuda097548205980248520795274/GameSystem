@@ -2,42 +2,82 @@
 #include "Engine.hpp"
 #include "Func/ConvertString/ConvertString.hpp"
 
-/// @brief コンストラクタ
-Detail::PSOEditor::PSOEditor()
+/// @brief 初期化
+/// @param device 
+/// @param compiler 
+void Detail::PSOEditor::Initialize(ID3D12Device* device, ShaderCompiler* compiler)
 {
-	// PSOファイルリストとシェーダファイルリストを更新する
-	RefreshPsoFileList();
-	RefreshShaderFileList();
+    // PSOファイルリストとシェーダファイルリストを更新する
+    RefreshPsoFileList();
+    RefreshShaderFileList();
 
-	
-	// エディタ生成時に初期用のシェーダを読み込んだデフォルトPSOを追加する
-	PSOItem defaultRender3DItem;
-	defaultRender3DItem.name = "Default_Render3D";
 
-	// デフォルトのシェーダパスを設定する
-	defaultRender3DItem.desc.vsPath = L"./Assets/Internal/Shader/Render/Render3D/Render3D.VS.hlsl";
-	defaultRender3DItem.desc.psPath = L"./Assets/Internal/Shader/Render/Render3D/Render3D.PS.hlsl";
-	AutoSetupRootParameters(defaultRender3DItem.desc);
+    /*-------------------------------
+        デフォルト用の描画PSOを追加
+    -------------------------------*/
 
-	// ルートパラメータのバインディングを自動設定する
-	defaultRender3DItem.desc.rootParameters[0].binding = RenderBinding::Transform;
-	defaultRender3DItem.desc.rootParameters[1].binding = RenderBinding::Material;
-	defaultRender3DItem.desc.rootParameters[2].binding = RenderBinding::Camera;
-	defaultRender3DItem.desc.rootParameters[3].binding = RenderBinding::NumLights;
-	defaultRender3DItem.desc.rootParameters[4].binding = RenderBinding::DirectionalLight;
-	defaultRender3DItem.desc.rootParameters[5].binding = RenderBinding::PointLight;
-	defaultRender3DItem.desc.rootParameters[6].binding = RenderBinding::SpotLight;
-	defaultRender3DItem.desc.rootParameters[7].binding = RenderBinding::LightCullingTitle;
-	defaultRender3DItem.desc.rootParameters[8].binding = RenderBinding::Texture;
+    // エディタ生成時に初期用のシェーダを読み込んだデフォルトPSOを追加する
+    PSOItem defaultRender3DItem;
+    defaultRender3DItem.name = "Default_Render3D";
 
-	// 自動再構築のフラグを立てておき、最初にDrawUIが呼ばれたタイミングでビルドを走らせる
-	defaultRender3DItem.isDirty = true;
-	isAutoRebuild_ = true;
+    // デフォルトのシェーダパスを設定する
+    defaultRender3DItem.desc.vsPath = L"./Assets/Internal/Shader/Render/Render3D/Render3D.VS.hlsl";
+    defaultRender3DItem.desc.psPath = L"./Assets/Internal/Shader/Render/Render3D/Render3D.PS.hlsl";
+    AutoSetupRootParameters(defaultRender3DItem.desc);
 
-	// リストに追加して選択状態にする
-	psoItems_.push_back(defaultRender3DItem);
-	selectedIndex_ = 0;
+    // ルートパラメータのバインディングを自動設定する
+    defaultRender3DItem.desc.rootParameters[0].binding = RenderBinding::Transform;
+    defaultRender3DItem.desc.rootParameters[1].binding = RenderBinding::Material;
+    defaultRender3DItem.desc.rootParameters[2].binding = RenderBinding::Camera;
+    defaultRender3DItem.desc.rootParameters[3].binding = RenderBinding::NumLights;
+    defaultRender3DItem.desc.rootParameters[4].binding = RenderBinding::DirectionalLight;
+    defaultRender3DItem.desc.rootParameters[5].binding = RenderBinding::PointLight;
+    defaultRender3DItem.desc.rootParameters[6].binding = RenderBinding::SpotLight;
+    defaultRender3DItem.desc.rootParameters[7].binding = RenderBinding::LightCullingTitle;
+    defaultRender3DItem.desc.rootParameters[8].binding = RenderBinding::Texture;
+
+    // 自動再構築のフラグを立てておき、最初にDrawUIが呼ばれたタイミングでビルドを走らせる
+    defaultRender3DItem.isDirty = true;
+
+
+    /*--------------------------------------
+        デフォルト用のプレハブ描画PSOを追加
+    --------------------------------------*/
+
+    PSOItem defaultPrefab3DItem;
+    defaultPrefab3DItem.name = "Default_Prefab3D";
+
+    // デフォルトのシェーダパスを設定する
+    defaultPrefab3DItem.desc.vsPath = L"./Assets/Internal/Shader/Prefab/Prefab3D/Prefab3D.VS.hlsl";
+    defaultPrefab3DItem.desc.psPath = L"./Assets/Internal/Shader/Prefab/Prefab3D/Prefab3D.PS.hlsl";
+    AutoSetupRootParameters(defaultPrefab3DItem.desc);
+
+    // ルートパラメータのバインディングを自動設定する
+    defaultPrefab3DItem.desc.rootParameters[0].binding = RenderBinding::Transform;
+    defaultPrefab3DItem.desc.rootParameters[1].binding = RenderBinding::Material;
+    defaultPrefab3DItem.desc.rootParameters[2].binding = RenderBinding::Camera;
+    defaultPrefab3DItem.desc.rootParameters[3].binding = RenderBinding::NumLights;
+    defaultPrefab3DItem.desc.rootParameters[4].binding = RenderBinding::DirectionalLight;
+    defaultPrefab3DItem.desc.rootParameters[5].binding = RenderBinding::PointLight;
+    defaultPrefab3DItem.desc.rootParameters[6].binding = RenderBinding::SpotLight;
+    defaultPrefab3DItem.desc.rootParameters[7].binding = RenderBinding::LightCullingTitle;
+    defaultPrefab3DItem.desc.rootParameters[8].binding = RenderBinding::Texture;
+
+    // 自動再構築のフラグを立てておき、最初にDrawUIが呼ばれたタイミングでビルドを走らせる
+    defaultPrefab3DItem.isDirty = true;
+
+
+    isAutoRebuild_ = true;
+
+    // リストに追加して選択状態にする
+    psoItems_.push_back(defaultRender3DItem);
+    psoItems_.push_back(defaultPrefab3DItem);
+    selectedIndex_ = 0;
+
+    // 初期化のためのビルド
+    BuildDirtyPSOs(device, compiler);
 }
+
 
 /// @brief 更新処理
 void Detail::PSOEditor::Update()
@@ -401,6 +441,12 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 						p.shaderRegister = static_cast<uint32_t>(std::max(0, reg));
 						currentItem.isDirty = true;
 					}
+
+                    int space = static_cast<int>(p.registerSpace);
+                    if (ImGui::InputInt("スペース", &space)) {
+                        p.registerSpace = static_cast<uint32_t>(std::max(0, space));
+                        currentItem.isDirty = true;
+                    }
 				}
 				else
 				{
@@ -443,6 +489,14 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 							range.baseShaderRegister = static_cast<uint32_t>(std::max(0, baseReg));
 							currentItem.isDirty = true;
 						}
+
+                        // レジスタスペースの編集
+                        int space = static_cast<int>(range.registerSpace);
+                        if (ImGui::InputInt("スペース", &space))
+                        {
+                            range.registerSpace = static_cast<uint32_t>(std::max(0, space));
+                            currentItem.isDirty = true;
+                        }
 
 						// レジスタスペースの編集
 						if (ImGui::Button("レンジ 削除"))
@@ -495,6 +549,13 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 					sampler.shaderRegister = static_cast<uint32_t>(std::max(0, reg));
 					currentItem.isDirty = true;
 				}
+
+                // レジスタスペースの編集
+                int space = static_cast<int>(sampler.registerSpace);
+                if (ImGui::InputInt("スペース", &space)) {
+                    sampler.registerSpace = static_cast<uint32_t>(std::max(0, space));
+                    currentItem.isDirty = true;
+                }
 
 				// フィルターの編集
 				const char* filterItems[] = { "MIN_MAG_MIP_POINT", "MIN_MAG_MIP_LINEAR", "ANISOTROPIC",
@@ -1037,8 +1098,8 @@ void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
 	desc.staticSamplers.clear();
 
 	// 重複チェック用のセット
-	using RegisterKey = std::tuple<char, uint32_t, ShaderVisibility>;
-	std::set<RegisterKey> registeredKeys;
+    using RegisterKey = std::tuple<char, uint32_t, uint32_t, ShaderVisibility>;
+    std::set<RegisterKey> registeredKeys;
 
 	// ファイルを読み込んでレジスタを抽出するラムダ関数
 	auto ExtractRegisters = [&](const std::wstring& path, ShaderVisibility visibility)
@@ -1051,58 +1112,63 @@ void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
 			ss << file.rdbuf();
 			std::string content = ss.str();
 
-			// HLSLのregister指定を正規表現で抽出
-			std::regex reg("register\\s*\\(\\s*([btus])(\\d+)\\s*(?:,\\s*space\\d+)?\\s*\\)");
-			auto words_begin = std::sregex_iterator(content.begin(), content.end(), reg);
-			auto words_end = std::sregex_iterator();
+            // HLSLのregister指定を正規表現で抽出
+            std::regex reg(R"(register\(\s*([tbsu])(\d+)(?:\s*,\s*space(\d+))?\s*\))");
+            auto words_begin = std::sregex_iterator(content.begin(), content.end(), reg);
+            auto words_end = std::sregex_iterator();
 
-			for (std::sregex_iterator i = words_begin; i != words_end; ++i)
-			{
-				std::smatch match = *i;
-				char type = match[1].str()[0];
-				uint32_t regNum = static_cast<uint32_t>(std::stoul(match[2].str()));
+            for (std::sregex_iterator i = words_begin; i != words_end; ++i)
+            {
+                std::smatch match = *i;
+                char type = match[1].str()[0]; // 't', 'b', 's', 'u'
+                uint32_t regNum = static_cast<uint32_t>(std::stoul(match[2].str()));
 
-				RegisterKey key = { type, regNum, visibility };
+                // space番号が指定されていない場合は0とする
+                uint32_t spaceNum = match[3].matched ? static_cast<uint32_t>(std::stoul(match[3].str())) : 0;
 
-				// 同一シェーダステージ内での重複指定でなければ追加
-				if (registeredKeys.find(key) == registeredKeys.end())
-				{
-					registeredKeys.insert(key);
+                RegisterKey key = { type, regNum, spaceNum, visibility };
 
-					if (type == 's')
-					{
-						CustomStaticSampler sampler{};
-						sampler.shaderRegister = regNum;
-						sampler.visibility = visibility;
-						desc.staticSamplers.push_back(sampler);
-					}
-					else
-					{
-						CustomRootParameter param{};
-						param.shaderRegister = regNum;
-						param.visibility = visibility;
+                // 同一シェーダステージ内での重複指定でなければ追加
+                if (registeredKeys.find(key) == registeredKeys.end())
+                {
+                    registeredKeys.insert(key);
 
-						if (type == 'b') param.type = CustomRootParamType::CBV;
-						
-						else if (type == 't' || type == 'u')
-						{
-							// t (Texture/SRV) と u (UAV) は DescriptorTable として設定
-							param.type = CustomRootParamType::DescriptorTable;
+                    if (type == 's')
+                    {
+                        // サンプラーの追加
+                        CustomStaticSampler sampler{};
+                        sampler.shaderRegister = regNum;
+                        sampler.registerSpace = spaceNum;
+                        sampler.visibility = visibility;
+                        desc.staticSamplers.push_back(sampler);
+                    }
+                    else
+                    {
+                        // ルートパラメータの追加
+                        CustomRootParameter param{};
+                        param.shaderRegister = regNum;
+                        param.registerSpace = spaceNum;
+                        param.visibility = visibility;
 
-							CustomDescriptorRange range{};
-							range.rangeType = (type == 't') ? D3D12_DESCRIPTOR_RANGE_TYPE_SRV : D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-							range.numDescriptors = 1; // デフォルトで1つ
-							range.baseShaderRegister = regNum;
-							range.registerSpace = 0;
-							range.offsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+                        if (type == 'b') param.type = CustomRootParamType::CBV;
+                        else if (type == 't' || type == 'u')
+                        {
+                            param.type = CustomRootParamType::DescriptorTable;
 
-							param.descriptorRanges.push_back(range);
-						}
+                            CustomDescriptorRange range{};
+                            range.rangeType = (type == 't') ? D3D12_DESCRIPTOR_RANGE_TYPE_SRV : D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+                            range.numDescriptors = 1;
+                            range.baseShaderRegister = regNum;
+                            range.registerSpace = spaceNum;
+                            range.offsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-						desc.rootParameters.push_back(param);
-					}
-				}
-			}
+                            param.descriptorRanges.push_back(range);
+                        }
+
+                        desc.rootParameters.push_back(param);
+                    }
+                }
+            }
 		};
 
 	// ファイルを読み込んでインプットレイアウトを抽出するラムダ関数
@@ -1183,6 +1249,86 @@ void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
 	{
 		ExtractRegisters(desc.csPath, ShaderVisibility::All);
 	}
+}
+
+/// @brief 変更されたPSOをビルドする
+/// @param device 
+/// @param compiler 
+/// @param engine 
+void Detail::PSOEditor::BuildDirtyPSOs(ID3D12Device* device, ShaderCompiler* compiler)
+{
+    // エンジンのインスタンスを取得する
+    auto engine = Engine::GetInstance();
+
+    for (size_t i = 0; i < psoItems_.size(); ++i)
+    {
+        //  現在のPSOアイテムを取得
+        auto& currentItem = psoItems_[i];
+        auto& currentDesc = currentItem.desc;
+
+        // シェーダファイルの存在チェック
+        bool vsExists = !currentDesc.vsPath.empty() && std::filesystem::exists(currentDesc.vsPath);
+        bool psExists = !currentDesc.psPath.empty() && std::filesystem::exists(currentDesc.psPath);
+        bool csExists = !currentDesc.csPath.empty() && std::filesystem::exists(currentDesc.csPath);
+
+        // isDirtyがtrueのものだけビルド
+        if (currentItem.isDirty)
+        {
+            // タイプに応じたファイル存在チェック
+            bool canBuild = false;
+
+            // Graphics PSO の場合は VS と PS が必要、Compute PSO の場合は CS が必要
+            if (currentDesc.type == Detail::PSOType::Graphics)
+            {
+                canBuild = vsExists && psExists;
+            }
+            else
+            {
+                canBuild = csExists;
+            }
+
+            // ビルド可能かどうかのチェック
+            if (!canBuild)
+            {
+                currentItem.isBuildFailed = true;
+                currentItem.statusMessage = "ビルド失敗 : シェーダファイルが見つかりません";
+                if (engine) engine->Log(LogLevel::Error, "PSOビルド失敗. 無効なシェーダパス : " + currentItem.name);
+            }
+            else
+            {
+                DynamicPSOBuilder builder;
+                Microsoft::WRL::ComPtr<ID3D12PipelineState> newPSO;
+                Microsoft::WRL::ComPtr<ID3D12RootSignature> newRootSig;
+
+                // PSOのビルドを試みる
+                if (builder.Build(device, compiler, currentDesc, &newRootSig, &newPSO))
+                {
+                    // 古いPSOやルートシグネチャを破棄するためにガベージキューに追加
+                    if (currentItem.pso || currentItem.rootSig)
+                    {
+                        garbageQueue_.push_back({ currentItem.pso, currentItem.rootSig, 0 });
+                    }
+
+                    // ビルドに成功した場合の処理
+                    currentItem.pso = newPSO;
+                    currentItem.rootSig = newRootSig;
+                    currentItem.isBuildFailed = false;
+                    currentItem.statusMessage = "ビルド成功";
+                    if (engine) engine->Log(LogLevel::Info, "PSO ビルド成功 : " + currentItem.name);
+                }
+                else
+                {
+                    // ビルドに失敗した場合の処理
+                    currentItem.isBuildFailed = true;
+                    currentItem.statusMessage = "コンパイルエラー";
+                    if (engine) engine->Log(LogLevel::Error, "PSO ビルド失敗 : " + currentItem.name);
+                }
+            }
+
+            // 処理が終わったらフラグを倒す
+            currentItem.isDirty = false;
+        }
+    }
 }
 
 /// @brief JSONファイルをバイナリに変換する

@@ -72,7 +72,7 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
 	shaderEditor_ = std::make_unique<ShaderEditor>();
 
 	// PSOEditorを作成
-	psoEditor_ = std::make_unique<PSOEditor>();
+    psoEditor_ = std::make_unique<PSOEditor>(core_->GetDevice(), shaderCompiler_.get());
 
 
 

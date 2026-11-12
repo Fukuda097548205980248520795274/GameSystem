@@ -45,7 +45,7 @@ namespace Detail
 	public:
 
 		/// @brief コンストラクタ
-		PSOEditor();
+        PSOEditor(ID3D12Device* device, ShaderCompiler* compiler) { Initialize(device, compiler); }
 
 		/// @brief 更新処理
 		void Update();
@@ -98,6 +98,16 @@ namespace Detail
 
 
 	private:
+
+        /// @brief 初期化
+        /// @param device 
+        /// @param compiler 
+        void Initialize(ID3D12Device* device, ShaderCompiler* compiler);
+
+        /// @brief 変更されたPSOをビルドする
+        /// @param device 
+        /// @param compiler 
+        void BuildDirtyPSOs(ID3D12Device* device, ShaderCompiler* compiler);
 
 		/// @brief JSONファイルをバイナリに変換する
 		void ConvertJsonToBin();
