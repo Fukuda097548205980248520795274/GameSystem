@@ -169,6 +169,10 @@ namespace Detail
         /// @return 
         ResourceStore* GetResourceStore() const { return resourceStore_.get(); }
 
+        /// @brief UPLOADヒープ用バッファアロケータを取得する
+        /// @return 
+        BufferAllocator* GetUploadBufferAllocator() const { return resourceStore_->GetUploadBufferAllocator(); }
+
         /// @brief 配置リソースアロケータを取得する
         /// @return 
         PlacedResourceAllocator* GetPlacedResourceAllocator() const { return resourceStore_->GetPlacedResourceAllocator(); }

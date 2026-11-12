@@ -2,6 +2,7 @@
 #include <cassert>
 #include <filesystem>
 #include "Store/TextureStore/TextureStore.hpp"
+#include "Store/ResourceStore/ResourceStore.hpp"
 
 /// @brief モデルを読み込む
 /// @param directory 
@@ -12,13 +13,22 @@
 /// @param commandList 
 /// @param allocator 
 /// @return 
-Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList, BufferAllocator* allocator)
+Detail::ModelData Detail::LoadModel(const std::string& filePath, TextureStore* textureStore,
+    DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ResourceStore* resourceStore)
 {
 	// nullptrチェック
 	assert(textureStore);
 	assert(heap);
 	assert(device);
 	assert(commandList);
+    assert(resourceStore);
+
+    // バッファアロケータを取得する
+    auto  uploadAllocator = resourceStore->GetUploadBufferAllocator();
+    auto  defaultAllocator = resourceStore->GetDefaultBufferAllocator();
+    if (uploadAllocator == nullptr || defaultAllocator == nullptr)
+        return ModelData();
+
 
 	// AssImpでファイルを開く
 	Assimp::Importer importer;
@@ -158,16 +168,44 @@ Detail::ModelData Detail::LoadModel(const std::string& filePath,TextureStore* te
 		modelData.meshes[meshIndex] = std::move(meshData);
 		modelData.meshNames[meshIndex] = meshName;
 		modelData.meshIndices[meshName] = meshIndex;
+        modelData.meshes[meshIndex].vertices = std::move(vertices);
+
+        // 頂点データのサイズ
+        uint64_t vertexDataSize = sizeof(ModelVertexData) * mesh->mNumVertices;
 
 		// 頂点データを作成する
-		modelData.meshes[meshIndex].vertexBufferResource = std::make_unique<VertexBufferResource<ModelVertexData>>(allocator, device, mesh->mNumVertices, 0);
-		auto vertexData = modelData.meshes[meshIndex].vertexBufferResource->GetData(0);
-		std::memcpy(vertexData, vertices.data(), sizeof(ModelVertexData) * mesh->mNumVertices);
+		modelData.meshes[meshIndex].vertexBufferResource = std::make_unique<VertexBufferResource<ModelVertexData>>(defaultAllocator, device, mesh->mNumVertices, 0);
+        SubAllocatedRegion stagingVertexRegion = uploadAllocator->Allocate(vertexDataSize);
+		std::memcpy(stagingVertexRegion.cpuAddress, modelData.meshes[meshIndex].vertices.data(), vertexDataSize);
+
+        // 頂点データをコピーする
+        const SubAllocatedRegion& destVertexRegion = modelData.meshes[meshIndex].vertexBufferResource->GetRegion(0);
+        destVertexRegion.parentBuffer->Transition(commandList, D3D12_RESOURCE_STATE_COPY_DEST);
+        commandList->CopyBufferRegion(destVertexRegion.parentBuffer->GetResource(), destVertexRegion.allocation.offset,
+            stagingVertexRegion.parentBuffer->GetResource(), stagingVertexRegion.allocation.offset, vertexDataSize);
+        destVertexRegion.parentBuffer->Transition(commandList, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+
+
+        // インデックスデータのサイズ
+        uint64_t indexDataSize = sizeof(uint32_t) * (mesh->mNumFaces * 3);
 
 		// インデックスデータを作成する
-		modelData.meshes[meshIndex].indexBufferResource = std::make_unique<IndexBufferResource>(allocator, device, mesh->mNumFaces * 3, 0);
-		auto indexData = modelData.meshes[meshIndex].indexBufferResource->GetData(0);
-		std::memcpy(indexData, indices.data(), sizeof(uint32_t) * (mesh->mNumFaces * 3));
+		modelData.meshes[meshIndex].indexBufferResource = std::make_unique<IndexBufferResource>(defaultAllocator, device, mesh->mNumFaces * 3, 0);
+        SubAllocatedRegion stagingIndexRegion = uploadAllocator->Allocate(indexDataSize);
+        std::memcpy(stagingIndexRegion.cpuAddress, indices.data(), indexDataSize);
+
+        // インデックスデータをコピーする
+        const SubAllocatedRegion& destIndexRegion = modelData.meshes[meshIndex].indexBufferResource->GetRegion(0);
+        destIndexRegion.parentBuffer->Transition(commandList, D3D12_RESOURCE_STATE_COPY_DEST);
+        commandList->CopyBufferRegion(destIndexRegion.parentBuffer->GetResource(), destIndexRegion.allocation.offset,
+            stagingIndexRegion.parentBuffer->GetResource(), stagingIndexRegion.allocation.offset, indexDataSize);
+        destIndexRegion.parentBuffer->Transition(commandList, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+
+        // アップロード用のバッファを解放する
+        resourceStore->FreeUploadRegionDeferred(stagingVertexRegion, 0);
+        resourceStore->FreeUploadRegionDeferred(stagingIndexRegion, 0);
 	}
 
 	// ノードを再帰的に読み込む

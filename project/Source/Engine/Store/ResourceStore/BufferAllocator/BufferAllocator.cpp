@@ -18,7 +18,7 @@ Detail::SubAllocatedRegion Detail::BufferAllocator::Allocate(uint64_t size, uint
     }
     
     // 既存ページに十分な空きがない場合、新しいページを生成して確保
-    auto newPage = std::make_unique<SubAllocatedBuffer>(device_, pageSize_);
+    auto newPage = std::make_unique<SubAllocatedBuffer>(device_, pageSize_, heapType_);
     SubAllocatedRegion region = newPage->Allocate(size, alignment);
     region.parentBuffer = newPage.get();
 

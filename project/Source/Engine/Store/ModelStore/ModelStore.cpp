@@ -34,15 +34,14 @@ Detail::ModelHandle Detail::ModelStore::Load(const std::string& filePath, Textur
 
     // エンジンのインスタンスを取得する
     auto engine = Engine::GetInstance();
-    assert(engine);
+    if (!engine) return ModelHandle::Invalid();
 
-    // バッファアロケータを取得する
-    auto allocator = engine->GetRenderContext()->GetResourceStore()->GetBufferAllocator();
-    assert(allocator);
+    auto resourceStore = engine->GetRenderContext()->GetResourceStore();
+    if (!resourceStore) return ModelHandle::Invalid();
 
 
 	// モデルデータのロード
-	ModelData modelData = LoadModel(filePath, textureStore, heap, device, commandList, allocator);
+	ModelData modelData = LoadModel(filePath, textureStore, heap, device, commandList, resourceStore);
 	if (modelData.meshes.empty())
 	{
 		return ModelHandle::Invalid();

@@ -21,9 +21,23 @@ namespace Detail
         /// @brief デストラクタ
         ~ResourceStore() = default;
 
-        /// @brief バッファアロケータを取得する
+        /// @brief 更新処理
+        /// @param maxBufferCount 
+        /// @param frameIndex 
+        void Update(uint32_t maxBufferCount, uint32_t frameIndex);
+
+        /// @brief UPLOADヒープ領域の遅延解放を予約する
+        /// @param region 
+        /// @param frameIndex 
+        void FreeUploadRegionDeferred(const SubAllocatedRegion& region, uint32_t frameIndex);
+
+        /// @brief UPLOADヒープ用バッファアロケータを取得する
         /// @return 
-        BufferAllocator* GetBufferAllocator() const { return bufferAllocator_.get(); }
+        BufferAllocator* GetUploadBufferAllocator() const { return uploadBufferAllocator_.get(); }
+
+        /// @brief DEFAULTヒープ用バッファアロケータを取得する
+        /// @return
+        BufferAllocator* GetDefaultBufferAllocator() const { return defaultBufferAllocator_.get(); }
 
         /// @brief 配置済みアロケータを取得する
         /// @return 
@@ -110,8 +124,11 @@ namespace Detail
             std::type_index type;
         };
 
-        // バッファアロケータ <- これはresourcesより先に消す
-        std::unique_ptr<BufferAllocator> bufferAllocator_;
+        // UPLOADヒープ用バッファアロケータ
+        std::unique_ptr<BufferAllocator> uploadBufferAllocator_;
+
+        // DEFAULTヒープ用バッファアロケータ
+        std::unique_ptr<BufferAllocator> defaultBufferAllocator_;
 
         // 配置済みリソースアロケータ
         std::unique_ptr<PlacedResourceAllocator> placedAllocator_;
@@ -121,5 +138,21 @@ namespace Detail
 
         // 型情報に基づいて空きハンドルのキューを管理
         std::queue<int32_t> freeHandles_;
+
+
+    private:
+
+        /// @brief 遅延解放待ちのデータ
+        struct DeferredFreeData
+        {
+            // @brief 解放するサブアロケート領域
+            SubAllocatedRegion region;
+
+            // 破棄要求を出したフレームインデックス
+            uint32_t requestedFrameIndex;
+        };
+
+        // 破棄待ちキュー
+        std::queue<DeferredFreeData> deferredFreeQueue_;
 	};
 }

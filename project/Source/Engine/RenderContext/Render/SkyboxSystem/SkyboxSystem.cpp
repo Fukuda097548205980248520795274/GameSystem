@@ -17,15 +17,15 @@ void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
     assert(resourceStore);
 
     // バッファアロケータを取得する
-    auto bufferAllocator = resourceStore->GetBufferAllocator();
-    assert(bufferAllocator);
+    auto uploadBufferAllocator = resourceStore->GetUploadBufferAllocator();
+    assert(uploadBufferAllocator);
 
 	// SkyboxPSOを初期化する
 	pso_ = std::make_unique<SkyboxPSO>(device, shaderCompiler);
 
 
 	// インデックスリソースの生成と初期化
-	indexResource_ = std::make_unique<IndexBufferResource>(bufferAllocator, device, 36, 1);
+	indexResource_ = std::make_unique<IndexBufferResource>(uploadBufferAllocator, device, 36, 1);
 	auto indexData = indexResource_->GetData(0);
 
 	// 番号を与える
@@ -45,7 +45,7 @@ void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 
 
 	// 頂点リソースの生成と初期化
-	vertexResource_ = std::make_unique<VertexBufferResource<Vector4>>(bufferAllocator, device, 24, 1);
+	vertexResource_ = std::make_unique<VertexBufferResource<Vector4>>(uploadBufferAllocator, device, 24, 1);
 	auto vertexData = vertexResource_->GetData(0);
 
 	// ローカル座標を与える
@@ -84,10 +84,10 @@ void Detail::SkyboxSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 	assert(maxBufferCount > 0);
 
 	// カラーバッファの生成
-	colorBuffer_ = std::make_unique<ConstantBufferResource<Vector4>>(resourceStore->GetBufferAllocator(), maxBufferCount);
+	colorBuffer_ = std::make_unique<ConstantBufferResource<Vector4>>(uploadBufferAllocator, maxBufferCount);
 
 	// 変換行列バッファの生成
-	transformBuffer_ = std::make_unique<ConstantBufferResource<Matrix4x4>>(resourceStore->GetBufferAllocator(), maxBufferCount);
+	transformBuffer_ = std::make_unique<ConstantBufferResource<Matrix4x4>>(uploadBufferAllocator, maxBufferCount);
 }
 
 /// @brief エンティティを作成する

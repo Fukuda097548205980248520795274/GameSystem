@@ -40,7 +40,8 @@ namespace Detail
         /// @brief コンストラクタ
         /// @param device 
         /// @param capacity 
-        SubAllocatedBuffer(ID3D12Device* device, uint64_t capacity);
+        /// @param heapType 
+        SubAllocatedBuffer(ID3D12Device* device, uint64_t capacity, D3D12_HEAP_TYPE heapType = D3D12_HEAP_TYPE_UPLOAD);
 
         /// @brief デストラクタ
         ~SubAllocatedBuffer();
@@ -59,6 +60,11 @@ namespace Detail
         /// @return 
         ID3D12Resource* GetResource() const { return resource_.Get(); }
 
+        /// @brief バリアを張る
+        /// @param commandList 
+        /// @param newState 
+        void Transition(ID3D12GraphicsCommandList* commandList, D3D12_RESOURCE_STATES newState);
+
 
     private:
 
@@ -73,5 +79,11 @@ namespace Detail
 
         // 永続的にマップされたCPUアクセス用アドレス
         void* mappedData_ = nullptr;
+
+        // ヒープタイプ
+        D3D12_HEAP_TYPE heapType_ = D3D12_HEAP_TYPE_UPLOAD;
+
+        // 現在のリソースステート
+        D3D12_RESOURCE_STATES currentState_ = D3D12_RESOURCE_STATE_COMMON;
     };
 }

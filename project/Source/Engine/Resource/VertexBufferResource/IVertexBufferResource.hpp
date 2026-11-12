@@ -31,6 +31,10 @@ namespace Detail
         /// @return 
         ID3D12Resource* Get(uint32_t bufferIndex = 0) const override;
 
+        /// @brief サブアロケートされた領域を取得する
+        /// @param bufferIndex 
+        /// @return 
+        const SubAllocatedRegion& GetRegion(uint32_t bufferIndex = 0) const;
 
 		template<typename T>
 		using ComPtr = Microsoft::WRL::ComPtr<T>;

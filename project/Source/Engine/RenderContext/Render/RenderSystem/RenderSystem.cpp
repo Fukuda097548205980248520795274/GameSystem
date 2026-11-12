@@ -48,19 +48,22 @@ void Detail::RenderSystem::Update(ID3D12GraphicsCommandList* commandList, int32_
 Entity Detail::RenderSystem::CreateRender3DEntity()
 {
 	auto engine = Engine::GetInstance();
-	assert(engine);
+	if(!engine) return kNullEntity;
 
 	auto renderContext = engine->GetRenderContext();
-	assert(renderContext);
+	if(!renderContext) return kNullEntity;
 
     auto resourceStore = renderContext->GetResourceStore();
-    assert(!resourceStore);
+    if(!resourceStore) return kNullEntity;
+
+    auto uploadBufferAllocator = resourceStore->GetUploadBufferAllocator();
+    if(!uploadBufferAllocator) return kNullEntity;
 
 	auto device = renderContext->GetCore()->GetDevice();
-	assert(device);
+	if(!device) return kNullEntity;
 
 	auto textureStore = renderContext->GetTextureStore();
-	assert(textureStore);
+	if(!textureStore) return kNullEntity;
 
 	// ECSレジストリを取得する
 	auto registry = engine->GetRegistryECS();
@@ -99,11 +102,11 @@ Entity Detail::RenderSystem::CreateRender3DEntity()
 	registry->AddComponent(entity, textureComp);
 
 	// TransformDataForGPU用のConstantBufferComponentを追加する
-	TransformConstantBufferComponent constantBufferComp(resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount));
+	TransformConstantBufferComponent constantBufferComp(resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(uploadBufferAllocator, maxBufferCount));
 	registry->AddComponent(entity, constantBufferComp);
 
 	// MaterialComponentを追加する
-	MaterialConstantBufferComponent materialConstantBufferComp(resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount));
+	MaterialConstantBufferComponent materialConstantBufferComp(resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(uploadBufferAllocator, maxBufferCount));
 	registry->AddComponent(entity, materialConstantBufferComp);
 
 	return entity;
@@ -119,6 +122,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
     auto device = renderContext->GetCore()->GetDevice();
     auto commandList = renderContext->GetCommand()->GetCommandList();
     auto resourceStore = renderContext->GetResourceStore();
+    auto uploadBufferAllocator = resourceStore->GetUploadBufferAllocator();
     auto textureStore = renderContext->GetTextureStore();
     auto modelStore = renderContext->GetModelStore();
     int32_t maxBufferCount = engine->GetMaxBufferCount();
@@ -227,9 +231,9 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
 
                 // GPUデータ用のコンスタントバッファ
                 registry->AddComponent(entity, TransformConstantBufferComponent(
-                    resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount)));
+                    resourceStore->Create<ConstantBufferResource<TransformDataForGPU>>(uploadBufferAllocator, maxBufferCount)));
                 registry->AddComponent(entity, MaterialConstantBufferComponent(
-                    resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(resourceStore->GetBufferAllocator(), maxBufferCount)));
+                    resourceStore->Create<ConstantBufferResource<UnLightingMaterialDataForGPU>>(uploadBufferAllocator, maxBufferCount)));
 
                 // スケルトンデータが存在する場合はスキニングインスタンスとスキンクラスターを追加する
                 if (skeletonData)

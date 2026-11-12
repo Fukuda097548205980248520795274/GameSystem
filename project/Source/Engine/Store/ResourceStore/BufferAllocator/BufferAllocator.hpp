@@ -12,7 +12,8 @@ namespace Detail
         /// @brief コンストラクタ
         /// @param device 
         /// @param pageSize 
-        BufferAllocator(ID3D12Device* device, uint64_t pageSize = 1024 * 1024 * 64) : device_(device), pageSize_(pageSize) {}
+        /// @param heapType 
+        BufferAllocator(ID3D12Device* device, uint64_t pageSize = 1024 * 1024 * 64, D3D12_HEAP_TYPE heapType = D3D12_HEAP_TYPE_UPLOAD) : device_(device), pageSize_(pageSize), heapType_(heapType) {}
 
         /// @brief メモリを確保する
         /// @param size 
@@ -29,6 +30,9 @@ namespace Detail
 
         // デバイス
         ID3D12Device* device_ = nullptr;
+
+        // ヒープタイプ
+        D3D12_HEAP_TYPE heapType_ = D3D12_HEAP_TYPE_UPLOAD;
 
         // 管理するページのサイズ
         uint64_t pageSize_ = 0;

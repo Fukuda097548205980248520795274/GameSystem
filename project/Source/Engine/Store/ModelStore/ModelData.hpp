@@ -78,6 +78,8 @@ namespace Detail
 		// マテリアルデータ
 		MaterialData material;
 
+        // 頂点データ
+        std::vector<ModelVertexData> vertices;
 
 		// 頂点バッファ
 		std::unique_ptr<VertexBufferResource<ModelVertexData>> vertexBufferResource;

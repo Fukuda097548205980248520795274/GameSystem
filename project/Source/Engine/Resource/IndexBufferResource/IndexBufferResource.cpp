@@ -74,3 +74,12 @@ ID3D12Resource* Detail::IndexBufferResource::Get(uint32_t bufferIndex) const
     // サブアロケーションされた領域の親バッファからリソースを取得する
     return regions_[bufferIndex].parentBuffer->GetResource();
 }
+
+/// @brief サブアロケートされた領域を取得する
+/// @param bufferIndex 
+/// @return 
+const Detail::SubAllocatedRegion& Detail::IndexBufferResource::GetRegion(uint32_t bufferIndex) const
+{
+    assert(bufferIndex < regions_.size());
+    return regions_[bufferIndex];
+}

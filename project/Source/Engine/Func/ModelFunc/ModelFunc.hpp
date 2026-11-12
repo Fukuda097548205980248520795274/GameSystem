@@ -15,7 +15,7 @@ namespace Detail
 	class DXHeap;
 
     // バッファアロケータ
-    class BufferAllocator;
+    class ResourceStore;
 
 	/// @brief モデルを読み込む
 	/// @param filePath
@@ -23,9 +23,11 @@ namespace Detail
 	/// @param heap 
 	/// @param device 
 	/// @param commandList 
-	/// @param allocator
+	/// @param uploadAllocator
+	/// @param defaultAllocator
 	/// @return 
-	ModelData LoadModel(const std::string& filePath, TextureStore* textureStore, DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList, BufferAllocator* allocator);
+	ModelData LoadModel(const std::string& filePath, TextureStore* textureStore,
+        DXHeap* heap, ID3D12Device* device, ID3D12GraphicsCommandList* commandList, ResourceStore* resourceStore);
 
 	/// @brief ノードの再帰読み込み
 	/// @param aiNode 

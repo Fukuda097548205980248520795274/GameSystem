@@ -9,12 +9,12 @@ void Detail::ProceduralMeshStore::Initialize(ID3D12Device* device)
     auto engine = Engine::GetInstance();
     assert(engine);
 
-    // バッファアロケータを取得する
-    auto bufferAllocator = engine->GetRenderContext()->GetResourceStore()->GetBufferAllocator();
-    assert(bufferAllocator);
+    // アップロードバッファアロケータを取得する
+    auto uploadBufferAllocator = engine->GetRenderContext()->GetResourceStore()->GetUploadBufferAllocator();
+    assert(uploadBufferAllocator);
 
 	// キューブメッシュを作成する
-	CreateCubeMesh(device, bufferAllocator);
+	CreateCubeMesh(device, uploadBufferAllocator);
 }
 
 /// @brief コマンドリストに登録する

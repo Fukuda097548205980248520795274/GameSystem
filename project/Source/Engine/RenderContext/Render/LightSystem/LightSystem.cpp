@@ -14,6 +14,9 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
     auto resourceStore = engine->GetRenderContext()->GetResourceStore();
     assert(resourceStore);
 
+    auto uploadBufferAllocator = resourceStore->GetUploadBufferAllocator();
+    assert(uploadBufferAllocator);
+
     auto placedResourceAllocator = engine->GetRenderContext()->GetPlacedResourceAllocator();
     assert(placedResourceAllocator);
 
@@ -25,19 +28,19 @@ void Detail::LightSystem::Initialize(ID3D12Device* device,ID3D12GraphicsCommandL
 
 
 	// カメラデータ用の定数バッファを作成
-	cameraDataBuffer_ = std::make_unique<ConstantBufferResource<LightCullingCameraDataForGPU>>(resourceStore->GetBufferAllocator(), engine->GetMaxBufferCount());
+	cameraDataBuffer_ = std::make_unique<ConstantBufferResource<LightCullingCameraDataForGPU>>(uploadBufferAllocator, engine->GetMaxBufferCount());
 
 	// ライト数データ用の構造化バッファを作成
-	numLightDataBuffer_ = std::make_unique<ConstantBufferResource<NumLightDataForGPU>>(resourceStore->GetBufferAllocator(), engine->GetMaxBufferCount());
+	numLightDataBuffer_ = std::make_unique<ConstantBufferResource<NumLightDataForGPU>>(uploadBufferAllocator, engine->GetMaxBufferCount());
 
 	// 平行光源データ用の構造化バッファを作成
-	directionalLightDataBuffer_ = std::make_unique<StructuredBufferResource<DirectionalLightDataForGPU>>(resourceStore->GetBufferAllocator(), device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
+	directionalLightDataBuffer_ = std::make_unique<StructuredBufferResource<DirectionalLightDataForGPU>>(uploadBufferAllocator, device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
 
 	// ポイントライトデータ用の構造化バッファを作成
-	pointLightDataBuffer_ = std::make_unique<StructuredBufferResource<PointLightDataForGPU>>(resourceStore->GetBufferAllocator(), device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
+	pointLightDataBuffer_ = std::make_unique<StructuredBufferResource<PointLightDataForGPU>>(uploadBufferAllocator, device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
 
 	// スポットライトデータ用の構造化バッファを作成
-	spotLightDataBuffer_ = std::make_unique<StructuredBufferResource<SpotLightDataForGPU>>(resourceStore->GetBufferAllocator(), device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
+	spotLightDataBuffer_ = std::make_unique<StructuredBufferResource<SpotLightDataForGPU>>(uploadBufferAllocator, device, engine->GetRenderContext()->GetHeap(), kMaxNumLights, engine->GetMaxBufferCount());
 
 	// タイルライトインデックス用のRW構造化バッファを作成
 	int width = engine->GetClientWidth();

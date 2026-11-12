@@ -21,6 +21,10 @@ void Detail::SkinningInstance::Initialize(DXHeap* heap, ID3D12Device* device, co
     auto resourceStore = engine->GetRenderContext()->GetResourceStore();
     assert(resourceStore);
 
+    // アップロードバッファアロケータを取得する
+    auto  uploadBufferAllocator = resourceStore->GetUploadBufferAllocator();
+    assert(uploadBufferAllocator);
+
 
 	assert(heap);
 	heap_ = heap;
@@ -33,17 +37,14 @@ void Detail::SkinningInstance::Initialize(DXHeap* heap, ID3D12Device* device, co
 	// 頂点数を取得する
 	uint32_t numVertices = static_cast<uint32_t>(meshData.vertexBufferResource->GetNumVertex());
 
-	// メッシュデータの頂点データを取得する
-	auto vertexData = meshData.vertexBufferResource->GetData(0);
-
 
 	// 入力頂点リソースを作成する
-	inputVertexResource_ = std::make_unique<StructuredBufferResource<ModelVertexData>>(resourceStore->GetBufferAllocator(), device, heap_, meshData.vertexBufferResource->GetNumVertex(), 1);
+	inputVertexResource_ = std::make_unique<StructuredBufferResource<ModelVertexData>>(uploadBufferAllocator, device, heap_, numVertices, 1);
 	auto inputData = inputVertexResource_->GetData(0);
-	std::memcpy(inputData, vertexData, sizeof(ModelVertexData) * meshData.vertexBufferResource->GetNumVertex());
+	std::memcpy(inputData, meshData.vertices.data(), sizeof(ModelVertexData) * numVertices);
 
 	// 入力頂点数リソースを作成する
-	numVertexResource_ = std::make_unique<ConstantBufferResource<uint32_t>>(resourceStore->GetBufferAllocator(), 1);
+	numVertexResource_ = std::make_unique<ConstantBufferResource<uint32_t>>(uploadBufferAllocator, 1);
 	auto numVertexData = numVertexResource_->GetData(0);
 	*numVertexData = numVertices;
 

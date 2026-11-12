@@ -234,6 +234,9 @@ void Detail::RenderContext::NewFrame()
     // SceneEditorを更新する
     sceneEditor_->Update();
 
+    // リソースストアを更新する
+    resourceStore_->Update(kBufferCount, frameIndex_);
+
 	// テクスチャストアを更新する
 	textureStore_->Update(kBufferCount, frameIndex_);
 
