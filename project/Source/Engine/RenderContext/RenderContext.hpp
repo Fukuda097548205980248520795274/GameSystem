@@ -19,6 +19,7 @@
 
 #include "Render/CameraSystem/CameraSystem.hpp"
 #include "Render/RenderSystem/RenderSystem.hpp"
+#include "Render/PrefabSystem/PrefabSystem.hpp"
 #include "Render/ShadowRenderSystem/ShadowRenderSystem.hpp"
 #include "Render/LightSystem/LightSystem.hpp"
 #include "Render/SkyboxSystem/SkyboxSystem.hpp"
@@ -310,6 +311,9 @@ namespace Detail
 
 		/// @brief レンダーシステム
 		std::unique_ptr<RenderSystem> renderSystem_ = nullptr;
+
+        /// @brief プレハブシステム
+        std::unique_ptr<PrefabSystem> prefabSystem_ = nullptr;
 
         // @brief シャドウレンダーシステム
         std::unique_ptr<ShadowRenderSystem> shadowRenderSystem_ = nullptr;

@@ -1,15 +1,9 @@
-
+#include "DepthOnly.hlsli"
 
 // 入力頂点シェーダ
 struct VertexShaderInput
 {
     float4 position : POSITION0;
-};
-
-// 出力頂点シェーダ
-struct VertexShaderOutput
-{
-    float4 position : SV_POSITION;
 };
 
 // 座標変換行列

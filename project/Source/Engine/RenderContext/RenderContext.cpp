@@ -109,6 +109,9 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
 	// レンダーシステムを作成
 	renderSystem_ = std::make_unique<RenderSystem>(core_->GetDevice(), shaderCompiler_.get());
 
+    // プレハブシステムを作成
+    prefabSystem_ = std::make_unique<PrefabSystem>(core_->GetDevice(), shaderCompiler_.get());
+
     // シャドウレンダーシステムを作成
     shadowRenderSystem_ = std::make_unique<ShadowRenderSystem>(core_->GetDevice(), shaderCompiler_.get());
 

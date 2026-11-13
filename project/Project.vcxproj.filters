@@ -371,6 +371,9 @@
     <Filter Include="Shader\Prefab\Prefab3D">
       <UniqueIdentifier>{e19d8bd4-2d7e-4a83-bcae-d403762bbf28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO">
+      <UniqueIdentifier>{1db0989c-4371-435d-9bce-afaae4a4ab62}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -645,6 +648,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.cpp">
       <Filter>Source\Engine\RenderContext\Render\PrefabSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO\DepthOnlyPrefabPSO.cpp">
+      <Filter>Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -957,6 +963,9 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.hpp">
       <Filter>Source\Engine\RenderContext\Render\PrefabSystem</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO\DepthOnlyPrefabPSO.hpp">
+      <Filter>Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\Fullscreen\Fullscreen.VS.hlsl">
@@ -1004,6 +1013,9 @@
     <FxCompile Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.VS.hlsl">
       <Filter>Shader\Prefab\Prefab3D</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnlyPrefab.VS.hlsl">
+      <Filter>Shader\DetphOnly</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Internal\Shader\Fullscreen\Fullscreen.hlsli">
@@ -1029,6 +1041,9 @@
     </None>
     <None Include="Assets\Internal\Shader\Prefab\Prefab3D\Prefab3D.hlsli">
       <Filter>Shader\Prefab\Prefab3D</Filter>
+    </None>
+    <None Include="Assets\Internal\Shader\DepthOnly\DepthOnly.hlsli">
+      <Filter>Shader\DetphOnly</Filter>
     </None>
   </ItemGroup>
 </Project>

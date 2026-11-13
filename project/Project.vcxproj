@@ -208,6 +208,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
+    <ClCompile Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO\DepthOnlyPrefabPSO.cpp" />
     <ClCompile Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -540,6 +541,7 @@
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightCullingPSO\LightCullingPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\LightSystem\LightSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\GPUParticleSystem\GPUParticleSystem.hpp" />
+    <ClInclude Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO\DepthOnlyPrefabPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\PrefabSystem\PrefabSystem.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\RenderSystem\DepthOnlyPSO\DepthOnlyPSO.hpp" />
     <ClInclude Include="Source\Engine\RenderContext\Render\ShadowRenderSystem\ShadowMapPrefabPSO\ShadowMapPrefabPSO.hpp" />
@@ -633,6 +635,14 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnly.VS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnlyPrefab.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
@@ -761,6 +771,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Internal\Shader\Camera\CameraData.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="Assets\Internal\Shader\DepthOnly\DepthOnly.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

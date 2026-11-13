@@ -1,6 +1,4 @@
 #pragma once
-#include <d3d12.h>
-#include <dxgi1_6.h>
 #include "Matrix/Matrix4x4/Matrix4x4.hpp"
 #include "ECS/EntityECS/EntityECS.hpp"
 #include "DepthOnlyPSO/DepthOnlyPSO.hpp"
