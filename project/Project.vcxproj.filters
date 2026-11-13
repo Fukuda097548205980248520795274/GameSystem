@@ -74,9 +74,6 @@
     <Filter Include="Source\Engine\RenderContext\DXSwapChain">
       <UniqueIdentifier>{144b6966-4a84-4710-9b77-8b9fc4d5c5e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Engine\Func\Barrier">
-      <UniqueIdentifier>{6929b12b-9e00-48fa-a677-67377c3774eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\RenderContext\MultiPass">
       <UniqueIdentifier>{9b5f33d0-7bfb-4001-a9d0-7adf1b7a6c8b}</UniqueIdentifier>
     </Filter>
