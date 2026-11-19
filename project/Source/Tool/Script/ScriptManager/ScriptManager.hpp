@@ -128,6 +128,16 @@ namespace Detail
 
 		// 中間データ用ディレクトリ
 		const std::string kCookedDir = "./Cooked/Script/";
+
+
+        // リロードタイマー
+        float reloadTimer_ = 0.0f;
+
+        // リロードが保留中かどうかのフラグ
+        bool isPendingReload_ = false;
+
+        // リロードのクールダウン時間（秒）
+        const float reloadCooldown_ = 0.5f;
 	};
 
 
@@ -180,6 +190,7 @@ namespace Detail
 		/// @brief ファイルが開いているかどうかを確認する
 		/// @return 
 		bool IsOpen() const { return file_.is_open(); }
+
 
 	private:
 

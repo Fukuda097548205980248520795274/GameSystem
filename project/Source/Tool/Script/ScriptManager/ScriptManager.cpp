@@ -361,6 +361,32 @@ void Detail::ScriptManager::Remove(ScriptHandle handle)
 			++it;
 		}
 	}
+
+    // このスクリプトを参照している全エンティティの既存インスタンスを破棄する
+    auto registry = Engine::GetInstance()->GetRegistryECS();
+    if (registry)
+    {
+        for (Entity entity : registry->GetActiveEntities())
+        {
+            if (registry->HasComponent<ScriptComponent>(entity))
+            {
+                auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
+                if (scriptComp->handle.index == handle.index)
+                {
+                    // オブジェクトと関数ポインタをクリア
+                    if (scriptComp->scriptObject)
+                    {
+                        scriptComp->scriptObject->Release();
+                        scriptComp->scriptObject = nullptr;
+                    }
+
+                    scriptComp->initFunc = nullptr;
+                    scriptComp->updateFunc = nullptr;
+                    scriptComp->handle = ScriptHandle::Invalid();
+                }
+            }
+        }
+    }
 }
 
 /// @brief スクリプトハンドルからスクリプトパスを取得する
@@ -525,4 +551,15 @@ void Detail::ScriptManager::RegisterEngineAPI()
 	{
 		if(engine)engine->Log(LogLevel::Error, "Log 関数の登録に失敗しました");
 	}
+
+    // DeltaTime 関数の登録
+    if (scriptEngine_->RegisterGlobalFunction("float GetDeltaTime()",
+        asFUNCTIONPR([]() -> float
+            {
+                return Engine::GetInstance()->GetDeltaTime();
+            },
+            (), float), asCALL_CDECL) < 0)
+    {
+        if (engine) engine->Log(LogLevel::Error, "GetDeltaTime 関数の登録に失敗しました");
+    }
 }

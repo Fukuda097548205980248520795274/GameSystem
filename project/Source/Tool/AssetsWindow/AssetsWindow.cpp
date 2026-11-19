@@ -460,11 +460,11 @@ void Detail::AssetsWindow::DrawScriptTab(ScriptManager* scriptManager)
 		}
 
 		// ダブルクリックでVSCodeを開く処理
-		if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-		{
-			// VSCodeを開く
-			ShellExecuteA(nullptr, "open", "code", ("\"" + filePath + "\"").c_str(), nullptr, SW_HIDE);
-		}
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        {
+            // VSCodeを開く (SW_HIDE を SW_SHOW に変更)
+            ShellExecuteA(nullptr, "open", "code", ("\"" + filePath + "\"").c_str(), nullptr, SW_SHOW);
+        }
 
 		// ドラッグアンドドロップのソースとして設定
 		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))

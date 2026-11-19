@@ -16,8 +16,8 @@ class Move
 
 		// ヘルパーで生成された名前に合わせて呼び出す
     	TransformComponent transform = GetTransformComponent();
-
-    	transform.position.z += 0.1f;
+		
+    	transform.position.z += 1.0f * GetDeltaTime();
     
     	SetTransformComponent(transform);
 	}

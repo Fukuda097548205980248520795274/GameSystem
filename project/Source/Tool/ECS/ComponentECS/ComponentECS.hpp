@@ -28,6 +28,19 @@ struct ScriptComponent
 	/// @param handle 
 	ScriptComponent(Detail::ScriptHandle handle) : handle(handle), filePath("") {}
 
+    // コピーコンストラクタ
+    ScriptComponent(const ScriptComponent& other):
+        filePath(other.filePath), moduleName(other.moduleName),className(other.className), handle(other.handle),initFunc(other.initFunc), updateFunc(other.updateFunc)
+    {
+        scriptObject = other.scriptObject;
+
+        // 参照カウントを増やす
+        if (scriptObject)
+        {
+            scriptObject->AddRef();
+        }
+    }
+
 	/// @brief デストラクタ
 	~ScriptComponent()
 	{
@@ -37,6 +50,34 @@ struct ScriptComponent
 			scriptObject = nullptr;
 		}
 	}
+
+    // コピー代入演算子
+    ScriptComponent& operator=(const ScriptComponent& other)
+    {
+        if (this == &other) return *this;
+
+        // 既存のオブジェクトを解放
+        if (scriptObject) scriptObject->Release();
+
+        filePath = other.filePath;
+        moduleName = other.moduleName;
+        className = other.className;
+        handle = other.handle;
+        initFunc = other.initFunc;
+        updateFunc = other.updateFunc;
+
+        scriptObject = other.scriptObject;
+
+        // 参照カウントを増やす
+        if (scriptObject)
+        {
+            scriptObject->AddRef();
+        }
+
+        return *this;
+    }
+
+
 
 	// @brief スクリプトのファイルパス
 	std::string filePath;
