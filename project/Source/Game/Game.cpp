@@ -25,10 +25,9 @@ void Game::Initialize()
 
     Entity directionalLight = engine->CreateDirectionalLightEntity(Vector3(0.0f, 3.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, true);
 
-	ScriptComponent scriptComp(engine->BuildScriptModule("Test", "Test", "./Assets/Script/Test.as"));
+	ScriptComponent scriptComp(engine->BuildScriptModule("Move", "Move", "./Assets/Script/Move.as"));
 	auto registry = engine->GetRegistryECS();
-	Entity scriptEntity = registry->CreateEntity();
-	registry->AddComponent(scriptEntity, scriptComp);
+	registry->AddComponent(model, scriptComp);
 }
 
 /// @brief 更新処理

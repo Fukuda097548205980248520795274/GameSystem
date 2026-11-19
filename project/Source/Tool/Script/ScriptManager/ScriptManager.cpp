@@ -3,6 +3,72 @@
 #include <cassert>
 #include <iostream>
 
+namespace
+{
+    /// @brief コンテキストからエンティティIDを取得するヘルパー
+    /// @return 
+    Entity GetActiveEntity()
+    {
+        asIScriptContext* ctx = asGetActiveContext();
+        if (!ctx) return kNullEntity;
+        return static_cast<Entity>(reinterpret_cast<uintptr_t>(ctx->GetUserData()));
+    }
+
+    /// @brief コンポーネントを取得するテンプレート関数
+    /// @return 
+    template<typename T>
+    T GetComponentFromScript()
+    {
+        Entity entity = GetActiveEntity();
+        auto registry = Engine::GetInstance()->GetRegistryECS();
+
+        // エンティティが有効で、かつコンポーネントを持っている場合に取得
+        if (entity != kNullEntity && registry->HasComponent<T>(entity))
+        {
+            return *registry->GetComponent<T>(entity);
+        }
+
+        // 未所持の場合はデフォルト値を返す
+        return T();
+    }
+
+    /// @brief コンポーネントを適用するテンプレート関数
+    /// @tparam T 
+    /// @param component 
+    template<typename T>
+    void SetComponentFromScript(const T& component)
+    {
+        Entity entity = GetActiveEntity();
+        auto registry = Engine::GetInstance()->GetRegistryECS();
+
+        // エンティティが有効で、かつコンポーネントを持っている場合に適用
+        if (entity != kNullEntity && registry->HasComponent<T>(entity))
+        {
+            *registry->GetComponent<T>(entity) = component;
+        }
+    }
+
+    /// @brief コンポーネントのGet/Set関数をまとめて登録するヘルパー
+    /// @tparam T 
+    /// @param engine 
+    /// @param typeName 
+    template<typename T>
+    void RegisterComponentAccessors(asIScriptEngine* scriptEngine, const std::string& typeName)
+    {
+        auto engine = Engine::GetInstance();
+
+        // 取得関数
+        std::string getDecl = typeName + " Get" + typeName + "()";
+        int r = scriptEngine->RegisterGlobalFunction(getDecl.c_str(), asFUNCTION(GetComponentFromScript<T>), asCALL_CDECL);
+        if (r < 0 && engine) engine->Log(LogLevel::Error, getDecl + " の登録に失敗しました");
+
+        // 設定関数
+        std::string setDecl = "void Set" + typeName + "(const " + typeName + " &in)";
+        r = scriptEngine->RegisterGlobalFunction(setDecl.c_str(), asFUNCTION(SetComponentFromScript<T>), asCALL_CDECL);
+        if (r < 0 && engine) engine->Log(LogLevel::Error, setDecl + " の登録に失敗しました");
+    }
+}
+
 /// @brief 初期化
 void Detail::ScriptManager::Initialize()
 {
@@ -411,53 +477,43 @@ void Detail::ScriptManager::RegisterEngineAPI()
 
 	// Vector3 の登録
 	if (scriptEngine_->RegisterObjectType("Vector3", sizeof(Vector3), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector3>()) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "Vector3 の登録に失敗しました");
-	}
+        throw std::runtime_error("Vector3 の登録に失敗しました");
+
 	if(scriptEngine_->RegisterObjectProperty("Vector3", "float x", asOFFSET(Vector3, x)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "Vector3 のプロパティ x の登録に失敗しました");
-	}
+        throw std::runtime_error("Vector3 のプロパティ x の登録に失敗しました");
+
 	if(scriptEngine_->RegisterObjectProperty("Vector3", "float y", asOFFSET(Vector3, y)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "Vector3 のプロパティ y の登録に失敗しました");
-	}
+        throw std::runtime_error("Vector3 のプロパティ y の登録に失敗しました");
+
 	if(scriptEngine_->RegisterObjectProperty("Vector3", "float z", asOFFSET(Vector3, z)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "Vector3 のプロパティ z の登録に失敗しました");
-	}
+        throw std::runtime_error("Vector3 のプロパティ z の登録に失敗しました");
 
 	// Vector2 の登録
 	if (scriptEngine_->RegisterObjectType("Vector2", sizeof(Vector2), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector2>()) < 0)
-	{
-		if (engine) engine->Log(LogLevel::Error, "Vector2 の登録に失敗しました");
-	}
-	if(scriptEngine_->RegisterObjectProperty("Vector2", "float x", asOFFSET(Vector2, x)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "Vector2 のプロパティ x の登録に失敗しました");
-	}
-	if(scriptEngine_->RegisterObjectProperty("Vector2", "float y", asOFFSET(Vector2, y)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "Vector2 のプロパティ y の登録に失敗しました");
-	}
+        throw std::runtime_error("Vector2 の登録に失敗しました");
 
+	if(scriptEngine_->RegisterObjectProperty("Vector2", "float x", asOFFSET(Vector2, x)) < 0)
+        throw  std::runtime_error("Vector2 のプロパティ x の登録に失敗しました");
+    
+	if(scriptEngine_->RegisterObjectProperty("Vector2", "float y", asOFFSET(Vector2, y)) < 0)
+        throw  std::runtime_error("Vector2 のプロパティ y の登録に失敗しました");
+
+    
 	// TransformComponent の登録
-	if(scriptEngine_->RegisterObjectType("TransformComponent", sizeof(TransformComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<TransformComponent>()) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "TransformComponent の登録に失敗しました");
-	}
+    if (scriptEngine_->RegisterObjectType("TransformComponent", sizeof(TransformComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<TransformComponent>()) < 0)
+        throw std::runtime_error("TransformComponent の登録に失敗しました");
+
 	if(scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 position", asOFFSET(TransformComponent, position)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "TransformComponent のプロパティ position の登録に失敗しました");
-	}
+        throw std::runtime_error("TransformComponent のプロパティ position の登録に失敗しました");
+
 	if(scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 rotation", asOFFSET(TransformComponent, rotation)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "TransformComponent のプロパティ rotation の登録に失敗しました");
-	}
+        throw std::runtime_error("TransformComponent のプロパティ rotation の登録に失敗しました");
+
 	if(scriptEngine_->RegisterObjectProperty("TransformComponent", "Vector3 scale", asOFFSET(TransformComponent, scale)) < 0)
-	{
-		if(engine)engine->Log(LogLevel::Error, "TransformComponent のプロパティ scale の登録に失敗しました");
-	}
+        throw std::runtime_error("TransformComponent のプロパティ scale の登録に失敗しました");
+
+    // コンポーネントのGet/Set関数をまとめて登録
+    RegisterComponentAccessors<TransformComponent>(scriptEngine_, "TransformComponent");
 
 	// Log 関数の登録
 	if(scriptEngine_->RegisterGlobalFunction("void Log(const string &in)",

@@ -1,5 +1,6 @@
 #pragma once
 #include "Store/HandleData/HandleData.hpp"
+#include "ECS/EntityECS/EntityECS.hpp"
 #include <unordered_map>
 #include <queue>
 #include <angelscript.h>
@@ -86,6 +87,7 @@ namespace Detail
 
 		/// @brief スクリプトエンジンを登録する
 		void RegisterEngineAPI();
+
 
 	private:
 
