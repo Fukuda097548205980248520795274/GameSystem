@@ -84,6 +84,14 @@ void Detail::ECSEditor::DrawPlayControls()
 
     if (currentState == PlayState::Editor)
     {
+        // エラー等で再生が中断され、エディタモードに戻されたがバックアップが残っている場合の復旧処理
+        if (backupRegistry_)
+        {
+            engine->QueueRestoreRegistry(std::move(backupRegistry_));
+            backupRegistry_ = nullptr;
+            selectedEntity_ = kNullEntity;
+        }
+
         // 編集モード：Playボタン（例えば少し緑がかった色にする）
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.6f, 0.2f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.7f, 0.3f, 1.0f));

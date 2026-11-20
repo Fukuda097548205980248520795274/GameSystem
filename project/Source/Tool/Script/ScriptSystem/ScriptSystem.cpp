@@ -74,6 +74,9 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
 				initCtx->Prepare(scriptComp->initFunc);
 				initCtx->SetObject(scriptComp->scriptObject);
 
+                // エンティティIDをスクリプト側に渡すためにユーザーデータとして設定
+                initCtx->SetUserData(reinterpret_cast<void*>(static_cast<uintptr_t>(entity)));
+
 				// 例外コールバックを設定
 				initCtx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
 
@@ -100,6 +103,9 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
 			asIScriptContext* ctx = scriptEngine->CreateContext();
 			ctx->Prepare(scriptComp->updateFunc);
 			ctx->SetObject(scriptComp->scriptObject);
+
+            // エンティティIDをスクリプト側に渡すためにユーザーデータとして設定
+            ctx->SetUserData(reinterpret_cast<void*>(static_cast<uintptr_t>(entity)));
 
 			// 例外コールバックを設定
 			ctx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
