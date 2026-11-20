@@ -12,6 +12,9 @@ struct TransformationMatrix
     float4x4 world;
     float4x4 worldViewProjection;
     float4x4 worldInverseTranspose;
+    float4 color;
+    float4x4 uvMatrix;
+    uint textureIndex;
 };
 StructuredBuffer<TransformationMatrix> gTransformation : register(t0);
 

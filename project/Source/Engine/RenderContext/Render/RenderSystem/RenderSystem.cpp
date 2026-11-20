@@ -225,6 +225,7 @@ Entity Detail::RenderSystem::CreateModelEntity(ModelHandle modelHandle)
                 meshDrawComp.rootMeshEntity = rootEntity;
                 registry->AddComponent(entity, meshDrawComp);
 
+                registry->AddComponent(entity, PSOComponent("Default_Render3D"));
                 registry->AddComponent(entity, MaterialComponent());
                 registry->AddComponent(entity, UVTransformComponent());
                 registry->AddComponent(entity, TextureComponent(modelData->meshes[meshIdx].material.handle));
@@ -491,15 +492,16 @@ void Detail::RenderSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, in
 		if (!modelData || meshDrawComp->meshIndex < 0 || meshDrawComp->meshIndex >= modelData->meshes.size()) continue;
 
 		// ループを削除し、エンティティの components を直接取得
+        auto psoComp = registry->GetComponent<PSOComponent>(entity);
 		auto material = registry->GetComponent<MaterialComponent>(entity);
 		auto uvTransform = registry->GetComponent<UVTransformComponent>(entity);
 		auto texture = registry->GetComponent<TextureComponent>(entity);
 		auto transformCB = registry->GetComponent<TransformConstantBufferComponent>(entity);
 		auto materialCB = registry->GetComponent<MaterialConstantBufferComponent>(entity);
-		if (!material || !uvTransform || !texture || !transformCB || !materialCB) continue;
+		if (!psoComp || !material || !uvTransform || !texture || !transformCB || !materialCB) continue;
 
 		// PSOを取得する
-		auto psoItem = psoEditor_->GetPSOItem(material->psoName);
+		auto psoItem = psoEditor_->GetPSOItem(psoComp->psoName);
 		if (!psoItem || !psoItem->pso) continue;
 
 		// PSOとルートシグネチャを設定する

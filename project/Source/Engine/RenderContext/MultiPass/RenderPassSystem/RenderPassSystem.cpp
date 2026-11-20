@@ -52,8 +52,9 @@ Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode, s
 /// @param multiPass 
 /// @param dsvHandle 
 /// @param renderSystem 
+/// @param prefabSystem 
 /// @param skyboxSystem 
-void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem)
+void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem, PrefabSystem* prefabSystem, SkyboxSystem* skyboxSystem)
 {
 	// ECSレジストリを取得する
 	auto registry = Engine::GetInstance()->GetRegistryECS();
@@ -112,6 +113,7 @@ void Detail::RenderPassSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList
 
 		// 描画処理の実行
 		renderSystem->ExecuteAll(commandList, pair.second);
+        prefabSystem->ExecuteAll(commandList, pair.second);
 
         // リソースバリアの設定（レンダーターゲット状態からシェーダーリソース状態へ遷移）
         destinationResource->Barrier(commandList, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, frameIndex);

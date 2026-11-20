@@ -50,7 +50,6 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
         {
             auto* c = registry->GetComponent<MaterialComponent>(entity);
             entityJson["components"]["MaterialComponent"] = {
-                {"psoName", c->psoName},
                 {"color", {c->color.x, c->color.y, c->color.z, c->color.w}}
             };
         }
@@ -213,7 +212,6 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
         if (componentsJson.contains("MaterialComponent"))
         {
             MaterialComponent comp;
-            comp.psoName = componentsJson["MaterialComponent"]["psoName"];
             auto color = componentsJson["MaterialComponent"]["color"];
             comp.color = Vector4(color[0], color[1], color[2], color[3]);
             registry->AddComponent<MaterialComponent>(newId, comp);

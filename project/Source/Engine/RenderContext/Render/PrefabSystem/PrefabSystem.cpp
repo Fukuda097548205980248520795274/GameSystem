@@ -31,7 +31,8 @@ void Detail::PrefabSystem::Initialize(ID3D12Device* device, ShaderCompiler* shad
 /// @param frameIndex 
 void Detail::PrefabSystem::Update(ID3D12GraphicsCommandList* commandList, int32_t frameIndex)
 {
-
+    // トランスフォームの更新
+    UpdateTransform(frameIndex);
 }
 
 /// @brief モデルエンティティを作成する
@@ -148,6 +149,7 @@ Entity Detail::PrefabSystem::CreateModelEntity(ModelHandle modelHandle, uint32_t
                 int32_t meshIdx = node.meshIndex.value();
 
                 // マテリアルコンポーネント, UV変換コンポーネント, テクスチャコンポーネントを追加
+                registry->AddComponent(entity, PSOComponent("Default_Prefab3D"));
                 registry->AddComponent(entity, MaterialComponent());
                 registry->AddComponent(entity, UVTransformComponent());
                 registry->AddComponent(entity, TextureComponent(modelData->meshes[meshIdx].material.handle));
@@ -300,9 +302,12 @@ Entity Detail::PrefabSystem::Instantiate(Entity prefabEntity)
                 registry->RemoveComponent<InstanceCountComponent>(newEntity);
             }
 
-            // これがプレハブのインスタンスであることを示すコンポーネントを追加
-            PrefabInstanceComponent instanceComp(prefabEntity);
-            registry->AddComponent(newEntity, instanceComp);
+            // ルートエンティティの場合のみ、プレハブのインスタンスであることを示すコンポーネントを追加
+            if (newParent == kNullEntity)
+            {
+                PrefabInstanceComponent instanceComp(prefabEntity);
+                registry->AddComponent(newEntity, instanceComp);
+            }
 
 
             // 親子関係コンポーネントの更新
@@ -376,11 +381,421 @@ Entity Detail::PrefabSystem::Instantiate(Entity prefabEntity)
     return instanceRootEntity;
 }
 
+/// @brief 深度値のみの描画を実行する
+/// @param commandList 
+/// @param frameIndex 
+void Detail::PrefabSystem::ExecuteDepthPrePass(ID3D12GraphicsCommandList* commandList, int32_t frameIndex)
+{
+    auto engine = Engine::GetInstance();
+    if (!engine) return;
+
+    auto renderContext = engine->GetRenderContext();
+    if (!renderContext) return;
+
+    auto resourceStore = renderContext->GetResourceStore();
+    if (!resourceStore) return;
+
+    auto modelStore = renderContext->GetModelStore();
+    if (!modelStore) return;
+
+    auto registry = engine->GetRegistryECS();
+    if (!registry) return;
+
+    // プレハブごとに深度描画
+    for (Entity rootEntity : registry->GetComponentArray<PrefabComponent>()->GetEntities())
+    {
+        auto pass = registry->GetComponent<PrefabComponent>(rootEntity);
+        auto instanceCountComp = registry->GetComponent<InstanceCountComponent>(rootEntity);
+        auto modelComp = registry->GetComponent<ModelComponent>(rootEntity);
+
+        if (!pass || !instanceCountComp || instanceCountComp->count == 0 || !modelComp) continue;
+
+        auto modelData = modelStore->GetModelData(modelComp->handle);
+        if (!modelData) continue;
+
+        // 深度のみのPSOを登録する
+        depthOnlyPrefabPSO_->Register(commandList);
+
+        // 再帰的にメッシュノードを走査
+        std::function<void(Entity)> DrawDepthNodes = [&](Entity currentEntity)
+            {
+                auto instanceDataComp = registry->GetComponent<InstanceDataStructuredBufferComponent>(currentEntity);
+                auto nodeComp = registry->GetComponent<NodeComponent>(currentEntity);
+
+                if (instanceDataComp && nodeComp)
+                {
+                    const auto& node = modelData->nodes[nodeComp->index];
+                    if (node.meshIndex.has_value())
+                    {
+                        int32_t meshIdx = node.meshIndex.value();
+
+                        modelStore->Register(commandList, modelComp->handle, meshIdx);
+
+                        // Transform (InstanceData) 用のリソースをバインド (DepthOnlyPSOのレジスタ0番を想定)
+                        auto instanceDataBuffer = resourceStore->Get<StructuredBufferResource<InstanceDataForGPU>>(instanceDataComp->handle);
+                        if (instanceDataBuffer) instanceDataBuffer->RegisterGraphics(commandList, 0, frameIndex);
+
+                        commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                        commandList->DrawIndexedInstanced(modelData->meshes[meshIdx].indexBufferResource->GetNumIndex(), instanceCountComp->count, 0, 0, 0);
+                    }
+                }
+
+                // 子ノードへ再帰
+                if (auto hierarchy = registry->GetComponent<HierarchyComponent>(currentEntity))
+                {
+                    for (Entity child : hierarchy->children) DrawDepthNodes(child);
+                }
+                if (auto jointHierarchy = registry->GetComponent<JointHierarchyComponent>(currentEntity))
+                {
+                    for (Entity child : jointHierarchy->children) DrawDepthNodes(child);
+                }
+            };
+
+        DrawDepthNodes(rootEntity);
+    }
+}
+
+/// @brief すべての3D描画を実行する
+/// @param commandList 
+/// @param priority 
+void Detail::PrefabSystem::ExecuteAll(ID3D12GraphicsCommandList* commandList, int priority)
+{
+    // priority が負の値の場合は何もしない
+    if (priority < 0) return;
+
+    auto engine = Engine::GetInstance();
+    if (!engine) return;
+
+    auto renderContext = engine->GetRenderContext();
+    if (!renderContext) return;
+
+    auto resourceStore = renderContext->GetResourceStore();
+    if (!resourceStore) return;
+
+    auto textureStore = renderContext->GetTextureStore();
+    if (!textureStore) return;
+
+    auto lightSystem = renderContext->GetLightSystem();
+    if (!lightSystem) return;
+
+    auto modelStore = renderContext->GetModelStore();
+    if (!modelStore) return;
+
+    // ECSレジストリを取得する
+    auto registry = engine->GetRegistryECS();
+    if (!registry) return;
+
+    // PrefabComponentの配列を取得する（プレハブのルートエンティティ）
+    auto* passArray = registry->GetComponentArray<PrefabComponent>();
+    const auto& entities = passArray->GetEntities();
+
+    // 今のフレームインデックスを取得する
+    int32_t frameIndex = engine->GetFrameIndex();
+
+    // priority に基づいてソートするためのペアのベクターを作成
+    std::vector<std::pair<Entity, int>> sortedPasses;
+    for (Entity entity : entities)
+    {
+        auto pass = registry->GetComponent<PrefabComponent>(entity);
+        auto instanceCountComp = registry->GetComponent<InstanceCountComponent>(entity);
+
+        // priority が一致しない場合、またはインスタンスがない場合はスキップ
+        if (!(pass && instanceCountComp && pass->priority == priority)) continue;
+        if (instanceCountComp->count == 0) continue;
+
+        sortedPasses.push_back({ entity, pass->priority });
+    }
+
+    // ソートされたレンダーパスが空の場合は何もしない
+    if (sortedPasses.empty()) return;
+
+    // priority に基づいて昇順でソート（数値が小さいほど先に描画）
+    std::sort(sortedPasses.begin(), sortedPasses.end(), [](const auto& a, const auto& b) {return a.second < b.second;});
+
+    // ソートされたプレハブを実行する
+    for (const auto& [rootEntity, p] : sortedPasses)
+    {
+        auto instanceCountComp = registry->GetComponent<InstanceCountComponent>(rootEntity);
+        auto modelComp = registry->GetComponent<ModelComponent>(rootEntity);
+        if (!instanceCountComp || !modelComp) continue;
+
+        // モデルデータを取得する
+        auto modelData = modelStore->GetModelData(modelComp->handle);
+        if (!modelData) continue;
+
+        // スケルトンコンポーネントはルートに付与されている
+        auto skeletonComp = registry->GetComponent<SkeletonComponent>(rootEntity);
+
+        // プレハブ内のメッシュノードを再帰的に走査して描画する関数
+        std::function<void(Entity)> DrawMeshNodes = [&](Entity currentEntity)
+            {
+                auto nodeComp = registry->GetComponent<NodeComponent>(currentEntity);
+                auto instanceDataComp = registry->GetComponent<InstanceDataStructuredBufferComponent>(currentEntity);
+                auto material = registry->GetComponent<MaterialComponent>(currentEntity);
+                auto uvTransform = registry->GetComponent<UVTransformComponent>(currentEntity);
+                auto texture = registry->GetComponent<TextureComponent>(currentEntity);
+
+                // メッシュ描画に必要なコンポーネントが揃っているか確認
+                if (nodeComp && instanceDataComp && material && uvTransform && texture)
+                {
+                    const auto& node = modelData->nodes[nodeComp->index];
+                    if (node.meshIndex.has_value())
+                    {
+                        int32_t meshIdx = node.meshIndex.value();
+                        auto psoComp = registry->GetComponent<PSOComponent>(currentEntity);
+
+                        // PSOを取得する
+                        auto psoItem = psoEditor_->GetPSOItem(psoComp->psoName);
+                        if (psoItem && psoItem->pso)
+                        {
+                            // PSOとルートシグネチャを設定する
+                            commandList->SetPipelineState(psoItem->pso.Get());
+                            commandList->SetGraphicsRootSignature(psoItem->rootSig.Get());
+
+                            auto skinningComp = registry->GetComponent<SkinningInstanceComponent>(currentEntity);
+                            auto skinClusterComp = registry->GetComponent<SkinClusterComponent>(currentEntity);
+
+                            // スキニングコンポーネントとスキンクラスターが存在する場合
+                            if (skeletonComp && skinningComp && skinClusterComp)
+                            {
+                                auto skinClusterStore = engine->GetRenderContext()->GetSkinClusterStore();
+                                if (skinClusterStore)
+                                {
+                                    auto skinClusterData = skinClusterStore->GetSkinCluster(skinClusterComp->handle);
+                                    if (skinClusterData)
+                                    {
+                                        skinClusterData->RegisterVertex(commandList, frameIndex);
+                                        modelStore->RegisterIndexBuffer(commandList, modelComp->handle, meshIdx);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // スキニングコンポーネントが存在しない場合は、通常の描画処理を行う
+                                modelStore->Register(commandList, modelComp->handle, meshIdx);
+                            }
+
+                            // PSOの要求に従って動的にパラメータをバインドする（現状維持）
+                            for (UINT i = 0; i < psoItem->desc.rootParameters.size(); ++i)
+                            {
+                                const auto& param = psoItem->desc.rootParameters[i];
+                                switch (param.binding)
+                                {
+                                case RenderBinding::InstaceData:
+                                    if (auto instanceDataBuffer = resourceStore->Get<StructuredBufferResource<InstanceDataForGPU>>(instanceDataComp->handle))
+                                        instanceDataBuffer->RegisterGraphics(commandList, i, frameIndex);
+                                    break;
+                                case RenderBinding::Camera:
+                                    if (auto cbResource = lightSystem->GetCameraDataBuffer())
+                                        cbResource->RegisterGraphics(commandList, i, frameIndex);
+                                    break;
+                                case RenderBinding::NumLights:
+                                    if (auto cbResource = lightSystem->GetNumLightDataBuffer())
+                                        cbResource->RegisterGraphics(commandList, i, frameIndex);
+                                    break;
+                                case RenderBinding::DirectionalLight:
+                                    if (auto cbResource = lightSystem->GetDirectionalLightDataBuffer())
+                                        cbResource->RegisterGraphics(commandList, i, frameIndex);
+                                    break;
+                                case RenderBinding::PointLight:
+                                    if (auto cbResource = lightSystem->GetPointLightDataBuffer())
+                                        cbResource->RegisterGraphics(commandList, i, frameIndex);
+                                    break;
+                                case RenderBinding::SpotLight:
+                                    if (auto cbResource = lightSystem->GetSpotLightDataBuffer())
+                                        cbResource->RegisterGraphics(commandList, i, frameIndex);
+                                    break;
+                                case RenderBinding::LightCullingTitle:
+                                    if (auto cbResource = lightSystem->GetTileLightIndexBuffer())
+                                        cbResource->RegisterGraphicsSRV(commandList, i, frameIndex);
+                                    break;
+                                case RenderBinding::Texture:
+                                    commandList->SetGraphicsRootDescriptorTable(i, textureStore->GetSrvHandle(texture->handle).gpuHandle);
+                                    break;
+                                }
+                            }
+
+                            // プリミティブトポロジーを設定する
+                            if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                            else if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+                            else if (psoItem->desc.primitiveTopology == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+                            // メッシュインデックスを使用してドローコール（インスタンス描画）
+                            commandList->DrawIndexedInstanced(modelData->meshes[meshIdx].indexBufferResource->GetNumIndex(), instanceCountComp->count, 0, 0, 0);
+                        }
+                    }
+                }
+
+                // 子ノードへ再帰
+                if (auto hierarchy = registry->GetComponent<HierarchyComponent>(currentEntity))
+                {
+                    for (Entity child : hierarchy->children) DrawMeshNodes(child);
+                }
+                if (auto jointHierarchy = registry->GetComponent<JointHierarchyComponent>(currentEntity))
+                {
+                    for (Entity child : jointHierarchy->children) DrawMeshNodes(child);
+                }
+            };
+
+        // ルートから走査開始
+        DrawMeshNodes(rootEntity);
+    }
+}
+
 /// @brief トランスフォームの更新
 /// @param frameIndex 
 void Detail::PrefabSystem::UpdateTransform(int32_t frameIndex)
 {
-    
+    auto engine = Engine::GetInstance();
+    if (!engine) return;
+
+    auto renderContext = engine->GetRenderContext();
+    if (!renderContext) return;
+
+    auto resourceStore = renderContext->GetResourceStore();
+    if (!resourceStore) return;
+
+    auto cameraSystem = renderContext->GetCameraSystem();
+    if (!cameraSystem) return;
+
+    auto registry = engine->GetRegistryECS();
+    if (!registry) return;
+
+    // カメラのビュー・プロジェクション行列を取得
+    Matrix4x4 viewMatrix = cameraSystem->GetViewMatrix();
+    Matrix4x4 projMatrix = cameraSystem->GetProjectionMatrix();
+    Matrix4x4 viewProj = viewMatrix * projMatrix;
+
+    // インスタンスのルートから再帰的に同名ノードを検索するラムダ関数
+    std::function<Entity(Entity, const std::string&)> FindNodeInInstance = [&](Entity current, const std::string& name) -> Entity
+        {
+            auto nodeC = registry->GetComponent<NodeComponent>(current);
+            if (nodeC && nodeC->name == name) return current;
+
+            if (auto hierarchy = registry->GetComponent<HierarchyComponent>(current))
+            {
+                for (Entity child : hierarchy->children)
+                {
+                    Entity found = FindNodeInInstance(child, name);
+                    if (found != kNullEntity) return found;
+                }
+            }
+            if (auto jointHierarchy = registry->GetComponent<JointHierarchyComponent>(current))
+            {
+                for (Entity child : jointHierarchy->children)
+                {
+                    Entity found = FindNodeInInstance(child, name);
+                    if (found != kNullEntity) return found;
+                }
+            }
+            return kNullEntity;
+        };
+
+    // 1. プレハブ（雛形）のルートエンティティを反復
+    for (Entity prefabRoot : registry->GetComponentArray<PrefabComponent>()->GetEntities())
+    {
+        // プレハブコンポーネントとインスタンスカウントを取得
+        auto prefabComp = registry->GetComponent<PrefabComponent>(prefabRoot);
+        auto instanceCountComp = registry->GetComponent<InstanceCountComponent>(prefabRoot);
+        if (!prefabComp || !instanceCountComp || instanceCountComp->count == 0) continue;
+
+        // このプレハブに属する全インスタンス（ルート）を収集
+        std::vector<Entity> instanceRoots;
+        for (Entity instEntity : registry->GetComponentArray<PrefabInstanceComponent>()->GetEntities())
+        {
+            auto instComp = registry->GetComponent<PrefabInstanceComponent>(instEntity);
+            if (instComp && instComp->sourcePrefab == prefabRoot)
+            {
+                instanceRoots.push_back(instEntity);
+            }
+        }
+
+        // 2. プレハブ内のメッシュエンティティを検索するラムダ関数
+        std::function<void(Entity, const std::string&)> ProcessMeshNodes = [&](Entity currentPrefabNode, const std::string& nodeName)
+            {
+                // メッシュノードなら構造化バッファに書き込む
+                if (auto structBufferComp = registry->GetComponent<InstanceDataStructuredBufferComponent>(currentPrefabNode))
+                {
+                    if (auto cb = resourceStore->Get<StructuredBufferResource<InstanceDataForGPU>>(structBufferComp->handle))
+                    {
+                        if (auto mappedData = cb->GetData(frameIndex))
+                        {
+                            // 各インスタンスごとに該当ノードのワールド行列を計算して配列に格納
+                            for (size_t i = 0; i < instanceRoots.size(); ++i)
+                            {
+                                Entity instRoot = instanceRoots[i];
+
+                                // インスタンスの階層ツリーから同名のノードを検索
+                                Entity targetInstNode = FindNodeInInstance(instRoot, nodeName);
+
+                                if (targetInstNode != kNullEntity)
+                                {
+                                    // 1. 構造体をゼロクリア初期化して生成（不要なゴミデータが入るのを防ぐ）
+                                    InstanceDataForGPU data{};
+
+                                    // 2. ワールド行列やビュープロジェクション行列を計算して代入
+                                    data.world = CalculateGlobalWorldMatrix(targetInstNode, instRoot);
+                                    data.worldViewProjection = data.world * viewProj;
+                                    data.worldInverseTranspose = data.world.Inverse().Transpose();
+
+                                    // 3. その他必要なマテリアル情報等があればここで代入
+                                    if (auto matComp = registry->GetComponent<MaterialComponent>(targetInstNode))
+                                        data.color = matComp->color;
+                                    else
+                                        data.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+                                    data.textureIndex = 0; // ルートパラメータ仕様に合わせる場合
+
+                                    // 4. ストラクチャードバッファのマップドメモリにデータを書き込む
+                                    mappedData[i] = data;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 子ノードへ再帰
+                if (auto hierarchy = registry->GetComponent<HierarchyComponent>(currentPrefabNode))
+                {
+                    for (Entity child : hierarchy->children)
+                    {
+                        if (auto nodeComp = registry->GetComponent<NodeComponent>(child))
+                        {
+                            ProcessMeshNodes(child, nodeComp->name);
+                        }
+                    }
+                }
+
+                if (auto jointHierarchy = registry->GetComponent<JointHierarchyComponent>(currentPrefabNode))
+                {
+                    for (Entity child : jointHierarchy->children)
+                    {
+                        if (auto nodeComp = registry->GetComponent<NodeComponent>(child))
+                        {
+                            ProcessMeshNodes(child, nodeComp->name);
+                        }
+                    }
+                }
+            };
+
+        // ルートから走査開始
+        if (auto rootNodeComp = registry->GetComponent<NodeComponent>(prefabRoot))
+        {
+            ProcessMeshNodes(prefabRoot, rootNodeComp->name);
+        }
+        else
+        {
+            // ルート直下の子から走査
+            if (auto hierarchy = registry->GetComponent<HierarchyComponent>(prefabRoot))
+            {
+                for (Entity child : hierarchy->children)
+                {
+                    if (auto nodeComp = registry->GetComponent<NodeComponent>(child))
+                        ProcessMeshNodes(child, nodeComp->name);
+                }
+            }
+        }
+    }
 }
 
 /// @brief グローバルなワールド行列を計算する

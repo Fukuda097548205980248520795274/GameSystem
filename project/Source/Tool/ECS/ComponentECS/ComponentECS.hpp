@@ -486,13 +486,19 @@ struct CubemapComponent
 /// @brief マテリアルコンポーネント
 struct MaterialComponent
 {
-	MaterialComponent() : psoName("Default_Render3D"), color(1.0f, 1.0f, 1.0f, 1.0f) {}
-
-	/// @brief 使用するPSO名（PSOEditorで管理されている名前）
-	std::string psoName;
+	MaterialComponent() : color(1.0f, 1.0f, 1.0f, 1.0f) {}
 
 	/// @brief マテリアルの色
 	Vector4 color;
+};
+
+// @brief PSOコンポーネント
+struct PSOComponent
+{
+    PSOComponent(const std::string& psoName) : psoName(psoName){}
+
+    // @brief 使用するPSOの名前
+    std::string psoName;
 };
 
 /// @brief UVトランスフォームコンポーネント

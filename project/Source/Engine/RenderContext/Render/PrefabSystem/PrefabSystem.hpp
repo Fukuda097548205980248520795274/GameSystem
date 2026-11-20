@@ -34,6 +34,16 @@ namespace Detail
         /// @return 
         Entity Instantiate(Entity prefabEntity);
 
+        /// @brief 深度値のみの描画を実行する
+        /// @param commandList 
+        /// @param frameIndex 
+        void ExecuteDepthPrePass(ID3D12GraphicsCommandList* commandList, int32_t frameIndex = 0);
+
+        /// @brief すべての3D描画を実行する
+        /// @param commandList 
+        /// @param priority 
+        void ExecuteAll(ID3D12GraphicsCommandList* commandList, int priority);
+
 
 
     private:

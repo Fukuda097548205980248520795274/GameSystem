@@ -20,6 +20,9 @@ namespace Detail
 	/// @brief レンダーシステム
 	class RenderSystem;
 
+    /// @brief プレハブシステム
+    class PrefabSystem;
+
 	/// @brief ライトシステム
 	class LightSystem
 	{
@@ -99,7 +102,8 @@ namespace Detail
 		/// @param commandList 
 		/// @param frameIndex 
 		/// @param renderSystem 
-		void LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem);
+		/// @param prefabSystem 
+		void LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem, PrefabSystem* prefabSystem);
 
 
 

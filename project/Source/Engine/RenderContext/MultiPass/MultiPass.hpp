@@ -12,6 +12,9 @@ namespace Detail
 	/// @brief レンダーシステム
 	class RenderSystem;
 
+    // brief プレハブシステム
+    class PrefabSystem;
+
 	/// @brief スカイボックスシステム
 	class SkyboxSystem;
 
@@ -59,7 +62,7 @@ namespace Detail
 
 		/// @brief レンダーパスを実行する
 		/// @param commandList 
-		void Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem, LightSystem* lightSystem, int frameIndex);
+		void Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, PrefabSystem* prefabSystem, SkyboxSystem* skyboxSystem, LightSystem* lightSystem, int frameIndex);
 
 		/// @brief 現在のレンダーパスのリソースを設定する
 		/// @param resource 

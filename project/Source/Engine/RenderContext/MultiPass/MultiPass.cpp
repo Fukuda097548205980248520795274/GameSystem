@@ -94,20 +94,21 @@ void Detail::MultiPass::RenderSwapChain(ID3D12GraphicsCommandList* commandList, 
 
 /// @brief レンダーパスを実行する
 /// @param commandList 
-void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem, LightSystem* lightSystem, int frameIndex)
+void Detail::MultiPass::Execute(ID3D12GraphicsCommandList* commandList, RenderSystem* renderSystem, PrefabSystem* prefabSystem, SkyboxSystem* skyboxSystem, LightSystem* lightSystem, int frameIndex)
 {
 	// nullptrチェック
 	assert(commandList);
 	assert(renderSystem);
+	assert(prefabSystem);
 	assert(skyboxSystem);
 	assert(lightSystem);
 	assert(frameIndex >= 0);
 
 	// ライトカリングを実行する
-	lightSystem->LightCulling(commandList, frameIndex, renderSystem);
+	lightSystem->LightCulling(commandList, frameIndex, renderSystem, prefabSystem);
 
 	// レンダーパスを実行する
-	renderPassSystem_->ExecuteAll(commandList, depthResource_->GetDsvHandle(frameIndex), this, renderSystem, skyboxSystem);
+	renderPassSystem_->ExecuteAll(commandList, depthResource_->GetDsvHandle(frameIndex), this, renderSystem, prefabSystem, skyboxSystem);
 
 	// レンダーパスの結果が存在しない場合は、ダミーリソースを設定する
 	if (!currentResource_)

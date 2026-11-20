@@ -193,7 +193,9 @@ Entity Detail::LightSystem::CreateSpotLightEntity(const Vector3& position, const
 /// @brief ライトカリング
 /// @param commandList 
 /// @param frameIndex 
-void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem)
+/// @param renderSystem 
+/// @param prefabSystem 
+void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, uint32_t frameIndex, RenderSystem* renderSystem, PrefabSystem* prefabSystem)
 {
 	// ECSレジストリを取得する
 	auto registry = Engine::GetInstance()->GetRegistryECS();
@@ -296,6 +298,7 @@ void Detail::LightSystem::LightCulling(ID3D12GraphicsCommandList* commandList, u
 
 	// 深度値を取得するためのレンダーパスを実行する
 	renderSystem->ExecuteDepthPrePass(commandList, frameIndex);
+    prefabSystem->ExecuteDepthPrePass(commandList, frameIndex);
 
 
 	/*---------------------------------------

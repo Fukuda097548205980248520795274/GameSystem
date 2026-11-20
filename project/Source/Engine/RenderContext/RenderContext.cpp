@@ -319,11 +319,14 @@ void Detail::RenderContext::PostDraw()
 	// スキニング処理を実行する
 	renderSystem_->Update(commandList, frameIndex_);
 
+    // プレハブの更新処理を実行する
+    prefabSystem_->Update(commandList, frameIndex_);
+
     // シャドウマップの描画を実行する
     shadowRenderSystem_->Update(commandList, frameIndex_);
 
 	// ライトカリングを実行する
-	multiPass_->Execute(commandList, renderSystem_.get(), skyboxSystem_.get(), lightSystem_.get(), frameIndex_);
+	multiPass_->Execute(commandList, renderSystem_.get(), prefabSystem_.get(), skyboxSystem_.get(), lightSystem_.get(), frameIndex_);
 
 	// バックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();

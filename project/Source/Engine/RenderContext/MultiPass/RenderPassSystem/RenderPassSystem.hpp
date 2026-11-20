@@ -23,6 +23,9 @@ namespace Detail
 	/// @brief レンダーシステム
 	class RenderSystem;
 
+    // brief プレハブシステム
+    class PrefabSystem;
+
 	/// @brief スカイボックスシステム
 	class SkyboxSystem;
 
@@ -51,8 +54,9 @@ namespace Detail
 		/// @param dsvHandle 
 		/// @param multiPass 
 		/// @param renderSystem 
+		/// @param prefabSystem 
 		/// @param skyboxSystem 
-		void ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem, SkyboxSystem* skyboxSystem);
+		void ExecuteAll(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle, MultiPass* multiPass, RenderSystem* renderSystem, PrefabSystem* prefabSystem, SkyboxSystem* skyboxSystem);
 
 		/// @brief レンダーパスを返却する
 		void Return();

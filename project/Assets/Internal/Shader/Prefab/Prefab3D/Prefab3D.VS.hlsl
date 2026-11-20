@@ -11,13 +11,12 @@ struct VertexShaderInput
 // インスタンスデータ構造体
 struct InstanceData
 {
-    matrix world;
-    matrix worldViewProjection;
-    matrix worldInverseTranspose;
+    float4x4 world;
+    float4x4 worldViewProjection;
+    float4x4 worldInverseTranspose;
     float4 color;
-    matrix uvMatrix;
+    float4x4 uvMatrix;
     uint textureIndex;
-    uint3 pad;
 };
 StructuredBuffer<InstanceData> gInstanceData : register(t0);
 
