@@ -8,5 +8,7 @@ struct VertexShaderOutput
 
     float4 color : COLOR0;
     float4x4 uvTransform : UVTRANSFORM0;
-    uint textureIndex : TEXCOORD1;
+
+    nointerpolation uint textureIndex : TEXCOORD1;
+    nointerpolation uint instanceID : INSTANCEID;
 };

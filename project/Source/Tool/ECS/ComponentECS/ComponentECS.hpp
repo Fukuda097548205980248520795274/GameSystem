@@ -173,10 +173,20 @@ struct PrefabComponent
 // @brief プレハブのインスタンスを示すコンポーネント
 struct PrefabInstanceComponent
 {
-    PrefabInstanceComponent() : sourcePrefab(kNullEntity) {}
+    PrefabInstanceComponent(Entity sourcePrefab) : sourcePrefab(sourcePrefab) {}
 
     // 参照するPrefabのエンティティ
     Entity sourcePrefab;
+};
+
+// @brief インスタンス数を保持するコンポーネント
+struct InstanceCountComponent
+{
+    // @brief コンストラクタ
+    InstanceCountComponent() : count(0) {}
+
+    // @brief インスタンス数
+    uint32_t count = 0;
 };
 
 /// @brief メッシュコンポーネント
@@ -313,6 +323,7 @@ struct DebugCameraComponent
     float lookSensitivity;
 };
 
+
 // コンスタントバッファコンポーネント
 struct ConstantBufferComponent
 {
@@ -327,6 +338,20 @@ struct TransformConstantBufferComponent : public ConstantBufferComponent { Trans
 
 /// @brief マテリアル用定数バッファコンポーネント
 struct MaterialConstantBufferComponent : public ConstantBufferComponent { MaterialConstantBufferComponent(uint32_t handle) : ConstantBufferComponent(handle) {} };
+
+
+// @brief 構造化バッファコンポーネント
+struct StructuredBufferComponent
+{
+    StructuredBufferComponent(uint32_t handle) : handle(handle) {}
+
+    // @brief 定数バッファのハンドル
+    uint32_t handle;
+};
+
+// @brief インスタンスデータ用構造化バッファコンポーネント
+struct InstanceDataStructuredBufferComponent : public StructuredBufferComponent { InstanceDataStructuredBufferComponent(uint32_t handle) : StructuredBufferComponent(handle) {} };
+
 
 /// @brief スカイボックスコンポーネント
 struct SkyboxComponent

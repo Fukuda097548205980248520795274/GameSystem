@@ -145,4 +145,16 @@ namespace Detail
 		// @brief 減衰開始角度のコサイン値
 		float cosFalloffStart;
 	};
+
+    // @brief インスタンスデータをGPU用に格納する構造体
+    struct InstanceDataForGPU
+    {
+        Matrix4x4 world;
+        Matrix4x4 worldViewProjection;
+        Matrix4x4 worldInverseTranspose;
+        Vector4 color;
+        Matrix4x4 uvMatrix;
+        uint32_t textureIndex;
+        uint32_t pad[3]; // 16バイト境界用のパディング
+    };
 }

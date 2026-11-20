@@ -21,7 +21,8 @@ void Game::Initialize()
 
 	Entity skybox = engine->CreateSkyboxEntity();
 
-	Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/AnimatedCube/AnimatedCube.gltf"));
+    Entity model = engine->CreateModelPrefabEntity(engine->LoadModel("./Assets/Model/AnimatedCube/AnimatedCube.gltf"), 10);
+    Entity modelInstance = engine->InstantiatePrefab(model);
 
     Entity directionalLight = engine->CreateDirectionalLightEntity(Vector3(0.0f, 3.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, true);
 

@@ -139,3 +139,19 @@ void Detail::RegistryECS::Clear()
         }
     }
 }
+
+/// @brief コンポーネントをコピーする
+/// @param source 
+/// @param target 
+void Detail::RegistryECS::CopyComponents(Entity source, Entity target)
+{
+    // 登録されている全てのコンポーネント配列を巡回する
+    for (auto& [type, array] : componentArrays_)
+    {
+        if (array)
+        {
+            // 動的に型を解決しながらコピー処理を実行
+            array->CopyEntity(source, target);
+        }
+    }
+}

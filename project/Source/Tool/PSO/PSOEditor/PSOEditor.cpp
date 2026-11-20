@@ -53,15 +53,14 @@ void Detail::PSOEditor::Initialize(ID3D12Device* device, ShaderCompiler* compile
     AutoSetupRootParameters(defaultPrefab3DItem.desc);
 
     // ルートパラメータのバインディングを自動設定する
-    defaultPrefab3DItem.desc.rootParameters[0].binding = RenderBinding::Transform;
-    defaultPrefab3DItem.desc.rootParameters[1].binding = RenderBinding::Material;
-    defaultPrefab3DItem.desc.rootParameters[2].binding = RenderBinding::Camera;
-    defaultPrefab3DItem.desc.rootParameters[3].binding = RenderBinding::NumLights;
-    defaultPrefab3DItem.desc.rootParameters[4].binding = RenderBinding::DirectionalLight;
-    defaultPrefab3DItem.desc.rootParameters[5].binding = RenderBinding::PointLight;
-    defaultPrefab3DItem.desc.rootParameters[6].binding = RenderBinding::SpotLight;
-    defaultPrefab3DItem.desc.rootParameters[7].binding = RenderBinding::LightCullingTitle;
-    defaultPrefab3DItem.desc.rootParameters[8].binding = RenderBinding::Texture;
+    defaultPrefab3DItem.desc.rootParameters[0].binding = RenderBinding::InstaceData;
+    defaultPrefab3DItem.desc.rootParameters[1].binding = RenderBinding::Camera;
+    defaultPrefab3DItem.desc.rootParameters[2].binding = RenderBinding::NumLights;
+    defaultPrefab3DItem.desc.rootParameters[3].binding = RenderBinding::DirectionalLight;
+    defaultPrefab3DItem.desc.rootParameters[4].binding = RenderBinding::PointLight;
+    defaultPrefab3DItem.desc.rootParameters[5].binding = RenderBinding::SpotLight;
+    defaultPrefab3DItem.desc.rootParameters[6].binding = RenderBinding::LightCullingTitle;
+    defaultPrefab3DItem.desc.rootParameters[7].binding = RenderBinding::Texture;
 
     // 自動再構築のフラグを立てておき、最初にDrawUIが呼ばれたタイミングでビルドを走らせる
     defaultPrefab3DItem.isDirty = true;

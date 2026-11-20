@@ -125,6 +125,19 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 			}
 		}
 
+        // InstanceCountComponent
+        if (registry_->HasComponent<InstanceCountComponent>(entity))
+        {
+            if (ImGui::CollapsingHeader("インスタンス数", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                auto instanceCount = registry_->GetComponent<InstanceCountComponent>(entity);
+                if (instanceCount)
+                {
+                    ImGui::Text("インスタンス数##インスタンス数 : %d", instanceCount->count);
+                }
+            }
+        }
+
 		// SkyboxComponent
 		if (registry_->HasComponent<SkyboxComponent>(entity))
 		{

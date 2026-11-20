@@ -33,6 +33,11 @@ public:
 
     /// @brief クリア
     virtual void Clear() = 0;
+
+    /// @brief コンポーネントをコピーする
+    /// @param source 
+    /// @param target 
+    virtual void CopyEntity(Entity source, Entity target) = 0;
 };
 
 /// @brief コンポーネント配列
@@ -156,6 +161,18 @@ public:
         dense_.clear();
         denseToEntity_.clear();
         sparse_.clear();
+    }
+
+    /// @brief コンポーネントをコピーする
+    /// @param source 
+    /// @param target 
+    void CopyEntity(Entity source, Entity target) override
+    {
+        // source エンティティが存在する場合のみコピーを行う
+        if (Has(source))
+        {
+            Insert(target, Get(source));
+        }
     }
 
 

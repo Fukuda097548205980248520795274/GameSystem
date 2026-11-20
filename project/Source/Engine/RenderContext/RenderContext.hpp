@@ -93,6 +93,17 @@ namespace Detail
 		/// @return 
 		Entity CreateModelEntity(ModelHandle modelHandle) { return renderSystem_->CreateModelEntity(modelHandle); }
 
+        /// @brief モデルプレハブエンティティを作成する
+        /// @param modelHandle 
+        /// @param instanceCount 
+        /// @return 
+        Entity CreateModelPrefabEntity(ModelHandle modelHandle, uint32_t instanceCount) { return prefabSystem_->CreateModelEntity(modelHandle, instanceCount); }
+
+        /// @brief プレハブのインスタンスを作成する
+        /// @param prefabEntity 
+        /// @return 
+        Entity InstantiatePrefab(Entity prefabEntity) { return prefabSystem_->Instantiate(prefabEntity); }
+
 		/// @brief カメラエンティティを作成する
 		/// @return 
 		Entity CreateCameraEntity() { return cameraSystem_->CreateCameraEntity(); }

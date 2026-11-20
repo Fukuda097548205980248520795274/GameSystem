@@ -129,6 +129,17 @@ public:
 	/// @return 
 	Entity CreateModelEntity(Detail::ModelHandle modelHandle) { return renderContext_->CreateModelEntity(modelHandle); }
 
+    /// @brief モデルプレハブエンティティを作成する
+    /// @param modelHandle 
+    /// @param instanceCount 
+    /// @return 
+    Entity CreateModelPrefabEntity(Detail::ModelHandle modelHandle, uint32_t instanceCount) { return renderContext_->CreateModelPrefabEntity(modelHandle, instanceCount); }
+
+    /// @brief プレハブのインスタンスを作成する
+    /// @param prefabEntity 
+    /// @return 
+    Entity InstantiatePrefab(Entity prefabEntity) { return renderContext_->InstantiatePrefab(prefabEntity); }
+
 	/// @brief カメラエンティティを作成する
 	/// @return 
 	Entity CreateCameraEntity() { return renderContext_->CreateCameraEntity(); }

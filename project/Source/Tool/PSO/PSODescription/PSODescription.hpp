@@ -58,7 +58,8 @@ namespace Detail
 		PointLight,
 		SpotLight,
 		LightCullingTitle,
-		Texture
+		Texture,
+        InstaceData,
 	};
 
 	// 詳細なブレンド設定データ

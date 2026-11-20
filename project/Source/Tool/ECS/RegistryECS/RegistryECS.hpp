@@ -145,6 +145,11 @@ namespace Detail
         /// @brief クリア
         void Clear();
 
+        /// @brief コンポーネントをコピーする
+        /// @param source
+        /// @param target
+        void CopyComponents(Entity source, Entity target);
+
 
 	private:
 
