@@ -32,6 +32,9 @@ class Move
 		{
 			transform.position.z += 2.0f * GetDeltaTime();
 		}
+
+		Matrix4x4 matrix4x4;
+		Matrix3x3 matrix3x3;
     
     	SetTransformComponent(transform);
 	}

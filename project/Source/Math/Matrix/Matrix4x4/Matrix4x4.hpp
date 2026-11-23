@@ -22,7 +22,7 @@ struct Matrix4x4
 	Matrix4x4 Transpose() const;
 
 	// 加算
-	Matrix4x4 operator+=(const Matrix4x4& matrix)
+	Matrix4x4& operator+=(const Matrix4x4& matrix)
 	{
 		for (int32_t i = 0; i < 4; ++i)for (int32_t j = 0; j < 4; ++j)
 			this->m[i][j] += matrix.m[i][j];
@@ -31,7 +31,7 @@ struct Matrix4x4
 	}
 
 	// 減算
-	Matrix4x4 operator-=(const Matrix4x4& matrix)
+	Matrix4x4& operator-=(const Matrix4x4& matrix)
 	{
 		for (int32_t i = 0; i < 4; ++i)for (int32_t j = 0; j < 4; ++j)
 			this->m[i][j] -= matrix.m[i][j];
@@ -40,7 +40,7 @@ struct Matrix4x4
 	}
 
 	// スカラー倍
-	Matrix4x4 operator*=(float scalar)
+	Matrix4x4& operator*=(float scalar)
 	{
 		for (int32_t i = 0; i < 4; ++i)for (int32_t j = 0; j < 4; ++j)
 			this->m[i][j] *= scalar;
@@ -49,7 +49,7 @@ struct Matrix4x4
 	}
 
 	// 乗算
-	Matrix4x4 operator*=(const Matrix4x4& matrix)
+	Matrix4x4& operator*=(const Matrix4x4& matrix)
 	{
 		// 積
 		Matrix4x4 multiply;

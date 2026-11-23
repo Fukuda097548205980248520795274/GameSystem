@@ -1,5 +1,7 @@
 #include "ScriptRegisterAPI.hpp"
 #include "Engine.hpp"
+#include "Matrix/Matrix4x4/Matrix4x4.hpp"
+#include "Matrix/Matrix3x3/Matrix3x3.hpp"
 
 namespace
 {
@@ -77,6 +79,74 @@ void Detail::ScriptRegisterAPI::RegisterMathAPI(asIScriptEngine* scriptEngine)
     scriptEngine->RegisterObjectType("Vector2", sizeof(Vector2), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector2>());
     scriptEngine->RegisterObjectProperty("Vector2", "float x", asOFFSET(Vector2, x));
     scriptEngine->RegisterObjectProperty("Vector2", "float y", asOFFSET(Vector2, y));
+
+
+
+    // Matrix3x3 の登録
+    scriptEngine->RegisterObjectType("Matrix3x3", sizeof(Matrix3x3), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Matrix3x3>());
+
+    // 配列アクセス用メソッドの登録
+    scriptEngine->RegisterObjectMethod("Matrix3x3", "float Get(uint row, uint col) const",
+        asFUNCTIONPR([](const Matrix3x3& m, uint32_t row, uint32_t col) -> float {
+            if (row < 3 && col < 3) return m.m[row][col];
+            return 0.0f;
+            }, (const Matrix3x3&, uint32_t, uint32_t), float), asCALL_CDECL_OBJFIRST);
+
+    scriptEngine->RegisterObjectMethod("Matrix3x3", "void Set(uint row, uint col, float value)",
+        asFUNCTIONPR([](Matrix3x3& m, uint32_t row, uint32_t col, float value) {
+            if (row < 3 && col < 3) m.m[row][col] = value;
+            }, (Matrix3x3&, uint32_t, uint32_t, float), void), asCALL_CDECL_OBJFIRST);
+
+
+
+    // Matrix4x4 の登録
+    scriptEngine->RegisterObjectType("Matrix4x4", sizeof(Matrix4x4), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Matrix4x4>());
+
+    // デフォルトコンストラクタ
+    scriptEngine->RegisterObjectBehaviour("Matrix4x4", asBEHAVE_CONSTRUCT, "void f()",
+        asFUNCTIONPR([](void* memory) { new(memory) Matrix4x4(); }, (void*), void), asCALL_CDECL_OBJLAST);
+
+    // 配列アクセス用メソッド
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "float Get(uint row, uint col) const",
+        asFUNCTIONPR([](const Matrix4x4& m, uint32_t row, uint32_t col) -> float {
+            if (row < 4 && col < 4) return m.m[row][col];
+            return 0.0f;
+            }, (const Matrix4x4&, uint32_t, uint32_t), float), asCALL_CDECL_OBJFIRST);
+
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "void Set(uint row, uint col, float value)",
+        asFUNCTIONPR([](Matrix4x4& m, uint32_t row, uint32_t col, float value) {
+            if (row < 4 && col < 4) m.m[row][col] = value;
+            }, (Matrix4x4&, uint32_t, uint32_t, float), void), asCALL_CDECL_OBJFIRST);
+
+    // メソッドの登録
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 Inverse() const", asMETHOD(Matrix4x4, Inverse), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 Transpose() const", asMETHOD(Matrix4x4, Transpose), asCALL_THISCALL);
+
+    // 演算子の登録 (自己代入系)
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4& opAddAssign(const Matrix4x4 &in)", asMETHODPR(Matrix4x4, operator+=, (const Matrix4x4&), Matrix4x4&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4& opSubAssign(const Matrix4x4 &in)", asMETHODPR(Matrix4x4, operator-=, (const Matrix4x4&), Matrix4x4&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4& opMulAssign(const Matrix4x4 &in)", asMETHODPR(Matrix4x4, operator*=, (const Matrix4x4&), Matrix4x4&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4& opMulAssign(float)", asMETHODPR(Matrix4x4, operator*=, (float), Matrix4x4&), asCALL_THISCALL);
+
+    // 演算子の登録 (二項演算子)
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 opAdd(const Matrix4x4 &in) const", asFUNCTIONPR(operator+, (const Matrix4x4&, const Matrix4x4&), Matrix4x4), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 opSub(const Matrix4x4 &in) const", asFUNCTIONPR(operator-, (const Matrix4x4&, const Matrix4x4&), Matrix4x4), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 opMul(const Matrix4x4 &in) const", asFUNCTIONPR(operator*, (const Matrix4x4&, const Matrix4x4&), Matrix4x4), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 opMul(float) const", asFUNCTIONPR(operator*, (const Matrix4x4&, float), Matrix4x4), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Matrix4x4", "Matrix4x4 opMul_r(float) const", asFUNCTIONPR(operator*, (float, const Matrix4x4&), Matrix4x4), asCALL_CDECL_OBJLAST);
+
+
+    // Matrix4x4 生成/変換用 グローバル関数の登録
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 MakeIdentityMatrix4x4()", asFUNCTION(MakeIdentityMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make2DScaleMatrix4x4(const Vector2 &in)", asFUNCTION(Make2DScaleMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make3DScaleMatrix4x4(const Vector3 &in)", asFUNCTION(Make3DScaleMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make3DRotateXMatrix4x4(float)", asFUNCTION(Make3DRotateXMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make3DRotateYMatrix4x4(float)", asFUNCTION(Make3DRotateYMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make3DRotateZMatrix4x4(float)", asFUNCTION(Make3DRotateZMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make3DRotateMatrix4x4(const Vector3 &in)", asFUNCTIONPR(Make3DRotateMatrix4x4, (const Vector3&), Matrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make2DTranslateMatrix4x4(const Vector2 &in)", asFUNCTION(Make2DTranslateMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make3DTranslateMatrix4x4(const Vector3 &in)", asFUNCTION(Make3DTranslateMatrix4x4), asCALL_CDECL);
+    scriptEngine->RegisterGlobalFunction("Matrix4x4 Make3DAffineMatrix4x4(const Vector2 &in scale, const Vector3 &in rot, const Vector2 &in trans)", asFUNCTIONPR(Make3DAffineMatrix4x4, (const Vector2&, const Vector3&, const Vector2&), Matrix4x4), asCALL_CDECL);
 }
 
 /// @brief コンポーネントAPIをスクリプトエンジンに登録する
