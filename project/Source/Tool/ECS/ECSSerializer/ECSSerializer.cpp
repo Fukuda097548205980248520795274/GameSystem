@@ -71,6 +71,30 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
 			entityJson["components"]["ScriptComponent"]["filePath"] = c->filePath;
 			entityJson["components"]["ScriptComponent"]["moduleName"] = c->moduleName;
 			entityJson["components"]["ScriptComponent"]["className"] = c->className;
+
+            // Entity型のプロパティを保存するためのマップ
+            for (const auto& [propName, entityValue] : c->savedEntityProperties)
+            {
+                entityJson["components"]["ScriptComponent"]["savedEntityProperties"][propName] = entityValue;
+            }
+
+            // int型のプロパティを保存するためのマップ
+            for (const auto& [propName, intValue] : c->savedIntProperties)
+            {
+                entityJson["components"]["ScriptComponent"]["savedIntProperties"][propName] = intValue;
+            }
+
+            // float型のプロパティを保存するためのマップ
+            for (const auto& [propName, floatValue] : c->savedFloatProperties)
+            {
+                entityJson["components"]["ScriptComponent"]["savedFloatProperties"][propName] = floatValue;
+            }
+
+            // bool型のプロパティを保存するためのマップ
+            for (const auto& [propName, boolValue] : c->savedBoolProperties)
+            {
+                entityJson["components"]["ScriptComponent"]["savedBoolProperties"][propName] = boolValue;
+            }
 		}
 
 		// TextureComponent
@@ -233,6 +257,31 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
 			comp.moduleName = componentsJson["ScriptComponent"]["moduleName"];
 			comp.className = componentsJson["ScriptComponent"]["className"];
 			comp.handle = engine ? engine->BuildScriptModule(comp.moduleName, comp.className, comp.filePath) : Detail::ScriptHandle::Invalid();
+
+            // Entity型のプロパティを保存するためのマップ
+            for (const auto& [propName, entityValue] : componentsJson["ScriptComponent"]["savedEntityProperties"].items())
+            {
+                comp.savedEntityProperties[propName] = entityValue;
+            }
+
+            // int型のプロパティを保存するためのマップ
+            for (const auto& [propName, intValue] : componentsJson["ScriptComponent"]["savedIntProperties"].items())
+            {
+                comp.savedIntProperties[propName] = intValue;
+            }
+
+            // float型のプロパティを保存するためのマップ
+            for (const auto& [propName, floatValue] : componentsJson["ScriptComponent"]["savedFloatProperties"].items())
+            {
+                comp.savedFloatProperties[propName] = floatValue;
+            }
+
+            // bool型のプロパティを保存するためのマップ
+            for (const auto& [propName, boolValue] : componentsJson["ScriptComponent"]["savedBoolProperties"].items())
+            {
+                comp.savedBoolProperties[propName] = boolValue;
+            }
+
 			registry->AddComponent<ScriptComponent>(newId, comp);
         }
 

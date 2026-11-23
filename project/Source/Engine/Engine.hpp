@@ -118,7 +118,7 @@ public:
 	/// @param blendMode 
 	/// @param drawFunc 
 	/// @return 
-	Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc) { return renderContext_->CreatePass(priority, blendMode, drawFunc); }
+	Entity CreatePass(int priority, BlendMode blendMode) { return renderContext_->CreatePass(priority, blendMode); }
 
 	/// @brief レンダー3Dエンティティを作成する
 	/// @return 

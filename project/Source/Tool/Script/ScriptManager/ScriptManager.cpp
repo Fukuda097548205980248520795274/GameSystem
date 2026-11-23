@@ -496,10 +496,30 @@ void Detail::ScriptManager::ReloadModifiedScripts()
 	}
 }
 
+/// @brief エンティティからスクリプトオブジェクトを取得する
+/// @param targetEntity 
+/// @return 
+asIScriptObject* Detail::ScriptManager::GetScriptFromEntity(Entity targetEntity)
+{
+	auto registry = Engine::GetInstance()->GetRegistryECS();
+
+    // エンティティが有効で、かつScriptComponentを持っている場合にスクリプトオブジェクトを返す
+	if (registry->HasComponent<ScriptComponent>(targetEntity))
+	{
+		return registry->GetComponent<ScriptComponent>(targetEntity)->scriptObject;
+	}
+
+	return nullptr;
+}
+
 /// @brief C++ エンジンAPIのバインド
 void Detail::ScriptManager::RegisterEngineAPI()
 {
 	auto engine = Engine::GetInstance();
+
+    // Entity の登録
+    if (scriptEngine_->RegisterObjectType("Entity", sizeof(Entity), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Entity>()) < 0)
+        throw std::runtime_error("Entity の登録に失敗しました");
 
 	// Vector3 の登録
 	if (scriptEngine_->RegisterObjectType("Vector3", sizeof(Vector3), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector3>()) < 0)

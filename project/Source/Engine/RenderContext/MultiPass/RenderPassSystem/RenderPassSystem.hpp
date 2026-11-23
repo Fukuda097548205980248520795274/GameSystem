@@ -45,9 +45,8 @@ namespace Detail
 		/// @brief レンダーパスを作成する
 		/// @param priority 
 		/// @param blendMode 
-		/// @param drawFunc 
 		/// @return 
-		Entity CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc);
+		Entity CreatePass(int priority, BlendMode blendMode);
 
 		/// @brief すべてのレンダーパスを実行する
 		/// @param commandList 

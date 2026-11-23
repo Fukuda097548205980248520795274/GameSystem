@@ -1,5 +1,12 @@
 class Move
 {
+	// ターゲットエンティティ
+	Entity targetEntity;
+
+	int testIntNum;
+	float testFloatNum;
+	bool testBool;
+
 	Move()
 	{
 		// コンストラクタ
@@ -17,7 +24,7 @@ class Move
 		// ヘルパーで生成された名前に合わせて呼び出す
     	TransformComponent transform = GetTransformComponent();
 		
-    	transform.position.z += 1.0f * GetDeltaTime();
+    	transform.position.z += testFloatNum * GetDeltaTime();
     
     	SetTransformComponent(transform);
 	}

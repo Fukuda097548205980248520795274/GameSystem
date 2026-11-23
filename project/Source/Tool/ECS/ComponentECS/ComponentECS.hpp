@@ -26,11 +26,13 @@ struct ScriptComponent
 
 	/// @brief コンストラクタ
 	/// @param handle 
-	ScriptComponent(Detail::ScriptHandle handle) : handle(handle), filePath("") {}
+    ScriptComponent(Detail::ScriptHandle handle, const std::string& moduleName = "", const std::string& className = "", const std::string& filePath = "")
+        : handle(handle), filePath(filePath), moduleName(moduleName), className(className) {
+    }
 
     // コピーコンストラクタ
     ScriptComponent(const ScriptComponent& other):
-        filePath(other.filePath), moduleName(other.moduleName),className(other.className), handle(other.handle),initFunc(other.initFunc), updateFunc(other.updateFunc)
+        filePath(other.filePath), moduleName(other.moduleName),className(other.className), handle(other.handle),initFunc(other.initFunc), updateFunc(other.updateFunc), savedEntityProperties(other.savedEntityProperties)
     {
         scriptObject = other.scriptObject;
 
@@ -65,6 +67,7 @@ struct ScriptComponent
         handle = other.handle;
         initFunc = other.initFunc;
         updateFunc = other.updateFunc;
+        savedEntityProperties = other.savedEntityProperties;
 
         scriptObject = other.scriptObject;
 
@@ -101,6 +104,19 @@ struct ScriptComponent
 
 	// スクリプトの初期化関数（コンストラクタ）を保持するためのメンバ変数
 	asIScriptFunction* initFunc = nullptr;
+
+
+    // @brief エンティティのプロパティを保存するためのマップ
+    std::unordered_map<std::string, Entity> savedEntityProperties;
+
+    // @brief int型のプロパティを保存するためのマップ
+    std::unordered_map<std::string, int> savedIntProperties;
+
+    // @brief float型のプロパティを保存するためのマップ
+    std::unordered_map<std::string, float> savedFloatProperties;
+
+    // @brief bool型のプロパティを保存するためのマップ
+    std::unordered_map<std::string, bool> savedBoolProperties;
 };
 
 /// @brief ScriptComponent用の特殊化

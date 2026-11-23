@@ -15,7 +15,7 @@ void Game::Initialize()
 {
 	auto  engine = Engine::GetInstance();
 
-	Entity renderPassEntity = engine->CreatePass(0, BlendMode::None, std::function<void()>{});
+	Entity renderPassEntity = engine->CreatePass(0, BlendMode::None);
 
 	Entity cameraEntity = engine->CreateCameraEntity();
 
@@ -27,9 +27,9 @@ void Game::Initialize()
 
     Entity directionalLight = engine->CreateDirectionalLightEntity(Vector3(0.0f, 3.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, true);
 
-	ScriptComponent scriptComp(engine->BuildScriptModule("Move", "Move", "./Assets/Script/Move.as"));
+	ScriptComponent scriptComp(engine->BuildScriptModule("Move", "Move", "./Assets/Script/Move.as"), "Move", "Move", "./Assets/Script/Move.as");
 	auto registry = engine->GetRegistryECS();
-	registry->AddComponent(model, scriptComp);
+	registry->AddComponent(modelInstance1, scriptComp);
 }
 
 /// @brief 更新処理

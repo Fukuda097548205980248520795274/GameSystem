@@ -46,6 +46,14 @@ void Detail::ECSEditor::DrawHierarchy()
 			selectedEntity_ = entity;
 		}
 
+        // ドラッグ＆ドロップの開始
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
+        {
+            ImGui::SetDragDropPayload("ENTITY_ID", &entity, sizeof(Entity));
+            ImGui::Text("Entity %u をドラッグ中", entity);
+            ImGui::EndDragDropSource();
+        }
+
 		// 右クリックでコンテキストメニューを表示
 		if (ImGui::BeginPopupContextItem())
 		{

@@ -22,9 +22,8 @@ void Detail::RenderPassSystem::Initialize(RenderTargetPool* renderTargetPool)
 /// @brief レンダーパスを作成する
 /// @param priority 
 /// @param blendMode 
-/// @param drawFunc 
 /// @return 
-Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode, std::function<void()> drawFunc)
+Entity Detail::RenderPassSystem::CreatePass(int priority, BlendMode blendMode)
 {
 	// ECSレジストリを取得する
 	auto registry = Engine::GetInstance()->GetRegistryECS();

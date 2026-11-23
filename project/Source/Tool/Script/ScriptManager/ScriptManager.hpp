@@ -72,6 +72,11 @@ namespace Detail
 		/// @brief 変更されたスクリプトをリロードする
 		void ReloadModifiedScripts();
 
+        /// @brief エンティティからスクリプトオブジェクトを取得する
+        /// @param targetEntity 
+        /// @return 
+        asIScriptObject* GetScriptFromEntity(Entity targetEntity);
+
 
 	private:
 
