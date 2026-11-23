@@ -96,6 +96,18 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                     {
                         *(bool*)propAddr = scriptComp->savedBoolProperties[propName];
                     }
+                    else if (typeId == scriptEngine->GetTypeIdByDecl("Vector2") && scriptComp->savedVector2Properties.count(propName))
+                    {
+                        *(Vector2*)propAddr = scriptComp->savedVector2Properties[propName];
+                    }
+                    else if (typeId == scriptEngine->GetTypeIdByDecl("Vector3") && scriptComp->savedVector3Properties.count(propName))
+                    {
+                        *(Vector3*)propAddr = scriptComp->savedVector3Properties[propName];
+                    }
+                    else if (typeId == scriptEngine->GetTypeIdByDecl("string") && scriptComp->savedStringProperties.count(propName))
+                    {
+                        *(std::string*)propAddr = scriptComp->savedStringProperties[propName];
+                    }
                     else if (typeId == scriptEngine->GetTypeIdByDecl("Entity") && scriptComp->savedEntityProperties.count(propName))
                     {
                         *(Entity*)propAddr = scriptComp->savedEntityProperties[propName];

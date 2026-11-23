@@ -117,6 +117,15 @@ struct ScriptComponent
 
     // @brief bool型のプロパティを保存するためのマップ
     std::unordered_map<std::string, bool> savedBoolProperties;
+
+    // @brief Vector2型のプロパティを保存するためのマップ
+    std::unordered_map<std::string, Vector2> savedVector2Properties;
+
+    // @brief Vector3型のプロパティを保存するためのマップ
+    std::unordered_map<std::string, Vector3> savedVector3Properties;
+
+    // @brief Vector4型のプロパティを保存するためのマップ
+    std::unordered_map<std::string, std::string> savedStringProperties;
 };
 
 /// @brief ScriptComponent用の特殊化

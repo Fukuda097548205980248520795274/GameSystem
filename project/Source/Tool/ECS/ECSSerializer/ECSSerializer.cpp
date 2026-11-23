@@ -95,6 +95,24 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
             {
                 entityJson["components"]["ScriptComponent"]["savedBoolProperties"][propName] = boolValue;
             }
+
+            // Vector2型のプロパティを保存するためのマップ
+            for (const auto& [propName, vector2Value] : c->savedVector2Properties)
+            {
+                entityJson["components"]["ScriptComponent"]["savedVector2Properties"][propName] = {vector2Value.x, vector2Value.y};
+            }
+
+            // Vector3型のプロパティを保存するためのマップ
+            for (const auto& [propName, vector3Value] : c->savedVector3Properties)
+            {
+                entityJson["components"]["ScriptComponent"]["savedVector3Properties"][propName] = {vector3Value.x, vector3Value.y, vector3Value.z};
+            }
+
+            // string型のプロパティを保存するためのマップ
+            for (const auto& [propName, stringValue] : c->savedStringProperties)
+            {
+                entityJson["components"]["ScriptComponent"]["savedStringProperties"][propName] = stringValue;
+            }
 		}
 
 		// TextureComponent
@@ -280,6 +298,24 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
             for (const auto& [propName, boolValue] : componentsJson["ScriptComponent"]["savedBoolProperties"].items())
             {
                 comp.savedBoolProperties[propName] = boolValue;
+            }
+
+            // Vector2型のプロパティを保存するためのマップ
+            for (const auto& [propName, vector2Value] : componentsJson["ScriptComponent"]["savedVector2Properties"].items())
+            {
+                comp.savedVector2Properties[propName] = Vector2(vector2Value[0], vector2Value[1]);
+            }
+
+            // Vector3型のプロパティを保存するためのマップ
+            for (const auto& [propName, vector3Value] : componentsJson["ScriptComponent"]["savedVector3Properties"].items())
+            {
+                comp.savedVector3Properties[propName] = Vector3(vector3Value[0], vector3Value[1], vector3Value[2]);
+            }
+
+            // string型のプロパティを保存するためのマップ
+            for (const auto& [propName, stringValue] : componentsJson["ScriptComponent"]["savedStringProperties"].items())
+            {
+                comp.savedStringProperties[propName] = stringValue;
             }
 
 			registry->AddComponent<ScriptComponent>(newId, comp);

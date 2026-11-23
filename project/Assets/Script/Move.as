@@ -6,6 +6,9 @@ class Move
 	int testIntNum;
 	float testFloatNum;
 	bool testBool;
+	Vector2 testVector2;
+	Vector3 testVector3;
+	string testString;
 
 	Move()
 	{
@@ -24,7 +27,11 @@ class Move
 		// ヘルパーで生成された名前に合わせて呼び出す
     	TransformComponent transform = GetTransformComponent();
 		
-    	transform.position.z += testFloatNum * GetDeltaTime();
+		// Wキーで移動する
+		if (Input::GetKeyPress(Key::W))
+		{
+			transform.position.z += 2.0f * GetDeltaTime();
+		}
     
     	SetTransformComponent(transform);
 	}

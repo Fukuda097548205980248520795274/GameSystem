@@ -131,6 +131,47 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
                                             if (livePropAddr) *(bool*)livePropAddr = val;
                                         }
                                     }
+                                    // --- Vector2 ---
+                                    else if (typeId == scriptEngine->GetTypeIdByDecl("Vector2"))
+                                    {
+                                        Vector2 val = livePropAddr ? *(Vector2*)livePropAddr : script->savedVector2Properties[propName];
+                                        ImGui::SetNextItemWidth(-1);
+                                        // 配列として先頭アドレス（&val.x）を渡す
+                                        if (ImGui::DragFloat2("##val", &val.x, 0.1f))
+                                        {
+                                            script->savedVector2Properties[propName] = val;
+                                            if (livePropAddr) *(Vector2*)livePropAddr = val;
+                                        }
+                                    }
+                                    // --- Vector3 ---
+                                    else if (typeId == scriptEngine->GetTypeIdByDecl("Vector3"))
+                                    {
+                                        Vector3 val = livePropAddr ? *(Vector3*)livePropAddr : script->savedVector3Properties[propName];
+                                        ImGui::SetNextItemWidth(-1);
+                                        if (ImGui::DragFloat3("##val", &val.x, 0.1f))
+                                        {
+                                            script->savedVector3Properties[propName] = val;
+                                            if (livePropAddr) *(Vector3*)livePropAddr = val;
+                                        }
+                                    }
+                                    // --- String ---
+                                    else if (typeId == scriptEngine->GetTypeIdByDecl("string"))
+                                    {
+                                        std::string val = livePropAddr ? *(std::string*)livePropAddr : script->savedStringProperties[propName];
+
+                                        // ImGui用のバッファを用意
+                                        char buffer[256];
+                                        strncpy_s(buffer, val.c_str(), sizeof(buffer) - 1);
+                                        buffer[sizeof(buffer) - 1] = '\0'; // 終端を保証
+
+                                        ImGui::SetNextItemWidth(-1);
+                                        if (ImGui::InputText("##val", buffer, sizeof(buffer)))
+                                        {
+                                            std::string newVal(buffer);
+                                            script->savedStringProperties[propName] = newVal;
+                                            if (livePropAddr) *(std::string*)livePropAddr = newVal;
+                                        }
+                                    }
                                     // --- Entity型 (UnityのGameObjectスロット風) ---
                                     else if (typeId == scriptEngine->GetTypeIdByDecl("Entity"))
                                     {

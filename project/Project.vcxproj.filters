@@ -374,6 +374,9 @@
     <Filter Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO">
       <UniqueIdentifier>{1db0989c-4371-435d-9bce-afaae4a4ab62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Tool\Script\ScriptRegisterAPI">
+      <UniqueIdentifier>{06773da3-bd1a-4235-af53-e1df70291d1a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -651,6 +654,9 @@
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO\DepthOnlyPrefabPSO.cpp">
       <Filter>Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Tool\Script\ScriptRegisterAPI\ScriptRegisterAPI.cpp">
+      <Filter>Source\Tool\Script\ScriptRegisterAPI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -965,6 +971,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO\DepthOnlyPrefabPSO.hpp">
       <Filter>Source\Engine\RenderContext\Render\PrefabSystem\DepthOnlyPrefabPSO</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Tool\Script\ScriptRegisterAPI\ScriptRegisterAPI.hpp">
+      <Filter>Source\Tool\Script\ScriptRegisterAPI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
