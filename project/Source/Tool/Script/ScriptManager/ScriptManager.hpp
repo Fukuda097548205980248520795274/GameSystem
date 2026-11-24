@@ -93,6 +93,10 @@ namespace Detail
 		/// @brief スクリプトエンジンを登録する
 		void RegisterEngineAPI();
 
+        /// @brief 事前定義されたスクリプトファイルをエクスポートする
+        /// @param outputPath 
+        void ExportPredefinedFile(const std::string& outputPath);
+
 
 	private:
 

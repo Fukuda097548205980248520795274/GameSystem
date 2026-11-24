@@ -327,6 +327,7 @@ imgui.ini
 *.xcf
 *.mdp
 *.pdb
+*.predefined
 project/Assets/Parameter/Debug/*
 project/logs/*
 project/dumps/*
