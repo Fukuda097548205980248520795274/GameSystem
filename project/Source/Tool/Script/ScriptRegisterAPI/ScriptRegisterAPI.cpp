@@ -1,4 +1,6 @@
 #include "ScriptRegisterAPI.hpp"
+#include <scriptarray/scriptarray.h>
+
 #include "Engine.hpp"
 #include "Matrix/Matrix4x4/Matrix4x4.hpp"
 #include "Matrix/Matrix3x3/Matrix3x3.hpp"
@@ -32,6 +34,21 @@ namespace
         return T();
     }
 
+    /// @brief コンポーネントを取得するテンプレート関数
+    /// @tparam T 
+    /// @param targetEntity 
+    /// @return 
+    template<typename T>
+    T GetComponentOfEntity(Entity targetEntity)
+    {
+        auto registry = Engine::GetInstance()->GetRegistryECS();
+        if (targetEntity != kNullEntity && registry->HasComponent<T>(targetEntity))
+        {
+            return *registry->GetComponent<T>(targetEntity);
+        }
+        return T();
+    }
+
     /// @brief コンポーネントを適用するテンプレート関数
     /// @tparam T 
     /// @param component 
@@ -59,9 +76,48 @@ namespace
         std::string getDecl = typeName + " Get" + typeName + "()";
         int r = scriptEngine->RegisterGlobalFunction(getDecl.c_str(), asFUNCTION(GetComponentFromScript<T>), asCALL_CDECL);
 
+        // エンティティ指定で取得する関数
+        std::string getTargetDecl = typeName + " Get" + typeName + "(Entity target)";
+        scriptEngine->RegisterGlobalFunction(getTargetDecl.c_str(), asFUNCTION(GetComponentOfEntity<T>), asCALL_CDECL);
+
         // 設定関数
         std::string setDecl = "void Set" + typeName + "(const " + typeName + " &in)";
         r = scriptEngine->RegisterGlobalFunction(setDecl.c_str(), asFUNCTION(SetComponentFromScript<T>), asCALL_CDECL);
+    }
+
+    /// @brief 指定されたタグを持つエンティティを検索する関数
+    /// @param targetTag 
+    /// @return 
+    CScriptArray* FindEntitiesWithTag(const std::string& targetTag)
+    {
+        asIScriptContext* ctx = asGetActiveContext();
+        if (!ctx) return nullptr;
+
+        asIScriptEngine* engine = ctx->GetEngine();
+
+        // array<Entity> の型情報を取得
+        asITypeInfo* arrayType = engine->GetTypeInfoByDecl("array<Entity>");
+        CScriptArray* resultArray = CScriptArray::Create(arrayType);
+
+        auto registry = Engine::GetInstance()->GetRegistryECS();
+        if (!registry) return resultArray;
+
+        for (Entity entity : registry->GetActiveEntities())
+        {
+            // プレハブ（雛形）は除外（ScriptSystemと同様の配慮）
+            if (registry->HasComponent<PrefabComponent>(entity)) continue;
+
+            if (registry->HasComponent<TagComponent>(entity))
+            {
+                auto tagComp = registry->GetComponent<TagComponent>(entity);
+                if (tagComp && tagComp->tag == targetTag)
+                {
+                    resultArray->InsertLast(&entity);
+                }
+            }
+        }
+
+        return resultArray;
     }
 }
 
@@ -155,6 +211,10 @@ void Detail::ScriptRegisterAPI::RegisterComponentAPI(asIScriptEngine* scriptEngi
 {
     // Entity の登録
     scriptEngine->RegisterObjectType("Entity", sizeof(Entity), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Entity>());
+
+    // FindEntitiesWithTag 関数の登録
+    scriptEngine->RegisterGlobalFunction("array<Entity>@ FindEntitiesWithTag(const string &in tag)",
+        asFUNCTION(FindEntitiesWithTag), asCALL_CDECL);
 
     // TransformComponent の登録
     scriptEngine->RegisterObjectType("TransformComponent", sizeof(TransformComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<TransformComponent>());

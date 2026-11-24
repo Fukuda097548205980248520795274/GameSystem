@@ -196,6 +196,15 @@ std::string Detail::ECSEditor::GetEntityDisplayName(Entity entity) const
 {
     std::string label = "Entity " + std::to_string(entity);
 
+    // タグコンポーネントがある場合、タグ名を優先して表示
+    if (auto tagComp = registry_->GetComponent<TagComponent>(entity))
+    {
+        if (!tagComp->tag.empty())
+        {
+            label = tagComp->tag + " (Entity " + std::to_string(entity) + ")";
+        }
+    }
+
     if (registry_->HasComponent<CameraComponent>(entity))
         label += " [Camera]";
     else if (registry_->HasComponent<SkyboxComponent>(entity))

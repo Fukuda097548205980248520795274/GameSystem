@@ -2,6 +2,7 @@
 #include "Engine.hpp"
 #include <cassert>
 #include <iostream>
+#include <scriptarray/scriptarray.h>
 
 #include "../ScriptRegisterAPI/ScriptRegisterAPI.hpp"
 
@@ -17,6 +18,9 @@ void Detail::ScriptManager::Initialize()
 
 	// 標準アッドオンの登録 (std::string サポート)
 	RegisterStdString(scriptEngine_);
+
+    // 標準アッドオンの登録 (std::vector サポート)
+    RegisterScriptArray(scriptEngine_, true);
 
 	// C++ エンジンAPIのバインド
 	RegisterEngineAPI();

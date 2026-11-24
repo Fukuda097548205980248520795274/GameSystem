@@ -144,6 +144,15 @@ struct ScriptComponent
     std::unordered_map<std::string, std::string> savedStringProperties;
 };
 
+/// @brief タグコンポーネント
+struct TagComponent
+{
+    TagComponent() = default;
+    TagComponent(const std::string& tag) : tag(tag) {}
+
+    std::string tag = "";
+};
+
 /// @brief ScriptComponent用の特殊化
 template<>
 inline void ComponentArray<ScriptComponent>::PostCopyProcess()

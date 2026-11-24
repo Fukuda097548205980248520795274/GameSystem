@@ -36,6 +36,29 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
     if (ImGui::TreeNodeEx(nodeName.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
     {
 
+        // TagComponent
+        if (registry_->HasComponent<TagComponent>(entity))
+        {
+            if (ImGui::CollapsingHeader("タグ", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                auto tagComp = registry_->GetComponent<TagComponent>(entity);
+                if (tagComp)
+                {
+                    char buffer[256];
+                    strncpy_s(buffer, tagComp->tag.c_str(), sizeof(buffer) - 1);
+                    buffer[sizeof(buffer) - 1] = '\0';
+
+                    ImGui::Text("タグ名");
+                    ImGui::SameLine(100.0f);
+                    ImGui::SetNextItemWidth(-1);
+                    if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+                    {
+                        tagComp->tag = buffer;
+                    }
+                }
+            }
+        }
+
         // ScriptComponent
         if (registry_->HasComponent<ScriptComponent>(entity))
         {
@@ -804,6 +827,9 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 
         if (ImGui::BeginPopup("コンポーネント"))
         {
+            if (!registry_->HasComponent<TagComponent>(entity) && ImGui::MenuItem("タグ"))
+                registry_->AddComponent<TagComponent>(entity, TagComponent{});
+
             if (!registry_->HasComponent<TransformComponent>(entity) && ImGui::MenuItem("トランスフォーム"))
                 registry_->AddComponent<TransformComponent>(entity, TransformComponent{});
 
