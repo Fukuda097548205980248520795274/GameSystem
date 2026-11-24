@@ -20,6 +20,10 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
 
     for (Entity entity : activeEntities)
     {
+        // プレハブ（雛形）自体はスクリプトを実行しない
+        if (registry->HasComponent<PrefabComponent>(entity)) continue;
+
+        // スクリプトコンポーネントを持っていない場合はスキップ
         if (!registry->HasComponent<ScriptComponent>(entity)) continue;
 
         // スクリプトコンポーネントを取得

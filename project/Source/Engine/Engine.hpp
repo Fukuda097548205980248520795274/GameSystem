@@ -62,6 +62,10 @@ public:
 	/// @return 
 	bool GameLoop() { return winApp_->ProcessMessage(); }
 
+    /// @brief ゲームがプレイ中かどうかを取得する
+    /// @return 
+    bool IsPlaying() const { return playState_ == PlayState::Playing; }
+
 	/// @brief クライアント領域の横幅を取得する
 	/// @return 
 	int32_t GetClientWidth() const { return winApp_->GetClientWidth(); }
@@ -207,10 +211,6 @@ public:
 	/// @brief PSOエディタを取得する
 	/// @return 
 	Detail::PSOEditor* GetPSOEditor() { return renderContext_->GetPSOEditor(); }
-
-	/// @brief シェーダエディタを取得する
-	/// @return 
-	Detail::ShaderEditor* GetShaderEditor() { return renderContext_->GetShaderEditor(); }
 
 	/// @brief 入力処理を取得する
 	/// @return 

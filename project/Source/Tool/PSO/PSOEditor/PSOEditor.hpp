@@ -96,6 +96,10 @@ namespace Detail
 		/// @param desc 
 		void AutoSetupRootParameters(PSODescription& desc);
 
+        /// @brief 指定したシェーダファイルをVSCodeで開く
+        /// @param filePath 
+        static void OpenInVSCode(const std::wstring& filePath);
+
 
 	private:
 
@@ -125,6 +129,9 @@ namespace Detail
 
 		/// @brief シェーダファイルリストを更新する
 		void RefreshShaderFileList();
+
+        /// @brief シェーダファイルの更新（保存）を監視し、変更があればisDirtyを立てる
+        void CheckShaderFileUpdates();
 
 
 	private:
@@ -178,5 +185,14 @@ namespace Detail
 		bool wasVsComboOpen_ = false;
 		bool wasPsComboOpen_ = false;
 		bool wasCsComboOpen_ = false;
+
+
+    private:
+
+        /// @brief シェーダファイルごとの最終更新日時キャッシュ
+        std::unordered_map<std::wstring, std::filesystem::file_time_type> shaderWriteTimes_;
+
+        /// @brief ファイル監視のフレームカウンタ（負荷軽減用）
+        uint32_t watchFrameCounter_ = 0;
 	};
 }

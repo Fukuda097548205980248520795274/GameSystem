@@ -31,12 +31,22 @@ struct ScriptComponent
     }
 
     // コピーコンストラクタ
-    ScriptComponent(const ScriptComponent& other):
-        filePath(other.filePath), moduleName(other.moduleName),className(other.className), handle(other.handle),initFunc(other.initFunc), updateFunc(other.updateFunc), savedEntityProperties(other.savedEntityProperties)
+    ScriptComponent(const ScriptComponent& other) :
+        filePath(other.filePath),
+        moduleName(other.moduleName),
+        className(other.className),
+        handle(other.handle),
+        initFunc(other.initFunc),
+        updateFunc(other.updateFunc),
+        savedEntityProperties(other.savedEntityProperties),
+        savedIntProperties(other.savedIntProperties),
+        savedFloatProperties(other.savedFloatProperties),
+        savedBoolProperties(other.savedBoolProperties),
+        savedVector2Properties(other.savedVector2Properties),
+        savedVector3Properties(other.savedVector3Properties),
+        savedStringProperties(other.savedStringProperties)
     {
         scriptObject = other.scriptObject;
-
-        // 参照カウントを増やす
         if (scriptObject)
         {
             scriptObject->AddRef();
@@ -68,6 +78,12 @@ struct ScriptComponent
         initFunc = other.initFunc;
         updateFunc = other.updateFunc;
         savedEntityProperties = other.savedEntityProperties;
+        savedIntProperties = other.savedIntProperties;
+        savedFloatProperties = other.savedFloatProperties;
+        savedBoolProperties = other.savedBoolProperties;
+        savedVector2Properties = other.savedVector2Properties;
+        savedVector3Properties = other.savedVector3Properties;
+        savedStringProperties = other.savedStringProperties;
 
         scriptObject = other.scriptObject;
 

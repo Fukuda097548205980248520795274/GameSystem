@@ -4,7 +4,7 @@
 #include "DXFence/DXFence.hpp"
 #include "DXHeap/DXHeap.hpp"
 #include "DXSwapChain/DXSwapChain.hpp"
-#include "Shader/ShaderCompiler/ShaderCompiler.hpp"
+#include "ShaderCompiler/ShaderCompiler.hpp"
 #include "Store/ResourceStore/ResourceStore.hpp"
 #include "Store/ResourceStore/PlacedResourceAllocator/PlacedResourceAllocator.hpp"
 #include "MultiPass/MultiPass.hpp"
@@ -27,7 +27,6 @@
 #include "Scene/SceneEditor/SceneEditor.hpp"
 #include "ProfilerEditor/ProfilerEditor.hpp"
 #include "ECS/ECSEditor/ECSEditor.hpp"
-#include "Shader/ShaderEditor/ShaderEditor.hpp"
 #include "PSO/PSOEditor/PSOEditor.hpp"
 
 #include "Resource/QueryResource/QueryResource.hpp"
@@ -160,10 +159,6 @@ namespace Detail
 		/// @brief PSOエディタを取得する
 		/// @return 
 		PSOEditor* GetPSOEditor() { return psoEditor_.get(); }
-
-		/// @brief シェーダエディタを取得する
-		/// @return 
-		ShaderEditor* GetShaderEditor() { return shaderEditor_.get(); }
 
 		/// @brief デバイスを取得する
 		/// @return 
@@ -368,9 +363,6 @@ namespace Detail
 
 		/// @brief PSOエディタ
 		std::unique_ptr<PSOEditor> psoEditor_;
-
-		/// @brief シェーダエディタ
-		std::unique_ptr<ShaderEditor> shaderEditor_;
 
 
 #ifdef DEVELOPMENT

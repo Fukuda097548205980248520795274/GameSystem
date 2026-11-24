@@ -161,3 +161,62 @@ void Detail::ECSEditor::DrawPlayControls()
         ImGui::PopStyleColor();
     }
 }
+
+/// @brief エンティティにスクリプトを割り当てる
+/// @param entity 
+/// @param scriptHandle 
+void Detail::ECSEditor::AssignScriptToEntity(Entity entity, ScriptHandle scriptHandle)
+{
+    auto engine = Engine::GetInstance();
+    if (!engine || !scriptHandle.IsValid()) return;
+
+    auto scriptManager = engine->GetScriptSystem()->GetScriptManager();
+    if (!scriptManager) return;
+
+    // ScriptComponent が無ければ追加
+    if (!registry_->HasComponent<ScriptComponent>(entity))
+    {
+        registry_->AddComponent<ScriptComponent>(entity, ScriptComponent{});
+    }
+
+    // ScriptComponent を取得して更新
+    if (auto script = registry_->GetComponent<ScriptComponent>(entity))
+    {
+        script->handle = scriptHandle;
+        script->filePath = scriptManager->GetFilePath(scriptHandle);
+        script->moduleName = scriptManager->GetModuleName(scriptHandle);
+        script->className = scriptManager->GetScriptClass(scriptHandle);
+    }
+}
+
+/// @brief ヒエラルキー用の表示ラベルを生成する
+/// @param entity 
+/// @return 
+std::string Detail::ECSEditor::GetEntityDisplayName(Entity entity) const
+{
+    std::string label = "Entity " + std::to_string(entity);
+
+    if (registry_->HasComponent<CameraComponent>(entity))
+        label += " [Camera]";
+    else if (registry_->HasComponent<SkyboxComponent>(entity))
+        label += " [Skybox]";
+    else if (registry_->HasComponent<DirectionalLightComponent>(entity))
+        label += " [DirLight]";
+    else if (registry_->HasComponent<PointLightComponent>(entity))
+        label += " [PointLight]";
+    else if (registry_->HasComponent<SpotLightComponent>(entity))
+        label += " [SpotLight]";
+    else if (registry_->HasComponent<ModelComponent>(entity))
+        label += " [Model]";
+
+    // スクリプトコンポーネントがある場合、クラス名を表示
+    if (auto script = registry_->GetComponent<ScriptComponent>(entity))
+    {
+        if (!script->className.empty())
+        {
+            label += " (" + script->className + ")";
+        }
+    }
+
+    return label;
+}

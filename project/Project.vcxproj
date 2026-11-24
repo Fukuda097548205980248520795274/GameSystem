@@ -470,7 +470,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.cpp">
+    <ClCompile Include="Source\Engine\ShaderCompiler\ShaderCompiler.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
@@ -512,10 +512,6 @@
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="Source\Tool\PSO\PSOEditor\PSOEditor.cpp">
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
-      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
-    </ClCompile>
-    <ClCompile Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
     </ClCompile>
@@ -624,7 +620,7 @@
     <ClInclude Include="Source\Tool\Script\ScriptManager\ScriptManager.hpp" />
     <ClInclude Include="Source\Tool\Script\ScriptRegisterAPI\ScriptRegisterAPI.hpp" />
     <ClInclude Include="Source\Tool\Script\ScriptSystem\ScriptSystem.hpp" />
-    <ClInclude Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.hpp" />
+    <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.hpp" />
     <ClInclude Include="Source\Engine\Audio\AudioStore\AudioStore.hpp" />
     <ClInclude Include="Source\Engine\Store\TextureStore\TextureStore.hpp" />
     <ClInclude Include="Source\Engine\WinApp\WinApp.hpp" />
@@ -636,7 +632,6 @@
     <ClInclude Include="Source\Math\Vector\Vector3\Vector3.hpp" />
     <ClInclude Include="Source\Math\Vector\Vector4\Vector4.hpp" />
     <ClInclude Include="Source\Tool\PSO\PSOEditor\PSOEditor.hpp" />
-    <ClInclude Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Internal\Shader\DepthOnly\DepthOnly.VS.hlsl">

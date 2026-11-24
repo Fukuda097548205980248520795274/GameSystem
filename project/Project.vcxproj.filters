@@ -146,17 +146,8 @@
     <Filter Include="Source\Tool\PSO\PSOEditor">
       <UniqueIdentifier>{3f802197-5fc7-477c-9976-03ed12bd090f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Tool\Shader">
-      <UniqueIdentifier>{df470403-a9ec-4a9b-944d-fa30b137c14b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Tool\Shader\ShaderEditor">
-      <UniqueIdentifier>{51ad5843-9868-4121-ba86-ef11dd6ba58c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Engine\RenderContext\ImGuiRender">
       <UniqueIdentifier>{0bdc9465-b915-4510-97ef-34a3df26a554}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Tool\Shader\ShaderCompiler">
-      <UniqueIdentifier>{c6dc3cf3-3fb1-4b17-89d7-e6a9da5960d3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Engine\Resource\IndexBufferResource">
       <UniqueIdentifier>{d485c078-bb00-45cb-9594-205061548509}</UniqueIdentifier>
@@ -377,6 +368,9 @@
     <Filter Include="Source\Tool\Script\ScriptRegisterAPI">
       <UniqueIdentifier>{06773da3-bd1a-4235-af53-e1df70291d1a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\ShaderCompiler">
+      <UniqueIdentifier>{c6dc3cf3-3fb1-4b17-89d7-e6a9da5960d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine\Engine.cpp">
@@ -418,8 +412,8 @@
     <ClCompile Include="Source\Engine\Func\CrashHandler\CrashHandler.cpp">
       <Filter>Source\Engine\Func\CrashHandler</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.cpp">
-      <Filter>Source\Tool\Shader\ShaderCompiler</Filter>
+    <ClCompile Include="Source\Engine\ShaderCompiler\ShaderCompiler.cpp">
+      <Filter>Source\Engine\ShaderCompiler</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\RenderContext\RenderContext.cpp">
       <Filter>Source\Engine\RenderContext</Filter>
@@ -486,9 +480,6 @@
     </ClCompile>
     <ClCompile Include="Source\Tool\PSO\PSOEditor\PSOEditor.cpp">
       <Filter>Source\Tool\PSO\PSOEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.cpp">
-      <Filter>Source\Tool\Shader\ShaderEditor</Filter>
     </ClCompile>
     <ClCompile Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.cpp">
       <Filter>Source\Engine\Resource\IndexBufferResource</Filter>
@@ -696,8 +687,8 @@
     <ClInclude Include="Source\Engine\Func\CrashHandler\CrashHandler.hpp">
       <Filter>Source\Engine\Func\CrashHandler</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Tool\Shader\ShaderCompiler\ShaderCompiler.hpp">
-      <Filter>Source\Tool\Shader\ShaderCompiler</Filter>
+    <ClInclude Include="Source\Engine\ShaderCompiler\ShaderCompiler.hpp">
+      <Filter>Source\Engine\ShaderCompiler</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\RenderContext\RenderContext.hpp">
       <Filter>Source\Engine\RenderContext</Filter>
@@ -782,9 +773,6 @@
     </ClInclude>
     <ClInclude Include="Source\Tool\PSO\PSOEditor\PSOEditor.hpp">
       <Filter>Source\Tool\PSO\PSOEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Tool\Shader\ShaderEditor\ShaderEditor.hpp">
-      <Filter>Source\Tool\Shader\ShaderEditor</Filter>
     </ClInclude>
     <ClInclude Include="Source\Engine\Resource\IndexBufferResource\IndexBufferResource.hpp">
       <Filter>Source\Engine\Resource\IndexBufferResource</Filter>

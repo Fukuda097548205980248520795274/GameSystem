@@ -34,6 +34,9 @@ namespace Detail
         /// @return 
         Entity Instantiate(Entity prefabEntity);
 
+        /// @brief すべてのインスタンスを削除する
+        void DestroyAllInstances();
+
         /// @brief 深度値のみの描画を実行する
         /// @param commandList 
         /// @param frameIndex 

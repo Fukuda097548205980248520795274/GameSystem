@@ -83,6 +83,9 @@ void Detail::PSOEditor::Update()
 {
 #ifdef DEVELOPMENT
 
+    // シェーダファイルの保存（更新）を監視
+    CheckShaderFileUpdates();
+
 	auto engine = Engine::GetInstance();
 
 	// 安全に破棄できるフレーム数を取得
@@ -333,60 +336,74 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 			};
 
 
-		// Graphics 専用のUI
-		if (currentDesc.type == Detail::PSOType::Graphics)
-		{
-			if (ImGui::CollapsingHeader("グラフィックス シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				// 頂点シェーダ
-				if (DrawShaderCombo("頂点シェーダ パス", currentDesc.vsPath, wasVsComboOpen_))
-				{
-					currentItem.isDirty = true;
-				}
+        // Graphics 専用のUI
+        if (currentDesc.type == Detail::PSOType::Graphics)
+        {
+            if (ImGui::CollapsingHeader("グラフィックス シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                // 頂点シェーダ
+                if (DrawShaderCombo("頂点シェーダ パス", currentDesc.vsPath, wasVsComboOpen_))
+                {
+                    currentItem.isDirty = true;
+                }
 
-				// ファイルが存在しない場合の警告表示
-				if (!vsExists)
-				{
-					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ 警告 : 頂点シェーダーファイルが見つかりません！");
-				}
+                ImGui::SameLine();
+                if (ImGui::Button("VSCodeで開く##VS"))
+                {
+                    OpenInVSCode(currentDesc.vsPath);
+                }
 
-				// ピクセルシェーダ
-				if (DrawShaderCombo("ピクセルシェーダ パス", currentDesc.psPath, wasPsComboOpen_))
-				{
-					currentItem.isDirty = true;
-				}
+                if (!vsExists)
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "  ↳ 警告 : 頂点シェーダーファイルが見つかりません！");
+                }
 
-				// ファイルが存在しない場合の警告表示
-				if (!psExists)
-				{
-					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : ピクセルシェーダーファイルが見つかりません！");
-				}
+                // ピクセルシェーダ
+                if (DrawShaderCombo("ピクセルシェーダ パス", currentDesc.psPath, wasPsComboOpen_))
+                {
+                    currentItem.isDirty = true;
+                }
 
-				// 自動設定ボタン
-				if (ImGui::Button("シェーダから自動設定"))
-				{
-					AutoSetupRootParameters(currentDesc);
-					currentItem.isDirty = true;
-				}
-			}
-		}
-		else if (currentDesc.type == Detail::PSOType::Compute)
-		{
-			// Compute 専用のUI
-			if (ImGui::CollapsingHeader("コンピュート シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
-			{
-				if (DrawShaderCombo("コンピュートシェーダ パス", currentDesc.csPath, wasCsComboOpen_))
-				{
-					currentItem.isDirty = true;
-				}
+                ImGui::SameLine();
+                if (ImGui::Button("VSCodeで開く##PS"))
+                {
+                    OpenInVSCode(currentDesc.psPath);
+                }
 
-				// ファイルが存在しない場合の警告表示
-				if (!csExists)
-				{
-					ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : コンピュートシェーダーファイルが見つかりません！");
-				}
-			}
-		}
+                if (!psExists)
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : ピクセルシェーダーファイルが見つかりません！");
+                }
+
+                // 自動設定ボタン
+                if (ImGui::Button("シェーダから自動設定"))
+                {
+                    AutoSetupRootParameters(currentDesc);
+                    currentItem.isDirty = true;
+                }
+            }
+        } else if (currentDesc.type == Detail::PSOType::Compute)
+        {
+            // Compute 専用のUI
+            if (ImGui::CollapsingHeader("コンピュート シェーダファイル", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                if (DrawShaderCombo("コンピュートシェーダ パス", currentDesc.csPath, wasCsComboOpen_))
+                {
+                    currentItem.isDirty = true;
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("VSCodeで開く##CS"))
+                {
+                    OpenInVSCode(currentDesc.csPath);
+                }
+
+                if (!csExists)
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), " ↳ 警告 : コンピュートシェーダーファイルが見つかりません！");
+                }
+            }
+        }
 
 		// ルートパラメータの設定 (Graphics / Compute 共通)
 		if (ImGui::CollapsingHeader("ルートパラメータ", ImGuiTreeNodeFlags_DefaultOpen))
@@ -926,6 +943,12 @@ void Detail::PSOEditor::DrawUI(ID3D12Device* device, ShaderCompiler* compiler)
 		}
 	}
 
+    // 自動再構築がONなら、選択中以外のPSOも含めて変更があったものを全て再コンパイル
+    if (isAutoRebuild_)
+    {
+        BuildDirtyPSOs(device, compiler);
+    }
+
 	ImGui::Columns(1);
 	ImGui::End();
 
@@ -1250,6 +1273,22 @@ void Detail::PSOEditor::AutoSetupRootParameters(PSODescription& desc)
 	}
 }
 
+/// @brief ルートパラメータを自動設定する
+/// @param filePath 
+void Detail::PSOEditor::OpenInVSCode(const std::wstring& filePath)
+{
+    if (filePath.empty() || !std::filesystem::exists(filePath)) return;
+
+    // 絶対パスに変換して引数として渡す
+    std::error_code ec;
+    std::wstring absPath = std::filesystem::absolute(filePath, ec).wstring();
+    if (ec) absPath = filePath;
+
+    // "code" コマンドでVSCodeを起動（コンソールウィンドウは非表示）
+    std::wstring args = L"/c code \"" + absPath + L"\"";
+    ShellExecuteW(nullptr, L"open", L"cmd.exe", args.c_str(), nullptr, SW_HIDE);
+}
+
 /// @brief 変更されたPSOをビルドする
 /// @param device 
 /// @param compiler 
@@ -1448,4 +1487,60 @@ void Detail::PSOEditor::RefreshShaderFileList()
 			shaderFileListUtf8_.push_back(pathUtf8);
 		}
 	}
+}
+
+/// @brief シェーダファイルの更新（保存）を監視し、変更があればisDirtyを立てる
+void Detail::PSOEditor::CheckShaderFileUpdates()
+{
+    // 毎フレームのディスクI/Oを避けるため、30フレームごと（約0.5秒間隔）にチェック
+    if (++watchFrameCounter_ < 30) return;
+    watchFrameCounter_ = 0;
+
+    // 対象のシェーダパスが更新されているか確認するラムダ関数
+    auto CheckPath = [&](const std::wstring& path) -> bool
+        {
+            if (path.empty()) return false;
+
+            std::error_code ec;
+            if (!std::filesystem::exists(path, ec)) return false;
+
+            auto currentWriteTime = std::filesystem::last_write_time(path, ec);
+            if (ec) return false; // 保存直後のロック等で取得失敗した場合は次フレームに回す
+
+            auto it = shaderWriteTimes_.find(path);
+            if (it == shaderWriteTimes_.end())
+            {
+                // 初回登録時はタイムスタンプを記録するだけ
+                shaderWriteTimes_[path] = currentWriteTime;
+                return false;
+            }
+
+            if (it->second != currentWriteTime)
+            {
+                // 更新日時が変わっていればキャッシュを更新し、リビルド対象とする
+                it->second = currentWriteTime;
+                return true;
+            }
+
+            return false;
+        };
+
+    // 全PSOアイテムが参照しているシェーダをチェック
+    for (auto& item : psoItems_)
+    {
+        bool updated = false;
+        if (item.desc.type == Detail::PSOType::Graphics)
+        {
+            if (CheckPath(item.desc.vsPath)) updated = true;
+            if (CheckPath(item.desc.psPath)) updated = true;
+        } else if (item.desc.type == Detail::PSOType::Compute)
+        {
+            if (CheckPath(item.desc.csPath)) updated = true;
+        }
+
+        if (updated)
+        {
+            item.isDirty = true;
+        }
+    }
 }

@@ -68,9 +68,6 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
 	// ECSEditorを作成
 	ecsEditor_ = std::make_unique<ECSEditor>();
 
-	// ShaderEditorを作成
-	shaderEditor_ = std::make_unique<ShaderEditor>();
-
 	// PSOEditorを作成
     psoEditor_ = std::make_unique<PSOEditor>(core_->GetDevice(), shaderCompiler_.get());
 
@@ -282,9 +279,6 @@ void Detail::RenderContext::NewFrame()
 
 	// psoEditorを更新する
 	psoEditor_->Update();
-
-	// ShaderエディタのUIを描画する
-	shaderEditor_->DrawUI(shaderCompiler_.get());
 
 	// PSOエディタのUIを描画する
 	psoEditor_->DrawUI(core_->GetDevice(), shaderCompiler_.get());

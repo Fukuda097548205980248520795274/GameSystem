@@ -21,15 +21,9 @@ void Game::Initialize()
 
 	Entity skybox = engine->CreateSkyboxEntity();
 
-    Entity model = engine->CreateModelPrefabEntity(engine->LoadModel("./Assets/Model/AnimatedCube/AnimatedCube.gltf"), 10);
-    Entity modelInstance0 = engine->InstantiatePrefab(model);
-    Entity modelInstance1 = engine->InstantiatePrefab(model);
+    Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/AnimatedCube/AnimatedCube.gltf"));
 
     Entity directionalLight = engine->CreateDirectionalLightEntity(Vector3(0.0f, 3.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, true);
-
-	ScriptComponent scriptComp(engine->BuildScriptModule("Move", "Move", "./Assets/Script/Move.as"), "Move", "Move", "./Assets/Script/Move.as");
-	auto registry = engine->GetRegistryECS();
-	registry->AddComponent(modelInstance1, scriptComp);
 }
 
 /// @brief 更新処理

@@ -271,6 +271,10 @@ Entity Detail::PrefabSystem::Instantiate(Entity prefabEntity)
     auto engine = Engine::GetInstance();
     if (!engine) return kNullEntity;
 
+    // プレイ中でなければインスタンス化できない
+    if (!engine->IsPlaying())
+        return kNullEntity;
+
     auto registry = engine->GetRegistryECS();
     if (!registry) return kNullEntity;
 
@@ -379,6 +383,55 @@ Entity Detail::PrefabSystem::Instantiate(Entity prefabEntity)
     Entity instanceRootEntity = CloneEntityTree(prefabEntity, kNullEntity);
 
     return instanceRootEntity;
+}
+
+/// @brief すべてのインスタンスを削除する
+void Detail::PrefabSystem::DestroyAllInstances()
+{
+    // Engineのインスタンスを取得する
+    auto engine = Engine::GetInstance();
+    if (!engine) return;
+
+    auto registry = engine->GetRegistryECS();
+    if (!registry) return;
+
+    // 破棄対象のインスタンスルートを収集（イテレーション中の破棄を避けるためコピー）
+    auto* instanceArray = registry->GetComponentArray<PrefabInstanceComponent>();
+    std::vector<Entity> instanceRoots = instanceArray->GetEntities();
+
+    // 再帰的に子エンティティごと破棄するラムダ
+    std::function<void(Entity)> DestroyTree = [&](Entity entity)
+        {
+            std::vector<Entity> children;
+            if (auto h = registry->GetComponent<HierarchyComponent>(entity))
+            {
+                children.insert(children.end(), h->children.begin(), h->children.end());
+            }
+            if (auto jh = registry->GetComponent<JointHierarchyComponent>(entity))
+            {
+                children.insert(children.end(), jh->children.begin(), jh->children.end());
+            }
+
+            for (Entity child : children)
+            {
+                DestroyTree(child);
+            }
+            registry->DestroyEntity(entity);
+        };
+
+    for (Entity root : instanceRoots)
+    {
+        DestroyTree(root);
+    }
+
+    // 全プレハブのインスタンスカウントを 0 にリセット
+    for (Entity prefabRoot : registry->GetComponentArray<PrefabComponent>()->GetEntities())
+    {
+        if (auto countComp = registry->GetComponent<InstanceCountComponent>(prefabRoot))
+        {
+            countComp->count = 0;
+        }
+    }
 }
 
 /// @brief 深度値のみの描画を実行する

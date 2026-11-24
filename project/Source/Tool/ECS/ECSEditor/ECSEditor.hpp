@@ -49,6 +49,19 @@ namespace Detail
 		void DrawPlayControls();
 
 
+    private:
+
+        /// @brief エンティティにスクリプトを割り当てる
+        /// @param entity 
+        /// @param scriptHandle 
+        void AssignScriptToEntity(Entity entity, ScriptHandle scriptHandle);
+
+        /// @brief ヒエラルキー用の表示ラベルを生成する
+        /// @param entity 
+        /// @return 
+        std::string GetEntityDisplayName(Entity entity) const;
+
+
 	private:
 
 		/// @brief 選択中のエンティティ

@@ -804,9 +804,17 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 
         if (ImGui::BeginPopup("コンポーネント"))
         {
-            // 各コンポーネントを持っていなければメニューに表示する
+            if (!registry_->HasComponent<TransformComponent>(entity) && ImGui::MenuItem("トランスフォーム"))
+                registry_->AddComponent<TransformComponent>(entity, TransformComponent{});
+
             if (!registry_->HasComponent<ScriptComponent>(entity) && ImGui::MenuItem("スクリプト"))
                 registry_->AddComponent<ScriptComponent>(entity, ScriptComponent{});
+
+            if (!registry_->HasComponent<InputComponent>(entity) && ImGui::MenuItem("入力"))
+                registry_->AddComponent<InputComponent>(entity, InputComponent{});
+
+            if (!registry_->HasComponent<AudioComponent>(entity) && ImGui::MenuItem("オーディオ"))
+                registry_->AddComponent<AudioComponent>(entity, AudioComponent{});
 
             ImGui::EndPopup();
         }
