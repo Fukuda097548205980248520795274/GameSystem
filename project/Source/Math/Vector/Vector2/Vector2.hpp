@@ -43,7 +43,7 @@ struct TVector2
 
 
 	// 加算
-	TVector2 operator+=(const TVector2& vector)
+	TVector2& operator+=(const TVector2& vector)
 	{
 		this->x += vector.x;
 		this->y += vector.y;
@@ -51,7 +51,7 @@ struct TVector2
 	}
 
 	// 減算
-	TVector2 operator-=(const TVector2& vector)
+	TVector2& operator-=(const TVector2& vector)
 	{
 		this->x -= vector.x;
 		this->y -= vector.y;
@@ -59,7 +59,7 @@ struct TVector2
 	}
 
 	// スカラー倍
-	TVector2 operator*=(T scalar)
+	TVector2& operator*=(T scalar)
 	{
 		this->x *= scalar;
 		this->y *= scalar;
@@ -67,7 +67,7 @@ struct TVector2
 	}
 
 	// スカラー除算
-	TVector2 operator/=(T scalar)
+	TVector2& operator/=(T scalar)
 	{
 		this->x /= scalar;
 		this->y /= scalar;

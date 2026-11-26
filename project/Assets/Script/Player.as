@@ -15,6 +15,9 @@ class Player
 	// 体力
 	private PlayerHealth health;
 
+	// コントローラ
+	private PlayerController controller;
+
 	// プレイヤー
 	Player()
 	{
@@ -31,6 +34,9 @@ class Player
 	// 更新処理
 	void Update()
 	{
+		// コントローラの更新
+		controller.Update();
+
 		// 最大体力を越えないようにする
 		if(currentHp_ >= maxHp_){currentHp_ = maxHp_;}
 

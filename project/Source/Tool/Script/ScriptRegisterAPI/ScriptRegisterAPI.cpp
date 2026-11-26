@@ -131,10 +131,55 @@ void Detail::ScriptRegisterAPI::RegisterMathAPI(asIScriptEngine* scriptEngine)
     scriptEngine->RegisterObjectProperty("Vector3", "float y", asOFFSET(Vector3, y));
     scriptEngine->RegisterObjectProperty("Vector3", "float z", asOFFSET(Vector3, z));
 
+    // 正規化
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3 Normalize() const", asMETHOD(Vector3, Normalize), asCALL_THISCALL);
+
+    // デフォルトコンストラクタの登録
+    scriptEngine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f()", asFUNCTIONPR([](void* memory) { new(memory) Vector3(); }, (void*), void), asCALL_CDECL_OBJLAST);
+
+    // 引数付きコンストラクタの登録
+    scriptEngine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f(float x, float y, float z)", asFUNCTIONPR([](void* memory, float x, float y, float z) { new(memory) Vector3(x, y, z); }, (void*, float, float, float), void), asCALL_CDECL_OBJFIRST);
+
+    // 自己代入演算子の登録
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opAddAssign(const Vector3 &in)", asMETHODPR(Vector3, operator+=, (const Vector3&), Vector3&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opSubAssign(const Vector3 &in)", asMETHODPR(Vector3, operator-=, (const Vector3&), Vector3&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opMulAssign(float)", asMETHODPR(Vector3, operator*=, (float), Vector3&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opDivAssign(float)", asMETHODPR(Vector3, operator/=, (float), Vector3&), asCALL_THISCALL);
+
+    // 二項演算子の登録
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3 opAdd(const Vector3 &in) const", asFUNCTIONPR(operator+, (const Vector3&, const Vector3&), Vector3), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3 opSub(const Vector3 &in) const", asFUNCTIONPR(operator-, (const Vector3&, const Vector3&), Vector3), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3 opMul(float) const", asFUNCTIONPR(operator*, (const Vector3&, float), Vector3), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3 opMul_r(float) const", asFUNCTIONPR(operator*, (float, const Vector3&), Vector3), asCALL_CDECL_OBJLAST);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3 opDiv(float) const", asFUNCTIONPR(operator/, (const Vector3&, float), Vector3), asCALL_CDECL_OBJFIRST);
+
+
     // Vector2 の登録
     scriptEngine->RegisterObjectType("Vector2", sizeof(Vector2), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Vector2>());
     scriptEngine->RegisterObjectProperty("Vector2", "float x", asOFFSET(Vector2, x));
     scriptEngine->RegisterObjectProperty("Vector2", "float y", asOFFSET(Vector2, y));
+
+    // 正規化
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2 Normalize() const", asMETHOD(Vector2, Normalize), asCALL_THISCALL);
+
+    // デフォルトコンストラクタの登録
+    scriptEngine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT, "void f()", asFUNCTIONPR([](void* memory) { new(memory) Vector2(); }, (void*), void), asCALL_CDECL_OBJLAST);
+
+    // 引数付きコンストラクタの登録
+    scriptEngine->RegisterObjectBehaviour("Vector2", asBEHAVE_CONSTRUCT, "void f(float x, float y)", asFUNCTIONPR([](void* memory, float x, float y) { new(memory) Vector2(x, y); }, (void*, float, float), void), asCALL_CDECL_OBJFIRST);
+
+    // 自己代入演算子の登録
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opAddAssign(const Vector2 &in)", asMETHODPR(Vector2, operator+=, (const Vector2&), Vector2&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opSubAssign(const Vector2 &in)", asMETHODPR(Vector2, operator-=, (const Vector2&), Vector2&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opMulAssign(float)", asMETHODPR(Vector2, operator*=, (float), Vector2&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opDivAssign(float)", asMETHODPR(Vector2, operator/=, (float), Vector2&), asCALL_THISCALL);
+
+    // 二項演算子の登録
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2 opAdd(const Vector2 &in) const", asFUNCTIONPR(operator+, (const Vector2&, const Vector2&), Vector2), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2 opSub(const Vector2 &in) const", asFUNCTIONPR(operator-, (const Vector2&, const Vector2&), Vector2), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2 opMul(float) const", asFUNCTIONPR(operator*, (const Vector2&, float), Vector2), asCALL_CDECL_OBJFIRST);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2 opMul_r(float) const", asFUNCTIONPR(operator*, (float, const Vector2&), Vector2), asCALL_CDECL_OBJLAST);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2 opDiv(float) const", asFUNCTIONPR(operator/, (const Vector2&, float), Vector2), asCALL_CDECL_OBJFIRST);
 
 
 
