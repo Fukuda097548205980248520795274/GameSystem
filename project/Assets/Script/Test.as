@@ -3,6 +3,8 @@ class Test
 	Test()
 	{
 		// コンストラクタ
+
+		
 	}
 
 	void Initialize()

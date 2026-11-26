@@ -1,0 +1,38 @@
+{
+    "entities": [
+        {
+            "components": {
+                "ScriptComponent": {
+                    "className": "Player",
+                    "filePath": "./Assets/Script/Player.as",
+                    "moduleName": "Player",
+                    "savedBoolProperties": {},
+                    "savedEntityProperties": {},
+                    "savedFloatProperties": {},
+                    "savedIntProperties": {},
+                    "savedStringProperties": {},
+                    "savedVector2Properties": {},
+                    "savedVector3Properties": {}
+                },
+                "TransformComponent": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "id": 0
+        }
+    ]
+}

@@ -67,52 +67,41 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
 		// ScriptComponent
 		if (registry->HasComponent<ScriptComponent>(entity))
 		{
-			auto* c = registry->GetComponent<ScriptComponent>(entity);
-			entityJson["components"]["ScriptComponent"]["filePath"] = c->filePath;
-			entityJson["components"]["ScriptComponent"]["moduleName"] = c->moduleName;
-			entityJson["components"]["ScriptComponent"]["className"] = c->className;
+            auto* c = registry->GetComponent<ScriptComponent>(entity);
+            auto& scriptJson = entityJson["components"]["ScriptComponent"];
 
-            // Entity型のプロパティを保存するためのマップ
+            scriptJson["filePath"] = c->filePath;
+            scriptJson["moduleName"] = c->moduleName;
+            scriptJson["className"] = c->className;
+
+            scriptJson["savedEntityProperties"] = nlohmann::json::object();
+            scriptJson["savedIntProperties"] = nlohmann::json::object();
+            scriptJson["savedFloatProperties"] = nlohmann::json::object();
+            scriptJson["savedBoolProperties"] = nlohmann::json::object();
+            scriptJson["savedVector2Properties"] = nlohmann::json::object();
+            scriptJson["savedVector3Properties"] = nlohmann::json::object();
+            scriptJson["savedStringProperties"] = nlohmann::json::object();
+
             for (const auto& [propName, entityValue] : c->savedEntityProperties)
-            {
-                entityJson["components"]["ScriptComponent"]["savedEntityProperties"][propName] = entityValue;
-            }
+                scriptJson["savedEntityProperties"][propName] = entityValue;
 
-            // int型のプロパティを保存するためのマップ
             for (const auto& [propName, intValue] : c->savedIntProperties)
-            {
-                entityJson["components"]["ScriptComponent"]["savedIntProperties"][propName] = intValue;
-            }
+                scriptJson["savedIntProperties"][propName] = intValue;
 
-            // float型のプロパティを保存するためのマップ
             for (const auto& [propName, floatValue] : c->savedFloatProperties)
-            {
-                entityJson["components"]["ScriptComponent"]["savedFloatProperties"][propName] = floatValue;
-            }
+                scriptJson["savedFloatProperties"][propName] = floatValue;
 
-            // bool型のプロパティを保存するためのマップ
             for (const auto& [propName, boolValue] : c->savedBoolProperties)
-            {
-                entityJson["components"]["ScriptComponent"]["savedBoolProperties"][propName] = boolValue;
-            }
+                scriptJson["savedBoolProperties"][propName] = boolValue;
 
-            // Vector2型のプロパティを保存するためのマップ
             for (const auto& [propName, vector2Value] : c->savedVector2Properties)
-            {
-                entityJson["components"]["ScriptComponent"]["savedVector2Properties"][propName] = {vector2Value.x, vector2Value.y};
-            }
+                scriptJson["savedVector2Properties"][propName] = { vector2Value.x, vector2Value.y };
 
-            // Vector3型のプロパティを保存するためのマップ
             for (const auto& [propName, vector3Value] : c->savedVector3Properties)
-            {
-                entityJson["components"]["ScriptComponent"]["savedVector3Properties"][propName] = {vector3Value.x, vector3Value.y, vector3Value.z};
-            }
+                scriptJson["savedVector3Properties"][propName] = { vector3Value.x, vector3Value.y, vector3Value.z };
 
-            // string型のプロパティを保存するためのマップ
             for (const auto& [propName, stringValue] : c->savedStringProperties)
-            {
-                entityJson["components"]["ScriptComponent"]["savedStringProperties"][propName] = stringValue;
-            }
+                scriptJson["savedStringProperties"][propName] = stringValue;
 		}
 
 		// TextureComponent
@@ -270,55 +259,92 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
 		// ScriptComponent の復元
         if (componentsJson.contains("ScriptComponent"))
         {
-			ScriptComponent comp(Detail::ScriptHandle::Invalid());
-			comp.filePath = componentsJson["ScriptComponent"]["filePath"];
-			comp.moduleName = componentsJson["ScriptComponent"]["moduleName"];
-			comp.className = componentsJson["ScriptComponent"]["className"];
-			comp.handle = engine ? engine->BuildScriptModule(comp.moduleName, comp.className, comp.filePath) : Detail::ScriptHandle::Invalid();
+            const auto& scriptJson = componentsJson["ScriptComponent"];
+            ScriptComponent comp(Detail::ScriptHandle::Invalid());
+            comp.filePath = scriptJson.value("filePath", "");
+            comp.moduleName = scriptJson.value("moduleName", "");
+            comp.className = scriptJson.value("className", "");
+            comp.handle = engine ? engine->BuildScriptModule(comp.moduleName, comp.className, comp.filePath) : Detail::ScriptHandle::Invalid();
 
-            // Entity型のプロパティを保存するためのマップ
-            for (const auto& [propName, entityValue] : componentsJson["ScriptComponent"]["savedEntityProperties"].items())
+            // Entity型（IDの再マッピングを行う）
+            if (scriptJson.contains("savedEntityProperties") && scriptJson["savedEntityProperties"].is_object())
             {
-                comp.savedEntityProperties[propName] = entityValue;
+                for (const auto& [propName, entityValue] : scriptJson["savedEntityProperties"].items())
+                {
+                    Entity oldEntity = entityValue.get<Entity>();
+                    if (oldEntity != kNullEntity && idMap.find(oldEntity) != idMap.end())
+                    {
+                        comp.savedEntityProperties[propName] = idMap[oldEntity];
+                    }
+                    else
+                    {
+                        comp.savedEntityProperties[propName] = kNullEntity;
+                    }
+                }
             }
 
-            // int型のプロパティを保存するためのマップ
-            for (const auto& [propName, intValue] : componentsJson["ScriptComponent"]["savedIntProperties"].items())
+            // int型
+            if (scriptJson.contains("savedIntProperties") && scriptJson["savedIntProperties"].is_object())
             {
-                comp.savedIntProperties[propName] = intValue;
+                for (const auto& [propName, intValue] : scriptJson["savedIntProperties"].items())
+                {
+                    comp.savedIntProperties[propName] = intValue.get<int>();
+                }
             }
 
-            // float型のプロパティを保存するためのマップ
-            for (const auto& [propName, floatValue] : componentsJson["ScriptComponent"]["savedFloatProperties"].items())
+            // float型
+            if (scriptJson.contains("savedFloatProperties") && scriptJson["savedFloatProperties"].is_object())
             {
-                comp.savedFloatProperties[propName] = floatValue;
+                for (const auto& [propName, floatValue] : scriptJson["savedFloatProperties"].items())
+                {
+                    comp.savedFloatProperties[propName] = floatValue.get<float>();
+                }
             }
 
-            // bool型のプロパティを保存するためのマップ
-            for (const auto& [propName, boolValue] : componentsJson["ScriptComponent"]["savedBoolProperties"].items())
+            // bool型
+            if (scriptJson.contains("savedBoolProperties") && scriptJson["savedBoolProperties"].is_object())
             {
-                comp.savedBoolProperties[propName] = boolValue;
+                for (const auto& [propName, boolValue] : scriptJson["savedBoolProperties"].items())
+                {
+                    comp.savedBoolProperties[propName] = boolValue.get<bool>();
+                }
             }
 
-            // Vector2型のプロパティを保存するためのマップ
-            for (const auto& [propName, vector2Value] : componentsJson["ScriptComponent"]["savedVector2Properties"].items())
+            // Vector2型
+            if (scriptJson.contains("savedVector2Properties") && scriptJson["savedVector2Properties"].is_object())
             {
-                comp.savedVector2Properties[propName] = Vector2(vector2Value[0], vector2Value[1]);
+                for (const auto& [propName, vector2Value] : scriptJson["savedVector2Properties"].items())
+                {
+                    comp.savedVector2Properties[propName] = Vector2(
+                        vector2Value[0].get<float>(),
+                        vector2Value[1].get<float>()
+                    );
+                }
             }
 
-            // Vector3型のプロパティを保存するためのマップ
-            for (const auto& [propName, vector3Value] : componentsJson["ScriptComponent"]["savedVector3Properties"].items())
+            // Vector3型
+            if (scriptJson.contains("savedVector3Properties") && scriptJson["savedVector3Properties"].is_object())
             {
-                comp.savedVector3Properties[propName] = Vector3(vector3Value[0], vector3Value[1], vector3Value[2]);
+                for (const auto& [propName, vector3Value] : scriptJson["savedVector3Properties"].items())
+                {
+                    comp.savedVector3Properties[propName] = Vector3(
+                        vector3Value[0].get<float>(),
+                        vector3Value[1].get<float>(),
+                        vector3Value[2].get<float>()
+                    );
+                }
             }
 
-            // string型のプロパティを保存するためのマップ
-            for (const auto& [propName, stringValue] : componentsJson["ScriptComponent"]["savedStringProperties"].items())
+            // string型
+            if (scriptJson.contains("savedStringProperties") && scriptJson["savedStringProperties"].is_object())
             {
-                comp.savedStringProperties[propName] = stringValue;
+                for (const auto& [propName, stringValue] : scriptJson["savedStringProperties"].items())
+                {
+                    comp.savedStringProperties[propName] = stringValue.get<std::string>();
+                }
             }
 
-			registry->AddComponent<ScriptComponent>(newId, comp);
+            registry->AddComponent<ScriptComponent>(newId, comp);
         }
 
 		// TextureComponent の復元

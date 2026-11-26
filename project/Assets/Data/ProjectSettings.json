@@ -3,7 +3,11 @@
         {
             "filePath": "./Assets/Data/Scenes/NewScene.json",
             "name": "NewScene"
+        },
+        {
+            "filePath": "./Assets/Data/Scenes/GameScene.json",
+            "name": "GameScene"
         }
     ],
-    "startupScene": "NewScene"
+    "startupScene": "GameScene"
 }

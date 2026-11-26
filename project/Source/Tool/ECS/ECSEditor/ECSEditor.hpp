@@ -5,6 +5,9 @@
 
 namespace Detail
 {
+    // @brief シーンマネージャー
+    class SceneManager;
+
 	/// @brief ECSエディタ
 	class ECSEditor
 	{
@@ -18,7 +21,7 @@ namespace Detail
 
 		/// @brief 更新
 		/// @param registry 
-		void Update();
+		void Update(SceneManager* sceneManager);
 
 		/// @brief ファイルがドロップされたときの処理
 		/// @param filePath 
@@ -46,7 +49,7 @@ namespace Detail
 		void DrawEntityComponents(Entity entity);
 
 		/// @brief プレイコントロールの描画
-		void DrawPlayControls();
+		void DrawPlayControls(SceneManager* sceneManager);
 
 
     private:

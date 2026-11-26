@@ -79,8 +79,22 @@ void Detail::SceneEditor::DeleteScene(const std::string& sceneName)
 /// @brief 現在のシーンを保存する
 void Detail::SceneEditor::SaveCurrentScene()
 {
-    sceneManager_->SaveCurrentScene();
-    Engine::GetInstance()->Log(LogLevel::Info, "シーンを保存しました : " + sceneManager_->GetCurrentSceneName());
+    // 現在のシーンが選択されていない場合は保存処理を行わない
+    if (sceneManager_->GetCurrentSceneName().empty())
+    {
+        Engine::GetInstance()->Log(LogLevel::Warning, "保存するシーンが選択されていません。");
+        return;
+    }
+
+    // 現在のECS状態を指定したシーンファイルに保存する
+    if (sceneManager_->SaveCurrentScene())
+    {
+        Engine::GetInstance()->Log(LogLevel::Info, "シーンを保存しました : " + sceneManager_->GetCurrentSceneName());
+    }
+    else
+    {
+        Engine::GetInstance()->Log(LogLevel::Error, "シーンの保存に失敗しました : " + sceneManager_->GetCurrentSceneName());
+    }
 }
 
 /// @brief シーンを読み込む
@@ -107,6 +121,7 @@ void Detail::SceneEditor::DrawUI()
     }
     else
     {
+        std::string displayName = sceneManager_->IsDirty() ? (currentScene + " *") : currentScene;
         ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", currentScene.c_str());
     }
 
@@ -117,7 +132,15 @@ void Detail::SceneEditor::DrawUI()
     // クイックアクション（新規作成・保存ボタンを横並びに配置）
     if (ImGui::Button("新しいシーンを作成", ImVec2(150, 30)))
     {
-        ImGui::OpenPopup("シーン名を設定");
+        if (!currentScene.empty() && sceneManager_->IsDirty())
+        {
+            pendingAction_ = PendingSceneAction::CreateNewScene;
+            isOpenSaveConfirmModal_ = true;
+        }
+        else
+        {
+            isOpenNewSceneModal_ = true;
+        }
     }
     ImGui::SameLine();
     if (ImGui::Button("現在のシーンを保存", ImVec2(150, 30)))
@@ -125,24 +148,58 @@ void Detail::SceneEditor::DrawUI()
         SaveCurrentScene();
     }
 
-    // 新規シーン作成のモーダルポップアップ
-    if (ImGui::BeginPopupModal("シーン名を設定", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    // ポップアップを開くトリガー（IDスタックを揃えるためトップレベルで実行）
+    if (isOpenNewSceneModal_)
     {
-        static char newSceneName[128] = "NewScene";
-        ImGui::InputText("シーン名", newSceneName, IM_ARRAYSIZE(newSceneName));
+        ImGui::OpenPopup("シーン名を設定");
+        isOpenNewSceneModal_ = false;
+    }
+    if (isOpenSaveConfirmModal_)
+    {
+        ImGui::OpenPopup("保存確認");
+        isOpenSaveConfirmModal_ = false;
+    }
+
+    // 保存確認モーダル
+    if (ImGui::BeginPopupModal("保存確認", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("現在のシーン '%s' は作成中です。", currentScene.c_str());
+        ImGui::Text("切り替える前に保存しますか？");
         ImGui::Spacing();
         ImGui::Separator();
         ImGui::Spacing();
 
-        if (ImGui::Button("作成", ImVec2(120, 0)))
+        auto executePendingAction = [this]()
+            {
+                if (pendingAction_ == PendingSceneAction::LoadScene)
+                {
+                    LoadScene(pendingSceneName_);
+                }
+                else if (pendingAction_ == PendingSceneAction::CreateNewScene)
+                {
+                    isOpenNewSceneModal_ = true;
+                }
+                pendingAction_ = PendingSceneAction::None;
+                pendingSceneName_.clear();
+            };
+
+        if (ImGui::Button("保存して切り替え", ImVec2(140, 0)))
         {
-            CreateNewScene(std::string(newSceneName));
+            SaveCurrentScene();
+            executePendingAction();
             ImGui::CloseCurrentPopup();
         }
-        ImGui::SetItemDefaultFocus();
         ImGui::SameLine();
-        if (ImGui::Button("キャンセル", ImVec2(120, 0)))
+        if (ImGui::Button("保存せずに切り替え", ImVec2(140, 0)))
         {
+            executePendingAction();
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("キャンセル", ImVec2(100, 0)))
+        {
+            pendingAction_ = PendingSceneAction::None;
+            pendingSceneName_.clear();
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
@@ -211,9 +268,19 @@ void Detail::SceneEditor::DrawUI()
         {
             ImGui::PushID(scene.name.c_str());
 
+            // シーンボタンの色を現在のシーンに応じて変える
             if (ImGui::Button(scene.name.c_str(), ImVec2(buttonWidth, buttonHeight)))
             {
-                LoadScene(scene.name);
+                if (!currentScene.empty() && currentScene != scene.name && sceneManager_->IsDirty())
+                {
+                    pendingAction_ = PendingSceneAction::LoadScene;
+                    pendingSceneName_ = scene.name;
+                    isOpenSaveConfirmModal_ = true;
+                }
+                else
+                {
+                    LoadScene(scene.name);
+                }
             }
 
             // 右クリックメニュー

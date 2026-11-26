@@ -35,6 +35,9 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
         // スクリプトインスタンスの生成（初回のみ）
         if (!scriptComp->scriptObject)
         {
+            // スクリプトがロードされていない場合はスキップ
+            if (!scriptManager_->EnsureLoaded(scriptComp->handle))continue;
+
             // スクリプトモジュールを取得
             std::string moduleName = scriptManager_->GetModuleName(scriptComp->handle);
             asIScriptModule* mod = scriptEngine->GetModule(moduleName.c_str());

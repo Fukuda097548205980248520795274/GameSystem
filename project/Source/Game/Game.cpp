@@ -13,17 +13,7 @@ Game::Game(int32_t screenWidth, int32_t screenHeight, const std::string& title)
 /// @brief 初期化
 void Game::Initialize()
 {
-	auto  engine = Engine::GetInstance();
 
-	Entity renderPassEntity = engine->CreatePass(0, BlendMode::None);
-
-	Entity cameraEntity = engine->CreateCameraEntity();
-
-	Entity skybox = engine->CreateSkyboxEntity();
-
-    Entity model = engine->CreateModelEntity(engine->LoadModel("./Assets/Model/AnimatedCube/AnimatedCube.gltf"));
-
-    Entity directionalLight = engine->CreateDirectionalLightEntity(Vector3(0.0f, 3.0f, 0.0f), Vector3(0.0f, -1.0f, 0.0f), Vector4(1.0f, 1.0f, 1.0f, 1.0f), 1.0f, true);
 }
 
 /// @brief 更新処理

@@ -77,6 +77,23 @@ namespace Detail
         /// @return 
         asIScriptObject* GetScriptFromEntity(Entity targetEntity);
 
+        /// @brief スクリプトのメタデータのみを登録する（実データはロードしない）
+        /// @param moduleName 
+        /// @param scriptClass 
+        /// @param scriptPath 
+        /// @return 
+        ScriptHandle RegisterScriptMetadata(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath);
+
+        /// @brief 指定ハンドルのスクリプトが未ロードであればロードする（遅延ロード）
+        /// @param handle 
+        /// @return 
+        bool EnsureLoaded(ScriptHandle handle);
+
+        /// @brief スクリプトがロード済みか確認する
+        /// @param handle 
+        /// @return 
+        bool IsLoaded(ScriptHandle handle) const;
+
 
 	private:
 
@@ -97,6 +114,9 @@ namespace Detail
         /// @param outputPath 
         void ExportPredefinedFile(const std::string& outputPath);
 
+        /// @brief フォルダを走査してスクリプトのメタデータのみを登録する
+        void ScanScriptDirectory();
+
 
 	private:
 
@@ -112,6 +132,12 @@ namespace Detail
 
 			// スロットが使用中かどうか
 			bool inUse = false;
+
+            // 実データ（モジュール）がロード済みか
+            bool isLoaded = false;
+
+            // スクリプトファイルのパス
+            std::string filePath = "";
 
 			// モジュール名
 			std::string moduleName = "";
@@ -135,8 +161,14 @@ namespace Detail
 
 	private:
 
+        // スクリプトの格納ディレクトリ
+        const std::string kScriptDir = "./Assets/Script/";
+
 		// 中間データ用ディレクトリ
 		const std::string kCookedDir = "./Cooked/Script/";
+
+        // binファイルの識別用マジックナンバー
+        static constexpr uint32_t kBinMagic = 0x53435242;
 
 
         // リロードタイマー
@@ -199,6 +231,55 @@ namespace Detail
 		/// @brief ファイルが開いているかどうかを確認する
 		/// @return 
 		bool IsOpen() const { return file_.is_open(); }
+
+        /// @brief uint32_t を書き込む
+        /// @param value 
+        /// @return 
+        bool WriteUint32(uint32_t value)
+        {
+            if (!file_.is_open()) return false;
+            file_.write(reinterpret_cast<const char*>(&value), sizeof(value));
+            return file_.good();
+        }
+
+        /// @brief uint32_t を読み込む
+        /// @param outValue 
+        /// @return 
+        bool ReadUint32(uint32_t& outValue)
+        {
+            if (!file_.is_open()) return false;
+            file_.read(reinterpret_cast<char*>(&outValue), sizeof(outValue));
+            return file_.good();
+        }
+
+        /// @brief 文字列を書き込む
+        /// @param str 
+        /// @return 
+        bool WriteString(const std::string& str)
+        {
+            uint32_t len = static_cast<uint32_t>(str.size());
+            if (!WriteUint32(len)) return false;
+            if (len > 0)
+            {
+                file_.write(str.data(), len);
+            }
+            return file_.good();
+        }
+
+        /// @brief 文字列を読み込む
+        /// @param outStr 
+        /// @return 
+        bool ReadString(std::string& outStr)
+        {
+            uint32_t len = 0;
+            if (!ReadUint32(len)) return false;
+            outStr.resize(len);
+            if (len > 0)
+            {
+                file_.read(outStr.data(), len);
+            }
+            return file_.good();
+        }
 
 
 	private:

@@ -29,6 +29,7 @@ void Detail::SceneManager::Initialize(const std::string& name)
         if (isLoaded)
         {
             currentSceneName_ = name;
+            isDirty_ = false;
         }
         else
         {
@@ -47,12 +48,18 @@ void Detail::SceneManager::RemoveScene(const std::string& name)
 }
 
 /// @brief 現在のECS状態を指定したシーンファイルに保存する
-void Detail::SceneManager::SaveCurrentScene()
+bool Detail::SceneManager::SaveCurrentScene()
 {
-    if (currentSceneName_.empty()) return;
+    if (currentSceneName_.empty()) return false;
 
     // 現在のECS状態をJSON形式でシリアライズして保存
-    Detail::ToJson(Engine::GetInstance()->GetRegistryECS(), currentSceneName_);
+    bool result = Detail::ToJson(Engine::GetInstance()->GetRegistryECS(), currentSceneName_);
+    if (result)
+    {
+        isDirty_ = false;
+    }
+    
+    return result;
 }
 
 /// @brief 更新処理
@@ -79,6 +86,7 @@ void Detail::SceneManager::Update()
         if (isLoaded)
         {
             currentSceneName_ = nextSceneName_;
+            isDirty_ = false;
         }
         else
         {

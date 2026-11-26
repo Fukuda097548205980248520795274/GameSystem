@@ -20,8 +20,12 @@ void Detail::ECSEditor::Initialize()
 }
 
 /// @brief 更新
-void Detail::ECSEditor::Update()
+void Detail::ECSEditor::Update(SceneManager* sceneManager)
 {
+    // シーンマネージャーがnullptrの場合は何もせずに終了
+    if (sceneManager == nullptr) return;
+
+
 	// エンジンのインスタンスを取得
     registry_ = Engine::GetInstance()->GetRegistryECS();
 
@@ -31,7 +35,7 @@ void Detail::ECSEditor::Update()
     Engine::GetInstance()->GetScriptSystem()->GetScriptManager()->ReloadModifiedScripts();
 
 	// UIウィンドウの描画
-    DrawPlayControls();
+    DrawPlayControls(sceneManager);
 	DrawHierarchy();
 	DrawInspector();
 	DrawAssetsWindow();
@@ -53,7 +57,7 @@ void Detail::ECSEditor::DrawAssetsWindow()
 }
 
 /// @brief プレイコントロールの描画
-void Detail::ECSEditor::DrawPlayControls()
+void Detail::ECSEditor::DrawPlayControls(SceneManager* sceneManager)
 {
     auto engine = Engine::GetInstance();
     PlayState currentState = engine->GetPlayState();
@@ -138,16 +142,26 @@ void Detail::ECSEditor::DrawPlayControls()
 
     ImGui::SameLine();
 
-    // 保存ボタン
-    if (ImGui::Button("保存", ImVec2(80.0f, buttonHeight)))
+    if (!engine->IsPlaying())
     {
-        if (engine->SaveScene("MainScene"))
+        // 保存ボタン
+        if (ImGui::Button("保存", ImVec2(80.0f, buttonHeight)))
         {
-            engine->Log(LogLevel::Info, "ECSデータを保存しました。");
-        }
-        else
-        {
-            engine->Log(LogLevel::Error, "ECSデータの保存に失敗しました。");
+            if (sceneManager && !sceneManager->GetCurrentSceneName().empty())
+            {
+                if (sceneManager->SaveCurrentScene())
+                {
+                    engine->Log(LogLevel::Info, "シーンを保存しました : " + sceneManager->GetCurrentSceneName());
+                }
+                else
+                {
+                    engine->Log(LogLevel::Error, "シーンの保存に失敗しました : " + sceneManager->GetCurrentSceneName());
+                }
+            }
+            else
+            {
+                engine->Log(LogLevel::Warning, "保存するシーンが選択されていません。");
+            }
         }
     }
 

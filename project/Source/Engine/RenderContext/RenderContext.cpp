@@ -272,7 +272,7 @@ void Detail::RenderContext::NewFrame()
     sceneEditor_->DrawUI();
 
 	// ECSEditorを更新する
-	ecsEditor_->Update();
+	ecsEditor_->Update(sceneEditor_->GetSceneManager());
 
 	// ProfilerEditorを更新する
 	profilerEditor_->DrawUI();

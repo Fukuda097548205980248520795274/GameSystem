@@ -47,7 +47,7 @@ namespace Detail
         void LoadScene(const std::string& name) { nextSceneName_ = name; }
 
         /// @brief 現在のECS状態を指定したシーンファイルに保存する
-        void SaveCurrentScene();
+        bool SaveCurrentScene();
 
         /// @brief 更新処理
         void Update();
@@ -67,6 +67,16 @@ namespace Detail
         /// @brief 起動時のシーンの名前を設定する
         /// @param name 
         void SetStartupSceneName(const std::string& name) { startupSceneName_ = name; }
+
+        /// @brief シーンに変更があったことを記録する
+        void MarkDirty() { isDirty_ = true; }
+
+        /// @brief 未保存の変更があるかを取得する
+        /// @return 
+        bool IsDirty() const { return isDirty_; }
+
+        /// @brief 変更フラグをリセットする
+        void ClearDirty() { isDirty_ = false; }
 
 
     private:
@@ -90,5 +100,8 @@ namespace Detail
 
         // 起動時に読み込むシーンの名前
         std::string startupSceneName_;
+
+        // シーンに変更があったかどうかのフラグ
+        bool isDirty_ = false;
     };
 }

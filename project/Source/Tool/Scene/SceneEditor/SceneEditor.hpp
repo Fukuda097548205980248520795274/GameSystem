@@ -37,6 +37,10 @@ namespace Detail
         /// @brief エディタのUIを描画する (ImGui用)
         void DrawUI();
 
+        /// @brief シーンマネージャを取得する
+        /// @return 
+        SceneManager* GetSceneManager() const { return sceneManager_.get(); }
+
 
     private:
 
@@ -51,5 +55,28 @@ namespace Detail
 
         // プロジェクト設定のバイナリパス（シーンリスト保存用）
         const std::string kProjectSettingsBinPath = "./Cooked/Data/ProjectSettings.bin";
+
+
+    private:
+
+        /// @brief 保存確認後に実行する保留中のアクション
+        enum class PendingSceneAction
+        {
+            None,
+            LoadScene,
+            CreateNewScene
+        };
+
+        // 保留中のシーンアクション
+        PendingSceneAction pendingAction_ = PendingSceneAction::None;
+
+        // 保留中のシーン名（保存確認後に使用する）
+        std::string pendingSceneName_;
+
+        // @brief 保存確認モーダルが開いているかどうか
+        bool isOpenSaveConfirmModal_ = false;
+
+        // @brief 新規シーン作成モーダルが開いているかどうか
+        bool isOpenNewSceneModal_ = false;
     };
 }

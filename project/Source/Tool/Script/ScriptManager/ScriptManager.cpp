@@ -2,6 +2,7 @@
 #include "Engine.hpp"
 #include <cassert>
 #include <iostream>
+#include <unordered_set>
 #include <scriptarray/scriptarray.h>
 
 #include "../ScriptRegisterAPI/ScriptRegisterAPI.hpp"
@@ -26,8 +27,13 @@ void Detail::ScriptManager::Initialize()
 	RegisterEngineAPI();
 
 #ifdef DEVELOPMENT
+
+    // フォルダ内のスクリプトのメタデータ（パスやクラス名）のみを登録する
+    ScanScriptDirectory();
+
     // VSCodeの予測変換用ファイルを自動生成
     ExportPredefinedFile("./as.predefined");
+
 #endif
 }
 
@@ -99,12 +105,11 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
 		if (cachedHandle != ScriptHandle::Invalid())
 		{
 			// キャッシュされている更新日時と比較
-			if (slots_[cachedHandle.index].lastWriteTime >= asTime)
+			if (slots_[cachedHandle.index].isLoaded && slots_[cachedHandle.index].lastWriteTime >= asTime)
 			{
 				// ファイルが更新されていなければキャッシュを返す
 				return cachedHandle;
 			}
-			// 更新されている場合はそのまま再ビルドへ進む
 		}
 	}
 
@@ -130,29 +135,30 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
 
 	if (loadFromBin)
 	{
-		// バイナリからロード
-		asIScriptModule* mod = scriptEngine_->GetModule(moduleName.c_str(), asGM_ALWAYS_CREATE);
-		if (mod)
-		{
-			CBytecodeStream stream(binPath, false);
-			if (stream.IsOpen())
-			{
-				int r = mod->LoadByteCode(&stream);
-				if (r >= 0)
-				{
-					isLoaded = true;
-				}
-				else
-				{
-					if (engine)
-					{
-						engine->Log(LogLevel::Error, "バイトコードの読み込みに失敗しました : " + binPath);
+        // バイトコードからロード
+        asIScriptModule* mod = scriptEngine_->GetModule(moduleName.c_str(), asGM_ALWAYS_CREATE);
+        if (mod)
+        {
+            // バイトコードのストリームを作成して読み込む
+            CBytecodeStream stream(binPath, false);
+            uint32_t magic = 0;
+            std::string dummyModule, dummyClass, dummyPath;
 
-						engine->StopExecution();
-					}
-				}
-			}
-		}
+            // バイトコードの読み込み
+            if (stream.IsOpen() && stream.ReadUint32(magic) && magic == kBinMagic &&stream.ReadString(dummyModule) &&
+                stream.ReadString(dummyClass) &&stream.ReadString(dummyPath))
+            {
+                int r = mod->LoadByteCode(&stream);
+                if (r >= 0)
+                {
+                    isLoaded = true;
+                }
+                else if (engine)
+                {
+                    engine->Log(LogLevel::Warning, "バイトコードの読み込みに失敗したため再ビルドします : " + binPath);
+                }
+            }
+        }
 	}
 
 	
@@ -161,46 +167,65 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
 
 	if (!isLoaded)
 	{
-		// スクリプトファイルを開く
-		std::ifstream file(scriptPath, std::ios::binary);
-		if (!file.is_open())
-		{
-			if (engine)
-			{
-				engine->Log(LogLevel::Error, "スクリプトファイルが開けません : " + scriptPath);
-				engine->StopExecution();
-			}
-			return ScriptHandle::Invalid();
-		}
+        // インクルード解決用のコールバック関数
+        auto includeCallback = [](const char* include, const char* from, CScriptBuilder* builder, void* userParam) -> int
+            {
+                // インクルード元ファイル（from）と同じディレクトリから相対パスを解決
+                std::filesystem::path baseDir = std::filesystem::path(from).parent_path();
+                std::filesystem::path targetPath = baseDir / include;
 
+                std::ifstream file(targetPath, std::ios::binary);
+                if (!file.is_open())
+                {
+                    return -1;
+                }
 
-		// ファイルの中身を文字列として読み込む
-		std::stringstream buffer;
-		buffer << file.rdbuf();
-		std::string scriptCode = buffer.str();
-		file.close();
+                std::stringstream buffer;
+                buffer << file.rdbuf();
+                std::string code = buffer.str();
 
-		// スクリプトビルダーを使用してモジュールをビルド
-		CScriptBuilder builder;
-		int r = builder.StartNewModule(scriptEngine_, moduleName.c_str());
-		if (r < 0)
-		{
-			if (engine) engine->StopExecution();
-			return ScriptHandle::Invalid();
-		}
+                // 読み込んだインクルード先をメモリから追加
+                return builder->AddSectionFromMemory(targetPath.generic_string().c_str(), code.c_str(), static_cast<uint32_t>(code.length()));
+            };
 
-		// スクリプトコードをメモリから追加
-		r = builder.AddSectionFromMemory(scriptPath.c_str(), scriptCode.c_str(), static_cast<uint32_t>(scriptCode.length()));
-		if (r < 0)
-		{
-			if (engine)
-			{
-				engine->Log(LogLevel::Error, "AddSectionFromMemory 失敗。エラーコード: " + std::to_string(r));
-				engine->StopExecution();
-			}
-			return ScriptHandle::Invalid();
-		}
-		if (engine)engine->Log(LogLevel::Info, "スクリプトコードをメモリから追加 : " + scriptPath);
+        // スクリプトビルダーを使用してモジュールをビルド
+        CScriptBuilder builder;
+        builder.SetIncludeCallback(includeCallback, nullptr);
+
+        int r = builder.StartNewModule(scriptEngine_, moduleName.c_str());
+        if (r < 0)
+        {
+            if (engine) engine->StopExecution();
+            return ScriptHandle::Invalid();
+        }
+
+        // 元のファイルも std::ifstream + AddSectionFromMemory で読み込む
+        std::ifstream file(scriptPath, std::ios::binary);
+        if (!file.is_open())
+        {
+            if (engine)
+            {
+                engine->Log(LogLevel::Error, "スクリプトファイルが開けません : " + scriptPath);
+                engine->StopExecution();
+            }
+            return ScriptHandle::Invalid();
+        }
+
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string scriptCode = buffer.str();
+        file.close();
+
+        r = builder.AddSectionFromMemory(scriptPath.c_str(), scriptCode.c_str(), static_cast<uint32_t>(scriptCode.length()));
+        if (r < 0)
+        {
+            if (engine)
+            {
+                engine->Log(LogLevel::Error, "AddSectionFromMemory 失敗。エラーコード: " + std::to_string(r));
+                engine->StopExecution();
+            }
+            return ScriptHandle::Invalid();
+        }
 
 		// モジュールのビルド
 		r = builder.BuildModule();
@@ -219,11 +244,17 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
 		asIScriptModule* mod = builder.GetModule();
 		if (mod)
 		{
-			CBytecodeStream stream(binPath, true);
-			if (stream.IsOpen())
-			{
-				mod->SaveByteCode(&stream);
-			}
+            CBytecodeStream stream(binPath, true);
+
+            // バイトコードの保存
+            if (stream.IsOpen())
+            {
+                stream.WriteUint32(kBinMagic);
+                stream.WriteString(moduleName);
+                stream.WriteString(scriptClass);
+                stream.WriteString(scriptPath);
+                mod->SaveByteCode(&stream);
+            }
 		}
 	}
 
@@ -250,6 +281,7 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
 	// スロットにデータを格納
 	Slot& slot = slots_[slotIndex];
 	slot.inUse = true;
+    slot.isLoaded = true;
 	slot.moduleName = moduleName;
 	slot.scriptClass = scriptClass;
 	slot.lastWriteTime = asTime;
@@ -339,18 +371,10 @@ void Detail::ScriptManager::Remove(ScriptHandle handle)
 /// @return 
 std::string Detail::ScriptManager::GetFilePath(ScriptHandle handle) const
 {
-	if (!handle.IsValid()) return "";
+    if (!handle.IsValid() || handle.index >= slots_.size() || !slots_[handle.index].inUse)
+        return "";
 
-	// キャッシュを検索して、ハンドルに対応するスクリプトパスを返す
-	for (const auto& pair : cache_)
-	{
-		if (pair.second.index == handle.index && pair.second.generation == handle.generation)
-		{
-			return pair.first;
-		}
-	}
-
-	return "";
+    return slots_[handle.index].filePath;
 }
 
 /// @brief スクリプトハンドルからモジュール名を取得する
@@ -395,7 +419,7 @@ void Detail::ScriptManager::ReloadModifiedScripts()
 		if (!handle.IsValid() || handle.index >= slots_.size()) continue;
 
 		Slot& slot = slots_[handle.index];
-		if (!slot.inUse) continue;
+		if (!slot.inUse || !slot.isLoaded) continue;
 
 		if (std::filesystem::exists(scriptPath))
 		{
@@ -455,6 +479,81 @@ asIScriptObject* Detail::ScriptManager::GetScriptFromEntity(Entity targetEntity)
 	}
 
 	return nullptr;
+}
+
+/// @brief スクリプトのメタデータのみを登録する（実データはロードしない）
+/// @param moduleName 
+/// @param scriptClass 
+/// @param scriptPath 
+/// @return 
+Detail::ScriptHandle Detail::ScriptManager::RegisterScriptMetadata(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath)
+{
+    // すでに登録済みなら既存のハンドルを返す
+    auto it = cache_.find(scriptPath);
+    if (it != cache_.end())
+    {
+        ScriptHandle cachedHandle = GetHandleByIndex(it->second.index);
+        if (cachedHandle != ScriptHandle::Invalid())
+        {
+            return cachedHandle;
+        }
+    }
+
+    // スロットの割り当て
+    uint32_t slotIndex = 0;
+    if (!freeSlots_.empty())
+    {
+        slotIndex = freeSlots_.front();
+        freeSlots_.pop();
+    }
+    else
+    {
+        slotIndex = static_cast<uint32_t>(slots_.size());
+        slots_.emplace_back();
+    }
+
+    Slot& slot = slots_[slotIndex];
+    slot.inUse = true;
+    slot.isLoaded = false; // 未ロード状態
+    slot.filePath = scriptPath;
+    slot.moduleName = moduleName;
+    slot.scriptClass = scriptClass;
+
+    ScriptHandle handle{ slotIndex, slot.generation };
+    cache_[scriptPath] = handle;
+
+    return handle;
+}
+
+/// @brief 指定ハンドルのスクリプトが未ロードであればロードする（遅延ロード）
+/// @param handle 
+/// @return 
+bool Detail::ScriptManager::EnsureLoaded(ScriptHandle handle)
+{
+    if (!handle.IsValid() || handle.index >= slots_.size()) return false;
+
+    // スロットの有効性を確認
+    Slot& slot = slots_[handle.index];
+    if (!slot.inUse || slot.generation != handle.generation) return false;
+
+    // すでにロード済みなら何もしない
+    if (slot.isLoaded) return true;
+
+    // スクリプトモジュールをビルドしてロードする
+    ScriptHandle builtHandle = BuildScriptModule(slot.moduleName, slot.scriptClass, slot.filePath);
+    return builtHandle.IsValid();
+}
+
+/// @brief スクリプトがロード済みか確認する
+/// @param handle 
+/// @return 
+bool Detail::ScriptManager::IsLoaded(ScriptHandle handle) const
+{
+    if (!handle.IsValid() || handle.index >= slots_.size()) return false;
+
+    // スロットの有効性を確認
+    const Slot& slot = slots_[handle.index];
+    return slot.inUse && slot.generation == handle.generation && slot.isLoaded;
 }
 
 /// @brief C++ エンジンAPIのバインド
@@ -583,4 +682,22 @@ void Detail::ScriptManager::ExportPredefinedFile(const std::string& outputPath)
     }
 
     ofs.close();
+}
+
+/// @brief フォルダを走査してスクリプトのメタデータのみを登録する
+void Detail::ScriptManager::ScanScriptDirectory()
+{
+    if (!std::filesystem::exists(kScriptDir)) return;
+
+    // スクリプトディレクトリを再帰的に走査して、.as ファイルを見つける
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(kScriptDir))
+    {
+        if (!entry.is_regular_file() || entry.path().extension() != ".as") continue;
+
+        std::string fileName = entry.path().stem().string();
+        std::string scriptPath = entry.path().generic_string();
+
+        // メタデータだけ登録（ファイルの中身はまだ開かない）
+        RegisterScriptMetadata(fileName, fileName, scriptPath);
+    }
 }
