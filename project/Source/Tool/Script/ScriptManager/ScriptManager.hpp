@@ -147,7 +147,13 @@ namespace Detail
 
 			// スクリプトファイルの最終更新時刻
 			std::filesystem::file_time_type lastWriteTime;
+
+            // スクリプトが依存しているインクルードファイルのパス
+            std::vector<std::string> includedFiles;
 		};
+
+        // @brief バイナリファイルの識別用マジックナンバー
+        static constexpr uint32_t kBinMagic = 0x53435232;
 
 		// データテーブル
 		std::vector<Slot> slots_;
@@ -166,9 +172,6 @@ namespace Detail
 
 		// 中間データ用ディレクトリ
 		const std::string kCookedDir = "./Cooked/Script/";
-
-        // binファイルの識別用マジックナンバー
-        static constexpr uint32_t kBinMagic = 0x53435242;
 
 
         // リロードタイマー
@@ -212,9 +215,9 @@ namespace Detail
 		/// @return 
 		int Read(void* ptr, asUINT size) override
 		{
-			if (!file_.is_open()) return -1;
-			file_.read(static_cast<char*>(ptr), size);
-			return 0;
+            if (!file_.is_open()) return -1;
+            file_.read(static_cast<char*>(ptr), size);
+            return file_.good() ? 0 : -1;
 		}
 
 		/// @brief 書き込み
@@ -223,9 +226,9 @@ namespace Detail
 		/// @return 
 		int Write(const void* ptr, asUINT size) override
 		{
-			if (!file_.is_open()) return -1;
-			file_.write(static_cast<const char*>(ptr), size);
-			return 0;
+            if (!file_.is_open()) return -1;
+            file_.write(static_cast<const char*>(ptr), size);
+            return file_.good() ? 0 : -1;
 		}
 
 		/// @brief ファイルが開いているかどうかを確認する

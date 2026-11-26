@@ -7,6 +7,36 @@
 
 #include "../ScriptRegisterAPI/ScriptRegisterAPI.hpp"
 
+namespace
+{
+    /// @brief メインファイルとインクルードファイル群の中で最新の更新日時を取得する
+    /// @param mainPath 
+    /// @param includedFiles 
+    /// @param outLatestTime 
+    /// @return 
+    bool TryGetLatestWriteTime(const std::string& mainPath,const std::vector<std::string>& includedFiles,std::filesystem::file_time_type& outLatestTime)
+    {
+        // メインファイルが存在しない場合は失敗
+        if (!std::filesystem::exists(mainPath)) return false;
+        outLatestTime = std::filesystem::last_write_time(mainPath);
+
+        // インクルードファイル群の中で最新の更新日時を取得
+        for (const auto& incPath : includedFiles)
+        {
+            if (!std::filesystem::exists(incPath)) return false;
+            auto incTime = std::filesystem::last_write_time(incPath);
+
+            // 最新の更新日時を更新
+            if (incTime > outLatestTime)
+            {
+                outLatestTime = incTime;
+            }
+        }
+
+        return true;
+    }
+}
+
 /// @brief 初期化
 void Detail::ScriptManager::Initialize()
 {
@@ -40,28 +70,37 @@ void Detail::ScriptManager::Initialize()
 /// @brief シャットダウン
 void Detail::ScriptManager::Shutdown()
 {
-	auto registry = Engine::GetInstance()->GetRegistryECS();
-	auto activeEntities = registry->GetActiveEntities();
+    // 先にすべてのスクリプトオブジェクトを解放する
+    if (auto engine = Engine::GetInstance())
+    {
+        if (auto registry = engine->GetRegistryECS())
+        {
+            auto activeEntities = registry->GetActiveEntities();
 
-	// スクリプトオブジェクトの参照カウントを解放
-	for (Entity entity : activeEntities)
-	{
-		if (registry->HasComponent<ScriptComponent>(entity))
-		{
-			// スクリプトコンポーネントを取得
-			auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
-			if (scriptComp->scriptObject)
-			{
-				// C++ 側で保持している参照カウントを解放
-				scriptComp->scriptObject->Release();
-				scriptComp->scriptObject = nullptr;
+            for (Entity entity : activeEntities)
+            {
+                if (registry->HasComponent<ScriptComponent>(entity))
+                {
+                    auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
+                    if (scriptComp->scriptObject)
+                    {
+                        scriptComp->scriptObject->Release();
+                        scriptComp->scriptObject = nullptr;
+                    }
 
-				// メソッドの参照のnullptr化
-				scriptComp->initFunc = nullptr;
-				scriptComp->updateFunc = nullptr;
-			}
-		}
-	}
+                    scriptComp->initFunc = nullptr;
+                    scriptComp->updateFunc = nullptr;
+                }
+            }
+        }
+    }
+
+    // すべてのオブジェクト解放後にエンジン本体をシャットダウン・解放する
+    if (scriptEngine_)
+    {
+        scriptEngine_->ShutDownAndRelease();
+        scriptEngine_ = nullptr;
+    }
 }
 
 /// @brief メッセージコールバック
@@ -84,113 +123,125 @@ void Detail::ScriptManager::MessageCallback(const asSMessageInfo* msg)
 /// @return 
 Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string& moduleName, const std::string& scriptClass, const std::string& scriptPath)
 {
-	auto engine = Engine::GetInstance();
+    auto engine = Engine::GetInstance();
 
-	std::filesystem::path asFilePath(scriptPath);
-	if (!std::filesystem::exists(asFilePath))
-	{
-		if (engine) engine->Log(LogLevel::Error, "スクリプトファイルが存在しません : " + scriptPath);
-		return ScriptHandle::Invalid();
-	}
+    std::filesystem::path asFilePath(scriptPath);
+    if (!std::filesystem::exists(asFilePath))
+    {
+        if (engine) engine->Log(LogLevel::Error, "スクリプトファイルが存在しません : " + scriptPath);
+        return ScriptHandle::Invalid();
+    }
 
-	// ファイルの更新日時を取得
-	auto asTime = std::filesystem::last_write_time(asFilePath);
-
-	// キャッシュチェック
-	auto it = cache_.find(scriptPath);
-	if (it != cache_.end())
-	{
-		// 既存のハンドルが有効か確認
-		ScriptHandle cachedHandle = GetHandleByIndex(it->second.index);
-		if (cachedHandle != ScriptHandle::Invalid())
-		{
-			// キャッシュされている更新日時と比較
-			if (slots_[cachedHandle.index].isLoaded && slots_[cachedHandle.index].lastWriteTime >= asTime)
-			{
-				// ファイルが更新されていなければキャッシュを返す
-				return cachedHandle;
-			}
-		}
-	}
-
-	// スクリプトファイルのパスを解析して中間データ（bin）のパスを生成
-	std::string binPath = kCookedDir + asFilePath.stem().string() + ".bin";
-
-	// 中間データ用ディレクトリが存在しない場合は作成
-	if (!std::filesystem::exists(kCookedDir))
-		std::filesystem::create_directories(kCookedDir);
-
-	// 中間データ（bin）を読み込むべきかのチェック
-	bool loadFromBin = false;
-	if (std::filesystem::exists(binPath))
-	{
-		auto binTime = std::filesystem::last_write_time(binPath);
-		if (binTime >= asTime)
-		{
-			loadFromBin = true;
-		}
-	}
-
-	bool isLoaded = false;
-
-	if (loadFromBin)
-	{
-        // バイトコードからロード
-        asIScriptModule* mod = scriptEngine_->GetModule(moduleName.c_str(), asGM_ALWAYS_CREATE);
-        if (mod)
+    // メモリキャッシュチェック（インクルードファイルも含めて確認）
+    auto it = cache_.find(scriptPath);
+    if (it != cache_.end())
+    {
+        ScriptHandle cachedHandle = GetHandleByIndex(it->second.index);
+        if (cachedHandle != ScriptHandle::Invalid())
         {
-            // バイトコードのストリームを作成して読み込む
-            CBytecodeStream stream(binPath, false);
-            uint32_t magic = 0;
-            std::string dummyModule, dummyClass, dummyPath;
-
-            // バイトコードの読み込み
-            if (stream.IsOpen() && stream.ReadUint32(magic) && magic == kBinMagic &&stream.ReadString(dummyModule) &&
-                stream.ReadString(dummyClass) &&stream.ReadString(dummyPath))
+            const Slot& cachedSlot = slots_[cachedHandle.index];
+            std::filesystem::file_time_type latestTime;
+            if (cachedSlot.isLoaded &&
+                TryGetLatestWriteTime(scriptPath, cachedSlot.includedFiles, latestTime) &&
+                cachedSlot.lastWriteTime >= latestTime)
             {
-                int r = mod->LoadByteCode(&stream);
-                if (r >= 0)
+                return cachedHandle;
+            }
+        }
+    }
+
+    std::string binPath = kCookedDir + asFilePath.stem().string() + ".bin";
+    if (!std::filesystem::exists(kCookedDir))
+        std::filesystem::create_directories(kCookedDir);
+
+    bool isLoaded = false;
+    std::vector<std::string> includedFiles;
+
+    // .binからのロード試行
+    if (std::filesystem::exists(binPath))
+    {
+        auto binTime = std::filesystem::last_write_time(binPath);
+        CBytecodeStream stream(binPath, false);
+        uint32_t magic = 0;
+        std::string dummyModule, dummyClass, dummyPath;
+        uint32_t includeCount = 0;
+
+        bool headerOk = stream.IsOpen() &&
+            stream.ReadUint32(magic) && magic == kBinMagic &&
+            stream.ReadString(dummyModule) &&
+            stream.ReadString(dummyClass) &&
+            stream.ReadString(dummyPath) &&
+            stream.ReadUint32(includeCount);
+
+        if (headerOk)
+        {
+            std::vector<std::string> binIncludes;
+            binIncludes.reserve(includeCount);
+            for (uint32_t i = 0; i < includeCount; ++i)
+            {
+                std::string incPath;
+                if (!stream.ReadString(incPath))
+                {
+                    headerOk = false;
+                    break;
+                }
+                binIncludes.push_back(std::move(incPath));
+            }
+
+            // メインファイルと全インクルードファイルが .bin より古いかチェック
+            std::filesystem::file_time_type latestTime;
+            if (headerOk &&
+                TryGetLatestWriteTime(scriptPath, binIncludes, latestTime) &&
+                binTime >= latestTime)
+            {
+                asIScriptModule* mod = scriptEngine_->GetModule(moduleName.c_str(), asGM_ALWAYS_CREATE);
+                if (mod && mod->LoadByteCode(&stream) >= 0)
                 {
                     isLoaded = true;
-                }
-                else if (engine)
+                    includedFiles = std::move(binIncludes);
+                } else if (engine)
                 {
                     engine->Log(LogLevel::Warning, "バイトコードの読み込みに失敗したため再ビルドします : " + binPath);
                 }
             }
         }
-	}
+    }
 
-	
-	if (engine)engine->Log(LogLevel::Info, "スクリプトモジュールのビルド : " + moduleName + (isLoaded ? " (バイトコードからロード)" : " (ソースからビルド)"));
+    if (engine)
+        engine->Log(LogLevel::Info, "スクリプトモジュールのビルド : " + moduleName + (isLoaded ? " (バイトコードからロード)" : " (ソースからビルド)"));
 
+    // ソースからビルド
+    if (!isLoaded)
+    {
+        includedFiles.clear();
 
-	if (!isLoaded)
-	{
-        // インクルード解決用のコールバック関数
         auto includeCallback = [](const char* include, const char* from, CScriptBuilder* builder, void* userParam) -> int
             {
-                // インクルード元ファイル（from）と同じディレクトリから相対パスを解決
                 std::filesystem::path baseDir = std::filesystem::path(from).parent_path();
-                std::filesystem::path targetPath = baseDir / include;
+                std::filesystem::path targetPath = (baseDir / include).lexically_normal();
 
                 std::ifstream file(targetPath, std::ios::binary);
-                if (!file.is_open())
-                {
-                    return -1;
-                }
+                if (!file.is_open()) return -1;
 
                 std::stringstream buffer;
                 buffer << file.rdbuf();
                 std::string code = buffer.str();
 
-                // 読み込んだインクルード先をメモリから追加
-                return builder->AddSectionFromMemory(targetPath.generic_string().c_str(), code.c_str(), static_cast<uint32_t>(code.length()));
+                std::string normalizedPath = targetPath.generic_string();
+
+                // インクルードしたファイルパスを記録
+                if (userParam)
+                {
+                    auto* list = static_cast<std::vector<std::string>*>(userParam);
+                    list->push_back(normalizedPath);
+                }
+
+                return builder->AddSectionFromMemory(normalizedPath.c_str(), code.c_str(), static_cast<uint32_t>(code.length()));
             };
 
-        // スクリプトビルダーを使用してモジュールをビルド
         CScriptBuilder builder;
-        builder.SetIncludeCallback(includeCallback, nullptr);
+        // userParam に includedFiles のポインタを渡す
+        builder.SetIncludeCallback(includeCallback, &includedFiles);
 
         int r = builder.StartNewModule(scriptEngine_, moduleName.c_str());
         if (r < 0)
@@ -199,7 +250,6 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
             return ScriptHandle::Invalid();
         }
 
-        // 元のファイルも std::ifstream + AddSectionFromMemory で読み込む
         std::ifstream file(scriptPath, std::ios::binary);
         if (!file.is_open())
         {
@@ -227,70 +277,70 @@ Detail::ScriptHandle Detail::ScriptManager::BuildScriptModule(const std::string&
             return ScriptHandle::Invalid();
         }
 
-		// モジュールのビルド
-		r = builder.BuildModule();
-		if (r < 0)
-		{
-			if (engine)
-			{
-				engine->Log(LogLevel::Error, "BuildModule 失敗。エラーコード: " + std::to_string(r));
-				engine->StopExecution();
-			}
-			return ScriptHandle::Invalid();
-		}
-		if (engine)engine->Log(LogLevel::Info, "スクリプトモジュールをビルド : " + moduleName);
+        r = builder.BuildModule();
+        if (r < 0)
+        {
+            if (engine)
+            {
+                engine->Log(LogLevel::Error, "BuildModule 失敗。エラーコード: " + std::to_string(r));
+                engine->StopExecution();
+            }
+            return ScriptHandle::Invalid();
+        }
+        if (engine) engine->Log(LogLevel::Info, "スクリプトモジュールをビルド : " + moduleName);
 
-		// ビルドに成功した場合、バイトコード（中間データ）として保存
-		asIScriptModule* mod = builder.GetModule();
-		if (mod)
-		{
+        // バイトコードとインクルード一覧を保存
+        asIScriptModule* mod = builder.GetModule();
+        if (mod)
+        {
             CBytecodeStream stream(binPath, true);
-
-            // バイトコードの保存
             if (stream.IsOpen())
             {
                 stream.WriteUint32(kBinMagic);
                 stream.WriteString(moduleName);
                 stream.WriteString(scriptClass);
                 stream.WriteString(scriptPath);
+                stream.WriteUint32(static_cast<uint32_t>(includedFiles.size()));
+                for (const auto& incPath : includedFiles)
+                {
+                    stream.WriteString(incPath);
+                }
                 mod->SaveByteCode(&stream);
             }
-		}
-	}
+        }
+    }
 
-	// スロットの割り当て
-	uint32_t slotIndex = 0;
-	if (it != cache_.end() && GetHandleByIndex(it->second.index) != ScriptHandle::Invalid())
-	{
-		// 既に有効なスロットがある場合は再利用する
-		slotIndex = it->second.index;
-	}
-	else if (!freeSlots_.empty())
-	{
-		// 空いているスロットを再利用
-		slotIndex = freeSlots_.front();
-		freeSlots_.pop();
-	}
-	else
-	{
-		// 新規スロット作成
-		slotIndex = static_cast<uint32_t>(slots_.size());
-		slots_.emplace_back();
-	}
+    // スロットの割り当て（既存処理と同じ）
+    uint32_t slotIndex = 0;
+    if (it != cache_.end() && GetHandleByIndex(it->second.index) != ScriptHandle::Invalid())
+    {
+        slotIndex = it->second.index;
+    } else if (!freeSlots_.empty())
+    {
+        slotIndex = freeSlots_.front();
+        freeSlots_.pop();
+    } else
+    {
+        slotIndex = static_cast<uint32_t>(slots_.size());
+        slots_.emplace_back();
+    }
 
-	// スロットにデータを格納
-	Slot& slot = slots_[slotIndex];
-	slot.inUse = true;
+    std::filesystem::file_time_type latestTime;
+    TryGetLatestWriteTime(scriptPath, includedFiles, latestTime);
+
+    Slot& slot = slots_[slotIndex];
+    slot.inUse = true;
     slot.isLoaded = true;
-	slot.moduleName = moduleName;
-	slot.scriptClass = scriptClass;
-	slot.lastWriteTime = asTime;
+    slot.filePath = scriptPath;
+    slot.moduleName = moduleName;
+    slot.scriptClass = scriptClass;
+    slot.includedFiles = std::move(includedFiles);
+    slot.lastWriteTime = latestTime;
 
-	// キャッシュに登録
-	ScriptHandle handle{ slotIndex, slot.generation };
-	cache_[scriptPath] = handle;
+    ScriptHandle handle{ slotIndex, slot.generation };
+    cache_[scriptPath] = handle;
 
-	return handle;
+    return handle;
 }
 
 /// @brief インデックスからハンドルを取得する
@@ -309,35 +359,36 @@ Detail::ScriptHandle Detail::ScriptManager::GetHandleByIndex(uint32_t index) con
 /// @param handle 
 void Detail::ScriptManager::Remove(ScriptHandle handle)
 {
-	if (!handle.IsValid() || handle.index >= slots_.size()) return;
+    if (!handle.IsValid() || handle.index >= slots_.size()) return;
 
-	Slot& slot = slots_[handle.index];
+    Slot& slot = slots_[handle.index];
 
-	// スロットが使用中で、世代番号が一致する場合のみ削除処理を行う
-	if (slot.inUse && slot.generation == handle.generation)
-	{
-		// スクリプトモジュールを破棄
-		if (scriptEngine_ && !slot.moduleName.empty())
-		{
-			scriptEngine_->DiscardModule(slot.moduleName.c_str());
-		}
+    // 未使用、または世代番号が一致しない（古いハンドル）場合は何もしない
+    if (!slot.inUse || slot.generation != handle.generation) return;
 
-		slot.inUse = false;
-		freeSlots_.push(handle.index);
-	}
+    // スクリプトモジュールを破棄
+    if (scriptEngine_ && !slot.moduleName.empty())
+    {
+        scriptEngine_->DiscardModule(slot.moduleName.c_str());
+    }
 
-	// キャッシュから該当するスクリプトパスを削除
-	for (auto it = cache_.begin(); it != cache_.end(); )
-	{
-		if (it->second.index == handle.index)
-		{
-			it = cache_.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
+    // スロットを解放し、世代番号を進める
+    slot.inUse = false;
+    slot.isLoaded = false;
+    slot.generation++;
+    freeSlots_.push(handle.index);
+
+    // キャッシュから該当するスクリプトパスを削除
+    for (auto it = cache_.begin(); it != cache_.end(); )
+    {
+        if (it->second == handle)
+        {
+            it = cache_.erase(it);
+        } else
+        {
+            ++it;
+        }
+    }
 
     // このスクリプトを参照している全エンティティの既存インスタンスを破棄する
     auto registry = Engine::GetInstance()->GetRegistryECS();
@@ -348,9 +399,8 @@ void Detail::ScriptManager::Remove(ScriptHandle handle)
             if (registry->HasComponent<ScriptComponent>(entity))
             {
                 auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
-                if (scriptComp->handle.index == handle.index)
+                if (scriptComp->handle == handle)
                 {
-                    // オブジェクトと関数ポインタをクリア
                     if (scriptComp->scriptObject)
                     {
                         scriptComp->scriptObject->Release();
@@ -374,7 +424,11 @@ std::string Detail::ScriptManager::GetFilePath(ScriptHandle handle) const
     if (!handle.IsValid() || handle.index >= slots_.size() || !slots_[handle.index].inUse)
         return "";
 
-    return slots_[handle.index].filePath;
+    // 世代番号が一致しない場合は空文字を返す
+    const Slot& slot = slots_[handle.index];
+    if (slot.generation != handle.generation)return "";
+
+    return slot.filePath;
 }
 
 /// @brief スクリプトハンドルからモジュール名を取得する
@@ -382,13 +436,13 @@ std::string Detail::ScriptManager::GetFilePath(ScriptHandle handle) const
 /// @return 
 std::string Detail::ScriptManager::GetModuleName(ScriptHandle handle) const
 {
-	if (!handle.IsValid()) return "";
+    if (!handle.IsValid() || handle.index >= slots_.size()) return "";
 
-	// インデックスが範囲外、またはスロットが使用中でない場合は空文字を返す
-	if (handle.index >= slots_.size() || !slots_[handle.index].inUse)
-		return "";
+    // スロットが使用中でない場合は空文字を返す
+    const Slot& slot = slots_[handle.index];
+    if (!slot.inUse || slot.generation != handle.generation) return "";
 
-	return slots_[handle.index].moduleName;
+    return slot.moduleName;
 }
 
 /// @brief スクリプトハンドルからスクリプトクラス名を取得する
@@ -402,67 +456,63 @@ std::string Detail::ScriptManager::GetScriptClass(ScriptHandle handle) const
 	if (handle.index >= slots_.size() || !slots_[handle.index].inUse)
 		return "";
 
-	return slots_[handle.index].scriptClass;
+    // 世代番号が一致しない場合も空文字を返す
+    const Slot& slot = slots_[handle.index];
+    if (slot.generation != handle.generation) return "";
+
+	return slot.scriptClass;
 }
 
 /// @brief 変更されたスクリプトをリロードする
 void Detail::ScriptManager::ReloadModifiedScripts()
 {
-	auto engine = Engine::GetInstance();
-	auto registry = engine->GetRegistryECS();
+    auto engine = Engine::GetInstance();
+    auto registry = engine->GetRegistryECS();
 
-	for (auto& pair : cache_)
-	{
-		const std::string& scriptPath = pair.first;
-		ScriptHandle handle = pair.second;
+    for (auto& pair : cache_)
+    {
+        const std::string& scriptPath = pair.first;
+        ScriptHandle handle = pair.second;
 
-		if (!handle.IsValid() || handle.index >= slots_.size()) continue;
+        if (!handle.IsValid() || handle.index >= slots_.size()) continue;
 
-		Slot& slot = slots_[handle.index];
-		if (!slot.inUse || !slot.isLoaded) continue;
+        Slot& slot = slots_[handle.index];
+        if (!slot.inUse || !slot.isLoaded) continue;
 
-		if (std::filesystem::exists(scriptPath))
-		{
-			auto currentWriteTime = std::filesystem::last_write_time(scriptPath);
+        // メインファイルと全インクルードファイルの最新更新日時を取得
+        std::filesystem::file_time_type latestWriteTime;
+        if (!TryGetLatestWriteTime(scriptPath, slot.includedFiles, latestWriteTime)) continue;
 
-			// キャッシュした時点の時刻より新しければ再ビルド
-			if (currentWriteTime > slot.lastWriteTime)
-			{
-				if (engine) engine->Log(LogLevel::Info, "スクリプトの更新を検知しました。再ビルドします : " + scriptPath);
+        // いずれかのファイルがキャッシュ時点より新しければ再ビルド
+        if (latestWriteTime > slot.lastWriteTime)
+        {
+            if (engine) engine->Log(LogLevel::Info, "スクリプトの更新を検知しました。再ビルドします : " + scriptPath);
 
-				// 再ビルド前に、このスクリプトを参照している全エンティティの既存インスタンスを破棄する
-				if (registry)
-				{
-					auto activeEntities = registry->GetActiveEntities();
-					for (Entity entity : activeEntities)
-					{
-						if (registry->HasComponent<ScriptComponent>(entity))
-						{
-							auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
+            if (registry)
+            {
+                auto activeEntities = registry->GetActiveEntities();
+                for (Entity entity : activeEntities)
+                {
+                    if (registry->HasComponent<ScriptComponent>(entity))
+                    {
+                        auto scriptComp = registry->GetComponent<ScriptComponent>(entity);
+                        if (scriptComp->handle.index == handle.index)
+                        {
+                            if (scriptComp->scriptObject)
+                            {
+                                scriptComp->scriptObject->Release();
+                                scriptComp->scriptObject = nullptr;
+                            }
+                            scriptComp->initFunc = nullptr;
+                            scriptComp->updateFunc = nullptr;
+                        }
+                    }
+                }
+            }
 
-							// 同じスクリプトハンドルを使っているかチェック
-							if (scriptComp->handle.index == handle.index)
-							{
-								if (scriptComp->scriptObject)
-								{
-									// C++ 側で保持している参照カウントを解放
-									scriptComp->scriptObject->Release();
-									scriptComp->scriptObject = nullptr;
-								}
-
-								// 関数のポインタもリセット
-								scriptComp->initFunc = nullptr;
-								scriptComp->updateFunc = nullptr;
-							}
-						}
-					}
-				}
-
-				// 再ビルド処理を呼び出す (内部でキャッシュスロットが上書き更新される)
-				BuildScriptModule(slot.moduleName, slot.scriptClass, scriptPath);
-			}
-		}
-	}
+            BuildScriptModule(slot.moduleName, slot.scriptClass, scriptPath);
+        }
+    }
 }
 
 /// @brief エンティティからスクリプトオブジェクトを取得する

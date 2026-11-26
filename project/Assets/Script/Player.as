@@ -3,8 +3,16 @@
 
 class Player
 {
-	int testNum;
+	// 移動速度
+	float moveSpeed_ = 1.0f;
 
+	// 初期の現在の体力
+	int currentHp_ = 100;
+
+	// 初期最大HP
+	int maxHp_ = 100;
+
+	// 体力
 	private PlayerHealth health;
 
 	Player()
@@ -14,15 +22,17 @@ class Player
 
 	void Initialize()
 	{
-		// 初期化処理
-
-		health.Initialize();
+		// 体力の初期化
+		health.Initialize(currentHp_, maxHp_);
 	}
 
 	void Update()
 	{
-		// 更新処理
+		// 最大体力を越えないようにする
+		if(currentHp_ >= maxHp_){currentHp_ = maxHp_;}
 
-		health.Update();
+		// 体力の値を渡す
+		health.SetCurrentHP(currentHp_);
+		health.SetMaxHP(maxHp_);
 	}
 }

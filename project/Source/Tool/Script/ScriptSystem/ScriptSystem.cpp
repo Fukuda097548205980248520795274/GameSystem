@@ -58,8 +58,11 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                 continue;
             }
 
-            asIScriptContext* ctx = scriptEngine->CreateContext();
+            asIScriptContext* ctx = scriptEngine->RequestContext();
             ctx->Prepare(factory);
+
+            // エンティティIDをスクリプト側に渡すためにユーザーデータとして設定
+            ctx->SetUserData(reinterpret_cast<void*>(static_cast<uintptr_t>(entity)));
 
             // 例外コールバック
             ctx->SetExceptionCallback(asFUNCTION(Detail::ScriptSystem::ExceptionCallback), nullptr, asCALL_CDECL);
@@ -70,13 +73,26 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             ctx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), &startTime, asCALL_CDECL);
 #endif
 
-            ctx->Execute();
+            int r = ctx->Execute();
+            if (r != asEXECUTION_FINISHED)
+            {
+                Engine::GetInstance()->Log(LogLevel::Error, "スクリプトのコンストラクタ実行時にエラーが発生しました");
+                Engine::GetInstance()->StopExecution();
+            }
+            else
+            {
+                // 正常終了時のみ取得
+                scriptComp->scriptObject = static_cast<asIScriptObject*>(ctx->GetReturnObject());
+                if (scriptComp->scriptObject) scriptComp->scriptObject->AddRef();
+            }
 
+            
+#ifdef DEVELOPMENT
+            // デバッグ用のラインコールバックをクリア
+            ctx->ClearLineCallback();
+#endif
 
-            // スクリプトオブジェクトの取得と参照カウントの増加
-            scriptComp->scriptObject = static_cast<asIScriptObject*>(ctx->GetReturnObject());
-            if (scriptComp->scriptObject) scriptComp->scriptObject->AddRef(); // C++側で保持するために参照カウントを増やす
-            ctx->Release();
+            scriptEngine->ReturnContext(ctx);
 
             // スクリプトのプロパティを保存している場合は、スクリプトオブジェクトに反映する
             if (scriptComp->scriptObject)
@@ -129,7 +145,7 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             // Initialize の実行
             if (scriptComp->initFunc)
             {
-                asIScriptContext* initCtx = scriptEngine->CreateContext();
+                asIScriptContext* initCtx = scriptEngine->RequestContext();
                 initCtx->Prepare(scriptComp->initFunc);
                 initCtx->SetObject(scriptComp->scriptObject);
 
@@ -152,14 +168,20 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                     Engine::GetInstance()->StopExecution();
                 }
 
-                initCtx->Release();
+#ifdef DEVELOPMENT
+                // デバッグ用のラインコールバックをクリア
+                initCtx->ClearLineCallback();
+#endif
+
+                // コンテキストを返却
+                scriptEngine->ReturnContext(initCtx);
             }
         }
 
         // Update メソッドの実行
         if (scriptComp->scriptObject && scriptComp->updateFunc)
         {
-            asIScriptContext* ctx = scriptEngine->CreateContext();
+            asIScriptContext* ctx = scriptEngine->RequestContext();
             ctx->Prepare(scriptComp->updateFunc);
             ctx->SetObject(scriptComp->scriptObject);
 
@@ -182,7 +204,13 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                 Engine::GetInstance()->StopExecution();
             }
 
-            ctx->Release();
+#ifdef DEVELOPMENT
+            // デバッグ用のラインコールバックをクリア
+            ctx->ClearLineCallback();
+#endif
+
+            // コンテキストを返却
+            scriptEngine->ReturnContext(ctx);
         }
     }
 }
@@ -208,10 +236,11 @@ void Detail::ScriptSystem::LineCallback(asIScriptContext* ctx, void* timeOut)
             auto engine = Engine::GetInstance();
             if (engine)
             {
-                const char* scriptSection;
+                const char* scriptSection = nullptr;
                 int line = ctx->GetLineNumber(0, nullptr, &scriptSection);
+                std::string sectionName = scriptSection ? scriptSection : "Unknown";
                 engine->Log(LogLevel::Error, "スクリプトの実行がタイムアウトしました (無限ループの可能性)。ファイル : "
-                    + std::string(scriptSection) + ", 行番号: " + std::to_string(line));
+                    + sectionName + ", 行番号: " + std::to_string(line));
             }
         }
     }

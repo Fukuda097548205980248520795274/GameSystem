@@ -1,22 +1,41 @@
 class PlayerHealth
 {
-	// 体力
-	int hp = 100;
+	// 現在のHP
+	private int currentHp_ = 0;
 
-	PlayerHealth()
+	// 最大HP
+	private int maxHp_ = 0;
+
+	// コンストラクタ
+	PlayerHealth(){}
+
+	// 初期化
+	void Initialize(int startCurrentHp,int startMaxHp)
 	{
-		// コンストラクタ
+		// 体力の設定
+		currentHp_ = startCurrentHp;
+		maxHp_ = startMaxHp;
 	}
 
-	void Initialize()
-	{
-		// 初期化処理
-
-		Log("Health");
-	}
-
+	// 更新処理
 	void Update()
 	{
-		// 更新処理
+		// 体力が越えないようにする
+		if(currentHp_ >= maxHp_){currentHp_ = maxHp_;}
 	}
+
+	// 死亡したかどうか
+	bool IsDead()
+	{
+		// 体力がなくなっていたら死亡
+		if(currentHp_ <= 0)return true;
+
+		return false;
+	}
+
+	// 現在の体力を設定する
+	void SetCurrentHP(int currentHp){currentHp_ = currentHp; }
+
+	// 最大体力を設定する
+	void SetMaxHP(int maxHp){maxHp_ = maxHp;}
 }
