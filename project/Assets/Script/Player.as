@@ -15,17 +15,20 @@ class Player
 	// 体力
 	private PlayerHealth health;
 
+	// プレイヤー
 	Player()
 	{
-		// コンストラクタ
+
 	}
 
+	// 初期化
 	void Initialize()
 	{
 		// 体力の初期化
 		health.Initialize(currentHp_, maxHp_);
 	}
 
+	// 更新処理
 	void Update()
 	{
 		// 最大体力を越えないようにする
