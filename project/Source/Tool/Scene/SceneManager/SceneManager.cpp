@@ -7,35 +7,8 @@ void Detail::SceneManager::Initialize(const std::string& name)
 {
     if (!name.empty())
     {
-        auto engine = Engine::GetInstance();
-        if (!engine) return;
-
-        auto registry = engine->GetRegistryECS();
-        if (!registry) return;
-
-        // 現在のエンティティを完全にクリア
-        registry->Clear();
-
-        // 基本は bin (バイナリ) ファイルからの高速な読み込みを試みる
-        bool isLoaded = Detail::LoadBin(registry, name);
-
-        // bin が無い、または読み込みに失敗した場合は json からの読み込みを試みる（フォールバック）
-        if (!isLoaded)
-        {
-            isLoaded = Detail::LoadJson(registry, name);
-        }
-
-        // 読み込みに成功したら現在のシーン名を更新
-        if (isLoaded)
-        {
-            currentSceneName_ = name;
-            isDirty_ = false;
-        }
-        else
-        {
-            // ログ出力などで読み込み失敗を通知すると親切です
-            engine->Log(LogLevel::Error, "シーンの読み込みに失敗しました : " + name);
-        }
+        // 初期化時に指定されたシーン名を読み込む
+        LoadSceneInternal(name);
     }
 }
 
@@ -67,34 +40,9 @@ void Detail::SceneManager::Update()
 {
     if (!nextSceneName_.empty())
     {
-        auto engine = Engine::GetInstance();
-        auto registry = engine->GetRegistryECS();
-
-        // 現在のエンティティを完全にクリア
-        registry->Clear();
-
-        // 基本は bin (バイナリ) ファイルからの高速な読み込みを試みる
-        bool isLoaded = Detail::LoadBin(registry, nextSceneName_);
-
-        // bin が無い、または読み込みに失敗した場合は json からの読み込みを試みる（フォールバック）
-        if (!isLoaded)
-        {
-            isLoaded = Detail::LoadJson(registry, nextSceneName_);
-        }
-
-        // 読み込みに成功したら現在のシーン名を更新
-        if (isLoaded)
-        {
-            currentSceneName_ = nextSceneName_;
-            isDirty_ = false;
-        }
-        else
-        {
-            // ログ出力などで読み込み失敗を通知すると親切です
-            engine->Log(LogLevel::Error, "シーンの読み込みに失敗しました : " + nextSceneName_);
-        }
-
-        nextSceneName_ = "";
+        // 次のシーンが指定されている場合、シーンを切り替える
+        LoadSceneInternal(nextSceneName_);
+        nextSceneName_.clear();
     }
 }
 
@@ -109,4 +57,55 @@ std::string Detail::SceneManager::GetFilePath(const std::string& name) const
     }
 
     return "";
+}
+
+/// @brief シーンを内部的に読み込む
+/// @param name 
+/// @return 
+bool Detail::SceneManager::LoadSceneInternal(const std::string& name)
+{
+    auto engine = Engine::GetInstance();
+    if (!engine) return false;
+
+    auto registry = engine->GetRegistryECS();
+    if (!registry) return false;
+
+    // 現在のエンティティを完全にクリア
+    registry->Clear();
+
+    // 基本は bin (バイナリ) ファイルからの高速な読み込みを試みる
+    bool isLoaded = Detail::LoadBin(registry, name);
+
+    // bin が無い、または読み込みに失敗した場合は json からの読み込みを試みる（フォールバック）
+    if (!isLoaded)
+    {
+        // JSONからの読み込みを試みる
+        isLoaded = Detail::LoadJson(registry, name);
+
+        // JSONからの読み込みに成功した場合、binファイルを生成しておく
+        if (isLoaded)
+        {
+            if (Detail::ToJson(registry, name))
+            {
+                engine->Log(LogLevel::Info, "シーンのbinファイルを自動生成しました : " + name);
+            }
+            else
+            {
+                engine->Log(LogLevel::Warning, "シーンのbinファイル自動生成に失敗しました : " + name);
+            }
+        }
+    }
+
+    // 読み込みに成功したら現在のシーン名を更新
+    if (isLoaded)
+    {
+        currentSceneName_ = name;
+        isDirty_ = false;
+    }
+    else
+    {
+        engine->Log(LogLevel::Error, "シーンの読み込みに失敗しました : " + name);
+    }
+
+    return isLoaded;
 }

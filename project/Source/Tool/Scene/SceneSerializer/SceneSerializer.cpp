@@ -63,7 +63,8 @@ bool Detail::DeserializeSceneList(SceneManager* sceneManager, const std::string&
         std::vector<uint8_t> binaryData((std::istreambuf_iterator<char>(binFile)), std::istreambuf_iterator<char>());
         rootJson = nlohmann::json::from_msgpack(binaryData); // バイナリをJSONに変換
         isLoaded = true;
-    } else
+    }
+    else
     {
         // BINファイルがない場合、JSONファイルからそのまま読み込む
         std::ifstream jsonFile(jsonPath);
@@ -71,6 +72,20 @@ bool Detail::DeserializeSceneList(SceneManager* sceneManager, const std::string&
         {
             jsonFile >> rootJson;
             isLoaded = true;
+
+            // 次回以降のためにBIN(MessagePack)ファイルを自動生成する
+            std::filesystem::path outPath(binPath);
+            if (outPath.has_parent_path())
+            {
+                std::filesystem::create_directories(outPath.parent_path());
+            }
+
+            std::ofstream outBinFile(binPath, std::ios::binary);
+            if (outBinFile.is_open())
+            {
+                std::vector<uint8_t> binaryData = nlohmann::json::to_msgpack(rootJson);
+                outBinFile.write(reinterpret_cast<const char*>(binaryData.data()), binaryData.size());
+            }
         }
     }
 

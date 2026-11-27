@@ -18,7 +18,24 @@ void Detail::TextureStore::Initialize(ID3D12Device* device, DXHeap* heap, ID3D12
 
 	// 初期テクスチャを読み込む
 	defaultTextureHandle_ = Load("./Cooked/Texture/white2x2.dds", heap, device, commandList);
+    if (!defaultTextureHandle_.IsValid())
+    {
+        defaultTextureHandle_ = Load("./Assets/Internal/Texture/white2x2.dds", heap, device, commandList);
+
+        // 出力用フォルダにコピー
+        std::filesystem::create_directories("./Cooked/Texture");
+        std::filesystem::copy_file("./Assets/Internal/Texture/white2x2.dds", "./Cooked/Texture/white2x2.dds");
+    }
+
 	defaultCubemapHandle_ = Load("./Cooked/Texture/white_skybox.dds", heap, device, commandList);
+    if (!defaultCubemapHandle_.IsValid())
+    {
+        defaultCubemapHandle_ = Load("./Assets/Internal/Texture/white_skybox.dds", heap, device, commandList);
+
+        // 出力用フォルダにコピー
+        std::filesystem::create_directories("./Cooked/Texture");
+        std::filesystem::copy_file("./Assets/Internal/Texture/white_skybox.dds", "./Cooked/Texture/white_skybox.dds");
+    }
 }
 
 /// @brief パスを正規化する

@@ -332,3 +332,4 @@ project/Assets/Parameter/Debug/*
 project/logs/*
 project/dumps/*
 project/Project.vcxproj.user
+project/Cooked/*

@@ -86,6 +86,11 @@ namespace Detail
         /// @return 
         std::string GetFilePath(const std::string& name) const;
 
+        /// @brief シーンを内部的に読み込む
+        /// @param name 
+        /// @return 
+        bool LoadSceneInternal(const std::string& name);
+
 
     private:
 
