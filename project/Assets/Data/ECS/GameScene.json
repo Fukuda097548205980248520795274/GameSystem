@@ -8,8 +8,13 @@
                     "moduleName": "Player",
                     "savedBoolProperties": {},
                     "savedEntityProperties": {},
-                    "savedFloatProperties": {},
-                    "savedIntProperties": {},
+                    "savedFloatProperties": {
+                        "moveSpeed_": 0.0
+                    },
+                    "savedIntProperties": {
+                        "currentHp_": 0,
+                        "maxHp_": 0
+                    },
                     "savedStringProperties": {},
                     "savedVector2Properties": {},
                     "savedVector3Properties": {}
@@ -33,6 +38,59 @@
                 }
             },
             "id": 0
+        },
+        {
+            "components": {
+                "BlendComponent": {
+                    "blendMode": 0
+                },
+                "RenderPassComponent": {
+                    "isEnabled": true,
+                    "priority": 0
+                }
+            },
+            "id": 1
+        },
+        {
+            "components": {
+                "CameraComponent": {
+                    "aspectRatio": 1.7777777910232544,
+                    "farPlane": 800.0,
+                    "fov": 0.3499999940395355,
+                    "nearPlane": 0.029999999329447746,
+                    "orthographicSize": 1.0,
+                    "projectionMode": 1
+                },
+                "TransformComponent": {
+                    "position": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "rotation": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "scale": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            },
+            "id": 2
+        },
+        {
+            "components": {
+                "CubemapComponent": {
+                    "filePath": "./Cooked/Texture/white_skybox.dds"
+                },
+                "SkyboxComponent": {
+                    "isEnabled": true
+                }
+            },
+            "id": 3
         }
     ]
 }

@@ -62,6 +62,10 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
         });
 
 
+    // テクスチャストアを作成
+    textureStore_ = std::make_unique<TextureStore>(core_->GetDevice(), heap_.get(), command_->GetCommandList());
+
+
     // SceneEditorを作成
     sceneEditor_ = std::make_unique<SceneEditor>();
 
@@ -70,11 +74,7 @@ void Detail::RenderContext::Initialize(WinApp* winApp, DXDebug* dxDebug, Registr
 
 	// PSOEditorを作成
     psoEditor_ = std::make_unique<PSOEditor>(core_->GetDevice(), shaderCompiler_.get());
-
-
-
-	// テクスチャストアを作成
-	textureStore_ = std::make_unique<TextureStore>(core_->GetDevice(), heap_.get(), command_->GetCommandList());
+	
 
 	// プロシージャルメッシュストアを作成
 	proceduralMeshStore_ = std::make_unique<ProceduralMeshStore>(core_->GetDevice());

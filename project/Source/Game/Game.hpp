@@ -7,7 +7,7 @@ class Game
 public:
 
 	/// @brief コンストラクタ
-	virtual ~Game() = default;
+	~Game() = default;
 
 	/// @brief コンストラクタ
 	/// @param screenWidth スクリーン横幅
@@ -27,23 +27,5 @@ protected:
 
 	/// @brief 更新処理
 	void Update();
-
-
-private:
-
-	/// @brief レンダーパスのエンティティ
-	Entity renderPassEntity;
-
-	/// @brief 読み込んだテクスチャのハンドル
-	uint32_t textureHandle = 0;
-
-	/// @brief 3D描画用のエンティティ
-	Entity render3dEntity;
-
-	/// @brief カメラ用のエンティティ
-	Entity cameraEntity;
-
-	/// @brief Skybox用のエンティティ
-	Entity skyboxEntity;
 };
 

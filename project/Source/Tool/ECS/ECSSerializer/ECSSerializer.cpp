@@ -36,6 +36,48 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
             };
         }
 
+        // CameraComponent
+        if (registry->HasComponent<CameraComponent>(entity))
+        {
+            auto* c = registry->GetComponent<CameraComponent>(entity);
+            entityJson["components"]["CameraComponent"] = {
+                { "fov", c->fovY },
+                { "nearPlane", c->nearPlane },
+                { "farPlane", c->farPlane },
+                { "aspectRatio", c->aspectRatio },
+                { "orthographicSize", c->orthographicSize },
+                { "projectionMode", static_cast<int>(c->projectionMode) }
+            };
+        }
+
+        // RenderPassComponent
+        if (registry->HasComponent<RenderPassComponent>(entity))
+        {
+            auto* c = registry->GetComponent<RenderPassComponent>(entity);
+            entityJson["components"]["RenderPassComponent"] = {
+                { "priority", c->priority },
+                { "isEnabled", c->isEnabled }
+            };
+        }
+
+        // BlendComponent
+        if (registry->HasComponent<BlendComponent>(entity))
+        {
+            auto* c = registry->GetComponent<BlendComponent>(entity);
+            entityJson["components"]["BlendComponent"] = {
+                { "blendMode", static_cast<int>(c->blendMode) }
+            };
+        }
+
+        // SkyboxComponent
+        if (registry->HasComponent<SkyboxComponent>(entity))
+        {
+            auto* c = registry->GetComponent<SkyboxComponent>(entity);
+            entityJson["components"]["SkyboxComponent"] = {
+                { "isEnabled", c->isEnabled }
+            };
+        }
+
         // MeshComponent
         if (registry->HasComponent<MeshComponent>(entity))
         {
@@ -61,6 +103,16 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
             entityJson["components"]["HierarchyComponent"] = {
                 {"parent", c->parent},
                 {"children", c->children}
+            };
+        }
+
+        // JointHierarchyComponent
+        if (registry->HasComponent<JointHierarchyComponent>(entity))
+        {
+            auto* c = registry->GetComponent<JointHierarchyComponent>(entity);
+            entityJson["components"]["JointHierarchyComponent"] = {
+                { "parent", c->parent },
+                { "children", c->children }
             };
         }
 
@@ -239,6 +291,45 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
             registry->AddComponent<TransformComponent>(newId, comp);
         }
 
+        // CameraComponent の復元
+        if (componentsJson.contains("CameraComponent"))
+        {
+            CameraComponent comp;
+            const auto& cJson = componentsJson["CameraComponent"];
+            comp.fovY = cJson["fov"];
+            comp.nearPlane = cJson["nearPlane"];
+            comp.farPlane = cJson["farPlane"];
+            comp.aspectRatio = cJson["aspectRatio"];
+            comp.orthographicSize = cJson["orthographicSize"];
+            comp.projectionMode = static_cast<ProjectionMode>(cJson["projectionMode"]);
+            registry->AddComponent<CameraComponent>(newId, comp);
+        }
+
+        // RenderPassComponent の復元
+        if (componentsJson.contains("RenderPassComponent"))
+        {
+            RenderPassComponent comp;
+            comp.priority = componentsJson["RenderPassComponent"]["priority"];
+            comp.isEnabled = componentsJson["RenderPassComponent"]["isEnabled"];
+            registry->AddComponent<RenderPassComponent>(newId, comp);
+        }
+
+        // BlendComponent の復元
+        if (componentsJson.contains("BlendComponent"))
+        {
+            BlendComponent comp;
+            comp.blendMode = static_cast<BlendMode>(componentsJson["BlendComponent"]["blendMode"]);
+            registry->AddComponent<BlendComponent>(newId, comp);
+        }
+
+        // SkyboxComponent の復元
+        if (componentsJson.contains("SkyboxComponent"))
+        {
+            SkyboxComponent comp;
+            comp.isEnabled = componentsJson["SkyboxComponent"]["isEnabled"];
+            registry->AddComponent<SkyboxComponent>(newId, comp);
+        }
+
         // MaterialComponent の復元
         if (componentsJson.contains("MaterialComponent"))
         {
@@ -402,9 +493,37 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
                     comp.children.push_back(idMap[oldChild]);
                 }
             }
+
             registry->AddComponent<HierarchyComponent>(newId, comp);
         }
 
+        // JointHierarchyComponent の復元（IDの再マッピングが必須）
+        if (componentsJson.contains("JointHierarchyComponent"))
+        {
+            JointHierarchyComponent comp;
+            Entity oldParent = componentsJson["JointHierarchyComponent"]["parent"];
+
+            // 親が kNullEntity でなく、かつ生成済みリストに存在する場合のみ新しいIDをセット
+            if (oldParent != kNullEntity && idMap.find(oldParent) != idMap.end())
+            {
+                comp.parent = idMap[oldParent];
+            }
+            else
+            {
+                comp.parent = kNullEntity;
+            }
+
+            // 子エンティティのIDも新しいものに変換して復元
+            for (Entity oldChild : componentsJson["JointHierarchyComponent"]["children"])
+            {
+                if (idMap.find(oldChild) != idMap.end())
+                {
+                    comp.children.push_back(idMap[oldChild]);
+                }
+            }
+
+            registry->AddComponent<JointHierarchyComponent>(newId, comp);
+        }
     }
 
     return true;

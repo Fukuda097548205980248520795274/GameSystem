@@ -122,6 +122,7 @@ Entity Detail::SkyboxSystem::CreateSkyboxEntity()
 
 	// CubemapComponentを追加する
 	CubemapComponent cubemapComp(textureStore->GetDefaultCubemapHandle());
+    cubemapComp.filePath = textureStore->GetFilePath(cubemapComp.handle);
 	registry->AddComponent(entity, cubemapComp);
 
 	return entity;

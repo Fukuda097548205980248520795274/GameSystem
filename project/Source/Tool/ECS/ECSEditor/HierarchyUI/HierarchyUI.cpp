@@ -25,6 +25,11 @@ void Detail::ECSEditor::DrawHierarchy()
 
             ImGui::Separator();
 
+            if (ImGui::MenuItem("レンダーパス"))
+            {
+                selectedEntity_ = engine->CreatePass(0, BlendMode::None);
+            }
+
             if (ImGui::MenuItem("カメラ"))
             {
                 selectedEntity_ = engine->CreateCameraEntity();
