@@ -1,41 +1,46 @@
 class PlayerHealth
 {
-	// 現在のHP
-	private int currentHp_ = 0;
-
-	// 最大HP
-	private int maxHp_ = 0;
-
 	// コンストラクタ
-	PlayerHealth(){}
-
-	// 初期化
-	void Initialize(int startCurrentHp,int startMaxHp)
+	PlayerHealth()
 	{
-		// 体力の設定
-		currentHp_ = startCurrentHp;
-		maxHp_ = startMaxHp;
 	}
 
 	// 更新処理
 	void Update()
 	{
-		// 体力が越えないようにする
-		if(currentHp_ >= maxHp_){currentHp_ = maxHp_;}
 	}
 
-	// 死亡したかどうか
-	bool IsDead()
+	// 最大HPを 1 以上に収める
+	int ClampMaxHP(int maxHp) const
 	{
-		// 体力がなくなっていたら死亡
-		if(currentHp_ <= 0)return true;
-
-		return false;
+		return (maxHp < 1) ? 1 : maxHp;
 	}
 
-	// 現在の体力を設定する
-	void SetCurrentHP(int currentHp){currentHp_ = currentHp; }
+	// HPを 0 ～ maxHp の範囲に収める
+	int ClampHP(int currentHp, int maxHp) const
+	{
+		if (currentHp > maxHp) { return maxHp; }
+		if (currentHp < 0)     { return 0; }
+		return currentHp;
+	}
 
-	// 最大体力を設定する
-	void SetMaxHP(int maxHp){maxHp_ = maxHp;}
+	// ダメージ処理（計算後のHPを返す）
+	int TakeDamage(int currentHp, int maxHp, int amount) const
+	{
+		if (amount <= 0) { return ClampHP(currentHp, maxHp); }
+		return ClampHP(currentHp - amount, maxHp);
+	}
+
+	// 回復処理（計算後のHPを返す）
+	int Heal(int currentHp, int maxHp, int amount) const
+	{
+		if (amount <= 0) { return ClampHP(currentHp, maxHp); }
+		return ClampHP(currentHp + amount, maxHp);
+	}
+
+	// 死亡判定
+	bool IsDead(int currentHp) const
+	{
+		return currentHp <= 0;
+	}
 }

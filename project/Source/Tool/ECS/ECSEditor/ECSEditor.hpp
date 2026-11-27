@@ -2,6 +2,7 @@
 #include "ECS/RegistryECS/RegistryECS.hpp"
 #include "ECS/ComponentECS/ComponentECS.hpp"
 #include "AssetsWindow/AssetsWindow.hpp"
+#include "RenderContext/ImGuiRender/ImGuiRender.hpp"
 
 namespace Detail
 {
@@ -63,6 +64,48 @@ namespace Detail
         /// @param entity 
         /// @return 
         std::string GetEntityDisplayName(Entity entity) const;
+
+
+        /// @brief コンポーネントのUI描画と右クリック削除メニューを共通化する
+        /// @tparam T 
+        /// @tparam UIFunc 
+        /// @param entity 
+        /// @param label 
+        /// @param uiFunc 
+        /// @param canRemove 
+        template<typename T, typename UIFunc>
+        void DrawComponent(Entity entity, const char* label, UIFunc uiFunc, bool canRemove = true)
+        {
+            if (!registry_->HasComponent<T>(entity)) return;
+
+            bool isOpen = ImGui::CollapsingHeader(label, ImGuiTreeNodeFlags_DefaultOpen);
+            bool isRemoved = false;
+
+            // 直前のアイテム（CollapsingHeader）に対する右クリックメニュー
+            if (canRemove && ImGui::BeginPopupContextItem())
+            {
+                if (ImGui::MenuItem("コンポーネントを削除"))
+                {
+                    isRemoved = true;
+                }
+                ImGui::EndPopup();
+            }
+
+            // 削除されていない場合のみ中身を描画する
+            if (isOpen && !isRemoved)
+            {
+                if (auto component = registry_->GetComponent<T>(entity))
+                {
+                    uiFunc(component);
+                }
+            }
+
+            // 描画の後に削除を実行する
+            if (isRemoved)
+            {
+                registry_->RemoveComponent<T>(entity);
+            }
+        }
 
 
 	private:

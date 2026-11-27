@@ -6,17 +6,19 @@ class Player
 	// 移動速度
 	float moveSpeed_ = 1.0f;
 
-	// 初期の現在の体力
+	// 初期HP
 	int currentHp_ = 100;
 
 	// 初期最大HP
 	int maxHp_ = 100;
 
+
 	// 体力
-	private PlayerHealth health;
+	private PlayerHealth health_;
 
 	// コントローラ
-	private PlayerController controller;
+	private PlayerController controller_;
+
 
 	// プレイヤー
 	Player()
@@ -28,20 +30,39 @@ class Player
 	void Initialize()
 	{
 		// 体力の初期化
-		health.Initialize(currentHp_, maxHp_);
+		maxHp_ = health_.ClampMaxHP(maxHp_);
+		currentHp_ = health_.ClampHP(currentHp_, maxHp_);
+
+		// コントローラの初期化
+		controller_.Initialize();
 	}
 
 	// 更新処理
 	void Update()
 	{
+		// インスペクタでの直接編集も含め、常に有効範囲内に保つ
+		maxHp_ = health_.ClampMaxHP(maxHp_);
+		currentHp_ = health_.ClampHP(currentHp_, maxHp_);
+
+		// 死亡している場合は操作を受け付けない
+		if (health_.IsDead(currentHp_))
+		{
+			return;
+		}
+
 		// コントローラの更新
-		controller.Update();
+		controller_.Update(moveSpeed_);
+	}
 
-		// 最大体力を越えないようにする
-		if(currentHp_ >= maxHp_){currentHp_ = maxHp_;}
+	// ダメージを受ける
+	void TakeDamage(int amount)
+	{
+		currentHp_ = health_.TakeDamage(currentHp_, maxHp_, amount);
+	}
 
-		// 体力の値を渡す
-		health.SetCurrentHP(currentHp_);
-		health.SetMaxHP(maxHp_);
+	// 回復する
+	void Heal(int amount)
+	{
+		currentHp_ = health_.Heal(currentHp_, maxHp_, amount);
 	}
 }
