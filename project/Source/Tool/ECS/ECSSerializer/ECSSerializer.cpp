@@ -50,6 +50,18 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
             };
         }
 
+        // PivotPointComponent
+        if (registry->HasComponent<PivotPointComponent>(entity))
+        {
+            auto* c = registry->GetComponent<PivotPointComponent>(entity);
+            entityJson["components"]["PivotPointComponent"] = {
+                { "pivotPoint",{ c->pivotPoint.x, c->pivotPoint.y, c->pivotPoint.z } },
+                { "length", c->length },
+                { "theta", c->theta },
+                { "phi", c->phi }
+            };
+        }
+
         // RenderPassComponent
         if (registry->HasComponent<RenderPassComponent>(entity))
         {
@@ -303,6 +315,18 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
             comp.orthographicSize = cJson["orthographicSize"];
             comp.projectionMode = static_cast<ProjectionMode>(cJson["projectionMode"]);
             registry->AddComponent<CameraComponent>(newId, comp);
+        }
+
+        // PivotPointComponent の復元
+        if (componentsJson.contains("PivotPointComponent"))
+        {
+            PivotPointComponent comp;
+            const auto& cJson = componentsJson["PivotPointComponent"];
+            comp.pivotPoint = Vector3(cJson["pivotPoint"][0], cJson["pivotPoint"][1], cJson["pivotPoint"][2]);
+            comp.length = cJson["length"];
+            comp.theta = cJson["theta"];
+            comp.phi = cJson["phi"];
+            registry->AddComponent<PivotPointComponent>(newId, comp);
         }
 
         // RenderPassComponent の復元

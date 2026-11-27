@@ -402,6 +402,43 @@ struct CameraComponent
     float orthographicSize;
 };
 
+// @brief ピボットポイントコンポーネント
+struct PivotPointComponent
+{
+    PivotPointComponent() : pivotPoint(0.0f, 0.0f, 0.0f), length(1.0f), theta(0.0f), phi(0.0f) {}
+
+    // @brief ピボットポイントの位置（ローカル座標系）
+    Vector3 pivotPoint;
+
+    // @brief ピボットポイントの長さ（デフォルトは1.0f）
+    float length;
+
+    // Yaw（水平回転）
+    float theta;
+
+    // Pitch（垂直回転）
+    float phi;
+
+    /// @brief 球面座標系の計算
+    /// @return 
+    Vector3 GetSphericalCoordinates() const
+    {
+        // カメラの前方ベクトル（Yaw -> Pitch 回転）
+        float cosPitch = std::cos(phi);
+        Vector3 forward(cosPitch * std::sin(theta), -std::sin(phi), cosPitch * std::cos(theta));
+
+        // ピボットから前方の逆方向に length だけ離れた位置に配置
+        return pivotPoint - forward * length;
+    }
+
+    /// @brief オイラー角
+    /// @return 
+    Vector3 GetEulerAngles() const
+    {
+        return Vector3(phi, theta, 0.0f);
+    }
+};
+
 // @brief デバッグカメラコンポーネント
 struct DebugCameraComponent
 {

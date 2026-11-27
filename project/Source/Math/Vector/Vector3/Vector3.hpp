@@ -86,6 +86,17 @@ struct TVector3
 		this->z /= scalar;
 		return *this;
 	}
+
+    /// @brief 代入演算子
+    /// @param vector 
+    /// @return 
+    TVector3& operator=(const TVector3& vector)
+    {
+        this->x = vector.x;
+        this->y = vector.y;
+        this->z = vector.z;
+        return *this;
+    }
 };
 
 namespace

@@ -7,7 +7,9 @@
                     "filePath": "./Assets/Script/Player.as",
                     "moduleName": "Player",
                     "savedBoolProperties": {},
-                    "savedEntityProperties": {},
+                    "savedEntityProperties": {
+                        "playerCamera_": 2
+                    },
                     "savedFloatProperties": {
                         "moveSpeed_": 0.0
                     },
@@ -60,6 +62,31 @@
                     "nearPlane": 0.029999999329447746,
                     "orthographicSize": 1.0,
                     "projectionMode": 1
+                },
+                "PivotPointComponent": {
+                    "length": 1.0,
+                    "phi": 0.0,
+                    "pivotPoint": [
+                        0.0,
+                        0.0,
+                        0.0
+                    ],
+                    "theta": 0.0
+                },
+                "ScriptComponent": {
+                    "className": "PlayerCamera",
+                    "filePath": "./Assets/Script/PlayerCamera.as",
+                    "moduleName": "PlayerCamera",
+                    "savedBoolProperties": {},
+                    "savedEntityProperties": {
+                        "plaeyerEntity": 0,
+                        "playerEntity": 0
+                    },
+                    "savedFloatProperties": {},
+                    "savedIntProperties": {},
+                    "savedStringProperties": {},
+                    "savedVector2Properties": {},
+                    "savedVector3Properties": {}
                 },
                 "TransformComponent": {
                     "position": [

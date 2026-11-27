@@ -145,6 +145,7 @@ void Detail::ScriptRegisterAPI::RegisterMathAPI(asIScriptEngine* scriptEngine)
     scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opSubAssign(const Vector3 &in)", asMETHODPR(Vector3, operator-=, (const Vector3&), Vector3&), asCALL_THISCALL);
     scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opMulAssign(float)", asMETHODPR(Vector3, operator*=, (float), Vector3&), asCALL_THISCALL);
     scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opDivAssign(float)", asMETHODPR(Vector3, operator/=, (float), Vector3&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector3", "Vector3& opAssign(const Vector3 &in)", asMETHODPR(Vector3, operator=, (const Vector3&), Vector3&), asCALL_THISCALL);
 
     // 二項演算子の登録
     scriptEngine->RegisterObjectMethod("Vector3", "Vector3 opAdd(const Vector3 &in) const", asFUNCTIONPR(operator+, (const Vector3&, const Vector3&), Vector3), asCALL_CDECL_OBJFIRST);
@@ -173,6 +174,7 @@ void Detail::ScriptRegisterAPI::RegisterMathAPI(asIScriptEngine* scriptEngine)
     scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opSubAssign(const Vector2 &in)", asMETHODPR(Vector2, operator-=, (const Vector2&), Vector2&), asCALL_THISCALL);
     scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opMulAssign(float)", asMETHODPR(Vector2, operator*=, (float), Vector2&), asCALL_THISCALL);
     scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opDivAssign(float)", asMETHODPR(Vector2, operator/=, (float), Vector2&), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("Vector2", "Vector2& opAssign(const Vector2 &in)", asMETHODPR(Vector2, operator=, (const Vector2&), Vector2&), asCALL_THISCALL);
 
     // 二項演算子の登録
     scriptEngine->RegisterObjectMethod("Vector2", "Vector2 opAdd(const Vector2 &in) const", asFUNCTIONPR(operator+, (const Vector2&, const Vector2&), Vector2), asCALL_CDECL_OBJFIRST);
@@ -267,6 +269,31 @@ void Detail::ScriptRegisterAPI::RegisterComponentAPI(asIScriptEngine* scriptEngi
     scriptEngine->RegisterObjectProperty("TransformComponent", "Vector3 rotation", asOFFSET(TransformComponent, rotation));
     scriptEngine->RegisterObjectProperty("TransformComponent", "Vector3 scale", asOFFSET(TransformComponent, scale));
     RegisterComponentAccessors<TransformComponent>(scriptEngine, "TransformComponent");
+
+    // カメラ投影モード
+    scriptEngine->RegisterEnum("ProjectionMode");
+    scriptEngine->RegisterEnumValue("ProjectionMode", "Perspective", static_cast<int>(ProjectionMode::Perspective));
+    scriptEngine->RegisterEnumValue("ProjectionMode", "Orthographic", static_cast<int>(ProjectionMode::Orthographic));
+
+    // ピボットポイントコンポーネント
+    scriptEngine->RegisterObjectType("PivotPointComponent", sizeof(PivotPointComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<PivotPointComponent>());
+    scriptEngine->RegisterObjectProperty("PivotPointComponent", "Vector3 pivotPoint", asOFFSET(PivotPointComponent, pivotPoint));
+    scriptEngine->RegisterObjectProperty("PivotPointComponent", "float length", asOFFSET(PivotPointComponent, length));
+    scriptEngine->RegisterObjectProperty("PivotPointComponent", "float theta", asOFFSET(PivotPointComponent, theta));
+    scriptEngine->RegisterObjectProperty("PivotPointComponent", "float phi", asOFFSET(PivotPointComponent, phi));
+    scriptEngine->RegisterObjectMethod("PivotPointComponent", "Vector3 GetSphericalCoordinates() const", asMETHOD(PivotPointComponent, GetSphericalCoordinates), asCALL_THISCALL);
+    scriptEngine->RegisterObjectMethod("PivotPointComponent", "Vector3 GetEulerAngles() const", asMETHOD(PivotPointComponent, GetEulerAngles), asCALL_THISCALL);
+    RegisterComponentAccessors<PivotPointComponent>(scriptEngine, "PivotPointComponent");
+
+    // CameraComponent の登録
+    scriptEngine->RegisterObjectType("CameraComponent", sizeof(CameraComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<CameraComponent>());
+    scriptEngine->RegisterObjectProperty("CameraComponent", "float fovY", asOFFSET(CameraComponent, fovY));
+    scriptEngine->RegisterObjectProperty("CameraComponent", "float aspectRatio", asOFFSET(CameraComponent, aspectRatio));
+    scriptEngine->RegisterObjectProperty("CameraComponent", "float nearClip", asOFFSET(CameraComponent, nearPlane));
+    scriptEngine->RegisterObjectProperty("CameraComponent", "float farClip", asOFFSET(CameraComponent, farPlane));
+    scriptEngine->RegisterObjectProperty("CameraComponent", "float orthographicSize", asOFFSET(CameraComponent, orthographicSize));
+    scriptEngine->RegisterObjectProperty("CameraComponent", "ProjectionMode projectionMode", asOFFSET(CameraComponent, projectionMode));
+    RegisterComponentAccessors<CameraComponent>(scriptEngine, "CameraComponent");
 }
 
 /// @brief エンジンAPIをスクリプトエンジンに登録する

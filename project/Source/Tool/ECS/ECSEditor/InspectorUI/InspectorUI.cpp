@@ -288,6 +288,19 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
                 }
             });
 
+        // PivotPointComponent
+        DrawComponent<PivotPointComponent>(entity, "ピボットポイント", [this, engine](PivotPointComponent* pivot)
+            {
+                ImGui::DragFloat3("ピボット位置", &pivot->pivotPoint.x, 0.01f);
+                ImGui::DragFloat("長さ", &pivot->length, 0.01f);
+                ImGui::DragFloat("回転角度 Theta", &pivot->theta, 0.01f);
+                ImGui::DragFloat("回転角度 Phi", &pivot->phi, 0.01f);
+
+                // 球面座標からデカルト座標への変換結果を表示
+                Vector3 cartesian = pivot->GetSphericalCoordinates();
+                ImGui::Text("デカルト座標: (%.2f, %.2f, %.2f)", cartesian.x, cartesian.y, cartesian.z);
+            });
+
         // MaterialComponent
         DrawComponent<MaterialComponent>(entity, "マテリアル", [this, engine](MaterialComponent* material)
             {
@@ -689,6 +702,15 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 
             if (!registry_->HasComponent<TransformComponent>(entity) && ImGui::MenuItem("トランスフォーム"))
                 registry_->AddComponent<TransformComponent>(entity, TransformComponent{});
+
+            if (!registry_->HasComponent<CameraComponent>(entity) && ImGui::MenuItem("カメラ"))
+                registry_->AddComponent<CameraComponent>(entity, CameraComponent{});
+
+            if (!registry_->HasComponent<PivotPointComponent>(entity) && ImGui::MenuItem("ピボットポイント"))
+                registry_->AddComponent<PivotPointComponent>(entity, PivotPointComponent{});
+
+            if (!registry_->HasComponent<MaterialComponent>(entity) && ImGui::MenuItem("マテリアル"))
+                registry_->AddComponent<MaterialComponent>(entity, MaterialComponent{});
 
             if (!registry_->HasComponent<ScriptComponent>(entity) && ImGui::MenuItem("スクリプト"))
                 registry_->AddComponent<ScriptComponent>(entity, ScriptComponent{});

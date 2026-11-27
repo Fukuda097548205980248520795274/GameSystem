@@ -12,6 +12,9 @@ class Player
 	// 初期最大HP
 	int maxHp_ = 100;
 
+	// プレイヤー用カメラ
+	Entity playerCamera_;
+
 
 	// 体力
 	private PlayerHealth health_;

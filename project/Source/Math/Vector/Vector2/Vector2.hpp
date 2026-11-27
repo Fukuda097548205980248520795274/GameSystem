@@ -73,6 +73,14 @@ struct TVector2
 		this->y /= scalar;
 		return *this;
 	}
+
+    // 代入演算子
+    TVector2& operator=(const TVector2& vector)
+    {
+        this->x = vector.x;
+        this->y = vector.y;
+        return *this;
+    }
 };
 
 namespace
