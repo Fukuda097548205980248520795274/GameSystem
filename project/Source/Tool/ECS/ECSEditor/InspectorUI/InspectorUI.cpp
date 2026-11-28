@@ -657,6 +657,14 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
                 ImGui::Checkbox("アクショントリガー##入力", &input->isActionTriggered);
             });
 
+        // WorldTimeComponent
+        DrawComponent<WorldTimeComponent>(entity, "ワールドタイム", [this, engine](WorldTimeComponent* worldTime)
+            {
+                ImGui::DragFloat("一日の長さ（秒）", &worldTime->dayLengthSeconds, 1.0f, 1.0f, 86400.0f);
+                ImGui::DragFloat("時間スケール", &worldTime->timeScale, 0.01f, 0.0f, 10.0f);
+                ImGui::Checkbox("一時停止", &worldTime->isPaused);
+            });
+
         // HierarchyComponent
         DrawComponent<HierarchyComponent>(entity, "階層", [this, engine](HierarchyComponent* hierarchy)
             {
@@ -720,6 +728,9 @@ void Detail::ECSEditor::DrawEntityComponents(Entity entity)
 
             if (!registry_->HasComponent<AudioComponent>(entity) && ImGui::MenuItem("オーディオ"))
                 registry_->AddComponent<AudioComponent>(entity, AudioComponent{});
+
+            if (!registry_->HasComponent<BlendComponent>(entity) && ImGui::MenuItem("ワールドタイム"))
+                registry_->AddComponent<WorldTimeComponent>(entity, WorldTimeComponent{});
 
             ImGui::EndPopup();
         }

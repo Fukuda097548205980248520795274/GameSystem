@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unordered_set>
 #include <scriptarray/scriptarray.h>
+#include <scriptmath/scriptmath.h>
 
 #include "../ScriptRegisterAPI/ScriptRegisterAPI.hpp"
 
@@ -47,11 +48,10 @@ void Detail::ScriptManager::Initialize()
 	// メッセージコールバックの設定（エラー・警告ログ）
 	scriptEngine_->SetMessageCallback(asMETHOD(ScriptManager, MessageCallback), this, asCALL_THISCALL);
 
-	// 標準アッドオンの登録 (std::string サポート)
+	// 標準アッドオンの登録
 	RegisterStdString(scriptEngine_);
-
-    // 標準アッドオンの登録 (std::vector サポート)
     RegisterScriptArray(scriptEngine_, true);
+    RegisterScriptMath(scriptEngine_);
 
 	// C++ エンジンAPIのバインド
 	RegisterEngineAPI();

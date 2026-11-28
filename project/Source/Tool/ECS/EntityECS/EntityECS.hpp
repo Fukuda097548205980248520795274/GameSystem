@@ -16,8 +16,8 @@ class IComponentArray
 {
 public:
 
-	/// @brief 仮想デストラクタ
-	~IComponentArray() = default;
+    // 仮想デストラクタ
+    virtual ~IComponentArray() = default;
 
     /// @brief エンティティが削除されたときに呼ばれるコールバック
     /// @param entity 

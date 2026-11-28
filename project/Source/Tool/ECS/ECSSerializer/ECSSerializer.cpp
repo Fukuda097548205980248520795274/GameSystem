@@ -168,6 +168,15 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
                 scriptJson["savedStringProperties"][propName] = stringValue;
 		}
 
+        // TagComponent
+        if (registry->HasComponent<TagComponent>(entity))
+        {
+            auto* c = registry->GetComponent<TagComponent>(entity);
+            entityJson["components"]["TagComponent"] = {
+                { "tag", c->tag }
+            };
+        }
+
 		// TextureComponent
         if (registry->HasComponent<TextureComponent>(entity))
         {
@@ -193,6 +202,59 @@ bool Detail::ToJson(RegistryECS* registry, const std::string& sceneName)
 			entityJson["components"]["AudioComponent"]["pitch"] = c->pitch;
 			entityJson["components"]["AudioComponent"]["isLoop"] = c->isLoop;
 			entityJson["components"]["AudioComponent"]["allowOverlap"] = c->allowOverlap;
+        }
+
+        // WorldTimeComponent
+        if (registry->HasComponent<WorldTimeComponent>(entity))
+        {
+            auto* c = registry->GetComponent<WorldTimeComponent>(entity);
+            entityJson["components"]["WorldTimeComponent"] = {
+                { "currentHour", c->currentHour },
+                { "dayCount", c->dayCount },
+                { "dayLengthSeconds", c->dayLengthSeconds },
+                { "timeScale", c->timeScale },
+                { "isPaused", c->isPaused }
+            };
+        }
+
+        // DirectionalLightComponent
+        if (registry->HasComponent<DirectionalLightComponent>(entity))
+        {
+            auto* c = registry->GetComponent<DirectionalLightComponent>(entity);
+            entityJson["components"]["DirectionalLightComponent"] = {
+                { "direction",{ c->direction.x, c->direction.y, c->direction.z } },
+                { "color",{ c->color.x, c->color.y, c->color.z } },
+                { "intensity", c->intensity }
+            };
+        }
+
+        // PointLightComponent
+        if (registry->HasComponent<PointLightComponent>(entity))
+        {
+            auto* c = registry->GetComponent<PointLightComponent>(entity);
+            entityJson["components"]["PointLightComponent"] = {
+                { "position",{ c->position.x, c->position.y, c->position.z } },
+                { "color",{ c->color.x, c->color.y, c->color.z } },
+                { "intensity", c->intensity },
+                { "radius", c->radius },
+                { "decay", c->decay }
+            };
+        }
+
+        // SpotLightComponent
+        if (registry->HasComponent<SpotLightComponent>(entity))
+        {
+            auto* c = registry->GetComponent<SpotLightComponent>(entity);
+            entityJson["components"]["SpotLightComponent"] = {
+                { "position",{ c->position.x, c->position.y, c->position.z } },
+                { "direction",{ c->direction.x, c->direction.y, c->direction.z } },
+                { "color",{ c->color.x, c->color.y, c->color.z } },
+                { "intensity", c->intensity },
+                { "distance", c->distance },
+                { "decay", c->decay },
+                { "cosAngle", c->cosAngle },
+                { "cosFalloffStart", c->cosFalloffStart }
+            };
         }
 
         rootJson["entities"].push_back(entityJson);
@@ -462,6 +524,14 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
             registry->AddComponent<ScriptComponent>(newId, comp);
         }
 
+        // TagComponent の復元
+        if (componentsJson.contains("TagComponent"))
+        {
+            TagComponent comp;
+            comp.tag = componentsJson["TagComponent"]["tag"];
+            registry->AddComponent<TagComponent>(newId, comp);
+        }
+
 		// TextureComponent の復元
         if (componentsJson.contains("TextureComponent"))
         {
@@ -491,6 +561,59 @@ bool Detail::Deserialize(RegistryECS* registry, const nlohmann::json& rootJson)
 			comp.allowOverlap = componentsJson["AudioComponent"]["allowOverlap"];
 			comp.audioHandle = engine ? engine->LoadAudio(comp.filePath) : Detail::AudioHandle::Invalid();
 			registry->AddComponent<AudioComponent>(newId, comp);
+        }
+
+        // WorldTimeComponent の復元
+        if (componentsJson.contains("WorldTimeComponent"))
+        {
+            WorldTimeComponent comp;
+            const auto& cJson = componentsJson["WorldTimeComponent"];
+            comp.currentHour = cJson["currentHour"];
+            comp.dayCount = cJson["dayCount"];
+            comp.dayLengthSeconds = cJson["dayLengthSeconds"];
+            comp.timeScale = cJson["timeScale"];
+            comp.isPaused = cJson["isPaused"];
+            registry->AddComponent<WorldTimeComponent>(newId, comp);
+        }
+
+        // DirectionalLightComponent の復元
+        if (componentsJson.contains("DirectionalLightComponent"))
+        {
+            DirectionalLightComponent comp;
+            const auto& cJson = componentsJson["DirectionalLightComponent"];
+            comp.direction = Vector3(cJson["direction"][0], cJson["direction"][1], cJson["direction"][2]);
+            comp.color = Vector3(cJson["color"][0], cJson["color"][1], cJson["color"][2]);
+            comp.intensity = cJson["intensity"];
+            registry->AddComponent<DirectionalLightComponent>(newId, comp);
+        }
+
+        // PointLightComponent の復元
+        if (componentsJson.contains("PointLightComponent"))
+        {
+            PointLightComponent comp;
+            const auto& cJson = componentsJson["PointLightComponent"];
+            comp.position = Vector3(cJson["position"][0], cJson["position"][1], cJson["position"][2]);
+            comp.color = Vector3(cJson["color"][0], cJson["color"][1], cJson["color"][2]);
+            comp.intensity = cJson["intensity"];
+            comp.radius = cJson["radius"];
+            comp.decay = cJson["decay"];
+            registry->AddComponent<PointLightComponent>(newId, comp);
+        }
+
+        // SpotLightComponent の復元
+        if (componentsJson.contains("SpotLightComponent"))
+        {
+            SpotLightComponent comp;
+            const auto& cJson = componentsJson["SpotLightComponent"];
+            comp.position = Vector3(cJson["position"][0], cJson["position"][1], cJson["position"][2]);
+            comp.direction = Vector3(cJson["direction"][0], cJson["direction"][1], cJson["direction"][2]);
+            comp.color = Vector3(cJson["color"][0], cJson["color"][1], cJson["color"][2]);
+            comp.intensity = cJson["intensity"];
+            comp.distance = cJson["distance"];
+            comp.decay = cJson["decay"];
+            comp.cosAngle = cJson["cosAngle"];
+            comp.cosFalloffStart = cJson["cosFalloffStart"];
+            registry->AddComponent<SpotLightComponent>(newId, comp);
         }
 
         // HierarchyComponent の復元（IDの再マッピングが必須）

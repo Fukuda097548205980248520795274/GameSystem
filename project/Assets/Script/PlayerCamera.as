@@ -5,16 +5,7 @@ class PlayerCamera
 
 
 	// プレイヤーの足元からのオフセット
-    Vector3 targetOffset = Vector3(0.0f, 1.5f, 0.0f); 
-
-	// マウス感度
-    float mouseSensitivity = 0.003f;
-
-	// ゲームパッド右スティック感度
-    float stickSensitivity = 2.0f;
-
-	// ホイールズーム速度
-    float zoomSpeed = 0.5f;
+    Vector3 targetOffset = Vector3(0.0f, 1.5f, 0.0f);
 
 	// 追従の滑らかさ（大きいほど即座に追従）
     float followSmoothness = 10.0f;
@@ -23,8 +14,6 @@ class PlayerCamera
     // 制限値
     float minPhi = -0.4f;  // 見上げ限界（ラジアン）
     float maxPhi = 1.2f;   // 見下ろし限界（ラジアン）
-    float minLength = 2.0f;
-    float maxLength = 15.0f;
 
 	PlayerCamera()
 	{

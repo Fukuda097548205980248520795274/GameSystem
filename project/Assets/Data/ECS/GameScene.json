@@ -21,6 +21,9 @@
                     "savedVector2Properties": {},
                     "savedVector3Properties": {}
                 },
+                "TagComponent": {
+                    "tag": "Player"
+                },
                 "TransformComponent": {
                     "position": [
                         0.0,
@@ -82,11 +85,21 @@
                         "plaeyerEntity": 0,
                         "playerEntity": 0
                     },
-                    "savedFloatProperties": {},
+                    "savedFloatProperties": {
+                        "followSmoothness": 0.0,
+                        "maxPhi": 0.0,
+                        "minPhi": 0.0
+                    },
                     "savedIntProperties": {},
                     "savedStringProperties": {},
                     "savedVector2Properties": {},
-                    "savedVector3Properties": {}
+                    "savedVector3Properties": {
+                        "targetOffset": [
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    }
                 },
                 "TransformComponent": {
                     "position": [
@@ -118,6 +131,74 @@
                 }
             },
             "id": 3
+        },
+        {
+            "components": {
+                "ScriptComponent": {
+                    "className": "Timer",
+                    "filePath": "./Assets/Script/Timer.as",
+                    "moduleName": "Timer",
+                    "savedBoolProperties": {},
+                    "savedEntityProperties": {},
+                    "savedFloatProperties": {},
+                    "savedIntProperties": {},
+                    "savedStringProperties": {},
+                    "savedVector2Properties": {},
+                    "savedVector3Properties": {}
+                },
+                "TagComponent": {
+                    "tag": "WorldTime"
+                },
+                "WorldTimeComponent": {
+                    "currentHour": 6.0,
+                    "dayCount": 1,
+                    "dayLengthSeconds": 1800.0,
+                    "isPaused": false,
+                    "timeScale": 1.0
+                }
+            },
+            "id": 4
+        },
+        {
+            "components": {
+                "DirectionalLightComponent": {
+                    "color": [
+                        1.0,
+                        1.0,
+                        1.0
+                    ],
+                    "direction": [
+                        0.0,
+                        -1.0,
+                        0.0
+                    ],
+                    "intensity": 1.0
+                },
+                "ScriptComponent": {
+                    "className": "Sun",
+                    "filePath": "./Assets/Script/Sun.as",
+                    "moduleName": "Sun",
+                    "savedBoolProperties": {
+                        "hasWorldTime": false
+                    },
+                    "savedEntityProperties": {
+                        "worldTimeEntity": 4
+                    },
+                    "savedFloatProperties": {
+                        "latitudeTiltRad": 0.0,
+                        "maxMoonIntensity": 0.0,
+                        "maxSunIntensity": 0.0
+                    },
+                    "savedIntProperties": {},
+                    "savedStringProperties": {},
+                    "savedVector2Properties": {},
+                    "savedVector3Properties": {}
+                },
+                "TagComponent": {
+                    "tag": "Sun"
+                }
+            },
+            "id": 5
         }
     ]
 }

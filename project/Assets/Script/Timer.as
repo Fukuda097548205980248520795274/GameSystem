@@ -1,17 +1,13 @@
-class Test
+class Timer
 {
-	Test()
+	Timer()
 	{
 		// コンストラクタ
-
-		
 	}
 
 	void Initialize()
 	{
 		// 初期化処理
-
-		Log("Miss, yes!!!!!");
 	}
 
 	void Update()

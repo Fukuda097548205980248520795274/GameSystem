@@ -766,3 +766,29 @@ struct InputComponent
 	bool isActionPressed;
 	bool isActionTriggered;
 };
+
+/// @brief ワールドタイムコンポーネント
+struct WorldTimeComponent
+{
+    /// @brief コンストラクタ
+    WorldTimeComponent() : currentHour(6.0f), dayCount(1), dayLengthSeconds(1800.0f), timeScale(1.0f), isPaused(false) {}
+
+    /// @brief 現在の時刻（0.0f ～ 24.0f）
+    float currentHour = 6.0f;
+
+    /// @brief 経過日数（1日目から開始）
+    int32_t dayCount = 1;
+
+    /// @brief 現実の何秒でゲーム内1日が経過するか
+    float dayLengthSeconds = 1800.0f; // デフォルトは30分で1日が経過する設定
+
+    /// @brief 時間経過の倍率（早送り・スロー用）
+    float timeScale = 1.0f;
+
+    /// @brief 時間進行の一時停止フラグ
+    bool isPaused = false;
+
+    /// @brief 正規化された時刻（0.0f ～ 1.0f）を取得
+    /// @return 
+    float GetNormalizedTime() const { return currentHour / 24.0f; }
+};

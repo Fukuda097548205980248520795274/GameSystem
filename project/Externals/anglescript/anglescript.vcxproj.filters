@@ -19,6 +19,9 @@
     <Filter Include="add_on\scriptarray">
       <UniqueIdentifier>{9f3318e0-0f8f-4105-b2e9-36e5753eba80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="add_on\scriptmath">
+      <UniqueIdentifier>{52957a27-26d2-4f5a-a4d4-4215f82b95b1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\angelscript.h">
@@ -143,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="add_on\scriptarray\scriptarray.h">
       <Filter>add_on\scriptarray</Filter>
+    </ClInclude>
+    <ClInclude Include="add_on\scriptmath\scriptmath.h">
+      <Filter>add_on\scriptmath</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -280,6 +286,9 @@
     </ClCompile>
     <ClCompile Include="add_on\scriptarray\scriptarray.cpp">
       <Filter>add_on\scriptarray</Filter>
+    </ClCompile>
+    <ClCompile Include="add_on\scriptmath\scriptmath.cpp">
+      <Filter>add_on\scriptmath</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

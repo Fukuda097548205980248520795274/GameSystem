@@ -295,6 +295,11 @@ private:
 	/// @param title 
 	void Initialize(int32_t screenWidth, int32_t screenHeight, const std::string& title);
 
+    /// @brief ワールドタイムを更新する
+    void UpdateWorldTime();
+
+private:
+
 	/// @brief ロガー
 	std::unique_ptr<Detail::Logger> logger_;
 

@@ -7,8 +7,16 @@
 
 namespace
 {
+    /// @brief 実行中のスクリプトコンテキストに例外を設定する
+    void ThrowScriptException(const std::string& message)
+    {
+        if (asIScriptContext* ctx = asGetActiveContext())
+        {
+            ctx->SetException(message.c_str());
+        }
+    }
+
     /// @brief コンテキストからエンティティIDを取得するヘルパー
-    /// @return 
     Entity GetActiveEntity()
     {
         asIScriptContext* ctx = asGetActiveContext();
@@ -16,53 +24,81 @@ namespace
         return static_cast<Entity>(reinterpret_cast<uintptr_t>(ctx->GetUserData()));
     }
 
-    /// @brief コンポーネントを取得するテンプレート関数
-    /// @return 
+    /// @brief 自身のコンポーネントを取得する
     template<typename T>
     T GetComponentFromScript()
     {
         Entity entity = GetActiveEntity();
         auto registry = Engine::GetInstance()->GetRegistryECS();
 
-        // エンティティが有効で、かつコンポーネントを持っている場合に取得
-        if (entity != kNullEntity && registry->HasComponent<T>(entity))
+        if (!registry)
         {
-            return *registry->GetComponent<T>(entity);
+            ThrowScriptException("RegistryECS が無効です。");
+            return T();
+        }
+        if (entity == kNullEntity)
+        {
+            ThrowScriptException("エンティティが無効（kNullEntity）のためコンポーネントを取得できません: " + std::string(typeid(T).name()));
+            return T();
+        }
+        if (!registry->HasComponent<T>(entity))
+        {
+            ThrowScriptException("エンティティが指定されたコンポーネントを持っていません: " + std::string(typeid(T).name()));
+            return T();
         }
 
-        // 未所持の場合はデフォルト値を返す
-        return T();
+        return *registry->GetComponent<T>(entity);
     }
 
-    /// @brief コンポーネントを取得するテンプレート関数
-    /// @tparam T 
-    /// @param targetEntity 
-    /// @return 
+    /// @brief 指定エンティティのコンポーネントを取得する
     template<typename T>
     T GetComponentOfEntity(Entity targetEntity)
     {
         auto registry = Engine::GetInstance()->GetRegistryECS();
-        if (targetEntity != kNullEntity && registry->HasComponent<T>(targetEntity))
+
+        if (!registry)
         {
-            return *registry->GetComponent<T>(targetEntity);
+            ThrowScriptException("RegistryECS が無効です。");
+            return T();
         }
-        return T();
+        if (targetEntity == kNullEntity)
+        {
+            ThrowScriptException("指定されたターゲットエンティティが無効（kNullEntity）です: " + std::string(typeid(T).name()));
+            return T();
+        }
+        if (!registry->HasComponent<T>(targetEntity))
+        {
+            ThrowScriptException("ターゲットエンティティが指定されたコンポーネントを持っていません: " + std::string(typeid(T).name()));
+            return T();
+        }
+
+        return *registry->GetComponent<T>(targetEntity);
     }
 
-    /// @brief コンポーネントを適用するテンプレート関数
-    /// @tparam T 
-    /// @param component 
+    /// @brief コンポーネントを適用する
     template<typename T>
     void SetComponentFromScript(const T& component)
     {
         Entity entity = GetActiveEntity();
         auto registry = Engine::GetInstance()->GetRegistryECS();
 
-        // エンティティが有効で、かつコンポーネントを持っている場合に適用
-        if (entity != kNullEntity && registry->HasComponent<T>(entity))
+        if (!registry)
         {
-            *registry->GetComponent<T>(entity) = component;
+            ThrowScriptException("RegistryECS が無効です。");
+            return;
         }
+        if (entity == kNullEntity)
+        {
+            ThrowScriptException("エンティティが無効（kNullEntity）のためコンポーネントを設定できません: " + std::string(typeid(T).name()));
+            return;
+        }
+        if (!registry->HasComponent<T>(entity))
+        {
+            ThrowScriptException("エンティティが指定されたコンポーネントを持っていません: " + std::string(typeid(T).name()));
+            return;
+        }
+
+        *registry->GetComponent<T>(entity) = component;
     }
 
     /// @brief コンポーネントのGet/Set関数をまとめて登録するヘルパー
@@ -259,6 +295,10 @@ void Detail::ScriptRegisterAPI::RegisterComponentAPI(asIScriptEngine* scriptEngi
     // Entity の登録
     scriptEngine->RegisterObjectType("Entity", sizeof(Entity), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<Entity>());
 
+    scriptEngine->RegisterObjectBehaviour("Entity", asBEHAVE_CONSTRUCT, "void f()",
+        asFUNCTIONPR([](void* memory) { *static_cast<Entity*>(memory) = kNullEntity; }, (void*), void),
+        asCALL_CDECL_OBJLAST);
+
     // FindEntitiesWithTag 関数の登録
     scriptEngine->RegisterGlobalFunction("array<Entity>@ FindEntitiesWithTag(const string &in tag)",
         asFUNCTION(FindEntitiesWithTag), asCALL_CDECL);
@@ -294,6 +334,44 @@ void Detail::ScriptRegisterAPI::RegisterComponentAPI(asIScriptEngine* scriptEngi
     scriptEngine->RegisterObjectProperty("CameraComponent", "float orthographicSize", asOFFSET(CameraComponent, orthographicSize));
     scriptEngine->RegisterObjectProperty("CameraComponent", "ProjectionMode projectionMode", asOFFSET(CameraComponent, projectionMode));
     RegisterComponentAccessors<CameraComponent>(scriptEngine, "CameraComponent");
+
+    // WorldTimeComponent の登録
+    scriptEngine->RegisterObjectType("WorldTimeComponent", sizeof(WorldTimeComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<WorldTimeComponent>());
+    scriptEngine->RegisterObjectProperty("WorldTimeComponent", "float currentHour", asOFFSET(WorldTimeComponent, currentHour));
+    scriptEngine->RegisterObjectProperty("WorldTimeComponent", "int dayCount", asOFFSET(WorldTimeComponent, dayCount));
+    scriptEngine->RegisterObjectProperty("WorldTimeComponent", "float dayLengthSeconds", asOFFSET(WorldTimeComponent, dayLengthSeconds));
+    scriptEngine->RegisterObjectProperty("WorldTimeComponent", "float timeScale", asOFFSET(WorldTimeComponent, timeScale));
+    scriptEngine->RegisterObjectProperty("WorldTimeComponent", "bool isPaused", asOFFSET(WorldTimeComponent, isPaused));
+    scriptEngine->RegisterObjectMethod("WorldTimeComponent", "float GetNormalizedTime() const", asMETHOD(WorldTimeComponent, GetNormalizedTime), asCALL_THISCALL);
+    RegisterComponentAccessors<WorldTimeComponent>(scriptEngine, "WorldTimeComponent");
+
+    // DirectionalLightComponent の登録
+    scriptEngine->RegisterObjectType("DirectionalLightComponent", sizeof(DirectionalLightComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<DirectionalLightComponent>());
+    scriptEngine->RegisterObjectProperty("DirectionalLightComponent", "Vector3 direction", asOFFSET(DirectionalLightComponent, direction));
+    scriptEngine->RegisterObjectProperty("DirectionalLightComponent", "Vector3 color", asOFFSET(DirectionalLightComponent, color));
+    scriptEngine->RegisterObjectProperty("DirectionalLightComponent", "float intensity", asOFFSET(DirectionalLightComponent, intensity));
+    RegisterComponentAccessors<DirectionalLightComponent>(scriptEngine, "DirectionalLightComponent");
+
+    // PointLightComponent の登録
+    scriptEngine->RegisterObjectType("PointLightComponent", sizeof(PointLightComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<PointLightComponent>());
+    scriptEngine->RegisterObjectProperty("PointLightComponent", "Vector3 position", asOFFSET(PointLightComponent, position));
+    scriptEngine->RegisterObjectProperty("PointLightComponent", "Vector3 color", asOFFSET(PointLightComponent, color));
+    scriptEngine->RegisterObjectProperty("PointLightComponent", "float intensity", asOFFSET(PointLightComponent, intensity));
+    scriptEngine->RegisterObjectProperty("PointLightComponent", "float radius", asOFFSET(PointLightComponent, radius));
+    scriptEngine->RegisterObjectProperty("PointLightComponent", "float decay", asOFFSET(PointLightComponent, decay));
+    RegisterComponentAccessors<PointLightComponent>(scriptEngine, "PointLightComponent");
+
+    // SpotLightComponent の登録
+    scriptEngine->RegisterObjectType("SpotLightComponent", sizeof(SpotLightComponent), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits<SpotLightComponent>());
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "Vector3 position", asOFFSET(SpotLightComponent, position));
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "Vector3 direction", asOFFSET(SpotLightComponent, direction));
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "Vector3 color", asOFFSET(SpotLightComponent, color));
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "float intensity", asOFFSET(SpotLightComponent, intensity));
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "float distance", asOFFSET(SpotLightComponent, distance));
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "float decay", asOFFSET(SpotLightComponent, decay));
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "float cosAngle", asOFFSET(SpotLightComponent, cosAngle));
+    scriptEngine->RegisterObjectProperty("SpotLightComponent", "float cosFalloffStart", asOFFSET(SpotLightComponent, cosFalloffStart));
+    RegisterComponentAccessors<SpotLightComponent>(scriptEngine, "SpotLightComponent");
 }
 
 /// @brief エンジンAPIをスクリプトエンジンに登録する

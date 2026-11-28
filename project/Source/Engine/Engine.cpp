@@ -132,6 +132,9 @@ void Engine::PostDraw()
 	// ゲームプレイ中の処理
 	if (playState_ == PlayState::Playing)
 	{
+        // ワールドタイムの更新
+        UpdateWorldTime();
+
 		// スクリプトシステムの更新
 		scriptSystem_->Update(registry_.get());
 	}
@@ -229,4 +232,42 @@ void Engine::Initialize(int32_t screenWidth, int32_t screenHeight, const std::st
 
     // デルタタイムを初期化
     ResetDeltaTime();
+}
+
+/// @brief ワールドタイムを更新する
+void Engine::UpdateWorldTime()
+{
+    auto* timeArray = registry_->GetComponentArray<WorldTimeComponent>();
+    auto& data = timeArray->GetData();
+
+    // シーンに WorldTimeComponent を持つエンティティがなければ何もしない
+    if (data.empty()) return;
+
+    // デルタタイムを取得
+    float deltaTime = GetDeltaTime();
+
+    // 各 WorldTimeComponent の時間を更新
+    for (auto& time : data)
+    {
+        if (time.isPaused || time.dayLengthSeconds <= 0.0f) continue;
+
+        // 1秒あたりのゲーム内時間の進行量を計算
+        float hoursPerSecond = 24.0f / time.dayLengthSeconds;
+
+        // 現在の時刻を更新
+        time.currentHour += deltaTime * hoursPerSecond * time.timeScale;
+
+        // 時間が24時間を超えた場合、日数を進める
+        while (time.currentHour >= 24.0f)
+        {
+            time.currentHour -= 24.0f;
+            time.dayCount++;
+        }
+        while (time.currentHour < 0.0f)
+        {
+            // 時間が0未満になった場合、日数を戻す
+            time.currentHour += 24.0f;
+            time.dayCount--;
+        }
+    }
 }

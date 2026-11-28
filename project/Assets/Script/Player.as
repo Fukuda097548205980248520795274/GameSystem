@@ -54,7 +54,7 @@ class Player
 		}
 
 		// コントローラの更新
-		controller_.Update(moveSpeed_);
+		controller_.Update(moveSpeed_, playerCamera_);
 	}
 
 	// ダメージを受ける

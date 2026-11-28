@@ -73,8 +73,10 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             ctx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), &startTime, asCALL_CDECL);
 #endif
 
+            // コンストラクタ
             int r = ctx->Execute();
-            if (r != asEXECUTION_FINISHED)
+            bool hasError = (r != asEXECUTION_FINISHED);
+            if (hasError)
             {
                 Engine::GetInstance()->Log(LogLevel::Error, "スクリプトのコンストラクタ実行時にエラーが発生しました");
                 Engine::GetInstance()->StopExecution();
@@ -86,13 +88,21 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                 if (scriptComp->scriptObject) scriptComp->scriptObject->AddRef();
             }
 
-            
 #ifdef DEVELOPMENT
+
             // デバッグ用のラインコールバックをクリア
             ctx->ClearLineCallback();
 #endif
 
+            // コンテキストを返却
             scriptEngine->ReturnContext(ctx);
+
+            // エラー発生時は Initialize や他エンティティの Update に進まず即座に終了
+            if (hasError)
+            {
+                return;
+            }
+
 
             // スクリプトのプロパティを保存している場合は、スクリプトオブジェクトに反映する
             if (scriptComp->scriptObject)
@@ -161,10 +171,12 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
                 initCtx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), &initStartTime, asCALL_CDECL);
 #endif
 
+                // Initialize メソッドの実行
                 int r = initCtx->Execute();
-                if (r != asEXECUTION_FINISHED)
+                bool hasError = (r != asEXECUTION_FINISHED);
+                if (hasError)
                 {
-                    Engine::GetInstance()->Log(LogLevel::Error, "スクリプトの Initialize 実行時にエラーが発生しました");
+                    Engine::GetInstance()->Log(LogLevel::Error, "スクリプトの初期化時にエラーが発生しました");
                     Engine::GetInstance()->StopExecution();
                 }
 
@@ -175,6 +187,12 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
 
                 // コンテキストを返却
                 scriptEngine->ReturnContext(initCtx);
+
+                // エラー発生時は Initialize や他エンティティの Update に進まず即座に終了
+                if (hasError)
+                {
+                    return;
+                }
             }
         }
 
@@ -197,20 +215,29 @@ void Detail::ScriptSystem::Update(RegistryECS* registry)
             ctx->SetLineCallback(asFUNCTION(Detail::ScriptSystem::LineCallback), &startTime, asCALL_CDECL);
 #endif
 
+            // Update メソッドの実行
             int r = ctx->Execute();
-            if (r != asEXECUTION_FINISHED)
+            bool hasError = (r != asEXECUTION_FINISHED);
+            if (hasError)
             {
-                Engine::GetInstance()->Log(LogLevel::Error, "スクリプトの Update 実行時にエラーが発生しました");
+                Engine::GetInstance()->Log(LogLevel::Error, "スクリプトの更新処理時にエラーが発生しました");
                 Engine::GetInstance()->StopExecution();
             }
 
 #ifdef DEVELOPMENT
+
             // デバッグ用のラインコールバックをクリア
             ctx->ClearLineCallback();
 #endif
 
             // コンテキストを返却
             scriptEngine->ReturnContext(ctx);
+
+            // エラー発生時は Initialize や他エンティティの Update に進まず即座に終了
+            if (hasError)
+            {
+                return;
+            }
         }
     }
 }
